@@ -1,0 +1,21 @@
+<div class="modal-header">
+    <h5 class="modal-title">Select Scripts</h5>
+</div>
+<div class="modal-body">
+    <table class="checkbox-table">
+        <tbody>
+            <tr ng-repeat="script in $ctrl.scripts">
+                <td>
+                    <input type="checkbox" id="{{ script.ID }}" name="{{ script.ID }}" ng-model="$ctrl.selectedScripts[script.ID]"/>
+                </td>
+                <td>
+                    <label for="{{ script.ID }}">{{ script.Name }}</label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" ng-click="$ctrl.response(false)">Discard</button>
+    <button type="button" class="btn btn-primary" ng-click="$ctrl.response(true)">Apply</button>
+</div>

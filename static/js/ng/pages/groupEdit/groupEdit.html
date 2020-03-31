@@ -1,0 +1,19 @@
+<page-wrapper page-title="{{ ::$ctrl.title }}" ng-if="$ctrl.loaded">
+    <form class="form" name="groupForm" novalidate ng-submit="$ctrl.save(groupForm.$valid)">
+        <div class="form-group">
+            <label for="$ctrl.group.Name">Name</label>
+            <input type="text" class="form-control" name="Name" placeholder="CentOS 8 Servers" required id="$ctrl.group.Name" ng-model="$ctrl.group.Name">
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label>Environmentment Variables</label>
+            <environment-edit environment="::$ctrl.group.Environment"></environment-edit>
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label>Scripts</label>
+            <script-picker model="$ctrl.group.ScriptIDs"></script-picker>
+        </div>
+        <wait-button title="Save" loading="$ctrl.loading" click="$ctrl.save(groupForm.$valid)"></wait-button>
+    </form>
+</page-wrapper>

@@ -1,0 +1,28 @@
+[
+    {
+        "name": "Logs",
+        "dir_name": "logs",
+        "is_data": true
+    },
+    {
+        "name": "Data",
+        "dir_name": "data",
+        "is_data": true
+    },
+    {
+        "name": "Static",
+        "dir_name": "static",
+        "required": true,
+        "subdirs": [
+            {
+                "name": "StaticBuild",
+                "dir_name": "build",
+                "required": true
+            }
+        ]
+    },
+    {
+        "name": "Clients",
+        "dir_name": "clients"
+    }
+]

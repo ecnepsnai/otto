@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="otto" ng-controller="otto">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/ottodev/static/img/logo_light.png">
+    <link rel="stylesheet" type="text/css" href="/ottodev/static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/ottodev/static/css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="/ottodev/static/css/bootstrap.min.css">
+    <title>Otto</title>
+    <script type="text/javascript" src="/ottodev/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/angular.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/angular-route.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/angular-sanitize.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/moment.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/angular-moment.min.js"></script>
+    <script type="text/javascript" src="/ottodev/static/js/ng.js"></script>
+    <base href="/">
+</head>
+
+<body ng-if="ready" ng-cloak>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <a class="navbar-brand" href="/dashboard/"><img class="brand" src="/ottodev/static/img/logo_red.svg" height="30"> </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-link" ng-class="navClass('/hosts/')" href="#" ng-click="navigate('/hosts/')">Hosts</a></li>
+                    <li class="nav-item"><a data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-link" ng-class="navClass('/groups/')" href="#" ng-click="navigate('/groups/')">Groups</a></li>
+                    <li class="nav-item"><a data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-link" ng-class="navClass('/scripts/')" href="#" ng-click="navigate('/scripts/')">Scripts</a></li>
+                    <li class="nav-item"><a data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-link" ng-class="navClass('/options/')" href="#" ng-click="navigate('/options/')">Options</a></li>
+                </ul>
+                <ul class="navbar-nav navbar-links">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> {{ ::state.User.Username }}</a>
+                        <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="navUserDropdown">
+                            <a class="dropdown-item" ng-href="/options/users/user/{{::state.User.Username}}"><i class="fas fa-user-cog"></i> Edit User</a>
+                            <a class="dropdown-item" ng-click="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header">Otto {{::state.Version}}</h6>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="load-wrapper" ng-show="isLoading"><i class="fas fa-spinner fa-pulse"></i></div>
+    <main role="main" class="main" ng-view ng-show="!isLoading"></main>
+</body>
+</html>

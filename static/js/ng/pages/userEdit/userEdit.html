@@ -1,0 +1,28 @@
+<page-wrapper page-title="{{ ::$ctrl.title }}" ng-if="$ctrl.loaded">
+    <form class="form" name="userForm" ng-submit="$ctrl.save(userForm.$valid)">
+        <div class="form-group">
+            <label for="$ctrl.user.Username">Username</label>
+            <input type="text" class="form-control" id="$ctrl.user.Username" placeholder="Username" required ng-model="$ctrl.user.Username" ng-disabled="!$ctrl.isNew">
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.user.Password">Password</label>
+            <div>
+            <button type="button" class="btn btn-sm btn-primary" ng-click="$ctrl.resetPassword()" ng-if="$ctrl.showResetPassword">Change Password</button>
+            <input type="password" class="form-control" id="$ctrl.user.Password" ng-if="$ctrl.showPassword" placeholder="Password" required ng-model="$ctrl.user.Password">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.user.Email">Email</label>
+            <input type="email" class="form-control" id="$ctrl.user.Email" placeholder="Email" required ng-model="$ctrl.user.Email">
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.user.Status">User Status</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="$ctrl.user.Enabled" ng-model="$ctrl.user.Enabled" ng-disabled="!$ctrl.canDisableUser">
+                <label class="form-check-label" for="$ctrl.user.Enabled">Enabled</label>
+                <small class="form-text text-muted">If unchecked this user can not log in.</small>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Apply</button>
+    </form>
+</page-wrapper>

@@ -1,0 +1,21 @@
+<div class="modal-header">
+    <h5 class="modal-title">Select Groups</h5>
+</div>
+<div class="modal-body">
+    <table class="checkbox-table">
+        <tbody>
+            <tr ng-repeat="group in $ctrl.groups">
+                <td>
+                    <input type="checkbox" id="{{ group.ID }}" name="{{ group.ID }}" ng-model="$ctrl.selectedGroups[group.ID]"/>
+                </td>
+                <td>
+                    <label for="{{ group.ID }}">{{ group.Name }}</label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" ng-click="$ctrl.response(false)">Discard</button>
+    <button type="button" class="btn btn-primary" ng-click="$ctrl.response(true)">Apply</button>
+</div>

@@ -1,0 +1,34 @@
+go.sum
+.DS_Store
+
+# executables
+/otto
+/otto_*
+
+# Artifacts
+artifacts/
+scripts/Docker/
+otto-*/
+
+# Logs
+*.log
+
+# Data Directory
+/data
+/logs
+
+# cmd executables
+cmd/client/*
+!cmd/client/*.go
+cmd/server/*
+!cmd/server/*.go
+
+# cbgen
+server/cbgen*.go
+
+# Static
+/static/node_modules
+/static/build
+/static/fonts/*
+/static/copy/assets/js
+/static/copy/assets/css

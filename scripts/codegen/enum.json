@@ -1,0 +1,54 @@
+[
+    {
+        "name": "IPVersionOption",
+        "type": "string",
+        "values": [
+            {
+                "key": "Auto",
+                "description": "IPv4 or IPv6 as chosen by the system automatically",
+                "value": "\"auto\""
+            },
+            {
+                "key": "IPv4",
+                "description": "IPv4 only",
+                "value": "\"ipv4\""
+            },
+            {
+                "key": "IPv6",
+                "description": "IPv6 only",
+                "value": "\"ipv6\""
+            }
+        ]
+    },
+    {
+        "name": "ClientAction",
+        "type": "string",
+        "values": [
+            {
+                "key": "Ping",
+                "description": "Ping the host",
+                "value": "\"ping\""
+            },
+            {
+                "key": "RunScript",
+                "description": "Run the script on the host",
+                "value": "\"run_script\""
+            },
+            {
+                "key": "ExitClient",
+                "description": "Exit the client on the host",
+                "value": "\"exit_client\""
+            },
+            {
+                "key": "Reboot",
+                "description": "Reboot the host",
+                "value": "\"reboot\""
+            },
+            {
+                "key": "Shutdown",
+                "description": "Power off the host",
+                "value": "\"shutdown\""
+            }
+        ]
+    }
+]

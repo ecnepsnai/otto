@@ -1,0 +1,27 @@
+<div class="mb-2 buttons">
+    <create-new link="'/options/users/user'"></create-new>
+    <table class="table table-sm">
+        <thead><tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th></th>
+        </tr></thead>
+        <tbody>
+            <tr ng-repeat="user in $ctrl.users">
+                <td><a ng-href="/options/users/user/{{ user.Username }}">{{ user.Username }}</a></td>
+                <td>{{ user.Email }}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-xsm" type="button" id="menu{{ user.Username }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="menu{{ user.Username }}">
+                            <a class="dropdown-item" ng-href="/options/users/user/{{ user.Username }}/"><i class="fas fa-edit"></i> Edit</a>
+                            <a class="dropdown-item" ng-click="$ctrl.deleteUser(user)" ng-if="$ctrl.canDeleteUser(user)"><i class="fas fa-trash"></i> Delete</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

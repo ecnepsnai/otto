@@ -1,0 +1,23 @@
+<div class="modal-header">
+        <h5 class="modal-title">{{:: $ctrl.title }}</h5>
+    </div>
+    <div class="modal-body">
+        <form class="form" name="environmentForm">
+            <div class="form-group row">
+                <label for="$ctrl.environment.Key" class="col-sm-2 col-form-label">Key</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="USERNAME" required id="$ctrl.environment.Key" ng-disabled="!$ctrl.isNew" ng-model="::$ctrl.environment.Key">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="$ctrl.environment.Value" class="col-sm-2 col-form-label">Value</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control monospace" id="$ctrl.environment.Value" ng-model="::$ctrl.environment.Value" rows="3"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" ng-click="$ctrl.dismiss(false)">Cancel</button>
+        <button type="button" class="btn btn-primary" ng-click="$ctrl.dismiss(true)">Apply</button>
+    </div>

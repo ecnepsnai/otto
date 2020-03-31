@@ -1,0 +1,49 @@
+# Client
+
+An otto client is a individual host that is running the Otto client daemon. Scripts are run on clients.
+
+## Installing the Client
+
+Client binaries are provided on any otto server server at `/clients`.
+
+## Running the Client
+
+The otto client is a static exectuable file that supports any *nix like system (Linux, BSD, macOS, Solaris).
+
+It works best if you run it as root, but will run as a non-root user.
+
+### Automatic Registration
+
+If enabled on the server, clients can configure themselves by automatically registering with the otto server.
+
+For server configuration information, see the server documentation.
+
+Run the otto client executable with the following envrionment variables **only once** to register the host:
+
+|Variable|Description|
+|-|-|
+|`REGISTER_HOST`|The base URL of the otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
+|`REGISTER_PSK`|The register PSK|
+|`REGISTER_NO_TLS_VERIFY`|Optional. If `1` no TLS verification is done when connecting to the server.|
+|`OTTO_CLIENT_PORT`|Optional. Specify the port that the otto client will listen on.|
+
+For example:
+
+```bash
+REGISTER_HOST='https://otto.mydomain' REGISTER_PSK='super_secret' ./otto
+```
+
+The client will then configure itself and exit with a status code of `0` and will now be ready for normal use.
+
+### Manual Configuration
+
+You may also manually configure the otto client with a configuration file. The configuration file is a JSON file with a
+single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the otto client binary.
+
+|Property|Required|Description|
+|-|-|-|
+|`psk`|Yes|The PSK configured for this host on the server|
+|`log_path`|Yes|The path to a file where the Otto client should log|
+|`default_uid`|No|The default UID if not specified by the script|
+|`default_gid`|No|The default GID if not specified by the script|
+|`path`|No|The value of $PATH when scripts are executed|

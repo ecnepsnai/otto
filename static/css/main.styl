@@ -1,0 +1,136 @@
+body
+    font-size: 0.875rem
+
+.load-wrapper
+    padding: 1em
+
+main
+    padding-bottom: 1rem
+
+nav
+    background-color: #D32F2F
+
+.page-title
+    padding: 1em 0
+    background-color: #f7f7f7
+    margin-bottom: 1em
+
+    p
+        margin: 0
+        padding: 0
+        font-weight: bold
+
+.form-control.ng-invalid:not(.ng-untouched)
+    border-color: #dc3545
+    padding-right: 2.25rem
+    background-repeat: no-repeat
+    background-position: center right calc(2.25rem / 4)
+    background-size: calc(2.25rem / 2) calc(2.25rem / 2)
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc354…%3e%3ccircle cy='3' r='.5'/%3e%3ccircle cx='3' cy='3' r='.5'/%3e%3c/svg%3E")
+
+    &:focus
+        border-color: #dc3545
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25)
+
+form .invalid-feedback
+    display: block !important
+
+.some-breathing-room
+    margin-top: 1em
+
+.a-little-to-the-left
+    margin-left: 5px
+
+.a-little-to-the-right
+    margin-right: 5px
+
+.inline-block
+    display: inline-block
+
+.inline-button
+    display: inline
+
+.form-control-dark
+    color: #fff
+    background-color: rgba(255,255,255,0.1)
+    border-color: rgba(255,255,255,0.1)
+
+.form-control-dark:focus
+    border-color: transparent
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.25)
+
+.border-top
+    border-top: 1px solid #e5e5e5
+
+.border-bottom
+    border-bottom: 1px solid #e5e5e5
+
+.notify
+    position: fixed !important
+    top: 1em
+    left: 1em
+    z-index: 10000
+
+.navbar-collapse
+    justify-content: space-between
+
+i.fas + span,
+i.far + span,
+i.fal + span
+    margin-left: 5px
+
+.buttons
+    a
+    button
+        margin-right: .25rem
+
+td
+th
+    white-space: nowrap
+
+.modal-body .col-sm.ng-scope
+    min-width: 100%
+
+.btn.btn-xsm
+    padding: .10rem .5rem
+    font-size: .875rem
+    line-height: 1.5
+    border-radius: .2rem
+
+.nothing-here
+    margin-top: .5rem
+
+    i
+        color: #d4e1f0
+
+    span
+        font-weight: bold
+
+table.checkbox-table
+    tr
+        td
+        th
+            input[type="checkbox"]
+                margin-right: .25rem
+            label
+                margin: 0
+
+.monospace
+    font-family: 'Fira Code', 'Menlo', 'Monaco', 'Courier New', 'Courier', monospace !important
+
+.list-style-none
+    list-style: none
+    padding-left: .75rem
+
+.run-script-button
+    color: #28a745
+
+    &:hover
+        color: #207e35
+
+@media (max-width: 575px)
+    .notify
+        right: 1em
+    .buttons
+        overflow: scroll
+        white-space: nowrap

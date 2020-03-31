@@ -1,0 +1,52 @@
+<page-wrapper page-title="{{ ::$ctrl.title }}" ng-if="$ctrl.loaded">
+    <form class="form" name="scriptForm" novalidate ng-submit="$ctrl.save(scriptForm.$valid)">
+        <div class="form-group">
+            <label for="$ctrl.script.Name">Name</label>
+            <input type="text" class="form-control" placeholder="Friendly Name" name="Name" required id="$ctrl.script.Name" ng-model="$ctrl.script.Name">
+        </div>
+        <div class="form-group form-check" ng-if="!$ctrl.isNew">
+            <checkbox label="Enabled" model="$ctrl.script.Enabled"></checkbox>
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.script.UID">User ID</label>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" name="UID" placeholder="1000" required id="$ctrl.script.UID" ng-model="$ctrl.script.UID">
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.script.GID">Group ID</label>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" name="GID" placeholder="1000" required id="$ctrl.script.GID" ng-model="$ctrl.script.GID">
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.script.WorkingDirectory">Working Directory</label>
+            <input type="text" class="form-control monospace" placeholder="/var/run/" name="WorkingDirectory" id="$ctrl.script.WorkingDirectory" ng-model="::$ctrl.script.WorkingDirectory">
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.script.AfterExecution">After Execution</label>
+            <select class="form-control" name="$ctrl.script.AfterExecution" id="$ctrl.script.AfterExecution" ng-model="::$ctrl.script.AfterExecution">
+                <option value="">Do Nothing</option>
+                <option value="exit_client">Exit Client</option>
+                <option value="reboot">Reboot System</option>
+                <option value="shutdown">Shutdown System</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="$ctrl.script.Executable">Executable</label>
+            <input type="text" class="form-control monospace" placeholder="/bin/bash" name="Executable" id="$ctrl.script.Executable" ng-model="::$ctrl.script.Executable">
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label>Hosts</label>
+            <host-picker model="$ctrl.enabledHosts"></host-picker>
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label>Environmentment Variables</label>
+            <environment-edit environment="::$ctrl.script.Environment"></environment-edit>
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label for="$ctrl.script.Script">Script</label>
+            <textarea class="form-control monospace" rows="20" ng-model="::$ctrl.script.Script"></textarea>
+        </div>
+        <wait-button title="Save" loading="$ctrl.loading" click="$ctrl.save(scriptForm.$valid)"></wait-button>
+    </form>
+</page-wrapper>

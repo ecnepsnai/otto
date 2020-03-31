@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Session",
+        "object": "Session",
+        "unordered": true
+    },
+    {
+        "name": "User",
+        "object": "User"
+    },
+    {
+        "name": "Host",
+        "object": "Host"
+    },
+    {
+        "name": "Group",
+        "object": "Group"
+    },
+    {
+        "name": "Script",
+        "object": "Script"
+    }
+]

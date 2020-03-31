@@ -1,0 +1,79 @@
+<page-wrapper page-title="Options">
+    <page-loading ng-if="$ctrl.loading"></page-loading>
+    <form class="form" name="settingsForm" ng-submit="$ctrl.save(settingsForm.$valid)" ng-if="!$ctrl.loading">
+        <div class="card mt-3 mb-3">
+            <div class="card-header"><i class="fas fa-atlas"></i> General Settings</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="$ctrl.options.ServerURL">Otto Server URL</label>
+                    <input type="text" class="form-control" placeholder="https://otto..." id="$ctrl.options.ServerURL" ng-model="::$ctrl.options.ServerURL" required>
+                    <small class="form-text text-muted">The absolute URL (Including protocol) where this otto server is accessed from</small>
+                </div>
+                <div class="form-group">
+                    <label>Global Environmentment Variables</label>
+                    <environment-edit environment="::$ctrl.options.GlobalEnvironment"></environment-edit>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3 mb-3">
+            <div class="card-header"><i class="fas fa-network-wired"></i> Network Settings</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>IP Version</label>
+                    <div class="form-check" ng-repeat="(label, value) in $ctrl.state.Enums.IPVersionOption">
+                        <input class="form-check-input" type="radio" value="{{ value }}" name="IPVersionOption" ng-model="$ctrl.options.Network.ForceIPVersion" id="ipversion-{{value}}">
+                        <label class="form-check-label" for="ipversion-{{value}}">
+                            {{ label }}
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">The IP Version used when connecting to clients</small>
+                </div>
+                <div class="form-group">
+                    <label for="$ctrl.options.Network.Timeout">Timeout</label>
+                    <div class="input-group">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="10" id="$ctrl.options.Network.Timeout" ng-model="$ctrl.options.Network.Timeout" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">Seconds</span>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">The maximum number of seconds Otto will wait while trying to connect to a client</small>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3 mb-3">
+            <div class="card-header"><i class="fas fa-magic"></i> Host Registration</div>
+            <div class="card-body">
+                <div class="form-group form-check">
+                    <checkbox label="Allow Hosts to Register Themselves" model="$ctrl.options.Register.Enabled" disable-if="$ctrl.groups.length === 0"></checkbox>
+                    <small class="form-text text-muted">If checked hosts can automatically register themselves with this Otto server</small>
+                    <small class="form-text text-danger" ng-if="$ctrl.groups.length === 0">At least one group is required</small>
+                </div>
+                <div ng-if="$ctrl.options.Register.Enabled">
+                    <div class="form-group">
+                        <label for="$ctrl.options.Register.PSK">Register PSK</label>
+                        <input type="password" class="form-control" id="$ctrl.options.Register.PSK" ng-model="::$ctrl.options.Register.PSK" required>
+                        <small class="form-text text-muted">Clients that wish to register with this server must specify this PSK to authenticate</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Rules</label>
+                        <register-rule-list rules="$ctrl.options.Register.Rules" groups="$ctrl.groups"></register-rule-list>
+                    </div>
+                    <div class="form-group">
+                        <label for="$ctrl.options.Register.DefaultGroupID">Default Group</label>
+                        <select class="form-control" id="$ctrl.options.Register.DefaultGroupID" ng-model="::$ctrl.options.Register.DefaultGroupID">
+                            <option ng-repeat="group in $ctrl.groups" value="{{ group.ID }}">{{ group.Name }}</option>
+                        </select>
+                        <small class="form-text text-muted">If none of the above rules match the client will be added to this group</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3 mb-3">
+            <div class="card-header"><i class="fas fa-users"></i> Users</div>
+            <div class="card-body">
+                <user-list></user-list>
+            </div>
+        </div>
+        <wait-button title="Save" loading="$ctrl.loading" click="$ctrl.save(settingsForm.$valid)"></wait-button>
+    </form>
+</page-wrapper>

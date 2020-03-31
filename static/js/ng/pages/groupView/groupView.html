@@ -1,0 +1,55 @@
+<page-wrapper page-title="View Group" ng-if="$ctrl.loaded">
+    <div class="mb-3">
+        <a ng-href="/groups/group/{{ ::$ctrl.group.ID }}/edit/" class="btn btn-sm btn-outline-primary"><i class="fas fa-pencil-alt"></i> Edit</a>
+        <button type="button" class="btn btn-sm btn-outline-danger" ng-click="$ctrl.deleteGroup()"><i class="fas fa-trash-alt"></i> Delete</button>
+    </div>
+    <div class="row card-padding-bottom">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    Group Information
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Name: <strong>{{ ::$ctrl.group.Name }}</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card mt-3" ng-if="::$ctrl.group.comments !== ''">
+                <div class="card-header">
+                    Environment Variables
+                </div>
+                <div class="card-body">
+                    <environment-view envs="$ctrl.environmentListSorted"></environment-view>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-header">
+                    Hosts
+                </div>
+                <div class="card-body">
+                    <nothing ng-if="$ctrl.hosts.length === 0"></nothing>
+                    <h6 ng-repeat="host in $ctrl.hosts">
+                        <i class="fas fa-desktop"></i>
+                        <a ng-href="/hosts/host/{{ host.ID }}/">{{ host.Name }}</a>
+                    </h6>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    Scripts
+                </div>
+                <div class="card-body">
+                    <nothing ng-if="$ctrl.scripts.length === 0"></nothing>
+                    <h6 ng-repeat="script in $ctrl.scripts">
+                        <i class="fas fa-scroll"></i>
+                        <a ng-href="/scripts/script/{{ script.ID }}/">{{ script.Name }}</a>
+                        <a ng-href="/scripts/script/{{ script.ID }}/execute/?host={{ $ctrl.host.ID }}" class="run-script-button"><i class="fas fa-play-circle"></i></a>
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</page-wrapper>
