@@ -56,6 +56,7 @@ func (s sessionStoreObject) SessionWithID(ID string) (*Session, *Error) {
 
 // DeleteSession delete a session with the given ID
 func (s sessionStoreObject) DeleteSession(session *Session) {
+	log.Info("Ending session for user: '%s' with session ID: '%s'", session.Username, session.ID)
 	s.Table.Delete(*session)
 }
 

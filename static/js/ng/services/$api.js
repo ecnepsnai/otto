@@ -1,5 +1,11 @@
 angular.module('otto').factory('$api', function($http, notify, $q) {
     function dealWithError(error) {
+        // Session no longer valid
+        if (error.status === 403) {
+            location.href = '/login?unauthorized';
+            return;
+        }
+
         var message = 'Internal Server Error';
         if (error && error.data) {
             if (error.data.message) {
@@ -18,7 +24,7 @@ angular.module('otto').factory('$api', function($http, notify, $q) {
                 $http.get(url).then(results => {
                     resolve(results);
                 }, function(error) {
-
+                    dealWithError(error);
                     reject(error);
                 }).catch(function(exception) {
                     dealWithError(exception);

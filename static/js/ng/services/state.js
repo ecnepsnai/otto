@@ -5,8 +5,6 @@ angular.module('otto').factory('state', function($api) {
         return $api.get('/api/state').then(response => {
             currentState = response.data.data;
             return response.data.data;
-        }, function() {
-            location.href = '/login?unauthorized';
         });
     };
 
