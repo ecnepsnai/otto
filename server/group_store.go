@@ -156,6 +156,14 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 }
 
 func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
+	hosts, err := group.Hosts()
+	if err != nil {
+		return err
+	}
+	if len(hosts) > 0 {
+		return ErrorUser("Can't delete group with hosts")
+	}
+
 	if err := s.Table.Delete(*group); err != nil {
 		log.Error("Error deleting group '%s': %s", group.Name, err.Error())
 		return ErrorFrom(err)

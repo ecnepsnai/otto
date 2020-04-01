@@ -1,4 +1,7 @@
-<page-wrapper page-title="{{ ::$ctrl.title }}" ng-if="$ctrl.loaded">
+<div class="modal-header">
+    <h5 class="modal-title">{{:: $ctrl.title }}</h5>
+</div>
+<div class="modal-body">
     <form class="form" name="userForm" ng-submit="$ctrl.save(userForm.$valid)">
         <div class="form-group">
             <label for="$ctrl.user.Username">Username</label>
@@ -7,8 +10,8 @@
         <div class="form-group">
             <label for="$ctrl.user.Password">Password</label>
             <div>
-            <button type="button" class="btn btn-sm btn-primary" ng-click="$ctrl.resetPassword()" ng-if="$ctrl.showResetPassword">Change Password</button>
-            <input type="password" class="form-control" id="$ctrl.user.Password" ng-if="$ctrl.showPassword" placeholder="Password" required ng-model="$ctrl.user.Password">
+            <button type="button" class="btn btn-sm btn-primary" ng-click="$ctrl.resetPassword()" ng-if="!$ctrl.showPasswordField">Change Password</button>
+            <input type="password" class="form-control" id="$ctrl.user.Password" ng-if="$ctrl.showPasswordField" placeholder="Password" required ng-model="$ctrl.user.Password">
             </div>
         </div>
         <div class="form-group">
@@ -23,6 +26,9 @@
                 <small class="form-text text-muted">If unchecked this user can not log in.</small>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Apply</button>
     </form>
-</page-wrapper>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" ng-click="$ctrl.response(false)">Discard</button>
+    <button type="button" class="btn btn-primary" ng-click="$ctrl.response(true)">Apply</button>
+</div>

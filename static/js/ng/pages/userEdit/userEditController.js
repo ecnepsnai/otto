@@ -1,53 +1,32 @@
-angular.module('otto').controller('userEdit', function ($user, $route, $q, $location, notify, state, popup) {
+angular.module('otto').controller('userEdit', function ($scope, state) {
     var $ctrl = this;
-    var username = $route.current.params.username;
-
-    function getUser() {
-        $ctrl.canDisableUser = true;
-
-        if (username) {
-            if (username === state.current().User.Username) {
-                $ctrl.canDisableUser = false;
-            }
-
-            return $user.get(username);
-        }
-        return $q.resolve({
-            Enabled: true,
-        });
+    var $popupScope = $scope.$parent;
+    var $popupData = $popupScope.popupData;
+    $ctrl.user = {
+        Enabled: true
+    };
+    $ctrl.title = 'New User';
+    $ctrl.canDisableUser = true;
+    $ctrl.showPasswordField = true;
+    $ctrl.isNew = true;
+    if ($popupData.user) {
+        $ctrl.user = $popupData.user;
+        $ctrl.title = 'Edit User';
+        $ctrl.canDisableUser = state.current().User.Username !== $ctrl.user.Username;
+        $ctrl.showPasswordField = false;
+        $ctrl.isNew = false;
     }
 
-    getUser().then(user => {
-        $ctrl.loaded = true;
-        $ctrl.isNew = username === undefined;
-        if ($ctrl.isNew) {
-            $ctrl.title = 'New User';
-            $ctrl.showPassword = true;
-            $ctrl.showResetPassword = false;
-        } else {
-            $ctrl.title = 'Edit User';
-            $ctrl.showPassword = false;
-            $ctrl.showResetPassword = true;
-        }
-        $ctrl.user = user;
-    });
-
     $ctrl.resetPassword = function() {
-        $ctrl.showPassword = true;
-        $ctrl.showResetPassword = false;
+        $ctrl.showPasswordField = true;
     };
 
-    $ctrl.save = function() {
-        var savePromise;
-        if ($ctrl.isNew) {
-            savePromise = $user.create($ctrl.user);
+    $ctrl.response = function(apply) {
+        if (apply) {
+            $popupScope.popupResolve($ctrl.user);
         } else {
-            savePromise = $user.update($ctrl.user.Username, $ctrl.user);
+            $popupScope.popupResolve(false);
         }
-
-        savePromise.then(function() {
-            $location.url('/options/');
-            notify.common.saved();
-        });
+        $popupScope.popupElement.modal('hide');
     };
 });

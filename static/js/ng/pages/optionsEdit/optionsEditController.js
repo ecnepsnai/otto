@@ -1,6 +1,7 @@
 angular.module('otto').controller('optionsEdit', function($scope, $api, $group, $q, notify, state, title) {
     var $ctrl = this;
     title.set('Options');
+    $ctrl.state = state.current();
 
     $ctrl.loadData = function() {
         $ctrl.loading = true;
@@ -36,6 +37,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
         $api.post('/api/options', $ctrl.options).then(function() {
             $ctrl.loading = false;
             state.invalidate().then(function() {
+                $ctrl.state = state.current();
                 notify.success('Options Updated');
             });
         }, function() {
