@@ -1,26 +1,42 @@
-angular.module('otto').controller('groupEdit', function($route, $group, $location, title, notify) {
+angular.module('otto').controller('groupEdit', function($route, $group, $q, $location, title, notify) {
     var $ctrl = this;
-    $ctrl.loading = false;
+    $ctrl.loaded = false;
 
-    if ($location.path() === '/groups/group/') {
-        $ctrl.isNew = true;
-        $ctrl.title = 'New Group';
-        title.set($ctrl.title);
-        $ctrl.group = {
-            Environment: {},
-            ScriptIDs: [],
-        };
-        $ctrl.loaded = true;
-    } else {
-        $ctrl.title = 'Edit Group';
-        title.set($ctrl.title);
-        var id = $route.current.params.id;
-        $group.get(id).then(group => {
-            $ctrl.group = group;
-            $ctrl.loaded = true;
+    $ctrl.getData = function() {
+        if ($location.path() === '/groups/group/') {
+            return $q.all({
+                group: $q.resolve({
+                    Environment: {},
+                    ScriptIDs: [],
+                }),
+                hosts: $q.resolve([]),
+            });
+        } else {
+            var id = $route.current.params.id;
+            return $q.all({
+                group: $group.get(id),
+                hosts: $group.getHosts(id),
+            });
+        }
+    };
+
+    $ctrl.getData().then(function(results) {
+        $ctrl.group = results.group;
+        $ctrl.selectedHosts = results.hosts.map(function(host) {
+            return host.ID;
         });
-        $ctrl.isNew = false;
-    }
+        $ctrl.loaded = true;
+
+        if ($location.path() === '/groups/group/') {
+            $ctrl.isNew = true;
+            $ctrl.title = 'New Group';
+            title.set($ctrl.title);
+        } else {
+            $ctrl.isNew = false;
+            $ctrl.title = 'Edit Group';
+            title.set($ctrl.title);
+        }
+    });
 
     $ctrl.save = function(isValid) {
         if (!isValid) {
@@ -35,9 +51,11 @@ angular.module('otto').controller('groupEdit', function($route, $group, $locatio
         }
         $ctrl.loading = true;
         savePromise.then(group => {
-            $ctrl.loading = false;
-            $location.url('/groups/group/' + group.ID);
-            notify.success('Group Saved');
+            $group.setHosts(group.ID, { Hosts: $ctrl.selectedHosts }).then(function() {
+                $ctrl.loading = false;
+                $location.url('/groups/group/' + group.ID);
+                notify.success('Group Saved');
+            });
         }, function() {
             $ctrl.loading = false;
         });

@@ -96,3 +96,13 @@ func Hostname() string {
 	}
 	return h
 }
+
+// StringSliceContains does this slice of strings contain n?
+func StringSliceContains(n string, h []string) bool {
+	for _, s := range h {
+		if s == n {
+			return true
+		}
+	}
+	return false
+}

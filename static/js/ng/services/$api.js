@@ -1,20 +1,27 @@
 angular.module('otto').factory('$api', function($http, notify, $q) {
+    function dealWithError(error) {
+        var message = 'Internal Server Error';
+        if (error && error.data) {
+            if (error.data.message) {
+                message = error.data.message;
+            } else if (error.data.error && error.data.error.message) {
+                message = error.data.error.message;
+            }
+        }
+        console.error(error);
+        notify.error(message, 'Error Processing Request');
+    }
+
     return {
         get: function(url) {
             return $q(function(resolve, reject) {
                 $http.get(url).then(results => {
                     resolve(results);
                 }, function(error) {
-                    var message = 'Internal Server Error';
-                    if (error && error.data && error.data.message) {
-                        message = error.data.message;
-                    }
-                    console.error(error);
-                    notify.error(message);
+
                     reject(error);
                 }).catch(function(exception) {
-                    console.error(exception);
-                    notify.error('Internal Server Error');
+                    dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
@@ -24,16 +31,10 @@ angular.module('otto').factory('$api', function($http, notify, $q) {
                 $http.post(url, body).then(results => {
                     resolve(results);
                 }, function(error) {
-                    var message = 'Internal Server Error';
-                    if (error && error.data && error.data.message) {
-                        message = error.data.message;
-                    }
-                    console.error(error);
-                    notify.error(message);
+                    dealWithError(error);
                     reject(error);
                 }).catch(function(exception) {
-                    console.error(exception);
-                    notify.error('Internal Server Error');
+                    dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
@@ -43,16 +44,10 @@ angular.module('otto').factory('$api', function($http, notify, $q) {
                 $http.put(url, body).then(results => {
                     resolve(results);
                 }, function(error) {
-                    var message = 'Internal Server Error';
-                    if (error && error.data && error.data.message) {
-                        message = error.data.message;
-                    }
-                    console.error(error);
-                    notify.error(message);
+                    dealWithError(error);
                     reject(error);
                 }).catch(function(exception) {
-                    console.error(exception);
-                    notify.error('Internal Server Error');
+                    dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
@@ -62,16 +57,10 @@ angular.module('otto').factory('$api', function($http, notify, $q) {
                 $http.delete(url).then(results => {
                     resolve(results);
                 }, function(error) {
-                    var message = 'Internal Server Error';
-                    if (error && error.data && error.data.message) {
-                        message = error.data.message;
-                    }
-                    console.error(error);
-                    notify.error(message);
+                    dealWithError(error);
                     reject(error);
                 }).catch(function(exception) {
-                    console.error(exception);
-                    notify.error('Internal Server Error');
+                    dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });

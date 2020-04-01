@@ -1,4 +1,6 @@
 <div>
     <page-loading ng-if="$ctrl.loading"></page-loading>
-    <button ng-if="!$ctrl.loading" class="btn btn-sm btn-outline-primary" ng-click="$ctrl.showPopup()" type="button">{{ ::$ctrl.buttonText }}</button>
+    <button ng-if="!$ctrl.loading" class="btn btn-sm btn-outline-primary" ng-click="$ctrl.showPopup()" type="button">
+        <span class="badge badge-primary">{{ $ctrl.model.length }}</span> {{ ::$ctrl.buttonText }}
+    </button>
 </div>

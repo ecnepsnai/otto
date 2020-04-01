@@ -66,6 +66,7 @@ func RouterSetup() {
 	server.API.GET("/api/groups/group/:id", h.GroupGet, authenticatedOptions)
 	server.API.GET("/api/groups/group/:id/scripts", h.GroupGetScripts, authenticatedOptions)
 	server.API.GET("/api/groups/group/:id/hosts", h.GroupGetHosts, authenticatedOptions)
+	server.API.POST("/api/groups/group/:id/hosts", h.GroupSetHosts, authenticatedOptions)
 	server.API.POST("/api/groups/group/:id", h.GroupEdit, authenticatedOptions)
 	server.API.DELETE("/api/groups/group/:id", h.GroupDelete, authenticatedOptions)
 

@@ -1,7 +1,7 @@
 angular.module('otto').controller('scriptEdit', function($route, $q, $script, $location, title, notify) {
     var $ctrl = this;
     $ctrl.loaded = false;
-    $ctrl.enabledHosts = [];
+    $ctrl.enabledGroups = [];
 
     if ($location.path() === '/scripts/script/') {
         $ctrl.isNew = true;
@@ -28,19 +28,19 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
         }
     }
 
-    function getScriptHosts() {
+    function getScriptGroups() {
         $ctrl.loaded = false;
         if ($location.path() === '/scripts/script/') {
             return $q.resolve([]);
         } else {
-            return $script.getHosts($route.current.params.id);
+            return $script.getGroups($route.current.params.id);
         }
     }
 
-    $q.all({ script: getScript(), hosts: getScriptHosts() }).then(function(results) {
+    $q.all({ script: getScript(), hosts: getScriptGroups() }).then(function(results) {
         $ctrl.script = results.script;
         results.hosts.forEach(function(host) {
-            $ctrl.enabledHosts.push(host.ID);
+            $ctrl.enabledGroups.push(host.ID);
         });
         $ctrl.loaded = true;
     });
@@ -59,10 +59,8 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
 
         $ctrl.loading = true;
         savePromise.then(function(script) {
-            $ctrl.loading = false;
-
-            var id = script.ID;
-            $script.setHosts(ID, { Hosts: $ctrl.enabledHosts }).then(function() {
+            $script.setGroups(script.ID, { Groups: $ctrl.enabledGroups }).then(function() {
+                $ctrl.loading = false;
                 $location.url('/scripts/script/' + script.ID);
                 notify.success('Script Saved');
             });

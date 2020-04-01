@@ -62,6 +62,65 @@ func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
 	return hosts, nil
 }
 
+func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	type params struct {
+		Hosts []string
+	}
+
+	r := params{}
+	if err := request.Decode(&r); err != nil {
+		return nil, err
+	}
+
+	group, err := GroupStore.GroupWithID(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+	if group == nil {
+		return nil, web.ValidationError("No group with ID %s", id)
+	}
+
+	for _, hostID := range r.Hosts {
+		host, err := HostStore.HostWithID(hostID)
+		if err != nil {
+			if err.Server {
+				return nil, web.CommonErrors.ServerError
+			}
+			return nil, web.ValidationError(err.Message)
+		}
+		if StringSliceContains(id, host.GroupIDs) {
+			continue
+		}
+
+		if _, err := HostStore.EditHost(host, editHostParameters{
+			Name:        host.Name,
+			Address:     host.Address,
+			Port:        host.Port,
+			PSK:         host.PSK,
+			Enabled:     host.Enabled,
+			GroupIDs:    append(host.GroupIDs, id),
+			Environment: host.Environment,
+		}); err != nil {
+			return nil, web.CommonErrors.ServerError
+		}
+	}
+
+	hosts, err := group.Hosts()
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return hosts, nil
+}
+
 func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

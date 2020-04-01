@@ -26,7 +26,7 @@ angular.module('otto').controller('hostView', function($q, $host, $group, $locat
             groupMap[group.ID] = group;
         });
         $ctrl.groups = [];
-        $ctrl.host.GroupIDs.forEach((groupID) => {
+        ($ctrl.host.GroupIDs || []).forEach((groupID) => {
             $ctrl.groups.push(groupMap[groupID]);
         });
 

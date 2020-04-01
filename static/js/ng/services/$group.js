@@ -20,6 +20,11 @@ angular.module('otto').factory('$group', function($api, popup, notify, $q) {
                 return results.data.data;
             });
         },
+        setHosts: function(ID, hosts) {
+            return $api.post('/api/groups/group/' + ID + '/hosts', hosts).then(results => {
+                return results.data.data;
+            });
+        },
         getScripts: function(ID) {
             return $api.get('/api/groups/group/' + ID + '/scripts').then(results => {
                 return results.data.data;

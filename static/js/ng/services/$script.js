@@ -20,6 +20,11 @@ angular.module('otto').factory('$script', function($api, popup, notify, $q) {
                 return results.data.data;
             });
         },
+        setGroups: function(ID, groups) {
+            return $api.post('/api/scripts/script/' + ID + '/groups', groups).then(results => {
+                return results.data.data;
+            });
+        },
         toggle: function(script) {
             return $q(function(resolve) {
                 return $api.post('/api/scripts/script/' + script.ID + '/disable/').then(function() {
