@@ -2,45 +2,11 @@ var otto = angular.module('otto', ['ngRoute', 'angularMoment', 'ngSanitize']);
 
 otto.controller('otto', OttoController);
 
-function OttoController($scope, $location, state) {
+function OttoController($scope, state) {
     state.start().then(function(state) {
         $scope.ready = true;
         $scope.state = state;
     });
-
-    $scope.logout = function() {
-        $api.post('/api/logout').then(function() {
-            location.href = '/login?logout';
-        }, function() {
-            location.href = '/login?logout';
-        });
-    };
-
-    $scope.navClass = function(tab) {
-        var matches = $location.path().startsWith(tab);
-        return { active: matches };
-    };
-
-    function doNavigate(href) {
-        if ($location.path() === href) {
-            $route.reload();
-        } else {
-            $location.url(href);
-        }
-    }
-
-    $scope.navigate = function(href) {
-        if (document.documentElement.clientWidth > 990) {
-            doNavigate(href);
-            return;
-        }
-
-        $scope.isLoading = true;
-        $timeout(function() {
-            $scope.isLoading = false;
-            doNavigate(href);
-        }, 300);
-    };
 }
 
 otto.config(function($routeProvider, $locationProvider) {

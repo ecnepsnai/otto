@@ -54,10 +54,12 @@
                         <input type="password" class="form-control" id="$ctrl.options.Register.PSK" ng-model="::$ctrl.options.Register.PSK" required>
                         <small class="form-text text-muted">Clients that wish to register with this server must specify this PSK to authenticate</small>
                     </div>
+                    <hr/>
                     <div class="form-group">
                         <label>Rules</label>
                         <register-rule-list rules="$ctrl.options.Register.Rules" groups="$ctrl.groups"></register-rule-list>
                     </div>
+                    <hr/>
                     <div class="form-group">
                         <label for="$ctrl.options.Register.DefaultGroupID">Default Group</label>
                         <select class="form-control" id="$ctrl.options.Register.DefaultGroupID" ng-model="::$ctrl.options.Register.DefaultGroupID">

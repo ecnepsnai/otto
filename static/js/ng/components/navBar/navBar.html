@@ -1,0 +1,30 @@
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="/hosts/"><img class="brand" src="/ottodev/static/img/logo_red.svg" height="30"> </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item" ng-repeat="item in $ctrl.items">
+                    <a data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-link" ng-class="$ctrl.navClass(item.link)" href="#" ng-click="$ctrl.navigate(item.link)">
+                        <i class="{{ item.icon }}"></i>&nbsp;{{ item.title }}
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav navbar-links">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> {{ ::$ctrl.state.User.Username }}</a>
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="navUserDropdown">
+                        <a class="dropdown-item" ng-click="$ctrl.editUser()"><i class="fas fa-user-cog"></i> Edit User</a>
+                        <a class="dropdown-item" ng-click="$ctrl.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="dropdown-header">Otto {{::$ctrl.state.Version}}</h6>
+                        <a class="dropdown-item" href="https://github.com/ecnepsnai/otto/tree/{{::$ctrl.state.Version}}/docs" target="_blank"><i class="fas fa-info-circle text-primary"></i> Documentation</a>
+                        <a class="dropdown-item" href="https://github.com/ecnepsnai/otto/issues/new" target="_blank"><i class="fas fa-exclamation-circle text-danger"></i> Report An Issue</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
