@@ -1,0 +1,6 @@
+<nothing ng-if="$ctrl.envs.length === 0"></nothing>
+<div ng-repeat="environment in $ctrl.envs">
+    <h6>{{ environment.Key }}</h6>
+    <code class="monospace">{{ environment.Value | truncate }}</code>
+    <hr ng-if="!$last"/>
+</div>
