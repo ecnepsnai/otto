@@ -6,7 +6,7 @@
             <div class="card-body">
                 <div class="form-group">
                     <label for="$ctrl.options.ServerURL">Otto Server URL</label>
-                    <input type="text" class="form-control" placeholder="https://otto..." id="$ctrl.options.ServerURL" ng-model="::$ctrl.options.ServerURL" required>
+                    <input type="text" class="form-control" placeholder="{{ ::$ctrl.urlPlaceholder }}" id="$ctrl.options.ServerURL" ng-model="::$ctrl.options.ServerURL" required>
                     <small class="form-text text-muted">The absolute URL (Including protocol) where this otto server is accessed from</small>
                 </div>
                 <div class="form-group">

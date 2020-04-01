@@ -2,6 +2,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
     var $ctrl = this;
     title.set('Options');
     $ctrl.state = state.current();
+    $ctrl.urlPlaceholder = location.href.replace('/options/', '') + '/';
 
     $ctrl.loadData = function() {
         $ctrl.loading = true;
