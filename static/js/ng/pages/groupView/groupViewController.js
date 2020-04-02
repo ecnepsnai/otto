@@ -1,4 +1,4 @@
-angular.module('otto').controller('groupView', function($q, $group, $location, $route, title) {
+angular.module('otto').controller('groupView', function($q, $group, $location, $route, title, notify) {
     var $ctrl = this;
     var id = $route.current.params.id;
 
@@ -11,6 +11,11 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
     };
 
     $ctrl.deleteGroup = function() {
+        if ($ctrl.hosts.length > 0) {
+            notify.error('Group must have no host members before it can be deleted', 'Unable to Delete Group');
+            return;
+        }
+
         $group.delete($ctrl.group).then(function() {
             $location.url('/groups/');
         });
