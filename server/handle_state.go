@@ -12,15 +12,25 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 		ServerFQDN string
 		Version    string
 		Enums      map[string]interface{}
+		Warnings   []string
 	}
 
 	hostname, _ := os.Hostname()
 	user := request.UserData.(*Session).User()
 
-	return state{
+	s := state{
 		User:       user,
 		ServerFQDN: hostname,
 		Version:    ServerVersion,
 		Enums:      AllEnums,
-	}, nil
+		Warnings:   []string{},
+	}
+
+	if user.Username == defaultUser.Username {
+		if user.PasswordHash.Compare(defaultUser.Password) {
+			s.Warnings = append(s.Warnings, "default_user_password")
+		}
+	}
+
+	return s, nil
 }

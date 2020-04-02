@@ -3,9 +3,40 @@ var otto = angular.module('otto', ['ngRoute', 'angularMoment', 'ngSanitize']);
 otto.controller('otto', OttoController);
 
 function OttoController($scope, state) {
-    state.start().then(function(state) {
-        $scope.ready = true;
-        $scope.state = state;
+    var loadState = function() {
+        state.start().then(function(state) {
+            $scope.ready = true;
+            $scope.state = state;
+
+            if (state.Warnings) {
+                $scope.showWarning = true;
+
+                $scope.warnings = [];
+                state.Warnings.forEach(function(warning) {
+                    var title = warning;
+                    var message = '';
+
+                    switch (warning) {
+                        case 'default_user_password':
+                            title = 'Default Password';
+                            message = 'You are using the default username and password. You should change your password immediately using the user menu in the top-right.';
+                            break;
+                    }
+
+                    $scope.warnings.push({
+                        title: title,
+                        message: message
+                    });
+                });
+            }
+        });
+    };
+    loadState();
+
+    window.addEventListener('message', function(event) {
+        if (event.data === 'reload_state') {
+            loadState();
+        }
     });
 }
 

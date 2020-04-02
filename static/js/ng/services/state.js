@@ -1,4 +1,4 @@
-angular.module('otto').factory('state', function($api) {
+angular.module('otto').factory('state', function($api, $q) {
     var currentState;
 
     var statePromise = function() {
@@ -15,7 +15,11 @@ angular.module('otto').factory('state', function($api) {
         start: statePromise,
         invalidate: function() {
             currentState = undefined;
-            return statePromise();
+            return $q(function(resolve) {
+                statePromise().then(function() {
+                    window.postMessage('reload_state');
+                });
+            });
         },
     };
 });

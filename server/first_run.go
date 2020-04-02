@@ -2,6 +2,12 @@ package server
 
 import "os"
 
+var defaultUser = newUserParameters{
+	Username: "admin",
+	Email:    "admin@localhost",
+	Password: "admin",
+}
+
 func checkFirstRun() {
 	users, err := UserStore.AllUsers()
 	if err != nil {
@@ -11,12 +17,7 @@ func checkFirstRun() {
 		return
 	}
 
-	_, err = UserStore.NewUser(newUserParameters{
-		Username: "admin",
-		Email:    "admin@local",
-		Password: "admin",
-	})
-	if err != nil {
+	if _, err := UserStore.NewUser(defaultUser); err != nil {
 		log.Error("Unable to make default user: %s", err.Message)
 		os.Exit(1)
 	}

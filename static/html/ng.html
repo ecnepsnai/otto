@@ -21,6 +21,11 @@
     <body ng-if="ready" ng-cloak>
         <nav-bar></nav-bar>
         <div class="load-wrapper" ng-show="isLoading"><i class="fas fa-spinner fa-pulse"></i></div>
+        <div class="warning" ng-repeat="warning in warnings">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span class="warning-title">{{ ::warning.title }}</span>
+            <span class="warning-message">{{ ::warning.message }}</span>
+        </div>
         <main role="main" class="main" ng-view ng-show="!isLoading"></main>
     </body>
 </html>
