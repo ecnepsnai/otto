@@ -1,5 +1,5 @@
-angular.module('otto').filter('truncate', function(truncate) {
-    return function(input, uppercase) {
+angular.module('otto').filter('truncate', (truncate) => {
+    return (input, uppercase) => {
         return truncate(input);
     };
 });

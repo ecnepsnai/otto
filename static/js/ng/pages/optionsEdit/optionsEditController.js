@@ -4,12 +4,12 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
     $ctrl.state = state.current();
     $ctrl.urlPlaceholder = location.href.replace('/options/', '') + '/';
 
-    $ctrl.loadData = function() {
+    $ctrl.loadData = () => {
         $ctrl.loading = true;
         return $q.all({
             groups: $group.list(),
             options: $api.get('/api/options'),
-        }).then(function(results) {
+        }).then((results) => {
             $ctrl.groups = results.groups;
             var options = results.options.data.data;
             $ctrl.originalConfig = angular.copy(options);
@@ -19,7 +19,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
     };
     $ctrl.loadData();
 
-    $scope.$watch('$ctrl.options.Register.Enabled', function(nv, ov) {
+    $scope.$watch('$ctrl.options.Register.Enabled', (nv, ov) => {
         if (nv === ov) {
             return;
         }
@@ -29,19 +29,19 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
         }
     });
 
-    $ctrl.save = function(valid) {
+    $ctrl.save = (valid) => {
         if (!valid) {
             return;
         }
 
         $ctrl.loading = true;
-        $api.post('/api/options', $ctrl.options).then(function() {
-            $ctrl.loading = false;
-            state.invalidate().then(function() {
+        $api.post('/api/options', $ctrl.options).then(() => {
+            state.invalidate().then(() => {
                 $ctrl.state = state.current();
+                $ctrl.loading = false;
                 notify.success('Options Updated');
             });
-        }, function() {
+        }, () => {
             $ctrl.loading = false;
         });
     };

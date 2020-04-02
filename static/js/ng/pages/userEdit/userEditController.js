@@ -17,11 +17,11 @@ angular.module('otto').controller('userEdit', function ($scope, state) {
         $ctrl.isNew = false;
     }
 
-    $ctrl.resetPassword = function() {
+    $ctrl.resetPassword = () => {
         $ctrl.showPasswordField = true;
     };
 
-    $ctrl.response = function(apply) {
+    $ctrl.response = (apply) => {
         if (apply) {
             $popupScope.popupResolve($ctrl.user);
         } else {

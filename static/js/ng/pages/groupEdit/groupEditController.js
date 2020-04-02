@@ -2,7 +2,7 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
     var $ctrl = this;
     $ctrl.loaded = false;
 
-    $ctrl.getData = function() {
+    $ctrl.getData = () => {
         if ($location.path() === '/groups/group/') {
             return $q.all({
                 group: $q.resolve({
@@ -20,9 +20,9 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
         }
     };
 
-    $ctrl.getData().then(function(results) {
+    $ctrl.getData().then((results) => {
         $ctrl.group = results.group;
-        $ctrl.selectedHosts = results.hosts.map(function(host) {
+        $ctrl.selectedHosts = results.hosts.map((host) => {
             return host.ID;
         });
         $ctrl.loaded = true;
@@ -38,7 +38,7 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
         }
     });
 
-    $ctrl.save = function(isValid) {
+    $ctrl.save = (isValid) => {
         if (!isValid) {
             return;
         }
@@ -51,12 +51,12 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
         }
         $ctrl.loading = true;
         savePromise.then(group => {
-            $group.setHosts(group.ID, { Hosts: $ctrl.selectedHosts }).then(function() {
+            $group.setHosts(group.ID, { Hosts: $ctrl.selectedHosts }).then(() => {
                 $ctrl.loading = false;
                 $location.url('/groups/group/' + group.ID);
                 notify.success('Group Saved');
             });
-        }, function() {
+        }, () => {
             $ctrl.loading = false;
         });
     };

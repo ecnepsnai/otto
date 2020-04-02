@@ -2,7 +2,7 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
     var $ctrl = this;
     var id = $route.current.params.id;
 
-    $ctrl.getData = function() {
+    $ctrl.getData = () => {
         return $q.all({
             group: $group.get(id),
             hosts: $group.getHosts(id),
@@ -10,20 +10,20 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
         });
     };
 
-    $ctrl.deleteGroup = function() {
+    $ctrl.deleteGroup = () => {
         if ($ctrl.hosts.length > 0) {
             notify.error('Group must have no host members before it can be deleted', 'Unable to Delete Group');
             return;
         }
 
-        $group.delete($ctrl.group).then(function() {
+        $group.delete($ctrl.group).then(() => {
             $location.url('/groups/');
         });
     };
 
     title.set('View Group');
     $ctrl.loaded = false;
-    $ctrl.getData().then(function(results) {
+    $ctrl.getData().then((results) => {
         $ctrl.group = results.group;
         $ctrl.hosts = results.hosts;
         $ctrl.scripts = results.scripts;
@@ -31,7 +31,7 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
 
         var keys = Object.keys($ctrl.group.Environment).sort();
         var environmentListSorted = [];
-        keys.forEach(function(key) {
+        keys.forEach((key) => {
             environmentListSorted.push({
                 Key: key,
                 Value: $ctrl.group.Environment[key],

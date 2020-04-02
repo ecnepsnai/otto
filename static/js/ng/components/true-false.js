@@ -6,7 +6,7 @@ angular.module('otto').component('trueFalse', {
     },
     controller: function($scope, $element, $attrs) {
         var that = this;
-        this.$onInit = function() {
+        this.$onInit = () => {
             var cls;
             var text;
 

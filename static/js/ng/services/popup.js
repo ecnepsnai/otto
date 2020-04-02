@@ -1,6 +1,6 @@
 angular.module('otto').factory('popup', function($window, $q, $compile, $rootScope, rand) {
-    var newPopup = function(options) {
-        return $q(function(resolve) {
+    var newPopup = (options) => {
+        return $q((resolve) => {
             options.id = 'popup-' + rand.ID();
             var cls = options.class || '';
 
@@ -13,7 +13,7 @@ angular.module('otto').factory('popup', function($window, $q, $compile, $rootSco
             $scope = $rootScope.$new(true);
             $scope.popupOptions = options;
             $scope.popupData = options.data;
-            $scope.popupResolve = function(data) {
+            $scope.popupResolve = (data) => {
                 modalData = data;
             };
 
@@ -22,7 +22,7 @@ angular.module('otto').factory('popup', function($window, $q, $compile, $rootSco
             var $modal = $('#' + options.id);
             $scope.popupElement = $modal;
             $modal.modal();
-            $modal.on('hidden.bs.modal', function() {
+            $modal.on('hidden.bs.modal', () => {
                 resolve(modalData);
             });
         });
@@ -42,7 +42,7 @@ angular.module('otto').factory('popup', function($window, $q, $compile, $rootSco
          * @param {string} title The title of the alert
          * @param {string} body The body of the alert
          */
-        alert: function(title, body) {
+        alert: (title, body) => {
             return newPopup({
                 template: '<alert-popup></alert-popup>',
                 data: {
@@ -57,7 +57,7 @@ angular.module('otto').factory('popup', function($window, $q, $compile, $rootSco
          * @param {string} body The body of the popup
          * @param {[]string} choices Buttons. Maximum 2. First is considered no and second is yes.
          */
-        confirm: function(title, body, choices) {
+        confirm: (title, body, choices) => {
             return newPopup({
                 template: '<confirm-popup></confirm-popup>',
                 data: {

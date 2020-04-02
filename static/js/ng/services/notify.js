@@ -1,7 +1,7 @@
 angular.module('otto').factory('notify', function($window, $q, $compile, $rootScope, rand) {
     var visibleNotifications = [];
-    var notify = function(options) {
-        return $q(function(resolve) {
+    var notify = (options) => {
+        return $q((resolve) => {
             options.id = 'notify-' + rand.ID();
             var cls = options.class || '';
 
@@ -18,17 +18,17 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
             var idx = visibleNotifications.push($notify) - 1;
             calculateHeightOffset();
             $notify.alert();
-            setTimeout(function() {
+            setTimeout(() => {
                 $notify.alert('close');
             }, 2000);
-            $notify.on('closed.bs.alert', function() {
+            $notify.on('closed.bs.alert', () => {
                 visibleNotifications.splice(visibleNotifications.indexOf($notify), 1);
                 calculateHeightOffset();
                 resolve();
             });
         });
     };
-    var calculateHeightOffset = function() {
+    var calculateHeightOffset = () => {
         if (visibleNotifications.length > 1) {
             var height = 16;
             for (var i = 0; i < visibleNotifications.length; i++) {
@@ -38,7 +38,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
         }
     };
 
-    window.addEventListener('message', function(event) {
+    window.addEventListener('message', (event) => {
         if (event.data.indexOf('notify:') === 0) {
             var components = event.data.split(':');
             var level = components[1];
@@ -59,7 +59,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
 
     return {
         show: notify,
-        success: function(body, title) {
+        success: (body, title) => {
             return notify({
                 class: 'success',
                 title: title,
@@ -67,7 +67,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-check-circle'
             });
         },
-        info: function(body, title) {
+        info: (body, title) => {
             return notify({
                 class: 'primary',
                 title: title,
@@ -75,7 +75,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-info-circle'
             });
         },
-        error: function(body, title) {
+        error: (body, title) => {
             return notify({
                 class: 'danger',
                 title: title,
@@ -83,7 +83,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-exclamation-circle'
             });
         },
-        warning: function(body, title) {
+        warning: (body, title) => {
             return notify({
                 class: 'warning',
                 title: title,
@@ -92,7 +92,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
             });
         },
         common: {
-            saved: function() {
+            saved: () => {
                 return notify({
                     class: 'success',
                     body: 'Changes Applied',

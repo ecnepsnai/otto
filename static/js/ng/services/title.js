@@ -1,6 +1,6 @@
-angular.module('otto').factory('title', function() {
+angular.module('otto').factory('title', () => {
     return {
-        set: function(val) {
+        set: (val) => {
             document.title = val + ' - Otto';
         }
     };

@@ -1,9 +1,9 @@
-angular.module('otto').filter('duration', function() {
+angular.module('otto').filter('duration', () => {
     function round(value, decimals) {
         return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
     }
 
-    return function(input, uppercase) {
+    return (input, uppercase) => {
         if (input != undefined) {
             if (input > 600000000000) {
                 nHours = round(input/600000000000, 2);

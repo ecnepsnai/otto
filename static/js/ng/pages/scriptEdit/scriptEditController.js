@@ -27,9 +27,9 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
         }
     }
 
-    $q.all({ script: getScript(), hosts: getScriptGroups() }).then(function(results) {
+    $q.all({ script: getScript(), hosts: getScriptGroups() }).then((results) => {
         $ctrl.script = results.script;
-        results.hosts.forEach(function(host) {
+        results.hosts.forEach((host) => {
             $ctrl.enabledGroups.push(host.ID);
         });
 
@@ -46,7 +46,7 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
         $ctrl.loaded = true;
     });
 
-    $ctrl.save = function(isValid) {
+    $ctrl.save = (isValid) => {
         if (!isValid) {
             return;
         }
@@ -59,13 +59,13 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
         }
 
         $ctrl.loading = true;
-        savePromise.then(function(script) {
-            $script.setGroups(script.ID, { Groups: $ctrl.enabledGroups }).then(function() {
+        savePromise.then((script) => {
+            $script.setGroups(script.ID, { Groups: $ctrl.enabledGroups }).then(() => {
                 $ctrl.loading = false;
                 $location.url('/scripts/script/' + script.ID);
                 notify.success('Script Saved');
             });
-        }, function() {
+        }, () => {
             $ctrl.loading = false;
         });
     };

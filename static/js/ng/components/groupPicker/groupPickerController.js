@@ -2,13 +2,13 @@ angular.module('otto').controller('groupPicker', function($scope, $group, popup)
     var $ctrl = this;
     $ctrl.loading = true;
 
-    $scope.$watch('$ctrl.model', function(model) {
+    $scope.$watch('$ctrl.model', (model) => {
         if (model === null || model === undefined) {
             return;
         }
 
         $ctrl.selectedGroups = {};
-        model.forEach(function(groupID) {
+        model.forEach((groupID) => {
             $ctrl.selectedGroups[groupID] = true;
         });
     });
@@ -19,20 +19,20 @@ angular.module('otto').controller('groupPicker', function($scope, $group, popup)
         $ctrl.loading = false;
     });
 
-    $ctrl.showPopup = function() {
+    $ctrl.showPopup = () => {
         popup.new({
             template: '<group-picker-popup></group-picker-popup>',
             data: {
                 selected: angular.copy($ctrl.selectedGroups),
                 groups: $ctrl.groups
             }
-        }).then(function(result) {
+        }).then((result) => {
             if (result === false || result === undefined) {
                 return;
             }
 
             var selected = [];
-            Object.keys(result).forEach(function(key) {
+            Object.keys(result).forEach((key) => {
                 if (result[key]) {
                     selected.push(key);
                 }

@@ -3,8 +3,8 @@ var otto = angular.module('otto', ['ngRoute', 'angularMoment', 'ngSanitize']);
 otto.controller('otto', OttoController);
 
 function OttoController($scope, state) {
-    var loadState = function() {
-        state.start().then(function(state) {
+    var loadState = () => {
+        state.start().then((state) => {
             $scope.ready = true;
             $scope.state = state;
 
@@ -12,7 +12,7 @@ function OttoController($scope, state) {
                 $scope.showWarning = true;
 
                 $scope.warnings = [];
-                state.Warnings.forEach(function(warning) {
+                state.Warnings.forEach((warning) => {
                     var title = warning;
                     var message = '';
 
@@ -33,7 +33,7 @@ function OttoController($scope, state) {
     };
     loadState();
 
-    window.addEventListener('message', function(event) {
+    window.addEventListener('message', (event) => {
         if (event.data === 'reload_state') {
             loadState();
         }

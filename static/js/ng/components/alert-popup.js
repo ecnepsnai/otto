@@ -2,11 +2,11 @@ angular.module('otto').component('alertPopup', {
     bindings: {},
     controller: function($scope) {
         var $ctrl = this;
-        this.$onInit = function() {
+        this.$onInit = () => {
             var $popupScope = $scope.$parent;
             $ctrl.title = $popupScope.popupData.title;
             $ctrl.body = $popupScope.popupData.body;
-            $ctrl.response = function(response) {
+            $ctrl.response = (response) => {
                 $popupScope.popupResolve(response);
                 $popupScope.popupElement.modal('hide');
             };

@@ -2,7 +2,7 @@ angular.module('otto').controller('groupList', function($q, $group, title, notif
     var $ctrl = this;
     title.set('Groups');
 
-    $ctrl.loadData = function() {
+    $ctrl.loadData = () => {
         $ctrl.loading = true;
         return $q.all({
             groups: $group.list(),
@@ -10,8 +10,8 @@ angular.module('otto').controller('groupList', function($q, $group, title, notif
         });
     };
 
-    $ctrl.loadAll = function() {
-        $ctrl.loadData().then(function(results) {
+    $ctrl.loadAll = () => {
+        $ctrl.loadData().then((results) => {
             $ctrl.loading = false;
             $ctrl.groups = results.groups;
             for (i = 0; i < $ctrl.groups.length; i++) {
@@ -22,13 +22,13 @@ angular.module('otto').controller('groupList', function($q, $group, title, notif
     };
     $ctrl.loadAll();
 
-    $ctrl.deleteHost = function(group) {
+    $ctrl.deleteHost = (group) => {
         if (group.HostIDs.length > 0) {
             notify.error('Group must have no host members before it can be deleted', 'Unable to Delete Group');
             return;
         }
 
-        $group.delete(group).then(function() {
+        $group.delete(group).then(() => {
             $ctrl.loadAll();
         });
     };

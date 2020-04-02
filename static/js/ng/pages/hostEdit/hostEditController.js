@@ -25,7 +25,7 @@ angular.module('otto').controller('hostEdit', function($route, $host, $location,
         $ctrl.isNew = false;
     }
 
-    $ctrl.save = function(isValid) {
+    $ctrl.save = (isValid) => {
         if (!isValid) {
             return;
         }
@@ -45,7 +45,7 @@ angular.module('otto').controller('hostEdit', function($route, $host, $location,
             $ctrl.loading = false;
             $location.url('/hosts/host/' + host.ID);
             notify.success('Host Saved');
-        }, function() {
+        }, () => {
             $ctrl.loading = false;
         });
     };

@@ -1,14 +1,14 @@
 angular.module('otto').controller('environmentEdit', function($scope, popup, notify, truncate) {
     var $ctrl = this;
 
-    $scope.$watch('$ctrl.environment', function(environment) {
+    $scope.$watch('$ctrl.environment', (environment) => {
         if (!environment) {
             $ctrl.environmentListSorted = [];
             return;
         }
         var keys = Object.keys(environment).sort();
         var environmentListSorted = [];
-        keys.forEach(function(key) {
+        keys.forEach((key) => {
             environmentListSorted.push({
                 Key: key,
                 Value: environment[key],
@@ -17,10 +17,10 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
         $ctrl.environmentListSorted = environmentListSorted;
     }, true);
 
-    $ctrl.newEnvironment = function() {
+    $ctrl.newEnvironment = () => {
         popup.new({
             template: '<environment-popup></environment-popup>',
-        }).then(function(result) {
+        }).then((result) => {
             if (!result) {
                 return;
             }
@@ -39,13 +39,13 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
         });
     };
 
-    $ctrl.editEnvironment = function(environment) {
+    $ctrl.editEnvironment = (environment) => {
         popup.new({
             template: '<environment-popup></environment-popup>',
             data: {
                 environment: environment
             }
-        }).then(function(result) {
+        }).then((result) => {
             if (!result) {
                 return;
             }
@@ -59,12 +59,12 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
         });
     };
 
-    $ctrl.deleteEnvironment = function(environment) {
+    $ctrl.deleteEnvironment = (environment) => {
         popup.confirm(
             'Delete Environment',
             'Are you sure you want to delete this environment?',
             ['Delete', 'Cancel']
-        ).then(function(result) {
+        ).then((result) => {
             if (result) {
                 delete $ctrl.environment[environment.Key];
             }

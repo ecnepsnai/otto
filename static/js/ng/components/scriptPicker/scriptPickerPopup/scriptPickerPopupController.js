@@ -6,7 +6,7 @@ angular.module('otto').controller('scriptPickerPopup', function($scope) {
     $ctrl.selectedScripts = $popupData.selected;
     $ctrl.scripts = $popupData.scripts;
 
-    $ctrl.response = function(apply) {
+    $ctrl.response = (apply) => {
         if (apply) {
             $popupScope.popupResolve($ctrl.selectedScripts);
         } else {

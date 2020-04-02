@@ -1,5 +1,5 @@
-angular.module('otto').factory('truncate', function() {
-    return function(input) {
+angular.module('otto').factory('truncate', () => {
+    return (input) => {
         if (input == undefined) {
             return;
         }

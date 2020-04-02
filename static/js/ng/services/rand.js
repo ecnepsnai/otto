@@ -1,6 +1,6 @@
-angular.module('otto').factory('rand', function() {
+angular.module('otto').factory('rand', () => {
     return {
-        ID: function() {
+        ID: () => {
             var text = '';
             var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             for (var i = 0; i < 10; i++) {

@@ -12,7 +12,7 @@ angular.module('otto').component('waitButton', {
     controller: function() {
         var $ctrl = this;
 
-        $ctrl.buttonClassImpl = function() {
+        $ctrl.buttonClassImpl = () => {
             var cls = {
                 btn: true,
             };
@@ -24,7 +24,7 @@ angular.module('otto').component('waitButton', {
             return cls;
         };
 
-        $ctrl.$onInit = function() {
+        $ctrl.$onInit = () => {
             if ($ctrl.icon) {
                 $ctrl.iconClass = {
                     'pr-1': true,
@@ -34,7 +34,7 @@ angular.module('otto').component('waitButton', {
             }
         };
 
-        $ctrl.isDisabled = function() {
+        $ctrl.isDisabled = () => {
             var disabled = false;
             if ($ctrl.loading) {
                 disabled = true;

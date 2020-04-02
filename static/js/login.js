@@ -8,7 +8,7 @@ if (params.get('unauthorized') != null) {
 
 var session;
 
-document.querySelector('#login').addEventListener("submit", function(e) {
+document.querySelector('#login').addEventListener("submit", (e) => {
     e.preventDefault();
 
     var loginButton = document.querySelector('#login_button'),

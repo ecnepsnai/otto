@@ -1,7 +1,7 @@
 angular.module('otto').controller('scriptHostList', function($scope) {
     var $ctrl = this;
 
-    this.$onInit = function() {
+    this.$onInit = () => {
         $ctrl.groupMap = {};
         $ctrl.hostsByGroup = {};
         $ctrl.hosts.forEach(host => {

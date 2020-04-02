@@ -14,7 +14,7 @@ const watch = require('gulp-watch');
 
 const BUILD_DIRECTORY_BASE = './build';
 
-gulp.task('js', gulp.parallel(function(done) {
+gulp.task('js', gulp.parallel((done) => {
     'use strict';
 
     return gulp.src('./js/ng/**/*.js')
@@ -22,7 +22,7 @@ gulp.task('js', gulp.parallel(function(done) {
         .pipe(concat('ng.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/js'));
-}, function(done) {
+}, (done) => {
     'use strict';
 
     return gulp.src('./js/*.js')
@@ -31,7 +31,7 @@ gulp.task('js', gulp.parallel(function(done) {
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/js'));
 }));
 
-gulp.task('html', gulp.parallel(function(done) {
+gulp.task('html', gulp.parallel((done) => {
     'use strict';
 
     return gulp.src(['./js/ng/pages/**/*.html', './js/ng/components/**/*.html'])
@@ -42,7 +42,7 @@ gulp.task('html', gulp.parallel(function(done) {
         }))
         .pipe(rename({ dirname: '' }))
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/html/'));
-}, function(done) {
+}, (done) => {
     'use strict';
 
     return gulp.src('./html/*.html')
@@ -54,13 +54,13 @@ gulp.task('html', gulp.parallel(function(done) {
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/'));
 }));
 
-gulp.task('css', gulp.parallel(function(done) {
+gulp.task('css', gulp.parallel((done) => {
     'use strict';
 
     return gulp.src(['./fonts/*.css'])
         .pipe(concat('fonts.css'))
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/css'));
-}, gulp.parallel(function(done) {
+}, gulp.parallel((done) => {
     'use strict';
 
     return gulp.src(['./css/*.styl', './../shared/*.styl'])
@@ -69,28 +69,28 @@ gulp.task('css', gulp.parallel(function(done) {
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/css'));
 })));
 
-gulp.task('img', function() {
+gulp.task('img', () => {
     'use strict';
 
     return gulp.src('./img/**/*')
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/img'));
 });
 
-gulp.task('fonts', function() {
+gulp.task('fonts', () => {
     'use strict';
 
     return gulp.src(['./fonts/*.eot', './fonts/*.svg', './fonts/*.ttf', './fonts/*.woff', './fonts/*.woff2'])
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/fonts'));
 });
 
-gulp.task('clean', function() {
+gulp.task('clean', () => {
     'use strict';
 
     return gulp.src(BUILD_DIRECTORY_BASE + '/', { read: false })
         .pipe(clean({ force: true }));
 });
 
-gulp.task('copy', function() {
+gulp.task('copy', () => {
     'use strict';
 
     return gulp.src('./copy/**/*')
@@ -98,7 +98,7 @@ gulp.task('copy', function() {
 });
 
 gulp.task('watch', gulp.parallel(
-    function(done) {
+    (done) => {
         gulp.watch('./js/**/*.js', gulp.series('js'));
         gulp.watch(['./css/*.styl', './../shared/*.styl'], gulp.series('css'));
         gulp.watch(['./html/*.html', './include/*.html', './js/ng/pages/**/*.html', './js/ng/components/**/*.html'], gulp.series('html'));
@@ -107,7 +107,7 @@ gulp.task('watch', gulp.parallel(
     }
 ));
 
-gulp.task('release', gulp.parallel(function(done) {
+gulp.task('release', gulp.parallel((done) => {
     'use strict';
 
     return gulp.src([BUILD_DIRECTORY_BASE + '/assets/js/*.js', '!' + BUILD_DIRECTORY_BASE + '/assets/js/*min.js'])
@@ -121,7 +121,7 @@ gulp.task('release', gulp.parallel(function(done) {
             compress: false
         }))
         .pipe(gulp.dest(BUILD_DIRECTORY_BASE + '/assets/js'));
-}, function(done) {
+}, (done) => {
     'use strict';
 
     return gulp.src(BUILD_DIRECTORY_BASE + '/assets/**/*.map', { read: false })

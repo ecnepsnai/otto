@@ -6,9 +6,9 @@ angular.module('otto').component('checkbox', {
     },
     controllerAs: '',
     template: '<div><input type="checkbox" class="form-check-input" id="{{ $ctrl.id }}" ng-model="$ctrl.model" ng-disabled="{{ $ctrl.disableIf }}"><label class="form-check-label" for="{{ $ctrl.id }}">{{ $ctrl.label }}</label></div>',
-    controller: function(rand) {
+    controller: (rand) => {
         var $ctrl = this;
-        this.$onInit = function() {
+        this.$onInit = () => {
             $ctrl.id = rand.ID();
         };
     }

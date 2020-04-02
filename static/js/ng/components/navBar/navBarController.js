@@ -2,40 +2,40 @@ angular.module('otto').controller('navBar', function($api, $route, $location, $t
     var $ctrl = this;
     $ctrl.state = state.current();
 
-    $ctrl.downloadButtonClass = function(href) {
+    $ctrl.downloadButtonClass = (href) => {
         var matches = $location.path().startsWith(href);
         return { 'btn-outline-dark-light': !matches, 'btn-light': matches };
     };
 
-    $ctrl.navClass = function(tab) {
+    $ctrl.navClass = (tab) => {
         var matches = $location.path().startsWith(tab);
         return { active: matches };
     };
 
-    $ctrl.editUser = function() {
+    $ctrl.editUser = () => {
         popup.new({
             template: '<user-edit></user-edit>',
             data: {
                 user: angular.copy($ctrl.state.User)
             }
-        }).then(function(result) {
+        }).then((result) => {
             if (!result) {
                 return;
             }
 
-            $user.update($ctrl.state.User.Username, result).then(function() {
+            $user.update($ctrl.state.User.Username, result).then(() => {
                 notify.success('Changed applied');
-                state.invalidate().then(function() {
+                state.invalidate().then(() => {
                     $ctrl.state = state.current();
                 });
             });
         });
     };
 
-    $ctrl.logout = function() {
-        $api.post('/api/logout').then(function() {
+    $ctrl.logout = () => {
+        $api.post('/api/logout').then(() => {
             location.href = '/login?logout';
-        }, function() {
+        }, () => {
             location.href = '/login?logout';
         });
     };
@@ -71,14 +71,14 @@ angular.module('otto').controller('navBar', function($api, $route, $location, $t
         }
     }
 
-    $ctrl.navigate = function(href) {
+    $ctrl.navigate = (href) => {
         if (document.documentElement.clientWidth > 990) {
             doNavigate(href);
             return;
         }
 
         $ctrl.isLoading = true;
-        $timeout(function() {
+        $timeout(() => {
             $ctrl.isLoading = false;
             doNavigate(href);
         }, 300);

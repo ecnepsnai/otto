@@ -2,13 +2,13 @@ angular.module('otto').controller('hostPicker', function($scope, $host, popup) {
     var $ctrl = this;
     $ctrl.loading = true;
 
-    $scope.$watch('$ctrl.model', function(model) {
+    $scope.$watch('$ctrl.model', (model) => {
         if (model === null || model === undefined) {
             return;
         }
 
         $ctrl.selectedHosts = {};
-        model.forEach(function(hostID) {
+        model.forEach((hostID) => {
             $ctrl.selectedHosts[hostID] = true;
         });
     });
@@ -19,20 +19,20 @@ angular.module('otto').controller('hostPicker', function($scope, $host, popup) {
         $ctrl.loading = false;
     });
 
-    $ctrl.showPopup = function() {
+    $ctrl.showPopup = () => {
         popup.new({
             template: '<host-picker-popup></host-picker-popup>',
             data: {
                 selected: angular.copy($ctrl.selectedHosts),
                 hosts: $ctrl.hosts
             }
-        }).then(function(result) {
+        }).then((result) => {
             if (result === false || result === undefined) {
                 return;
             }
 
             var selected = [];
-            Object.keys(result).forEach(function(key) {
+            Object.keys(result).forEach((key) => {
                 if (result[key]) {
                     selected.push(key);
                 }

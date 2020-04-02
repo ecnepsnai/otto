@@ -1,7 +1,7 @@
 angular.module('otto').controller('userList', function($user, popup, state) {
     var $ctrl = this;
 
-    $ctrl.loadData = function() {
+    $ctrl.loadData = () => {
         $ctrl.loading = true;
         $user.list().then(users => {
             $ctrl.users = users;
@@ -10,47 +10,47 @@ angular.module('otto').controller('userList', function($user, popup, state) {
     };
     $ctrl.loadData();
 
-    $ctrl.newUser = function() {
+    $ctrl.newUser = () => {
         popup.new({
             template: '<user-edit></user-edit>',
             data: {},
-        }).then(function(result) {
+        }).then((result) => {
             if (!result) {
                 return;
             }
 
-            $user.new(result).then(function() {
+            $user.new(result).then(() => {
                 notify.success('Changed applied');
                 $ctrl.loadData();
             });
         });
     };
 
-    $ctrl.editUser = function(user) {
+    $ctrl.editUser = (user) => {
         popup.new({
             template: '<user-edit></user-edit>',
             data: {
                 user: angular.copy(user)
             }
-        }).then(function(result) {
+        }).then((result) => {
             if (!result) {
                 return;
             }
 
-            $user.update(user.Username, result).then(function() {
+            $user.update(user.Username, result).then(() => {
                 notify.success('Changed applied');
                 $ctrl.loadData();
             });
         });
     };
 
-    $ctrl.deleteUser = function(user) {
-        $user.delete(user).then(function() {
+    $ctrl.deleteUser = (user) => {
+        $user.delete(user).then(() => {
             $ctrl.loadData();
         });
     };
 
-    $ctrl.canDeleteUser = function(user) {
+    $ctrl.canDeleteUser = (user) => {
         return user.Username !== state.current().User.Username;
     };
 });
