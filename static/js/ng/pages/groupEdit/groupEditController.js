@@ -33,7 +33,7 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
             title.set($ctrl.title);
         } else {
             $ctrl.isNew = false;
-            $ctrl.title = 'Edit Group';
+            $ctrl.title = 'Edit Group: ' + $ctrl.group.Name;
             title.set($ctrl.title);
         }
     });

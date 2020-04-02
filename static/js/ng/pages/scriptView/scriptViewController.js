@@ -9,12 +9,18 @@ angular.module('otto').controller('scriptView', function($q, $script, $route, ti
         });
     };
 
+    $ctrl.deleteScript = function() {
+        $script.delete($ctrl.script).then(function() {
+            $location.url('/scripts/');
+        });
+    };
+
     title.set('View Script');
     $ctrl.loaded = false;
     $ctrl.getData().then(function(result) {
         $ctrl.script = result.script;
         $ctrl.hosts = result.hosts;
-        title.set($ctrl.script.Name);
+        title.set('View Script: ' + $ctrl.script.Name);
 
         var keys = Object.keys($ctrl.script.Environment).sort();
         var environmentListSorted = [];

@@ -1,8 +1,9 @@
-angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $script, $group, $route, $location) {
+angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $script, $group, $route, $location, title) {
     var $ctrl = this;
     $ctrl.stage = 'input';
     $ctrl.hostIDMap = {};
     $ctrl.title = 'Execute Script';
+    title.set($ctrl.title);
     $ctrl.selectedHosts = {};
     $ctrl.selectedGroups = {};
 
@@ -83,6 +84,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         $ctrl.groups = results.groups;
         $ctrl.script = results.script;
         $ctrl.title = 'Execute Script: ' + $ctrl.script.Name;
+        title.set($ctrl.title);
         $ctrl.loaded = true;
 
         var host = $location.search().host;

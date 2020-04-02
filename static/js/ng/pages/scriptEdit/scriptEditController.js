@@ -3,16 +3,6 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
     $ctrl.loaded = false;
     $ctrl.enabledGroups = [];
 
-    if ($location.path() === '/scripts/script/') {
-        $ctrl.isNew = true;
-        $ctrl.title = 'New Script';
-        title.set($ctrl.title);
-    } else {
-        $ctrl.isNew = false;
-        $ctrl.title = 'Edit Script';
-        title.set($ctrl.title);
-    }
-
     function getScript() {
         $ctrl.loaded = false;
         if ($location.path() === '/scripts/script/') {
@@ -42,6 +32,17 @@ angular.module('otto').controller('scriptEdit', function($route, $q, $script, $l
         results.hosts.forEach(function(host) {
             $ctrl.enabledGroups.push(host.ID);
         });
+
+        if ($location.path() === '/scripts/script/') {
+            $ctrl.isNew = true;
+            $ctrl.title = 'New Script';
+            title.set($ctrl.title);
+        } else {
+            $ctrl.isNew = false;
+            $ctrl.title = 'Edit Script: ' + $ctrl.script.Name;
+            title.set($ctrl.title);
+        }
+
         $ctrl.loaded = true;
     });
 

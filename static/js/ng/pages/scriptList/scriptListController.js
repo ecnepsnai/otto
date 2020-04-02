@@ -1,5 +1,6 @@
-angular.module('otto').controller('scriptList', function($script) {
+angular.module('otto').controller('scriptList', function($script, title) {
     var $ctrl = this;
+    title.set('Scripts');
 
     $ctrl.loadData = function() {
         $ctrl.loading = true;

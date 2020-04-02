@@ -10,15 +10,15 @@ angular.module('otto').controller('hostEdit', function($route, $host, $location,
         $ctrl.host = {
             Port: 12444,
             Environment: {},
-            EnabledScripts: [],
+            GroupIDs: [],
         };
         $ctrl.loaded = true;
     } else {
         $ctrl.title = 'Edit Host';
-        title.set($ctrl.title);
         var id = $route.current.params.id;
         $host.get(id).then(host => {
             $ctrl.host = host;
+            title.set('Edit Host: ' + host.Name);
             $ctrl.loaded = true;
             $ctrl.useNameAsAddress = host.Name === host.Address;
         });

@@ -1,6 +1,7 @@
 <page-wrapper page-title="View Script" ng-if="$ctrl.loaded">
     <div class="mb-3">
         <a ng-href="/scripts/script/{{ ::$ctrl.script.ID }}/edit/" class="btn btn-sm btn-outline-primary"><i class="fas fa-pencil-alt"></i> Edit</a>
+        <button type="button" class="btn btn-sm btn-outline-danger" ng-click="$ctrl.deleteScript()"><i class="fas fa-trash-alt"></i> Delete</button>
         <a ng-href="/scripts/script/{{ ::$ctrl.script.ID }}/execute/" class="btn btn-sm btn-outline-success"><i class="fas fa-play"></i> Execute</a>
     </div>
     <div class="row card-padding-bottom">
