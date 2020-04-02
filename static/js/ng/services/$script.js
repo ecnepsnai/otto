@@ -54,11 +54,6 @@ angular.module('otto').factory('$script', function($api, popup, notify, $q) {
             return $api.post('/api/scripts/script/' + ID, params).then(results => {
                 return results.data.data;
             });
-        },
-        setGroups: (ID, params) => {
-            return $api.post('/api/scripts/script/' + ID + '/groups', params).then(results => {
-                return results.data.data;
-            });
         }
     };
 });
