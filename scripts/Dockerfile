@@ -4,6 +4,8 @@ RUN echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/reposito
 RUN apk --no-cache add --update shadow
 
 RUN addgroup -S otto && adduser -S otto -G otto
+RUN groupmod -g 1000 otto
+RUN usermod -u 1000 -g 1000 otto
 
 EXPOSE 8080
 RUN mkdir /otto_data
