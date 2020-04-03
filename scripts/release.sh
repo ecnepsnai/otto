@@ -17,12 +17,12 @@ cd ${OTTO_PATH}/scripts
 cd ${OTTO_PATH}/static/
 gulp release
 cd build
-for FILE in *.html; do
+for FILE in $(find . -name '*.html'); do
     [ -e "$FILE" ] || continue
     perl -pi -e "s,ottodev,otto${VERSION},g" ${FILE}
 done
 cd assets/js
-for FILE in *.js; do
+for FILE in $(find . -name '*.js'); do
     [ -e "$FILE" ] || continue
     perl -pi -e "s,ottodev,otto${VERSION},g" ${FILE}
 done
