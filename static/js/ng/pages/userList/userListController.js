@@ -1,4 +1,4 @@
-angular.module('otto').controller('userList', function($user, popup, state) {
+angular.module('otto').controller('userList', function($user, popup, state, notify) {
     var $ctrl = this;
 
     $ctrl.loadData = () => {
