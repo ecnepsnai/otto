@@ -2,13 +2,13 @@ angular.module('otto').controller('scriptPicker', function($scope, $script, popu
     var $ctrl = this;
     $ctrl.loading = true;
 
-    $scope.$watch('$ctrl.model', (model) => {
+    $scope.$watch('$ctrl.model', function(model) {
         if (model === null || model === undefined) {
             return;
         }
 
         $ctrl.selectedScripts = {};
-        model.forEach((scriptID) => {
+        model.forEach(function(scriptID) {
             $ctrl.selectedScripts[scriptID] = true;
         });
     });
@@ -26,13 +26,13 @@ angular.module('otto').controller('scriptPicker', function($scope, $script, popu
                 selected: angular.copy($ctrl.selectedScripts),
                 scripts: $ctrl.scripts
             }
-        }).then((result) => {
+        }).then(function(result) {
             if (result === false || result === undefined) {
                 return;
             }
 
             var selected = [];
-            Object.keys(result).forEach((key) => {
+            Object.keys(result).forEach(function(key) {
                 if (result[key]) {
                     selected.push(key);
                 }

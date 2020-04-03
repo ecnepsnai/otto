@@ -18,15 +18,15 @@ angular.module('otto').controller('hostView', function($q, $host, $group, $locat
 
     title.set('View Host');
     $ctrl.loaded = false;
-    $ctrl.getData().then((result) => {
+    $ctrl.getData().then(function(result) {
         $ctrl.host = result.host;
         $ctrl.scripts = result.scripts;
         var groupMap = {};
-        result.groups.forEach((group) => {
+        result.groups.forEach(function(group) {
             groupMap[group.ID] = group;
         });
         $ctrl.groups = [];
-        ($ctrl.host.GroupIDs || []).forEach((groupID) => {
+        ($ctrl.host.GroupIDs || []).forEach(function(groupID) {
             $ctrl.groups.push(groupMap[groupID]);
         });
 
@@ -34,7 +34,7 @@ angular.module('otto').controller('hostView', function($q, $host, $group, $locat
 
         var keys = Object.keys(($ctrl.host.Environment || {})).sort();
         var environmentListSorted = [];
-        keys.forEach((key) => {
+        keys.forEach(function(key) {
             environmentListSorted.push({
                 Key: key,
                 Value: $ctrl.host.Environment[key],

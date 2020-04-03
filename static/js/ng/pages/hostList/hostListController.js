@@ -8,7 +8,7 @@ angular.module('otto').controller('hostList', function($q, $heartbeat, $host, ti
             hosts: $host.list(),
             heartbeats: $heartbeat.list().then(hosts => {
                 var results = {};
-                hosts.forEach((hb) => {
+                hosts.forEach(function(hb) {
                     results[hb.Address] = hb;
                 });
                 return results;
@@ -17,7 +17,7 @@ angular.module('otto').controller('hostList', function($q, $heartbeat, $host, ti
     };
 
     $ctrl.loadAll = () => {
-        $ctrl.loadData().then((results) => {
+        $ctrl.loadData().then(function(results) {
             $ctrl.loading = false;
             $ctrl.hosts = results.hosts;
             $ctrl.heartbeats = results.heartbeats;
@@ -25,7 +25,7 @@ angular.module('otto').controller('hostList', function($q, $heartbeat, $host, ti
     };
     $ctrl.loadAll();
 
-    $ctrl.deleteHost = (host) => {
+    $ctrl.deleteHost = function(host) {
         $host.delete(host).then(() => {
             $ctrl.loadAll();
         });

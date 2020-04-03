@@ -1,9 +1,9 @@
-angular.module('otto').controller('registerRuleList', (popup) => {
+angular.module('otto').controller('registerRuleList', function(popup) {
     var $ctrl = this;
     $ctrl.groupNameMap = {};
 
     this.$onInit = function () {
-        $ctrl.groups.forEach((group) => {
+        $ctrl.groups.forEach(function(group) {
             $ctrl.groupNameMap[group.ID] = group.Name;
         });
         $ctrl.loadRules();
@@ -13,7 +13,7 @@ angular.module('otto').controller('registerRuleList', (popup) => {
         if (!$ctrl.rules) {
             $ctrl.rules = [];
         }
-        $ctrl.rules.forEach((rule) => {
+        $ctrl.rules.forEach(function(rule) {
             if (rule.Uname) {
                 rule.Property = 'Uname';
                 rule.Matches = rule.Uname;
@@ -33,7 +33,7 @@ angular.module('otto').controller('registerRuleList', (popup) => {
             data: {
                 groups: $ctrl.groups,
             },
-        }).then((result) => {
+        }).then(function(result) {
             if (result) {
                 $ctrl.rules.push(result);
                 $ctrl.loadRules();
@@ -41,7 +41,7 @@ angular.module('otto').controller('registerRuleList', (popup) => {
         });
     };
 
-    $ctrl.editRule = (index) => {
+    $ctrl.editRule = function(index) {
         var rule = angular.copy($ctrl.rules[index]);
         popup.new({
             template: '<register-rule-edit></register-rule-edit>',
@@ -49,7 +49,7 @@ angular.module('otto').controller('registerRuleList', (popup) => {
                 rule: rule,
                 groups: $ctrl.groups,
             },
-        }).then((result) => {
+        }).then(function(result) {
             if (result) {
                 $ctrl.rules[index] = rule;
                 $ctrl.loadRules();
@@ -57,8 +57,8 @@ angular.module('otto').controller('registerRuleList', (popup) => {
         });
     };
 
-    $ctrl.deleteRule = (index) => {
-        popup.confirm('Delete Register Rule', 'Are you sure you want to delete this register rule?', ['Delete', 'Cancel']).then((result) => {
+    $ctrl.deleteRule = function(index) {
+        popup.confirm('Delete Register Rule', 'Are you sure you want to delete this register rule?', ['Delete', 'Cancel']).then(function(result) {
             if (result) {
                 $ctrl.rules.splice(index, 1);
                 $ctrl.loadRules();

@@ -6,7 +6,7 @@ angular.module('otto').controller('groupPickerPopup', function($scope) {
     $ctrl.selectedGroups = $popupData.selected;
     $ctrl.groups = $popupData.groups;
 
-    $ctrl.response = (apply) => {
+    $ctrl.response = function(apply) {
         if (apply) {
             $popupScope.popupResolve($ctrl.selectedGroups);
         } else {

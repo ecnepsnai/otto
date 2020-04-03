@@ -17,14 +17,14 @@ angular.module('otto').controller('scriptView', function($q, $script, $route, ti
 
     title.set('View Script');
     $ctrl.loaded = false;
-    $ctrl.getData().then((result) => {
+    $ctrl.getData().then(function(result) {
         $ctrl.script = result.script;
         $ctrl.hosts = result.hosts;
         title.set('View Script: ' + $ctrl.script.Name);
 
         var keys = Object.keys($ctrl.script.Environment).sort();
         var environmentListSorted = [];
-        keys.forEach((key) => {
+        keys.forEach(function(key) {
             environmentListSorted.push({
                 Key: key,
                 Value: $ctrl.script.Environment[key],

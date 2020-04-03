@@ -23,7 +23,7 @@ angular.module('otto').controller('registerRuleEdit', function($scope) {
         $ctrl.title = 'New Rule';
     }
 
-    $ctrl.response = (apply) => {
+    $ctrl.response = function(apply) {
         if (apply) {
             delete $ctrl.rule.Uname;
             delete $ctrl.rule.Hostname;

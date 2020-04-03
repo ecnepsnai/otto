@@ -10,20 +10,20 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
     $ctrl.loadData = () => {
         $ctrl.loading = true;
         var scriptID = $route.current.params.id;
-        return $q((resolve, reject) => {
+        return $q(function(resolve, reject) {
             $q.all({
                 groups: $script.getGroups(scriptID),
                 hosts: $script.getHosts(scriptID),
                 script: $script.get(scriptID)
-            }, reject).then((results) => {
+            }, reject).then(function(results) {
                 var promises = {};
-                results.groups.forEach((group) => {
+                results.groups.forEach(function(group) {
                     promises[group.ID] = $group.getHosts(group.ID);
                 });
-                results.hosts.forEach((host) => {
+                results.hosts.forEach(function(host) {
                     $ctrl.hostIDMap[host.HostID] = host.HostName;
                 });
-                $q.all(promises).then((groupHosts) => {
+                $q.all(promises).then(function(groupHosts) {
                     $ctrl.loading = false;
                     resolve({
                         groups: results.groups,
@@ -36,21 +36,21 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         });
     };
 
-    $scope.$watch('$ctrl.allGroups', (val) => {
+    $scope.$watch('$ctrl.allGroups', function(val) {
         if (val === undefined) {
             return;
         }
 
-        $ctrl.groups.forEach((group) => {
+        $ctrl.groups.forEach(function(group) {
             $ctrl.selectedGroups[group.ID] = val;
         });
     });
-    $scope.$watch('$ctrl.allHosts', (val) => {
+    $scope.$watch('$ctrl.allHosts', function(val) {
         if (val === undefined) {
             return;
         }
 
-        $ctrl.hosts.forEach((host) => {
+        $ctrl.hosts.forEach(function(host) {
             $ctrl.selectedHosts[host.HostID] = val;
         });
     });
@@ -59,7 +59,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         if (Object.keys($ctrl.selectedGroups).length === 0) {
             return;
         }
-        Object.keys($ctrl.selectedGroups).forEach((groupID) => {
+        Object.keys($ctrl.selectedGroups).forEach(function(groupID) {
             if (!$ctrl.selectedGroups[groupID]) {
                 allEnabled = false;
             }
@@ -71,7 +71,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         if (Object.keys($ctrl.selectedHosts).length === 0) {
             return;
         }
-        Object.keys($ctrl.selectedHosts).forEach((hostID) => {
+        Object.keys($ctrl.selectedHosts).forEach(function(hostID) {
             if (!$ctrl.selectedHosts[hostID]) {
                 allEnabled = false;
             }
@@ -79,7 +79,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         $ctrl.allHosts = allEnabled;
     }, true);
 
-    $ctrl.loadData().then((results) => {
+    $ctrl.loadData().then(function(results) {
         $ctrl.hosts = results.hosts;
         $ctrl.groups = results.groups;
         $ctrl.script = results.script;
@@ -101,19 +101,19 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
     $ctrl.executeHosts = () => {
         var hosts = {};
 
-        var selectedHosts = $ctrl.hosts.filter((h) => {
+        var selectedHosts = $ctrl.hosts.filter(function(h) {
             return $ctrl.selectedHosts[h.HostID];
         });
 
-        var selectedGroups = $ctrl.groups.filter((g) => {
+        var selectedGroups = $ctrl.groups.filter(function(g) {
             return $ctrl.selectedGroups[g.ID];
         });
 
-        selectedHosts.forEach((h) => {
+        selectedHosts.forEach(function(h) {
             hosts[h.HostID] = true;
         });
-        selectedGroups.forEach((g) => {
-            $ctrl.hosts.forEach((h) => {
+        selectedGroups.forEach(function(g) {
+            $ctrl.hosts.forEach(function(h) {
                 if (h.GroupID === g.ID) {
                     hosts[h.HostID] = true;
                 }
@@ -123,7 +123,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         return Object.keys(hosts);
     };
 
-    $ctrl.execute = (valid) => {
+    $ctrl.execute = function(valid) {
         $ctrl.executeHosts();
 
         if (!valid) {
@@ -136,7 +136,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         }
 
         var executions = [];
-        selectedHosts.forEach((host) => {
+        selectedHosts.forEach(function(host) {
             executions.push({
                 Action: 'run_script',
                 HostID: host,
@@ -150,7 +150,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         $ctrl.startExecution(executions);
     };
 
-    $ctrl.startExecution = (executions) => {
+    $ctrl.startExecution = function(executions) {
         $ctrl.executePercent = 0;
         $ctrl.searchProgressStyle = {width: $ctrl.executePercent + '%'};
 
@@ -163,15 +163,15 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         }
 
         var promises = [];
-        executions.forEach((execution) => {
-            promises.push($q((resolve) => {
-                $api.put('/api/request', execution).then((response) => {
+        executions.forEach(function(execution) {
+            promises.push($q(function(resolve) {
+                $api.put('/api/request', execution).then(function(response) {
                     var result = response.data.data;
                     result.Host = $ctrl.hostIDMap[execution.HostID];
 
                     var keys = Object.keys(result.Environment).sort();
                     var environmentListSorted = [];
-                    keys.forEach((key) => {
+                    keys.forEach(function(key) {
                         environmentListSorted.push({
                             Key: key,
                             Value: result.Environment[key],
@@ -181,7 +181,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
 
                     updateExecuteProgress();
                     resolve(result);
-                }, (response) => {
+                }, function(response) {
                     var result = {error: response.data.error};
                     result.Host = $ctrl.hostIDMap[execution.HostID];
                     updateExecuteProgress();
@@ -190,13 +190,13 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
             }));
         });
 
-        $q.all(promises).then((results) => {
+        $q.all(promises).then(function(results) {
             $ctrl.results = results;
             $ctrl.stage = 'results';
         });
     };
 
-    $ctrl.borderClass = (result) => {
+    $ctrl.borderClass = function(result) {
         if (result.error || !result.Result.Success) {
             return {
                 'border-danger': true,
@@ -207,7 +207,7 @@ angular.module('otto').controller('scriptExecute', function($scope, $api, $q, $s
         };
     };
 
-    $ctrl.headerClass = (result) => {
+    $ctrl.headerClass = function(result) {
         if (result.error || !result.Result.Success) {
             return {
                 'text-white': true,

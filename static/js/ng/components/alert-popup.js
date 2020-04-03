@@ -6,7 +6,7 @@ angular.module('otto').component('alertPopup', {
             var $popupScope = $scope.$parent;
             $ctrl.title = $popupScope.popupData.title;
             $ctrl.body = $popupScope.popupData.body;
-            $ctrl.response = (response) => {
+            $ctrl.response = function(response) {
                 $popupScope.popupResolve(response);
                 $popupScope.popupElement.modal('hide');
             };

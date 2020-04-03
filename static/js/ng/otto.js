@@ -4,7 +4,7 @@ otto.controller('otto', OttoController);
 
 function OttoController($scope, state) {
     var loadState = () => {
-        state.start().then((state) => {
+        state.start().then(function(state) {
             $scope.ready = true;
             $scope.state = state;
 
@@ -12,7 +12,7 @@ function OttoController($scope, state) {
                 $scope.showWarning = true;
 
                 $scope.warnings = [];
-                state.Warnings.forEach((warning) => {
+                state.Warnings.forEach(function(warning) {
                     var title = warning;
                     var message = '';
 
@@ -33,7 +33,7 @@ function OttoController($scope, state) {
     };
     loadState();
 
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', function(event) {
         if (event.data === 'reload_state') {
             loadState();
         }

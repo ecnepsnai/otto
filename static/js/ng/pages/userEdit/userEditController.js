@@ -21,7 +21,7 @@ angular.module('otto').controller('userEdit', function ($scope, state) {
         $ctrl.showPasswordField = true;
     };
 
-    $ctrl.response = (apply) => {
+    $ctrl.response = function(apply) {
         if (apply) {
             $popupScope.popupResolve($ctrl.user);
         } else {

@@ -20,9 +20,9 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
         }
     };
 
-    $ctrl.getData().then((results) => {
+    $ctrl.getData().then(function(results) {
         $ctrl.group = results.group;
-        $ctrl.selectedHosts = results.hosts.map((host) => {
+        $ctrl.selectedHosts = results.hosts.map(function(host) {
             return host.ID;
         });
         $ctrl.loaded = true;
@@ -38,7 +38,7 @@ angular.module('otto').controller('groupEdit', function($route, $group, $q, $loc
         }
     });
 
-    $ctrl.save = (isValid) => {
+    $ctrl.save = function(isValid) {
         if (!isValid) {
             return;
         }

@@ -1,7 +1,7 @@
 angular.module('otto').factory('notify', function($window, $q, $compile, $rootScope, rand) {
     var visibleNotifications = [];
-    var notify = (options) => {
-        return $q((resolve) => {
+    var notify = function(options) {
+        return $q(function(resolve) {
             options.id = 'notify-' + rand.ID();
             var cls = options.class || '';
 
@@ -38,7 +38,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
         }
     };
 
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', function(event) {
         if (event.data.indexOf('notify:') === 0) {
             var components = event.data.split(':');
             var level = components[1];
@@ -59,7 +59,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
 
     return {
         show: notify,
-        success: (body, title) => {
+        success: function(body, title) {
             return notify({
                 class: 'success',
                 title: title,
@@ -67,7 +67,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-check-circle'
             });
         },
-        info: (body, title) => {
+        info: function(body, title) {
             return notify({
                 class: 'primary',
                 title: title,
@@ -75,7 +75,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-info-circle'
             });
         },
-        error: (body, title) => {
+        error: function(body, title) {
             return notify({
                 class: 'danger',
                 title: title,
@@ -83,7 +83,7 @@ angular.module('otto').factory('notify', function($window, $q, $compile, $rootSc
                 icon: 'fas fa-exclamation-circle'
             });
         },
-        warning: (body, title) => {
+        warning: function(body, title) {
             return notify({
                 class: 'warning',
                 title: title,

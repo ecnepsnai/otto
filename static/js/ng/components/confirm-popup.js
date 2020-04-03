@@ -7,7 +7,7 @@ angular.module('otto').component('confirmPopup', {
             $ctrl.title = $popupScope.popupData.title;
             $ctrl.body = $popupScope.popupData.body;
             $ctrl.choices = $popupScope.popupData.choices;
-            $ctrl.response = (response) => {
+            $ctrl.response = function(response) {
                 $popupScope.popupResolve(response);
                 $popupScope.popupElement.modal('hide');
             };

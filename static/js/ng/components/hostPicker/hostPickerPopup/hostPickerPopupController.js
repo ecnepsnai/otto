@@ -6,7 +6,7 @@ angular.module('otto').controller('hostPickerPopup', function($scope) {
     $ctrl.selectedHosts = $popupData.selected;
     $ctrl.hosts = $popupData.hosts;
 
-    $ctrl.response = (apply) => {
+    $ctrl.response = function(apply) {
         if (apply) {
             $popupScope.popupResolve($ctrl.selectedHosts);
         } else {

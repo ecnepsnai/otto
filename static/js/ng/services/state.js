@@ -15,7 +15,7 @@ angular.module('otto').factory('state', function($api, $q) {
         start: statePromise,
         invalidate: () => {
             currentState = undefined;
-            return $q((resolve) => {
+            return $q(function(resolve) {
                 statePromise().then(() => {
                     window.postMessage('reload_state');
                     resolve();

@@ -19,53 +19,53 @@ angular.module('otto').factory('$api', function($http, notify, $q) {
     }
 
     return {
-        get: (url) => {
-            return $q((resolve, reject) => {
+        get: function(url) {
+            return $q(function(resolve, reject) {
                 $http.get(url).then(results => {
                     resolve(results);
-                }, (error) => {
+                }, function(error) {
                     dealWithError(error);
                     reject(error);
-                }).catch((exception) => {
+                }).catch(function(exception) {
                     dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
         },
-        post: (url, body) => {
-            return $q((resolve, reject) => {
+        post: function(url, body) {
+            return $q(function(resolve, reject) {
                 $http.post(url, body).then(results => {
                     resolve(results);
-                }, (error) => {
+                }, function(error) {
                     dealWithError(error);
                     reject(error);
-                }).catch((exception) => {
+                }).catch(function(exception) {
                     dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
         },
-        put: (url, body) => {
-            return $q((resolve, reject) => {
+        put: function(url, body) {
+            return $q(function(resolve, reject) {
                 $http.put(url, body).then(results => {
                     resolve(results);
-                }, (error) => {
+                }, function(error) {
                     dealWithError(error);
                     reject(error);
-                }).catch((exception) => {
+                }).catch(function(exception) {
                     dealWithError(exception);
                     reject('Internal Server Error');
                 });
             });
         },
-        delete: (url) => {
-            return $q((resolve, reject) => {
+        delete: function(url) {
+            return $q(function(resolve, reject) {
                 $http.delete(url).then(results => {
                     resolve(results);
-                }, (error) => {
+                }, function(error) {
                     dealWithError(error);
                     reject(error);
-                }).catch((exception) => {
+                }).catch(function(exception) {
                     dealWithError(exception);
                     reject('Internal Server Error');
                 });

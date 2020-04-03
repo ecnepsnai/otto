@@ -1,14 +1,14 @@
 angular.module('otto').controller('environmentEdit', function($scope, popup, notify, truncate) {
     var $ctrl = this;
 
-    $scope.$watch('$ctrl.environment', (environment) => {
+    $scope.$watch('$ctrl.environment', function(environment) {
         if (!environment) {
             $ctrl.environmentListSorted = [];
             return;
         }
         var keys = Object.keys(environment).sort();
         var environmentListSorted = [];
-        keys.forEach((key) => {
+        keys.forEach(function(key) {
             environmentListSorted.push({
                 Key: key,
                 Value: environment[key],
@@ -20,7 +20,7 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
     $ctrl.newEnvironment = () => {
         popup.new({
             template: '<environment-popup></environment-popup>',
-        }).then((result) => {
+        }).then(function(result) {
             if (!result) {
                 return;
             }
@@ -39,13 +39,13 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
         });
     };
 
-    $ctrl.editEnvironment = (environment) => {
+    $ctrl.editEnvironment = function(environment) {
         popup.new({
             template: '<environment-popup></environment-popup>',
             data: {
                 environment: environment
             }
-        }).then((result) => {
+        }).then(function(result) {
             if (!result) {
                 return;
             }
@@ -59,12 +59,12 @@ angular.module('otto').controller('environmentEdit', function($scope, popup, not
         });
     };
 
-    $ctrl.deleteEnvironment = (environment) => {
+    $ctrl.deleteEnvironment = function(environment) {
         popup.confirm(
             'Delete Environment',
             'Are you sure you want to delete this environment?',
             ['Delete', 'Cancel']
-        ).then((result) => {
+        ).then(function(result) {
             if (result) {
                 delete $ctrl.environment[environment.Key];
             }

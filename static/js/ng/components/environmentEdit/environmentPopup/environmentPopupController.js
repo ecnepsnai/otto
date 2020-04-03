@@ -17,7 +17,7 @@ angular.module('otto').controller('environmentPopup', function($scope) {
         };
     }
 
-    $ctrl.dismiss = (apply) => {
+    $ctrl.dismiss = function(apply) {
         if (apply) {
             popupScope.popupResolve($ctrl.environment);
         }

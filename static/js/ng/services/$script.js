@@ -5,36 +5,36 @@ angular.module('otto').factory('$script', function($api, popup, notify, $q) {
                 return results.data.data;
             });
         },
-        get: (ID) => {
+        get: function(ID) {
             return $api.get('/api/scripts/script/' + ID).then(results => {
                 return results.data.data;
             });
         },
-        getGroups: (ID) => {
+        getGroups: function(ID) {
             return $api.get('/api/scripts/script/' + ID + '/groups').then(results => {
                 return results.data.data;
             });
         },
-        getHosts: (ID) => {
+        getHosts: function(ID) {
             return $api.get('/api/scripts/script/' + ID + '/hosts').then(results => {
                 return results.data.data;
             });
         },
-        setGroups: (ID, groups) => {
+        setGroups: function(ID, groups) {
             return $api.post('/api/scripts/script/' + ID + '/groups', groups).then(results => {
                 return results.data.data;
             });
         },
-        toggle: (script) => {
-            return $q((resolve) => {
+        toggle: function(script) {
+            return $q(function(resolve) {
                 return $api.post('/api/scripts/script/' + script.ID + '/disable/').then(() => {
                     notify.success('Script Saved');
                     resolve();
                 });
             });
         },
-        delete: (script) => {
-            return $q((resolve) => {
+        delete: function(script) {
+            return $q(function(resolve) {
                 popup.confirm('Delete Script', 'Are you sure you want to delete the script "' + script.Name + '"?', ['Delete', 'Cancel']).then(result => {
                     if (result) {
                         $api.delete('/api/scripts/script/' + script.ID).then(() => {
@@ -45,12 +45,12 @@ angular.module('otto').factory('$script', function($api, popup, notify, $q) {
                 });
             });
         },
-        new: (params) => {
+        new: function(params) {
             return $api.put('/api/scripts/script', params).then(results => {
                 return results.data.data;
             });
         },
-        update: (ID, params) => {
+        update: function(ID, params) {
             return $api.post('/api/scripts/script/' + ID, params).then(results => {
                 return results.data.data;
             });

@@ -23,7 +23,7 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
 
     title.set('View Group');
     $ctrl.loaded = false;
-    $ctrl.getData().then((results) => {
+    $ctrl.getData().then(function(results) {
         $ctrl.group = results.group;
         $ctrl.hosts = results.hosts;
         $ctrl.scripts = results.scripts;
@@ -31,7 +31,7 @@ angular.module('otto').controller('groupView', function($q, $group, $location, $
 
         var keys = Object.keys($ctrl.group.Environment).sort();
         var environmentListSorted = [];
-        keys.forEach((key) => {
+        keys.forEach(function(key) {
             environmentListSorted.push({
                 Key: key,
                 Value: $ctrl.group.Environment[key],

@@ -9,7 +9,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
         return $q.all({
             groups: $group.list(),
             options: $api.get('/api/options'),
-        }).then((results) => {
+        }).then(function(results) {
             $ctrl.groups = results.groups;
             var options = results.options.data.data;
             $ctrl.originalConfig = angular.copy(options);
@@ -19,7 +19,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
     };
     $ctrl.loadData();
 
-    $scope.$watch('$ctrl.options.Register.Enabled', (nv, ov) => {
+    $scope.$watch('$ctrl.options.Register.Enabled', function(nv, ov) {
         if (nv === ov) {
             return;
         }
@@ -29,7 +29,7 @@ angular.module('otto').controller('optionsEdit', function($scope, $api, $group, 
         }
     });
 
-    $ctrl.save = (valid) => {
+    $ctrl.save = function(valid) {
         if (!valid) {
             return;
         }

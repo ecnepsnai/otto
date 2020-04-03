@@ -11,7 +11,7 @@ angular.module('otto').controller('scriptList', function($script, title) {
     };
     $ctrl.loadData();
 
-    $ctrl.deleteScript = (script) => {
+    $ctrl.deleteScript = function(script) {
         $script.delete(script).then(() => {
             $ctrl.loadData();
         });

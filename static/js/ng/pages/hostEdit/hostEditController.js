@@ -25,7 +25,7 @@ angular.module('otto').controller('hostEdit', function($route, $host, $location,
         $ctrl.isNew = false;
     }
 
-    $ctrl.save = (isValid) => {
+    $ctrl.save = function(isValid) {
         if (!isValid) {
             return;
         }

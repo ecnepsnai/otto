@@ -14,7 +14,7 @@ angular.module('otto').controller('userList', function($user, popup, state, noti
         popup.new({
             template: '<user-edit></user-edit>',
             data: {},
-        }).then((result) => {
+        }).then(function(result) {
             if (!result) {
                 return;
             }
@@ -26,13 +26,13 @@ angular.module('otto').controller('userList', function($user, popup, state, noti
         });
     };
 
-    $ctrl.editUser = (user) => {
+    $ctrl.editUser = function(user) {
         popup.new({
             template: '<user-edit></user-edit>',
             data: {
                 user: angular.copy(user)
             }
-        }).then((result) => {
+        }).then(function(result) {
             if (!result) {
                 return;
             }
@@ -44,13 +44,13 @@ angular.module('otto').controller('userList', function($user, popup, state, noti
         });
     };
 
-    $ctrl.deleteUser = (user) => {
+    $ctrl.deleteUser = function(user) {
         $user.delete(user).then(() => {
             $ctrl.loadData();
         });
     };
 
-    $ctrl.canDeleteUser = (user) => {
+    $ctrl.canDeleteUser = function(user) {
         return user.Username !== state.current().User.Username;
     };
 });

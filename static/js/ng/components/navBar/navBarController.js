@@ -2,12 +2,12 @@ angular.module('otto').controller('navBar', function($api, $route, $location, $t
     var $ctrl = this;
     $ctrl.state = state.current();
 
-    $ctrl.downloadButtonClass = (href) => {
+    $ctrl.downloadButtonClass = function(href) {
         var matches = $location.path().startsWith(href);
         return { 'btn-outline-dark-light': !matches, 'btn-light': matches };
     };
 
-    $ctrl.navClass = (tab) => {
+    $ctrl.navClass = function(tab) {
         var matches = $location.path().startsWith(tab);
         return { active: matches };
     };
@@ -18,7 +18,7 @@ angular.module('otto').controller('navBar', function($api, $route, $location, $t
             data: {
                 user: angular.copy($ctrl.state.User)
             }
-        }).then((result) => {
+        }).then(function(result) {
             if (!result) {
                 return;
             }
@@ -71,7 +71,7 @@ angular.module('otto').controller('navBar', function($api, $route, $location, $t
         }
     }
 
-    $ctrl.navigate = (href) => {
+    $ctrl.navigate = function(href) {
         if (document.documentElement.clientWidth > 990) {
             doNavigate(href);
             return;
