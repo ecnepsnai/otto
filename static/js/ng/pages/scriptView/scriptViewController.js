@@ -1,4 +1,4 @@
-angular.module('otto').controller('scriptView', function($q, $script, $route, title) {
+angular.module('otto').controller('scriptView', function($q, $script, $route, $location, title) {
     var $ctrl = this;
     var id = $route.current.params.id;
 
