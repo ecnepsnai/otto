@@ -23,7 +23,7 @@ var clientActionMap = map[string]uint32{
 // PerformRequest perform an otto request on a host
 func (host *Host) PerformRequest(request otto.Request) (*otto.Reply, *Error) {
 	address := fmt.Sprintf("%s:%d", host.Address, host.Port)
-	log.Info("Connecting to %s...", address)
+	log.Debug("Connecting to %s...", address)
 
 	timeout := time.Duration(Options.Network.Timeout) * time.Second
 	network := "tcp"
@@ -39,7 +39,7 @@ func (host *Host) PerformRequest(request otto.Request) (*otto.Reply, *Error) {
 		log.Error("Error connecting to host '%s': %s", address, err.Error())
 		return nil, ErrorFrom(err)
 	}
-	log.Info("Connected!")
+	log.Debug("Connected!")
 	defer c.Close()
 
 	if err := otto.WriteRequest(request, host.PSK, c); err != nil {

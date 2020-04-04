@@ -4,40 +4,37 @@ otto.controller('otto', OttoController);
 
 function OttoController($scope, state) {
     var loadState = () => {
-        state.start().then(function(state) {
+        state.start().then(function(current) {
             $scope.ready = true;
-            $scope.state = state;
-
-            if (state.Warnings) {
-                $scope.showWarning = true;
-
-                $scope.warnings = [];
-                state.Warnings.forEach(function(warning) {
-                    var title = warning;
-                    var message = '';
-
-                    switch (warning) {
-                        case 'default_user_password':
-                            title = 'Default Password';
-                            message = 'You are using the default username and password. You should change your password immediately using the user menu in the top-right.';
-                            break;
-                    }
-
-                    $scope.warnings.push({
-                        title: title,
-                        message: message
-                    });
-                });
-            }
+            $scope.state = current;
+            processWarnings(current);
         });
     };
-    loadState();
+    var processWarnings = (current) => {
+        if (current.Warnings) {
+            $scope.showWarning = true;
 
-    window.addEventListener('message', function(event) {
-        if (event.data === 'reload_state') {
-            loadState();
+            $scope.warnings = [];
+            current.Warnings.forEach(function(warning) {
+                var title = warning;
+                var message = '';
+
+                switch (warning) {
+                    case 'default_user_password':
+                        title = 'Default Password';
+                        message = 'You are using the default username and password. You should change your password immediately using the user menu in the top-right.';
+                        break;
+                }
+
+                $scope.warnings.push({
+                    title: title,
+                    message: message
+                });
+            });
         }
-    });
+    };
+    loadState();
+    state.watch(processWarnings);
 }
 
 otto.config(function($routeProvider, $locationProvider) {

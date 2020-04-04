@@ -1,9 +1,19 @@
 angular.module('otto').factory('state', function($api, $q) {
     var currentState;
+    var watchCallbacks = [];
 
     var statePromise = () => {
         return $api.get('/api/state').then(response => {
             currentState = response.data.data;
+
+            watchCallbacks.forEach((cb) => {
+                try {
+                    cb(currentState);
+                } catch (e) {
+                    // Don't worry about it
+                }
+            });
+
             return response.data.data;
         });
     };
@@ -21,6 +31,9 @@ angular.module('otto').factory('state', function($api, $q) {
                     resolve();
                 });
             });
+        },
+        watch: (cb) => {
+            watchCallbacks.push(cb);
         },
     };
 });
