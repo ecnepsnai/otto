@@ -1,5 +1,5 @@
 /*
-Package otto is the ottomatic ottomation thing
+Package otto an automation toolkit for Unix-like computers.
 */
 package otto
 
