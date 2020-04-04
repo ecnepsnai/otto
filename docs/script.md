@@ -11,15 +11,10 @@ Environment variables allow you to customize the results of the script on a per 
 
 Envrionment variables can be configured at multiple levels:
 
-1. Global
-2. Script
-3. Host
-
-Global envrionment variables are configured in the options page on the Otto server. They're included in all scripts.
-
-Scripts can also include their own envrionment variables. These overwrite global variables.
-
-Hosts can include their own variables. These overwrite script variables.
+1. **Global**. Configured in the options page on the Otto server. They're included in all scripts.
+2. **Script**. Configured in the script. These overwrite global variables.
+3. **Group**. Configured in the group. These overwrite script variables.
+4. **Host**. Configured in the host. These overwrite host variabled.
 
 Lastly, there are a number of implicit variables that are automatically included:
 

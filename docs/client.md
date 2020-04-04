@@ -24,10 +24,10 @@ Run the otto client executable with the following envrionment variables **only o
 |-|-|
 |`REGISTER_HOST`|The base URL of the otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
 |`REGISTER_PSK`|The register PSK|
-|`REGISTER_NO_TLS_VERIFY`|Optional. If `1` no TLS verification is done when connecting to the server.|
+|`REGISTER_NO_TLS_VERIFY`|Optional. If `1` then no TLS verification is done when connecting to the server.|
 |`OTTO_CLIENT_PORT`|Optional. Specify the port that the otto client will listen on.|
 
-For example:
+**Example:**
 
 ```bash
 REGISTER_HOST='https://otto.mydomain' REGISTER_PSK='super_secret' ./otto
@@ -47,3 +47,15 @@ single, top-level object. The `otto_client.conf` configuration file must be in t
 |`default_uid`|No|The default UID if not specified by the script|
 |`default_gid`|No|The default GID if not specified by the script|
 |`path`|No|The value of $PATH when scripts are executed|
+
+**Example:**
+
+```json
+{
+    "psk": "36C1CD5993F64EF0394C0DE9DE12567D",
+    "log_path": ".",
+    "path":"/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin",
+    "default_uid": 0,
+    "default_gid": 0
+}
+```
