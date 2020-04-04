@@ -17,6 +17,11 @@ type clientConfig struct {
 var config *clientConfig
 
 func loadConfig() error {
+	if _, err := os.Stat("otto_client.conf"); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n", MainVersion)
+		os.Exit(1)
+	}
+
 	f, err := os.OpenFile("otto_client.conf", os.O_RDONLY, 0644)
 	if err != nil {
 		return err

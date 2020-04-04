@@ -109,7 +109,9 @@ func tryAutoRegister() {
 	}
 	rlog.Printf("HTTP %d", response.StatusCode)
 	if response.StatusCode != 200 {
-		rlog.Fatalf("HTTP Error %d from otto server", response.StatusCode)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(response.Request.Body)
+		rlog.Fatalf("HTTP Error %d from otto server. Response: %s", response.StatusCode, buf.String())
 	}
 
 	// Parse the response

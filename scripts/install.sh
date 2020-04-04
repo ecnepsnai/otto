@@ -16,6 +16,8 @@ echo "" > ${LOG}
 cd ${SCRIPTS_PATH}/codegen/
 cbgen -n server -v ${OTTO_VERSION}
 mv *.go ${OTTO_PATH}/server
+cd ${OTTO_PATH}/cmd/client
+cbgen -n main -v ${OTTO_VERSION}
 cd ${OTTO_PATH}/
 go build
 

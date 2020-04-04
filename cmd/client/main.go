@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
@@ -9,6 +10,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
+	"runtime"
 	"strconv"
 	"syscall"
 
@@ -19,11 +21,12 @@ import (
 var log *logtic.Source
 
 func main() {
+	parseArgs()
 	tryAutoRegister()
 	mustLoadConfig()
 
 	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
-	logtic.Log.Level = logtic.LevelDebug
+	logtic.Log.Level = logtic.LevelWarn
 	logtic.Open()
 	log = logtic.Connect("otto")
 
@@ -38,6 +41,23 @@ func main() {
 			continue
 		}
 		go newRequest(c)
+	}
+}
+
+func parseArgs() {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		return
+	}
+
+	i := 0
+	for i < len(args) {
+		arg := args[i]
+		if arg == "-v" || arg == "--version" {
+			fmt.Printf("Otto client %s (Runtime %s)\n", MainVersion, runtime.Version())
+			os.Exit(0)
+		}
+		i++
 	}
 }
 
