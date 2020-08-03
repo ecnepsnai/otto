@@ -9,20 +9,26 @@ import (
 
 // OttoOptions describes options for the otto server
 type OttoOptions struct {
+	General  OptionsGeneral
+	Network  OptionsNetwork
+	Register OptionsRegister
+}
+
+// OptionsGeneral describes the general options
+type OptionsGeneral struct {
 	ServerURL         string
 	GlobalEnvironment map[string]string
-	Network           NetworkOptions
-	Register          RegisterOptions
 }
 
-// NetworkOptions describes network options for connecting to otto clients
-type NetworkOptions struct {
-	ForceIPVersion string
-	Timeout        int64
+// OptionsNetwork describes network options for connecting to otto clients
+type OptionsNetwork struct {
+	ForceIPVersion     string
+	Timeout            int64
+	HeartbeatFrequency int64
 }
 
-// RegisterOptions describes register options
-type RegisterOptions struct {
+// OptionsRegister describes register options
+type OptionsRegister struct {
 	Enabled        bool
 	PSK            string
 	Rules          []RegisterRule
@@ -43,13 +49,16 @@ var optionsLock = sync.Mutex{}
 // LoadOptions load E6 options
 func LoadOptions() {
 	defaults := OttoOptions{
-		ServerURL:         "http://" + bindAddress + "/",
-		GlobalEnvironment: map[string]string{},
-		Network: NetworkOptions{
-			ForceIPVersion: IPVersionOptionAuto,
-			Timeout:        10,
+		General: OptionsGeneral{
+			ServerURL:         "http://" + bindAddress + "/",
+			GlobalEnvironment: map[string]string{},
 		},
-		Register: RegisterOptions{
+		Network: OptionsNetwork{
+			ForceIPVersion:     IPVersionOptionAuto,
+			Timeout:            10,
+			HeartbeatFrequency: 5,
+		},
+		Register: OptionsRegister{
 			Enabled: false,
 			Rules:   []RegisterRule{},
 		},

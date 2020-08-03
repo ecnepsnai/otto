@@ -1,0 +1,77 @@
+import * as React from 'react';
+
+import { Script } from '../../types/Script';
+import { Link } from 'react-router-dom';
+import { Dropdown, MenuItem } from '../../components/Menu';
+import { Style } from '../../components/Style';
+import { Icon } from '../../components/Icon';
+import { Table } from '../../components/Table';
+import { GlobalModalFrame } from '../../components/Modal';
+import { Rand } from '../../services/Rand';
+import { RunModal } from '../run/RunModal';
+
+export interface ScriptListItemProps { script: Script, onReload: () => (void); }
+
+interface ScriptListItemState { navigateToEdit?: boolean }
+
+export class ScriptListItem extends React.Component<ScriptListItemProps, ScriptListItemState> {
+    constructor(props: ScriptListItemProps) {
+        super(props);
+        this.state = { };
+    }
+
+    private editMenuClick = () => {
+        this.setState({ navigateToEdit: true });
+    }
+
+    private deleteMenuClick = () => {
+        this.props.script.DeleteModal().then(confirmed => {
+            if (confirmed) {
+                this.props.onReload();
+            }
+        });
+    }
+
+    private toggleMenuClick = () => {
+        this.props.script.Update({
+            Enabled: !this.props.script.Enabled
+        }).then(() => {
+            this.props.onReload();
+        });
+    }
+
+    private enableDisableMenu = () => {
+        if (this.props.script.Enabled) {
+            return ( <MenuItem icon={<Icon.TimesCircle />} onClick={this.toggleMenuClick} label="Disable" /> );
+        }
+        return ( <MenuItem icon={<Icon.CheckCircle />} onClick={this.toggleMenuClick} label="Enable" /> );
+    }
+
+    private executeScriptMenuClick = () => {
+        GlobalModalFrame.showModal(<RunModal scriptID={this.props.script.ID} key={Rand.ID()}/>);
+    }
+
+    render(): JSX.Element {
+        const link = <Link to={'/scripts/script/' + this.props.script.ID}>{ this.props.script.Name }</Link>;
+        const dropdownLabel = <Icon.Bars />;
+        const buttonProps = {
+            color: Style.Palette.Secondary,
+            outline: true,
+            size: Style.Size.XS,
+        };
+        return (
+            <Table.Row disabled={!this.props.script.Enabled}>
+                <td>{ link }</td>
+                <td>{ this.props.script.Executable }</td>
+                <td>
+                    <Dropdown label={dropdownLabel} button={buttonProps}>
+                        <MenuItem label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
+                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editMenuClick}/>
+                        { this.enableDisableMenu() }
+                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                    </Dropdown>
+                </td>
+            </Table.Row>
+        );
+    }
+}

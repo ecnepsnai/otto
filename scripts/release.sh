@@ -4,6 +4,7 @@ set -e
 if [[ -z "${VERSION}" ]]; then
     VERSION=${1:?Version required}
 fi
+export VERSION=${VERSION}
 
 OTTO_PATH=$(realpath ../)
 
@@ -15,17 +16,9 @@ git clean -qxdf
 cd ${OTTO_PATH}/scripts
 ./install.sh ${VERSION}
 cd ${OTTO_PATH}/static/
-gulp release
-cd build
-for FILE in $(find . -name '*.html'); do
-    [ -e "$FILE" ] || continue
-    perl -pi -e "s,ottodev,otto${VERSION},g" ${FILE}
-done
-cd assets/js
-for FILE in $(find . -name '*.js'); do
-    [ -e "$FILE" ] || continue
-    perl -pi -e "s,ottodev,otto${VERSION},g" ${FILE}
-done
+rm -rf build/
+npx webpack --config webpack.login.production.js
+npx webpack --config webpack.app.production.js
 cd ${OTTO_PATH}
 rm -rf artifacts/
 mkdir -p artifacts/

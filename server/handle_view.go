@@ -30,17 +30,24 @@ func (v *view) Login(request web.Request, writer web.Writer) (response web.Respo
 	return
 }
 
-func (v *view) AngularJS(request web.Request, writer web.Writer) (response web.Response) {
-	response.ContentType = "text/html; charset=utf-8"
-	f, err := os.Open(path.Join(Directories.Static, "build", "ng.html"))
+func (v *view) AngularJS(request web.Request, writer web.Writer) web.Response {
+	file, err := os.OpenFile(path.Join(Directories.Build, "index.html"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		log.Error("Error reading static file: %s", err.Error())
-		return web.Response{
-			Status: 500,
-		}
+		panic(err)
 	}
-	response.Reader = f
-	return
+	return web.Response{
+		Reader: file,
+	}
+}
+
+func (v *view) Favicon(request web.Request, writer web.Writer) web.Response {
+	file, err := os.OpenFile(path.Join(Directories.Build, "assets", "img", "logo.png"), os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	return web.Response{
+		Reader: file,
+	}
 }
 
 func (v *view) Redirect(request web.Request, writer web.Writer) (response web.Response) {

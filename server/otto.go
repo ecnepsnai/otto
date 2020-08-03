@@ -25,12 +25,9 @@ var log *logtic.Source
 func CommonSetup() {
 	fsSetup()
 	initLogtic(isVerbose())
+	StateSetup()
+	migrateIfNeeded()
 	LoadOptions()
-}
-
-// StatsPopulate populate the stats object
-func StatsPopulate() {
-
 }
 
 func initLogtic(verbose bool) {
@@ -49,12 +46,13 @@ func startup() {
 	CommonSetup()
 	DataStoreSetup()
 	WarmCache()
-	StatsPopulate()
 	ScheduleSetup()
 	checkFirstRun()
+	go StartHeartbeatMonitor()
 }
 
 func shutdown() {
+	State.Close()
 	DataStoreTeardown()
 	logtic.Close()
 }

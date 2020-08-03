@@ -24,8 +24,8 @@ go build
 echo -e "${COLOR_BLUE}[INFO]${COLOR_NC} Building static assets"
 cd ${STATIC_DIR}
 npm install >> "${LOG}" 2>&1
-./install.sh >> "${LOG}" 2>&1
-gulp >> "${LOG}" 2>&1
+npx webpack --config webpack.login.development.js >> "${LOG}" 2>&1
+npx webpack --config webpack.app.development.js >> "${LOG}" 2>&1
 cd ../
 
 echo -e "${COLOR_GREEN}Finished!${COLOR_NC}"

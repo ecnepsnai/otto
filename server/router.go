@@ -38,9 +38,8 @@ func RouterSetup() {
 	h := handle{}
 	v := view{}
 
-	staticPath := path.Join(Directories.StaticBuild, "assets")
-	server.HTTP.Static("/static/*filepath", staticPath)
-	server.HTTP.Static(fmt.Sprintf("/otto%s/static/*filepath", ServerVersion), staticPath)
+	server.HTTP.Static("/static/*filepath", Directories.Build)
+	server.HTTP.Static(fmt.Sprintf("/otto%s/*filepath", ServerVersion), Directories.Build)
 	server.HTTP.Static("/clients/*filepath", Directories.Clients)
 
 	// Authentication
@@ -53,6 +52,7 @@ func RouterSetup() {
 	server.API.PUT("/api/hosts/host", h.HostNew, authenticatedOptions)
 	server.API.GET("/api/hosts/host/:id", h.HostGet, authenticatedOptions)
 	server.API.GET("/api/hosts/host/:id/scripts", h.HostGetScripts, authenticatedOptions)
+	server.API.GET("/api/hosts/host/:id/groups", h.HostGetGroups, authenticatedOptions)
 	server.API.POST("/api/hosts/host/:id", h.HostEdit, authenticatedOptions)
 	server.API.DELETE("/api/hosts/host/:id", h.HostDelete, authenticatedOptions)
 
@@ -103,37 +103,42 @@ func RouterSetup() {
 	// Redirect
 	server.HTTP.GET("/", v.Redirect, unauthenticatedOptions)
 
+	server.HTTP.GET("/favicon.ico", v.Favicon, unauthenticatedOptions)
+
 	server.NotFoundHandler = func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
+		notFoundFile := path.Join(Directories.Build, "404.html")
 		accept := r.Header.Get("Accept")
 		if strings.Contains(accept, "application/json") {
 			json.NewEncoder(w).Encode(web.CommonErrors.NotFound)
-		} else {
-			file, err := os.OpenFile(path.Join(Directories.Static, "build", "not_found.html"), os.O_RDONLY, os.ModePerm)
+		} else if FileExists(notFoundFile) {
+			file, err := os.OpenFile(path.Join(Directories.Build, "404.html"), os.O_RDONLY, os.ModePerm)
 			defer file.Close()
 			if err != nil {
 				panic(err)
 			}
 			io.CopyBuffer(w, file, nil)
+		} else {
+			w.Write([]byte("not found"))
 		}
 	}
 
 	ngRoutes := []string{
-		"/hosts/",
-		"/hosts/host/",
-		"/hosts/host/:id/",
-		"/hosts/host/:id/edit/",
-		"/groups/",
-		"/groups/group/",
-		"/groups/group/:id/",
-		"/groups/group/:id/edit/",
-		"/scripts/",
-		"/scripts/script/",
-		"/scripts/script/:id/",
-		"/scripts/script/:id/edit/",
-		"/scripts/script/:id/execute/",
-		"/options/",
-		"/options/users/user/",
+		"/hosts",
+		"/hosts/host",
+		"/hosts/host/:id",
+		"/hosts/host/:id/edit",
+		"/groups",
+		"/groups/group",
+		"/groups/group/:id",
+		"/groups/group/:id/edit",
+		"/scripts",
+		"/scripts/script",
+		"/scripts/script/:id",
+		"/scripts/script/:id/edit",
+		"/scripts/script/:id/execute",
+		"/options",
+		"/options/users/user",
 		"/options/users/user/:username",
 	}
 	for _, route := range ngRoutes {
@@ -145,7 +150,7 @@ func RouterSetup() {
 
 func unauthorizedHandle(w http.ResponseWriter, request *http.Request) {
 	if strings.Contains(request.Header.Get("Accept"), "text/html") {
-		w.Header().Add("Location", "/login?unauthorized")
+		w.Header().Add("Location", "/login?unauthorized&redirect="+request.URL.Path)
 		cookie := http.Cookie{
 			Name:    ottoSessionCookie,
 			Value:   "",

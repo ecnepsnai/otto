@@ -17,12 +17,12 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	if !strings.HasPrefix(options.ServerURL, "http") {
+	if !strings.HasPrefix(options.General.ServerURL, "http") {
 		return nil, web.ValidationError("Server URL must include protocol")
 	}
 
-	if !strings.HasSuffix(options.ServerURL, "/") {
-		options.ServerURL = options.ServerURL + "/"
+	if !strings.HasSuffix(options.General.ServerURL, "/") {
+		options.General.ServerURL = options.General.ServerURL + "/"
 	}
 
 	if err := options.Save(); err != nil {

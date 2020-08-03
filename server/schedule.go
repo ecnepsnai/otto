@@ -13,17 +13,17 @@ var scheduleDisabled = false
 func ScheduleSetup() {
 	schedule = scheduler.New([]scheduler.Job{
 		{
+			Pattern: "0 * * * *",
+			Name:    "CleanupSessions",
+			Exec: func() error {
+				return SessionStore.CleanupSessions().Error
+			},
+		},
+		{
 			Pattern: "1 0 * * *",
 			Name:    "RotateLogs",
 			Exec: func() error {
 				return logtic.Rotate()
-			},
-		},
-		{
-			Pattern: "/5 * * * *",
-			Name:    "PingHosts",
-			Exec: func() error {
-				return HostStore.PingAll()
 			},
 		},
 	})

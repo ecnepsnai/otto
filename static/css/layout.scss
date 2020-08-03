@@ -1,0 +1,14 @@
+.container .row:not(:first-child) {
+    margin-top: 1rem;
+}
+
+@media(max-width:950px) {
+    .container .row {
+        .col-md-4,
+        .col {
+            &:not(:first-child) {
+                margin-top: 1rem;
+            }
+        }
+    }
+}

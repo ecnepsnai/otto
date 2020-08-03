@@ -2,28 +2,38 @@ package server
 
 import (
 	"os"
+	"runtime"
 
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) State(request web.Request) (interface{}, *web.Error) {
-	type state struct {
-		User       *User
+	type runtimeType struct {
 		ServerFQDN string
 		Version    string
-		Enums      map[string]interface{}
-		Warnings   []string
+		Config     string
+	}
+	type stateType struct {
+		Runtime  runtimeType
+		User     *User
+		Enums    map[string]interface{}
+		Warnings []string
+		Options  *OttoOptions
 	}
 
 	hostname, _ := os.Hostname()
 	user := request.UserData.(*Session).User()
 
-	s := state{
-		User:       user,
-		ServerFQDN: hostname,
-		Version:    ServerVersion,
-		Enums:      AllEnums,
-		Warnings:   []string{},
+	s := stateType{
+		Runtime: runtimeType{
+			ServerFQDN: hostname,
+			Version:    ServerVersion,
+			Config:     runtime.GOOS + "_" + runtime.GOARCH,
+		},
+		User:     user,
+		Enums:    AllEnums,
+		Warnings: []string{},
+		Options:  Options,
 	}
 
 	if user.Username == defaultUser.Username {

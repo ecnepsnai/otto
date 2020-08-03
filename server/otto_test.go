@@ -40,12 +40,14 @@ func testSetup() {
 		initLogtic(true)
 	}
 
+	StateSetup()
 	DataStoreSetup()
 	LoadOptions()
 }
 
 // Close everything and delete the operating directory
 func testTeardown() {
+	State.Close()
 	DataStoreTeardown()
 	logtic.Close()
 	if tmpDir != nil {

@@ -33,6 +33,31 @@ func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 	return host, nil
 }
 
+func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	host, err := HostStore.HostWithID(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+	if host == nil {
+		return nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	groups, err := host.Groups()
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return groups, nil
+}
+
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

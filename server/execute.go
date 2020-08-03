@@ -91,7 +91,7 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	scriptRequest.Environment["OTTO_HOST_PSK"] = host.PSK
 
 	// 1. Global envrionment variables
-	for key, val := range Options.GlobalEnvironment {
+	for key, val := range Options.General.GlobalEnvironment {
 		scriptRequest.Environment[key] = val
 	}
 
