@@ -19,5 +19,9 @@
     {
         "name": "Script",
         "object": "Script"
+    },
+    {
+        "name": "Schedule",
+        "object": "Schedule"
     }
 ]
