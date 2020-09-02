@@ -14,4 +14,4 @@ EXE_NAME="otto_$(uname)_$(uname -m)"
 go build -o $EXE_NAME
 mv $EXE_NAME $ROOT
 cd $ROOT
-./$EXE_NAME --no-schedule "$@"
+./$EXE_NAME --no-scheduler "$@"

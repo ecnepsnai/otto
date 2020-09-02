@@ -5,13 +5,11 @@ import (
 	"github.com/ecnepsnai/scheduler"
 )
 
-var schedule *scheduler.Schedule
+var schedulerDisabled = false
 
-var scheduleDisabled = false
-
-// ScheduleSetup start the scheduler
-func ScheduleSetup() {
-	schedule = scheduler.New([]scheduler.Job{
+// SchedulerSetup start the scheduler
+func SchedulerSetup() {
+	schedule := scheduler.New([]scheduler.Job{
 		{
 			Pattern: "0 * * * *",
 			Name:    "CleanupSessions",
@@ -27,7 +25,7 @@ func ScheduleSetup() {
 			},
 		},
 	})
-	if !scheduleDisabled {
+	if !schedulerDisabled {
 		go schedule.Start()
 	}
 }
