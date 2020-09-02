@@ -1,9 +1,10 @@
 import { API } from "../services/API";
+import { Variable } from "./Variable";
 
 export interface ScriptRun {
     ScriptID: string;
     Duration: number;
-    Environment: {[id: string]: string};
+    Environment: Variable[];
     Result: ScriptResultDetails;
 }
 

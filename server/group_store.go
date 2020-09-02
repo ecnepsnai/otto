@@ -1,6 +1,9 @@
 package server
 
-import "github.com/ecnepsnai/ds"
+import (
+	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
+)
 
 func (s *groupStoreObject) GroupWithID(id string) (*Group, *Error) {
 	obj, err := s.Table.Get(id)
@@ -76,7 +79,7 @@ func (s *groupStoreObject) AllGroups() ([]Group, *Error) {
 type newGroupParameters struct {
 	Name        string
 	ScriptIDs   []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) {
@@ -118,7 +121,7 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 type editGroupParameters struct {
 	Name        string
 	ScriptIDs   []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (*Group, *Error) {

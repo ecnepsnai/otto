@@ -2,6 +2,7 @@ import { API } from "../services/API";
 import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
 import { Group } from "./Group";
+import { Variable } from "./Variable";
 
 export class Script {
     ID: string;
@@ -9,7 +10,7 @@ export class Script {
     Enabled: boolean;
     Executable: string;
     Script: string;
-    Environment: {[id: string]: string};
+    Environment: Variable[];
     UID: number;
     GID: number;
     WorkingDirectory: string;
@@ -21,7 +22,7 @@ export class Script {
         this.Enabled = json.Enabled as boolean;
         this.Executable = json.Executable as string;
         this.Script = json.Script as string;
-        this.Environment = (json.Environment || {}) as {[id: string]: string};
+        this.Environment = (json.Environment || []) as Variable[];
         this.UID = json.UID as number;
         this.GID = json.GID as number;
         this.WorkingDirectory = json.WorkingDirectory as string;
@@ -39,7 +40,7 @@ export class Script {
             PSK: '',
             Enabled: '',
             GroupIDs: [],
-            Environment: {},
+            Environment: [],
         });
     }
 
@@ -167,7 +168,7 @@ export interface NewScriptParameters {
     Name: string;
     Executable: string;
     Script: string;
-    Environment: {[id: string]: string};
+    Environment: Variable[];
     UID: number;
     GID: number;
     WorkingDirectory: string;
@@ -179,7 +180,7 @@ export interface EditScriptParameters {
     Enabled: boolean;
     Executable: string;
     Script: string;
-    Environment: {[id: string]: string};
+    Environment: Variable[];
     UID: number;
     GID: number;
     WorkingDirectory: string;

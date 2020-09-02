@@ -1,0 +1,6 @@
+[
+    {
+        "type": "environ.Variable{}",
+        "include": "github.com/ecnepsnai/otto/server/environ"
+    }
+]

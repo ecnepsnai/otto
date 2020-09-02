@@ -10,6 +10,7 @@ import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
+import { Variable } from '../../types/Variable';
 
 export interface ScriptEditProps { match: match }
 interface ScriptEditState {
@@ -33,10 +34,21 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
     loadScript(): void {
         const id = (this.props.match.params as URLParams).id;
         if (id == null) {
-            this.setState({ isNew: true, script: Script.Blank(), loading: false });
+            this.setState({
+                isNew: true,
+                script: Script.Blank(),
+                loading: false,
+                groupIDs: [],
+            });
         } else {
             Script.Get(id).then(script => {
-                this.setState({ loading: false, script: script });
+                script.Groups().then(selectedGroups => {
+                    this.setState({
+                        loading: false,
+                        script: script,
+                        groupIDs: selectedGroups.map(group => { return group.ID; })
+                    });
+                });
             });
         }
     }
@@ -48,7 +60,7 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         });
     }
 
-    private changeEnvironment = (Environment: {[id: string]: string}) => {
+    private changeEnvironment = (Environment: Variable[]) => {
         this.setState(state => {
             state.script.Environment = Environment;
             return state;

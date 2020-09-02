@@ -1,5 +1,7 @@
 package server
 
+import "github.com/ecnepsnai/otto/server/environ"
+
 // Host describes a otto host
 type Host struct {
 	ID          string `ds:"primary"`
@@ -9,7 +11,7 @@ type Host struct {
 	PSK         string
 	Enabled     bool `ds:"index"`
 	GroupIDs    []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 // Groups return all groups for this host

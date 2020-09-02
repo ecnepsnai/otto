@@ -1,6 +1,9 @@
 package server
 
-import "github.com/ecnepsnai/ds"
+import (
+	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
+)
 
 func (s *hostStoreObject) HostWithID(id string) (*Host, *Error) {
 	obj, err := s.Table.Get(id)
@@ -104,7 +107,7 @@ type newHostParameters struct {
 	Port        uint32
 	PSK         string
 	GroupIDs    []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
@@ -154,7 +157,7 @@ type editHostParameters struct {
 	PSK         string
 	Enabled     bool
 	GroupIDs    []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host, *Error) {

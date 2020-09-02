@@ -1,8 +1,10 @@
 package server
 
-func staticEnvironment() map[string]string {
-	return map[string]string{
-		"OTTO_VERSION": ServerVersion,
-		"OTTO_URL":     Options.General.ServerURL,
+import "github.com/ecnepsnai/otto/server/environ"
+
+func staticEnvironment() []environ.Variable {
+	return []environ.Variable{
+		environ.New("OTTO_VERSION", ServerVersion),
+		environ.New("OTTO_URL", Options.General.ServerURL),
 	}
 }

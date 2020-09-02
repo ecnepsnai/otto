@@ -3,18 +3,19 @@ import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
 import { Host } from "./Host";
 import { Script } from "./Script";
+import { Variable } from "./Variable";
 
 export class Group {
     ID: string;
     Name: string;
     ScriptIDs: string[];
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 
     constructor(json: any) {
         this.ID = json.ID as string;
         this.Name = json.Name as string;
         this.ScriptIDs = (json.ScriptIDs || []) as string[];
-        this.Environment = (json.Environment || {}) as {[id: string]: string};
+        this.Environment = (json.Environment || []) as Variable[];
     }
 
 
@@ -25,7 +26,7 @@ export class Group {
         return new Group({
             Name: '',
             ScriptIDs: [],
-            Environment: {},
+            Environment: [],
         });
     }
 
@@ -155,11 +156,11 @@ export class Group {
 export interface NewGroupParameters {
     Name: string;
     ScriptIDs: string[];
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 }
 
 export interface EditGroupParameters {
     Name: string;
     ScriptIDs: string[];
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 }

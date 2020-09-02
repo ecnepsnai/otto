@@ -4,6 +4,7 @@ import { Icon } from '../../components/Icon';
 import { Input } from '../../components/Form';
 import { Options } from '../../types/Options';
 import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdit';
+import { Variable } from '../../types/Variable';
 
 export interface OptionsGeneralProps {
     defaultValue: Options.General;
@@ -32,7 +33,7 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
         });
     }
 
-    private changeGlobalEnvironment = (GlobalEnvironment: {[id: string]: string}) => {
+    private changeGlobalEnvironment = (GlobalEnvironment: Variable[]) => {
         this.setState(state => {
             const options = state.value;
             options.GlobalEnvironment = GlobalEnvironment;

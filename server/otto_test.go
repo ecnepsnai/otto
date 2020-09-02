@@ -40,6 +40,7 @@ func testSetup() {
 		initLogtic(true)
 	}
 
+	GobSetup()
 	StateSetup()
 	DataStoreSetup()
 	LoadOptions()

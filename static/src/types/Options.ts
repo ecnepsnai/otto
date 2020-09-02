@@ -1,4 +1,5 @@
 import { API } from "../services/API";
+import { Variable } from "./Variable";
 
 export namespace Options {
     export interface OttoOptions {
@@ -9,7 +10,7 @@ export namespace Options {
 
     export interface General {
         ServerURL: string;
-        GlobalEnvironment: {[id: string]: string};
+        GlobalEnvironment: Variable[];
     }
 
     export interface Network {

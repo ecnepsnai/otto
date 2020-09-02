@@ -10,6 +10,7 @@ import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
+import { Variable } from '../../types/Variable';
 
 export interface HostEditProps { match: match }
 interface HostEditState {
@@ -87,7 +88,7 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
         });
     }
 
-    private changeEnvironment = (Environment: {[id: string]: string}) => {
+    private changeEnvironment = (Environment: Variable[]) => {
         this.setState(state => {
             state.host.Environment = Environment;
             return state;

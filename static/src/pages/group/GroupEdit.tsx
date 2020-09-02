@@ -10,6 +10,7 @@ import { ScriptCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
+import { Variable } from '../../types/Variable';
 
 export interface GroupEditProps { match: match }
 interface GroupEditState {
@@ -50,7 +51,7 @@ export class GroupEdit extends React.Component<GroupEditProps, GroupEditState> {
         });
     }
 
-    private changeEnvironment = (Environment: {[id: string]: string}) => {
+    private changeEnvironment = (Environment: Variable[]) => {
         this.setState(state => {
             state.group.Environment = Environment;
             return state;

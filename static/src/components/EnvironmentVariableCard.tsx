@@ -2,29 +2,21 @@ import * as React from 'react';
 import { Card } from './Card';
 import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
+import { Variable } from '../types/Variable';
 
 export interface EnvironmentVariableCardProps {
-    variables: {[id: string]: string};
-}
-interface vbtype {
-    key: string;
-    value: string;
+    variables: Variable[];
 }
 export class EnvironmentVariableCard extends React.Component<EnvironmentVariableCardProps, {}> {
     private list = () => {
-        const variables: vbtype[] = [];
-        Object.keys(this.props.variables).forEach(key => {
-            const value = this.props.variables[key];
-            variables.push({ key: key, value: value });
-        });
-
         return (
         <ListGroup.List>
             {
-                variables.map((variable, index) => {
+                this.props.variables.map((variable, index) => {
+                    const content = variable.Secret ? '******' : variable.Value;
                     return (
-                    <ListGroup.TextItem title={variable.key} key={index}>
-                        <code>{ variable.value }</code>
+                    <ListGroup.TextItem title={variable.Key} key={index}>
+                        <code>{content}</code>
                     </ListGroup.TextItem>
                     );
                 })

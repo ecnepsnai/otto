@@ -1,68 +1,51 @@
 import * as React from 'react';
-import { Card } from './Card';
 import { Table } from './Table';
 import { CreateButton } from './Button';
 import { Icon } from './Icon';
 import { Style } from './Style';
 import { Dropdown, MenuItem } from './Menu';
-import { Modal, ModalButton } from './Modal';
-import { Form, Input, Textarea } from './Form';
+import { Modal, ModalButton, GlobalModalFrame } from './Modal';
+import { Form, Input, Textarea, Checkbox } from './Form';
+import { Variable } from '../types/Variable';
 
 export interface EnvironmentVariableEditProps {
-    variables: {[id: string]: string};
-    onChange: (variables: {[id: string]: string}) => (void);
+    variables: Variable[];
+    onChange: (variables: Variable[]) => (void);
 }
-interface EnvironmentVariableEditState {
-    editKey?: string;
-}
-export class EnvironmentVariableEdit extends React.Component<EnvironmentVariableEditProps, EnvironmentVariableEditState> {
-    constructor(props: EnvironmentVariableEditProps) {
-        super(props);
-        this.state = { };
-    }
-
-    private createClick = () => {
-        this.setState({ editKey: '' });
-    }
-
-    private editVar = (key: string): () => (void) => {
-        return () => {
-            this.setState({ editKey: key });
-        };
-    }
-
-    private deleteVar = (key: string): () => (void) => {
-        return () => {
-            Modal.delete('Delete Variable', 'Are you sure you want to delete this variable?').then(confirmed => {
-                if (!confirmed) { return; }
-
-                const vars = this.props.variables;
-                delete vars[key];
-                this.props.onChange(vars);
-            });
-        };
-    }
-
-    private editDialogDismissed = (key: string, value: string) => {
-        this.setState({ editKey: undefined });
-        if (key == undefined) {
-            return;
-        }
-
+export class EnvironmentVariableEdit extends React.Component<EnvironmentVariableEditProps, {}> {
+    private addNewVariable = (variable: Variable) => {
         const vars = this.props.variables;
-        vars[key] = value;
+        vars.push(variable);
         this.props.onChange(vars);
     }
 
-    private editDialog = () => {
-        if (this.state.editKey == undefined) { return null; }
-        const value = this.state.editKey != '' ? this.props.variables[this.state.editKey] : undefined;
-        return (
-            <EnvironmentVariableEditModal
-                defaultKey={this.state.editKey}
-                defaultValue={value}
-                onDismiss={this.editDialogDismissed} />
-        );
+    private createClick = () => {
+        GlobalModalFrame.showModal(<EnvironmentVariableEditModal default={{}} onSave={this.addNewVariable} />);
+    }
+
+    private replaceVariable = (idx: number) => {
+        return (varible: Variable) => {
+            const vars = this.props.variables;
+            vars[idx] = varible;
+            this.props.onChange(vars);
+        };
+    }
+
+    private editVar = (variable: Variable, idx: number): () => (void) => {
+        return () => {
+            GlobalModalFrame.showModal(<EnvironmentVariableEditModal default={variable} onSave={this.replaceVariable(idx)} />);
+        };
+    }
+
+    private deleteVar = (idx: number): () => (void) => {
+        return () => {
+            Modal.delete('Delete Variable', 'Are you sure you want to delete this variable?').then(confirmed => {
+                if (!confirmed) { return; }
+                const vars = this.props.variables;
+                vars.splice(idx, 1);
+                this.props.onChange(vars);
+            });
+        };
     }
 
     render(): JSX.Element {
@@ -77,29 +60,26 @@ export class EnvironmentVariableEdit extends React.Component<EnvironmentVariable
                     </Table.Head>
                     <Table.Body>
                         {
-                            Object.keys(this.props.variables).map((key, idx) => {
+                            this.props.variables.map((variable, idx) => {
                                 return (
                                     <EnvironmentVariableEditListItem
-                                        envKey={key}
-                                        value={this.props.variables[key]}
+                                        variable={variable}
                                         key={idx}
-                                        requestEdit={this.editVar(key)}
-                                        requestDelete={this.deleteVar(key)}
+                                        requestEdit={this.editVar(variable, idx)}
+                                        requestDelete={this.deleteVar(idx)}
                                         />
                                 );
                             })
                         }
                     </Table.Body>
                 </Table.Table>
-                { this.editDialog() }
             </React.Fragment>
         );
     }
 }
 
 interface EnvironmentVariableEditListItemProps {
-    envKey: string;
-    value: string;
+    variable: Variable;
     requestEdit: () => (void);
     requestDelete: () => (void);
 }
@@ -111,13 +91,16 @@ class EnvironmentVariableEditListItem extends React.Component<EnvironmentVariabl
             outline: true,
             size: Style.Size.XS,
         };
+
+        const content = this.props.variable.Secret ? '******' : this.props.variable.Value;
+
         return (
             <Table.Row>
                 <td>
-                    { this.props.envKey }
+                    { this.props.variable.Key }
                 </td>
                 <td>
-                    <code>{ this.props.value }</code>
+                    <code>{content}</code>
                 </td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
@@ -131,20 +114,21 @@ class EnvironmentVariableEditListItem extends React.Component<EnvironmentVariabl
 }
 
 interface EnvironmentVariableEditModalProps {
-    defaultKey: string;
-    defaultValue: string;
-    onDismiss: (key: string, value: string) => (void);
+    default: Variable;
+    onSave: (variable: Variable) => (void);
 }
 interface EnvironmentVariableEditModalState {
     key: string;
     value: string;
+    secret: boolean;
 }
 class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEditModalProps, EnvironmentVariableEditModalState> {
     constructor(props: EnvironmentVariableEditModalProps) {
         super(props);
         this.state = {
-            key: props.defaultKey,
-            value: props.defaultValue,
+            key: props.default.Key,
+            value: props.default.Value,
+            secret: props.default.Secret,
         };
     }
 
@@ -156,20 +140,25 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
         this.setState({ value: value });
     }
 
+    private changeSecret = (secret: boolean) => {
+        this.setState({ secret: secret });
+    }
+
     render(): JSX.Element {
-        const title = this.props.defaultKey != '' ? 'Edit Variable' : 'New Variable';
+        const title = this.props.default.Key != '' ? 'Edit Variable' : 'New Variable';
         const buttons: ModalButton[] = [
             {
                 label: 'Discard',
                 color: Style.Palette.Secondary,
-                onClick: () => {
-                    this.props.onDismiss(undefined, undefined);
-                },
             },
             {
                 label: 'Add',
                 onClick: () => {
-                    this.props.onDismiss(this.state.key, this.state.value);
+                    this.props.onSave({
+                        Key: this.state.key,
+                        Value: this.state.value,
+                        Secret: this.state.secret,
+                    });
                 },
             }
         ];
@@ -186,6 +175,11 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
                         defaultValue={this.state.value}
                         onChange={this.changeValue}
                         fixedWidth />
+                    <Checkbox
+                        label="Secret"
+                        defaultValue={this.state.secret}
+                        onChange={this.changeSecret}
+                        helpText="If checked then the value of this variable is obscured" />
                 </Form>
             </Modal>
         );

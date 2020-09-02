@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/server/environ"
 )
 
 // ScriptResult describes a script result
 type ScriptResult struct {
 	ScriptID    string
 	Duration    time.Duration
-	Environment map[string]string
+	Environment []environ.Variable
 	Result      otto.ScriptResult
 }
 
@@ -83,22 +84,17 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 		Environment:      map[string]string{},
 	}
 
-	for key, val := range staticEnvironment() {
-		scriptRequest.Environment[key] = val
-	}
-	scriptRequest.Environment["OTTO_HOST_ADDRESS"] = host.Address
-	scriptRequest.Environment["OTTO_HOST_PORT"] = fmt.Sprintf("%d", host.Port)
-	scriptRequest.Environment["OTTO_HOST_PSK"] = host.PSK
+	variables := environ.Merge(staticEnvironment(), []environ.Variable{
+		environ.New("OTTO_HOST_ADDRESS", host.Address),
+		environ.New("OTTO_HOST_PORT", fmt.Sprintf("%d", host.Port)),
+		{Key: "OTTO_HOST_PSK", Value: host.PSK, Secret: true},
+	})
 
 	// 1. Global envrionment variables
-	for key, val := range Options.General.GlobalEnvironment {
-		scriptRequest.Environment[key] = val
-	}
+	variables = environ.Merge(variables, Options.General.GlobalEnvironment)
 
 	// 2. Script envrionment variables
-	for key, val := range script.Environment {
-		scriptRequest.Environment[key] = val
-	}
+	variables = environ.Merge(variables, script.Environment)
 
 	// 3. Group envrionment variables
 	groups, err := host.Groups()
@@ -106,15 +102,13 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 		return nil, err
 	}
 	for _, group := range groups {
-		for key, val := range group.Environment {
-			scriptRequest.Environment[key] = val
-		}
+		variables = environ.Merge(variables, group.Environment)
 	}
 
 	// 4. Host envrionment variables
-	for key, val := range host.Environment {
-		scriptRequest.Environment[key] = val
-	}
+	variables = environ.Merge(variables, host.Environment)
+
+	scriptRequest.Environment = environ.Map(variables)
 
 	log.Info("Executing script '%s' on host '%s'", script.Name, host.Address)
 	reply, err := host.PerformRequest(otto.Request{
@@ -146,7 +140,7 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	return &ScriptResult{
 		ScriptID:    script.ID,
 		Duration:    time.Since(start),
-		Environment: scriptRequest.Environment,
+		Environment: variables,
 		Result:      result,
 	}, nil
 }

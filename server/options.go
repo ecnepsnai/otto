@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"sync"
+
+	"github.com/ecnepsnai/otto/server/environ"
 )
 
 // OttoOptions describes options for the otto server
@@ -17,7 +19,7 @@ type OttoOptions struct {
 // OptionsGeneral describes the general options
 type OptionsGeneral struct {
 	ServerURL         string
-	GlobalEnvironment map[string]string
+	GlobalEnvironment []environ.Variable
 }
 
 // OptionsNetwork describes network options for connecting to otto clients
@@ -51,7 +53,7 @@ func LoadOptions() {
 	defaults := OttoOptions{
 		General: OptionsGeneral{
 			ServerURL:         "http://" + bindAddress + "/",
-			GlobalEnvironment: map[string]string{},
+			GlobalEnvironment: []environ.Variable{},
 		},
 		Network: OptionsNetwork{
 			ForceIPVersion:     IPVersionOptionAuto,

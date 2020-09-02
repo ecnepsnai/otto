@@ -1,11 +1,13 @@
 package server
 
+import "github.com/ecnepsnai/otto/server/environ"
+
 // Group describes a group object
 type Group struct {
 	ID          string `ds:"primary"`
 	Name        string `ds:"unique"`
 	ScriptIDs   []string
-	Environment map[string]string
+	Environment []environ.Variable
 }
 
 // HostIDs return the IDs for each host member of this group

@@ -1,6 +1,9 @@
 package server
 
-import "github.com/ecnepsnai/ds"
+import (
+	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
+)
 
 // Script describes an otto script
 type Script struct {
@@ -9,7 +12,7 @@ type Script struct {
 	Enabled          bool   `ds:"index"`
 	Executable       string
 	Script           string
-	Environment      map[string]string
+	Environment      []environ.Variable
 	UID              uint32
 	GID              uint32
 	WorkingDirectory string
@@ -79,7 +82,7 @@ type newScriptParameters struct {
 	Name             string
 	Executable       string
 	Script           string
-	Environment      map[string]string
+	Environment      []environ.Variable
 	UID              uint32
 	GID              uint32
 	WorkingDirectory string
@@ -126,7 +129,7 @@ type editScriptParameters struct {
 	Enabled          bool
 	Executable       string
 	Script           string
-	Environment      map[string]string
+	Environment      []environ.Variable
 	UID              uint32
 	GID              uint32
 	WorkingDirectory string

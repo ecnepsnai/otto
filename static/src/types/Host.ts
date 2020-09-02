@@ -2,6 +2,7 @@ import { API } from "../services/API";
 import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
 import { Group } from "./Group";
+import { Variable } from "./Variable";
 
 export class Host {
     ID: string;
@@ -11,7 +12,7 @@ export class Host {
     PSK: string;
     Enabled: boolean;
     GroupIDs: string[];
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 
     constructor(json: any) {
         this.ID = json.ID as string;
@@ -21,7 +22,7 @@ export class Host {
         this.PSK = json.PSK as string;
         this.Enabled = json.Enabled as boolean;
         this.GroupIDs = (json.GroupIDs || []) as string[];
-        this.Environment = (json.Environment || {}) as {[id: string]: string};
+        this.Environment = (json.Environment || []) as Variable[];
     }
 
     /**
@@ -35,7 +36,7 @@ export class Host {
             PSK: '',
             Enabled: '',
             GroupIDs: [],
-            Environment: {},
+            Environment: [],
         });
     }
 
@@ -147,7 +148,7 @@ export interface NewHostParameters {
     Port: number;
     PSK: string;
     GroupIDs: string[];
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 }
 
 export interface EditHostParameters {
@@ -157,7 +158,7 @@ export interface EditHostParameters {
     PSK: string;
     GroupIDs: string[];
     Enabled: boolean;
-    Environment: {[id: string]: string};
+    Environment: Variable[];
 }
 
 export interface ScriptEnabledGroup {

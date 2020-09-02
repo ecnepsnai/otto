@@ -25,6 +25,7 @@ var log *logtic.Source
 func CommonSetup() {
 	fsSetup()
 	initLogtic(isVerbose())
+	GobSetup()
 	StateSetup()
 	migrateIfNeeded()
 	LoadOptions()
