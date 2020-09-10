@@ -19,7 +19,6 @@ import { ScheduleView } from './pages/schedule/ScheduleView';
 import { ScheduleList } from './pages/schedule/ScheduleList';
 import { OptionsMain } from './pages/options/OptionsMain';
 import '../css/main.scss';
-import '../css/notify.scss';
 import { Loading } from './components/Loading';
 
 export interface AppProps {}

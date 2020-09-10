@@ -155,7 +155,7 @@ export class Schedule {
                 }
 
                 API.DELETE('/api/schedules/schedule/' + this.ID).then(() => {
-                    Notification.success('Schedule Deleted', '');
+                    Notification.success('Schedule Deleted');
                     resolve(true);
                 });
             });

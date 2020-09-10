@@ -1,0 +1,10 @@
+#global-notification-frame {
+    position: fixed !important;
+    top: 1em;
+    left: 1em;
+    z-index: 10000;
+
+    @media(max-width:767px) {
+        right: 1em;
+    }
+}

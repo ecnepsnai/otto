@@ -141,7 +141,7 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
 
         promise.then(script => {
             script.SetGroups(this.state.groupIDs).then(() => {
-                Notification.success('Script Saved', script.Name);
+                Notification.success('Script Saved');
                 Redirect.To('/scripts/script/' + script.ID);
             });
         });

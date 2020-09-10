@@ -7,6 +7,7 @@ import { OptionsGeneral } from './OptionsGeneral';
 import { OptionsNetwork } from './OptionsNetwork';
 import { OptionsRegister } from './OptionsRegister';
 import { OptionsUsers } from './OptionsUsers';
+import { Notification } from '../../components/Notification';
 
 export interface OptionsMainProps {}
 interface OptionsMainState {
@@ -49,6 +50,7 @@ export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainSt
         this.setState({ loading: true });
         Options.Options.Save(this.state.options).then(() => {
             StateManager.Refresh().then(() => {
+                Notification.success('Options Saved');
                 this.setState({ loading: false });
             });
         });

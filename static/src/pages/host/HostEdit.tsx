@@ -111,7 +111,7 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
         }
 
         promise.then(host => {
-            Notification.success('Host Saved', host.Name);
+            Notification.success('Host Saved');
             Redirect.To('/hosts/host/' + host.ID);
         });
     }

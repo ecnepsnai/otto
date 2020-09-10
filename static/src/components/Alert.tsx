@@ -2,12 +2,32 @@ import * as React from 'react';
 
 import { Style } from './Style';
 
-export interface AlertProps { color: Style.Palette; }
-
+export interface AlertProps {
+    color: Style.Palette;
+    onClose?: () => (void);
+}
 export class Alert extends React.Component<AlertProps, {}> {
-    render(): JSX.Element {
+    private closeButton = () => {
+        if (!this.props.onClose) {
+            return null;
+        }
+
         return (
-            <div className={'alert alert-' + this.props.color.toString()} role="alert">{ this.props.children }</div>
+        <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={this.props.onClose}>
+            <span aria-hidden="true">&times;</span>
+        </button>
+        );
+    }
+    render(): JSX.Element {
+        let className = 'alert fade show alert-' + this.props.color.toString();
+        if (this.props.onClose) {
+            className += ' alert-dismissible';
+        }
+        return (
+            <div className={className} role="alert">
+                { this.closeButton() }
+                { this.props.children }
+            </div>
         );
     }
 

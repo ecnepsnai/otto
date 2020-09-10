@@ -85,7 +85,7 @@ export class Host {
                 }
 
                 API.DELETE('/api/hosts/host/' + this.ID).then(() => {
-                    Notification.success('Host Deleted', this.Name);
+                    Notification.success('Host Deleted');
                     resolve(true);
                 });
             });

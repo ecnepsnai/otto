@@ -89,7 +89,7 @@ export class Script {
                 }
 
                 API.DELETE('/api/scripts/script/' + this.ID).then(() => {
-                    Notification.success('Script Deleted', this.Name);
+                    Notification.success('Script Deleted');
                     resolve(true);
                 });
             });

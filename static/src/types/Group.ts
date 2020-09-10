@@ -75,7 +75,7 @@ export class Group {
                 }
 
                 API.DELETE('/api/groups/group/' + this.ID).then(() => {
-                    Notification.success('Group Deleted', this.Name);
+                    Notification.success('Group Deleted');
                     resolve(true);
                 });
             });

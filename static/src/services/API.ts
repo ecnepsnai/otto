@@ -24,7 +24,7 @@ export class API {
                             message = results.error.message;
                         }
                         console.error('API error caught', results);
-                        Notification.error('An Error Occured', message);
+                        Notification.error('An Error Occured: ' + message);
                         reject(results);
                     } else {
                         resolve(results.data);
@@ -32,14 +32,14 @@ export class API {
                 }, e => {
                     if (!noCheckError) {
                         console.error('API error caught', e);
-                        Notification.error('An Error Occured', 'Internal Server Error');
+                        Notification.error('An Error Occured: Internal Server Error');
                     }
                     reject(e);
                 });
             }, e => {
                 if (!noCheckError) {
                     console.error('API error caught', e);
-                    Notification.error('An Error Occured', 'Internal Server Error');
+                    Notification.error('An Error Occured: Internal Server Error');
                 }
                 reject(e);
             });
