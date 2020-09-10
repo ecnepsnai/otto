@@ -5,6 +5,8 @@ import { Input } from '../../components/Form';
 import { Options } from '../../types/Options';
 import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdit';
 import { Variable } from '../../types/Variable';
+import { Alert } from '../../components/Alert';
+import { Style } from '../../components/Style';
 
 export interface OptionsGeneralProps {
     defaultValue: Options.General;
@@ -19,6 +21,18 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
         this.state = {
             value: props.defaultValue,
         };
+    }
+
+    private originWarning = () => {
+        if (location.origin === this.props.defaultValue.ServerURL) {
+            return null;
+        }
+
+        return (
+        <Alert color={Style.Palette.Warning}>
+            The configured server URL is different than the URL you are using to access this page.
+        </Alert>
+        );
     }
 
     private changeServerURL = (ServerURL: string) => {
@@ -59,6 +73,7 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
                         helpText="The absolute URL (Including protocol) where this otto server is accessed from"
                         defaultValue={this.state.value.ServerURL}
                         onChange={this.changeServerURL} />
+                    { this.originWarning() }
                     <label className="form-label">Global Environment Variables</label>
                     <div>
                         <EnvironmentVariableEdit
