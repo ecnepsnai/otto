@@ -7,6 +7,7 @@ export class State {
     public readonly StartDate: string;
     public readonly Hostname: string;
     public readonly Version: string;
+    public readonly Warnings: string[];
     public readonly Options: Options.OttoOptions;
 
     public constructor(json: any) {
@@ -15,6 +16,7 @@ export class State {
         this.StartDate = json.StartDate as string;
         this.Hostname = json.Hostname as string;
         this.Version = json.Version as string;
+        this.Warnings = json.Warnings as string[];
         this.Options = json.Options as Options.OttoOptions;
     }
 }

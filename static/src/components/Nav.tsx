@@ -4,8 +4,8 @@ import { Icon } from './Icon';
 import { StateManager } from '../services/StateManager';
 import { Style } from './Style';
 import { UserManager } from '../pages/options/OptionsUsers';
-import '../../css/nav.scss';
 import { API } from '../services/API';
+import '../../css/nav.scss';
 
 interface NavProps {}
 interface NavState {
@@ -97,6 +97,9 @@ export class Nav extends React.Component<NavProps, NavState> {
                         </div>
                     </div>
                 </nav>
+                { StateManager.Current().Warnings.map((warn, idx) => {
+                    return ( <Warning warning={warn} key={idx} /> );
+                }) }
             </header>
         );
     }
@@ -120,6 +123,33 @@ class NavItem extends React.Component<NavItemProps, {}> {
                 <Icon.Label icon={this.props.icon} label={this.props.label} />
             </Link>
         </li>
+        );
+    }
+}
+
+interface WarningProps {
+    warning: string;
+}
+class Warning extends React.Component<WarningProps, {}> {
+    render(): JSX.Element {
+        let title = '';
+        let body = '';
+
+        if (this.props.warning === 'default_user_password') {
+            title = 'Default Password';
+            body = 'You are using the default username and password. You should change your password immediately using the user menu in the top-right.';
+        }
+
+        return (
+            <div className="warning">
+                <Icon.ExclamationTriangle />
+                <strong className="ml-1">
+                    {title}
+                </strong>
+                <span className="ml-1">
+                    {body}
+                </span>
+            </div>
         );
     }
 }
