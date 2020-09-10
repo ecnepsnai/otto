@@ -14,6 +14,9 @@ import { GroupView } from './pages/group/GroupView';
 import { ScriptEdit } from './pages/script/ScriptEdit';
 import { ScriptList } from './pages/script/ScriptList';
 import { ScriptView } from './pages/script/ScriptView';
+import { ScheduleEdit } from './pages/schedule/ScheduleEdit';
+import { ScheduleView } from './pages/schedule/ScheduleView';
+import { ScheduleList } from './pages/schedule/ScheduleList';
 import { OptionsMain } from './pages/options/OptionsMain';
 import '../css/main.scss';
 import '../css/notify.scss';
@@ -53,6 +56,10 @@ export class App extends React.Component<AppProps, AppState> {
                     <Route path="/scripts/script/:id" component={ScriptView} />
                     <Route path="/scripts/script" component={ScriptEdit} />
                     <Route path="/scripts" component={ScriptList} />
+                    <Route path="/schedules/schedule/:id/edit" component={ScheduleEdit} />
+                    <Route path="/schedules/schedule/:id" component={ScheduleView} />
+                    <Route path="/schedules/schedule" component={ScheduleEdit} />
+                    <Route path="/schedules" component={ScheduleList} />
                     <Route path="/options" component={OptionsMain} />
                 </Switch>
                 <GlobalModalFrame />

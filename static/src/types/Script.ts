@@ -3,6 +3,7 @@ import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
 import { Group } from "./Group";
 import { Variable } from "./Variable";
+import { Schedule } from "./Schedule";
 
 export class Script {
     ID: string;
@@ -152,6 +153,23 @@ export class Script {
     public async SetGroups(groupIDs: string[]): Promise<ScriptEnabledHost[]> {
         const data = await API.POST('/api/scripts/script/' + this.ID + '/groups', { Groups: groupIDs });
         return data as ScriptEnabledHost[];
+    }
+
+    /**
+     * List all schedules for this script
+     */
+    public async Schedules(): Promise<Schedule[]> {
+        return Script.Schedules(this.ID);
+    }
+
+    /**
+     * List all schedules for a script
+     */
+    public static async Schedules(id: string): Promise<Schedule[]> {
+        const data = await API.GET('/api/scripts/script/' + id + '/schedules');
+        return (data as any[]).map(obj => {
+            return new Schedule(obj);
+        });
     }
 }
 

@@ -50,5 +50,26 @@
                 "value": "\"shutdown\""
             }
         ]
+    },
+    {
+        "name": "ScheduleResult",
+        "type": "int",
+        "values": [
+            {
+                "key": "Success",
+                "description": "All hosts executed the script successfully",
+                "value": "0"
+            },
+            {
+                "key": "PartialSuccess",
+                "description": "Some hosts did not execute the script successfully",
+                "value": "1"
+            },
+            {
+                "key": "Fail",
+                "description": "No hosts executed the script successfully",
+                "value": "2"
+            }
+        ]
     }
 ]

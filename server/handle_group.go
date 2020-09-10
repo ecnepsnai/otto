@@ -146,6 +146,20 @@ func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) 
 	return scripts, nil
 }
 
+func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	schedules, err := ScheduleStore.AllSchedulesForGroup(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return schedules, nil
+}
+
 func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
 	params := newGroupParameters{}
 	if err := request.Decode(&params); err != nil {

@@ -19,6 +19,7 @@ export class Nav extends React.Component<NavProps, NavState> {
                 "hosts": false,
                 "groups": false,
                 "scripts": false,
+                "schedules": false,
                 "options": false,
             },
         };
@@ -35,6 +36,7 @@ export class Nav extends React.Component<NavProps, NavState> {
             state.active.hosts = location.pathname.indexOf('/hosts') > -1;
             state.active.groups = location.pathname.indexOf('/groups') > -1;
             state.active.scripts = location.pathname.indexOf('/scripts') > -1;
+            state.active.schedules = location.pathname.indexOf('/schedules') > -1;
             state.active.options = location.pathname.indexOf('/options') > -1;
             return state;
         });
@@ -70,6 +72,7 @@ export class Nav extends React.Component<NavProps, NavState> {
                                 <NavItem link="/hosts" active={this.state.active.hosts} icon={<Icon.Desktop />} label="Hosts" />
                                 <NavItem link="/groups" active={this.state.active.groups} icon={<Icon.LayerGroup />} label="Groups" />
                                 <NavItem link="/scripts" active={this.state.active.scripts} icon={<Icon.Scroll />} label="Scripts" />
+                                <NavItem link="/schedules" active={this.state.active.schedules} icon={<Icon.Calendar />} label="Schedules" />
                                 <NavItem link="/options" active={this.state.active.options} icon={<Icon.Cog />} label="Options" />
                             </ul>
                             <ul className="navbar-nav navbar-links">

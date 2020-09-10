@@ -67,6 +67,20 @@ func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
 	return script.Hosts(), nil
 }
 
+func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	schedules, err := ScheduleStore.AllSchedulesForScript(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return schedules, nil
+}
+
 func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

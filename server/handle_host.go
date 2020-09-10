@@ -58,6 +58,20 @@ func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 	return groups, nil
 }
 
+func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	schedules, err := ScheduleStore.AllSchedulesForHost(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return schedules, nil
+}
+
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

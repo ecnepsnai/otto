@@ -3,6 +3,9 @@ package server
 import (
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/ecnepsnai/otto/server/environ"
 )
 
 func preBootstrapArgs() {
@@ -31,7 +34,7 @@ func preBootstrapArgs() {
 			bindAddress = value
 			i++
 		} else if arg == "--no-scheduler" {
-			schedulerDisabled = true
+			cronDisabled = true
 		} else if arg == "-h" || arg == "--help" {
 			printHelpAndExit()
 		}
@@ -51,7 +54,94 @@ func isVerbose() bool {
 }
 
 func postBootstrapArgs() {
+	args := os.Args[1:]
+	i := 0
+	count := len(args)
+	for i < count {
+		arg := args[i]
 
+		if arg == "--demo" {
+			script, err := ScriptStore.NewScript(newScriptParameters{
+				Name:        "Update Software",
+				Executable:  "/bin/sh",
+				Script:      "#!/bin/sh\n${YUM_CMD} -y update\n",
+				Environment: []environ.Variable{},
+				UID:         0,
+				GID:         0,
+			})
+			if err != nil {
+				panic(err)
+			}
+			el7, err := GroupStore.NewGroup(newGroupParameters{
+				Name:      "CentOS 7 Servers",
+				ScriptIDs: []string{script.ID},
+				Environment: []environ.Variable{
+					environ.New("YUM_CMD", "yum"),
+				},
+			})
+			if err != nil {
+				panic(err)
+			}
+			el8, err := GroupStore.NewGroup(newGroupParameters{
+				Name:      "CentOS 8 Servers",
+				ScriptIDs: []string{script.ID},
+				Environment: []environ.Variable{
+					environ.New("YUM_CMD", "dnf"),
+				},
+			})
+			if err != nil {
+				panic(err)
+			}
+			el7Host, err := HostStore.NewHost(newHostParameters{
+				Name:     "el7-host.example.com",
+				Address:  "el7-host.example.com",
+				Port:     12444,
+				PSK:      "password1234",
+				GroupIDs: []string{el7.ID},
+			})
+			if err != nil {
+				panic(err)
+			}
+			el8Host, err := HostStore.NewHost(newHostParameters{
+				Name:     "el8-host.example.com",
+				Address:  "el8-host.example.com",
+				Port:     12444,
+				PSK:      "password1234",
+				GroupIDs: []string{el8.ID},
+			})
+			if err != nil {
+				panic(err)
+			}
+			schedule, err := ScheduleStore.NewSchedule(newScheduleParameters{
+				ScriptID: script.ID,
+				Scope: ScheduleScope{
+					GroupIDs: []string{
+						el7.ID,
+						el8.ID,
+					},
+				},
+				Pattern: "0 0 * * *",
+			})
+			x := int64(0)
+			for x < 10 {
+				report := ScheduleReport{
+					ID:         NewID(),
+					ScheduleID: schedule.ID,
+					HostIDs:    []string{el7Host.ID, el8Host.ID},
+					Time: ScheduleReportTime{
+						Start:          time.Unix(time.Now().Unix()-x*7400, 0),
+						Finished:       time.Unix(time.Now().Unix()-x*7350, 0),
+						ElapsedSeconds: 50.0,
+					},
+					Result: 0,
+				}
+				ScheduleReportStore.Table.Add(report)
+				x++
+			}
+		}
+
+		i++
+	}
 }
 
 func printHelpAndExit() {

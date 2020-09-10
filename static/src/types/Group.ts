@@ -4,6 +4,7 @@ import { Notification } from "../components/Notification";
 import { Host } from "./Host";
 import { Script } from "./Script";
 import { Variable } from "./Variable";
+import { Schedule } from "./Schedule";
 
 export class Group {
     ID: string;
@@ -149,6 +150,23 @@ export class Group {
         const data = await API.POST('/api/groups/group/' + this.ID + '/hosts', { Hosts: hostIDs });
         return (data as any[]).map(obj => {
             return new Host(obj);
+        });
+    }
+
+    /**
+     * List all schedules for this group
+     */
+    public async Schedules(): Promise<Schedule[]> {
+        return Group.Schedules(this.ID);
+    }
+
+    /**
+     * List all schedules for a group
+     */
+    public static async Schedules(groupID: string): Promise<Schedule[]> {
+        const data = await API.GET('/api/groups/group/' + groupID + '/schedules');
+        return (data as any[]).map(obj => {
+            return new Schedule(obj);
         });
     }
 }

@@ -6,7 +6,7 @@ import (
 
 // NewID generate a new
 func NewID() string {
-	id, err := nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890", 11)
+	id, err := nanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890._-", 12)
 	if err != nil {
 		panic(err)
 	}

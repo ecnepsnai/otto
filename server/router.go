@@ -53,6 +53,7 @@ func RouterSetup() {
 	server.API.GET("/api/hosts/host/:id", h.HostGet, authenticatedOptions)
 	server.API.GET("/api/hosts/host/:id/scripts", h.HostGetScripts, authenticatedOptions)
 	server.API.GET("/api/hosts/host/:id/groups", h.HostGetGroups, authenticatedOptions)
+	server.API.GET("/api/hosts/host/:id/schedules", h.HostGetSchedules, authenticatedOptions)
 	server.API.POST("/api/hosts/host/:id", h.HostEdit, authenticatedOptions)
 	server.API.DELETE("/api/hosts/host/:id", h.HostDelete, authenticatedOptions)
 
@@ -66,9 +67,21 @@ func RouterSetup() {
 	server.API.GET("/api/groups/group/:id", h.GroupGet, authenticatedOptions)
 	server.API.GET("/api/groups/group/:id/scripts", h.GroupGetScripts, authenticatedOptions)
 	server.API.GET("/api/groups/group/:id/hosts", h.GroupGetHosts, authenticatedOptions)
+	server.API.GET("/api/groups/group/:id/schedules", h.GroupGetSchedules, authenticatedOptions)
 	server.API.POST("/api/groups/group/:id/hosts", h.GroupSetHosts, authenticatedOptions)
 	server.API.POST("/api/groups/group/:id", h.GroupEdit, authenticatedOptions)
 	server.API.DELETE("/api/groups/group/:id", h.GroupDelete, authenticatedOptions)
+
+	// Schedules
+	server.API.GET("/api/schedules", h.ScheduleList, authenticatedOptions)
+	server.API.PUT("/api/schedules/schedule", h.ScheduleNew, authenticatedOptions)
+	server.API.GET("/api/schedules/schedule/:id", h.ScheduleGet, authenticatedOptions)
+	server.API.GET("/api/schedules/schedule/:id/reports", h.ScheduleGetReports, authenticatedOptions)
+	server.API.GET("/api/schedules/schedule/:id/hosts", h.ScheduleGetHosts, authenticatedOptions)
+	server.API.GET("/api/schedules/schedule/:id/groups", h.ScheduleGetGroups, authenticatedOptions)
+	server.API.GET("/api/schedules/schedule/:id/script", h.ScheduleGetScript, authenticatedOptions)
+	server.API.POST("/api/schedules/schedule/:id", h.ScheduleEdit, authenticatedOptions)
+	server.API.DELETE("/api/schedules/schedule/:id", h.ScheduleDelete, authenticatedOptions)
 
 	// Heartbeats
 	server.API.GET("/api/heartbeat", h.HeartbeatLast, authenticatedOptions)
@@ -79,6 +92,7 @@ func RouterSetup() {
 	server.API.GET("/api/scripts/script/:id", h.ScriptGet, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/hosts", h.ScriptGetHosts, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/groups", h.ScriptGetGroups, authenticatedOptions)
+	server.API.GET("/api/scripts/script/:id/schedules", h.ScriptGetSchedules, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id/groups", h.ScriptSetGroups, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id", h.ScriptEdit, authenticatedOptions)
 	server.API.DELETE("/api/scripts/script/:id", h.ScriptDelete, authenticatedOptions)
@@ -137,6 +151,10 @@ func RouterSetup() {
 		"/scripts/script/:id",
 		"/scripts/script/:id/edit",
 		"/scripts/script/:id/execute",
+		"/schedules",
+		"/schedules/schedule",
+		"/schedules/schedule/:id",
+		"/schedules/schedule/:id/edit",
 		"/options",
 		"/options/users/user",
 		"/options/users/user/:username",

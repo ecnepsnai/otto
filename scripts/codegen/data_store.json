@@ -23,5 +23,9 @@
     {
         "name": "Schedule",
         "object": "Schedule"
+    },
+    {
+        "name": "ScheduleReport",
+        "object": "ScheduleReport"
     }
 ]
