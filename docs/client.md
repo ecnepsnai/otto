@@ -1,31 +1,31 @@
 # Client
 
-An otto client is a individual host that is running the Otto client daemon. Scripts are run on clients.
+An Otto client is a individual host that is running the Otto client daemon. Scripts are run on clients.
 
 ## Installing the Client
 
-Client binaries are provided on any otto server server at `/clients`.
+Client binaries are provided on any Otto server server at `/clients`.
 
 ## Running the Client
 
-The otto client is a static exectuable file that supports any *nix like system (Linux, BSD, macOS, Solaris).
+The Otto client is a static executable file that supports any *nix like system (Linux, BSD, macOS, Solaris).
 
 It works best if you run it as root, but will run as a non-root user.
 
 ### Automatic Registration
 
-If enabled on the server, clients can configure themselves by automatically registering with the otto server.
+If enabled on the server, clients can configure themselves by automatically registering with the Otto server.
 
 For server configuration information, see the server documentation.
 
-Run the otto client executable with the following envrionment variables **only once** to register the host:
+Run the Otto client executable with the following environment variables **only once** to register the host:
 
 |Variable|Description|
 |-|-|
-|`REGISTER_HOST`|The base URL of the otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
+|`REGISTER_HOST`|The base URL of the Otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
 |`REGISTER_PSK`|The register PSK|
 |`REGISTER_NO_TLS_VERIFY`|Optional. If `1` then no TLS verification is done when connecting to the server.|
-|`OTTO_CLIENT_PORT`|Optional. Specify the port that the otto client will listen on.|
+|`OTTO_CLIENT_PORT`|Optional. Specify the port that the Otto client will listen on.|
 
 **Example:**
 
@@ -37,8 +37,8 @@ The client will then configure itself and exit with a status code of `0` and wil
 
 ### Manual Configuration
 
-You may also manually configure the otto client with a configuration file. The configuration file is a JSON file with a
-single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the otto client binary.
+You may also manually configure the Otto client with a configuration file. The configuration file is a JSON file with a
+single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client binary.
 
 |Property|Required|Description|
 |-|-|-|

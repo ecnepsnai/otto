@@ -1,27 +1,28 @@
 # Scripts
 
-A script is configured on the otto server and is executed on the otto client. Scripts can be in any executable format as long
-as the executable itself requires only the first and only parameter being the path to the script.
+A script is configured on the Otto server and is executed on the Otto client. Scripts can be in any executable format as long as the executable itself requires only the first and only parameter being the path to the script.
 
 For example: `bash <script>`, `python <python file>`
 
 ## Environment Variables
 
-Environment variables allow you to customize the results of the script on a per host basis.
+Environment variables are run-time variables that are passed to the script when it is run on the host. Variables can be configured in a couple different locations, and cascade down overwriting any duplicate keys.
 
-Envrionment variables can be configured at multiple levels:
-
-1. **Global**. Configured in the options page on the Otto server. They're included in all scripts.
+1. **Global**. Configured in the options page on the Otto server. These are included in all scripts.
 2. **Script**. Configured in the script. These overwrite global variables.
 3. **Group**. Configured in the group. These overwrite script variables.
-4. **Host**. Configured in the host. These overwrite host variabled.
+4. **Host**. Configured in the host. These overwrite host variables.
 
-Lastly, there are a number of implicit variables that are automatically included:
+For example, you may want to have a script that sets a users password. The script will contain a default password but individual groups could specify a different password that would be used by the script.
+
+Lastly, there are a number of implicit variables that are automatically included and can not be overwritten:
 
 |Key|Value|
 |-|-|
-|`OTTO_URL`|The absolute URL to the otto server, configured in the options page|
-|`OTTO_VERSION`|The version of the otto software|
+|`OTTO_URL`|The absolute URL to the Otto server, configured in the options page|
+|`OTTO_VERSION`|The version of the Otto software|
 |`OTTO_HOST_ADDRESS`|The configured address of the host this script is executing on|
 |`OTTO_HOST_PORT`|The configured port of the host this script is executing on|
 |`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on|
+
+When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in the web interface.
