@@ -101,11 +101,13 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Er
 func (s scheduleStoreObject) RunSchedules() {
 	schedules, err := s.AllSchedules()
 	if err != nil {
-
+		log.Error("Error fetching all schedules: %s", err.Message)
+		return
 	}
 
 	for _, schedule := range schedules {
 		if !schedule.Enabled {
+			log.Debug("Skipping disabled schedule: %s", schedule.ID)
 			continue
 		}
 

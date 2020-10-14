@@ -24,6 +24,13 @@ func CronSetup() {
 				logtic.Rotate()
 			},
 		},
+		{
+			Pattern: "* * * * *",
+			Name:    "RunSchedules",
+			Exec: func() {
+				ScheduleStore.RunSchedules()
+			},
+		},
 	})
 	if !cronDisabled {
 		go schedule.Start()

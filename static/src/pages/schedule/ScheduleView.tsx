@@ -17,6 +17,8 @@ import { DateLabel } from '../../components/DateLabel';
 import { SchedulePattern } from './SchedulePattern';
 import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
+import { Nothing } from '../../components/Nothing';
+import { Popover } from '../../components/Popover';
 
 export interface ScheduleViewProps {
     match: match;
@@ -135,6 +137,18 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
         );
     }
 
+    private historyContent = () => {
+        if (this.state.reports.length == 0) {
+            return (<Card.Body><Nothing /></Card.Body>);
+        }
+
+        return (<ListGroup.List>
+            { this.state.reports.map((report, idx) => {
+                return (<ScheduleReportItem report={report} key={idx}/>);
+            })}
+        </ListGroup.List>);
+    }
+
     render(): JSX.Element {
         if (this.state.loading) { return (<PageLoading />); }
 
@@ -162,11 +176,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
                         <Layout.Column>
                             <Card.Card>
                                 <Card.Header>History</Card.Header>
-                                <ListGroup.List>
-                                    { this.state.reports.map((report, idx) => {
-                                        return (<ScheduleReportItem report={report} key={idx}/>);
-                                    })}
-                                </ListGroup.List>
+                                {this.historyContent()}
                             </Card.Card>
                         </Layout.Column>
                     </Layout.Row>
@@ -192,7 +202,7 @@ class ScheduleReportItem extends React.Component<ScheduleReportItemProps, {}> {
             <ListGroup.Item>
                 {icon}
                 <span className="ml-1">
-                    <DateLabel date={this.props.report.Time.Start} />
+                    <DateLabel date={this.props.report.Time.Start} /> on {this.props.report.HostIDs.length} hosts
                 </span>
             </ListGroup.Item>
         );
