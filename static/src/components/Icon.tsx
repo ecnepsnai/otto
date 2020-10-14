@@ -30,6 +30,7 @@ import {
     faSignOutAlt,
     faCalendarAlt,
     faExclamationTriangle,
+    faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import '../../css/icon.scss';
 
@@ -81,6 +82,7 @@ export namespace Icon {
     export class SignOut extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faSignOutAlt} options={this.props}/> );}}
     export class Calendar extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faCalendarAlt} options={this.props}/> );}}
     export class ExclamationTriangle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faExclamationTriangle} options={this.props}/> );}}
+    export class ArrowLeft extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faArrowLeft} options={this.props}/> );}}
 
     export class Descendant extends React.Component<IconProps, {}> {render(): JSX.Element {
         return ( <span className="descendant-icon"><FontAwesomeIcon icon={faLevelDownAlt} flip="horizontal" transform={{ rotate: 90 }}/></span> );

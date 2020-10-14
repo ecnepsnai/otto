@@ -17,6 +17,7 @@ interface HostEditState {
     loading: boolean;
     host?: Host;
     isNew?: boolean;
+    useHostName?: boolean;
 }
 export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     constructor(props: HostEditProps) {
@@ -33,10 +34,19 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     loadHost(): void {
         const id = (this.props.match.params as URLParams).id;
         if (id == null) {
-            this.setState({ isNew: true, host: Host.Blank(), loading: false });
+            this.setState({
+                isNew: true,
+                host: Host.Blank(),
+                loading: false,
+                useHostName: true,
+            });
         } else {
             Host.Get(id).then(host => {
-                this.setState({ loading: false, host: host });
+                this.setState({
+                    loading: false,
+                    host: host,
+                    useHostName: host.Name == host.Address,
+                });
             });
         }
     }
@@ -116,6 +126,23 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
         });
     }
 
+    private changeUseHostName = (useHostName: boolean) => {
+        this.setState({ useHostName: useHostName });
+    }
+
+    private addressInput = () => {
+        if (this.state.useHostName) { return null; }
+
+        return (
+            <Input
+                label="Address"
+                type="text"
+                defaultValue={this.state.host.Address}
+                onChange={this.changeAddress}
+                required />
+        )
+    }
+
     render(): JSX.Element {
         if (this.state.loading) { return (<PageLoading />); }
 
@@ -128,12 +155,8 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
                     defaultValue={this.state.host.Name}
                     onChange={this.changeName}
                     required />
-                <Input
-                    label="Address"
-                    type="text"
-                    defaultValue={this.state.host.Address}
-                    onChange={this.changeAddress}
-                    required />
+                <Checkbox label="Connect to host using this name" defaultValue={this.state.useHostName} onChange={this.changeUseHostName} />
+                { this.addressInput() }
                 <NumberInput
                     label="Port"
                     defaultValue={this.state.host.Port}

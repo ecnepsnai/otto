@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Schedule } from '../../types/Schedule';
-import { match } from 'react-router-dom';
+import { Link, match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -12,9 +12,13 @@ import { Group } from '../../types/Group';
 import { Host } from '../../types/Host';
 import { GroupCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
+import { Alert } from '../../components/Alert';
+import { Style } from '../../components/Style';
+import { Icon } from '../../components/Icon';
 
 export interface ScheduleEditProps { match: match }
 interface ScheduleEditState {
+    noData?: boolean;
     loading: boolean;
     schedule?: Schedule;
     isNew?: boolean;
@@ -54,6 +58,12 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
             const groups = results[2];
             const hosts = results[3];
             let patternTemplate = '';
+
+            if (!hosts || hosts.length === 0 || !scripts || scripts.length === 0) {
+                this.setState({ noData: true });
+                return;
+            }
+
             if (isNew) {
                 schedule.ScriptID = scripts[0].ID;
                 schedule.Pattern = '0 * * * *';
@@ -221,6 +231,12 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
     }
 
     render(): JSX.Element {
+        if (this.state.noData) return (<Page title="New Schedule">
+            <Alert color={Style.Palette.Danger}>
+                <p>At least one script and host is required before you can create a schedule</p>
+                <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
+            </Alert>
+        </Page>)
         if (this.state.loading) { return (<PageLoading />); }
 
         const runOnChoices: RadioChoice[] = [
