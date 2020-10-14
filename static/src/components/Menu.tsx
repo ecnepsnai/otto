@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Rand } from '../services/Rand';
 import { ButtonProps, Button } from './Button';
+import { Icon } from './Icon';
 
 export interface DropdownProps {
     label: JSX.Element;
@@ -55,6 +57,24 @@ export class MenuItem extends React.Component<MenuItemProps, {}> {
     render(): JSX.Element {
         return (
             <li><a className="dropdown-item" href="#" onClick={this.onClick}>{ this.props.icon }<span className="ml-1">{ this.props.label }</span></a></li>
+        );
+    }
+}
+
+export interface MenuLinkProps {
+    icon?: JSX.Element;
+    label: string;
+    to: string;
+}
+
+export class MenuLink extends React.Component<MenuLinkProps, {}> {
+    render(): JSX.Element {
+        return (
+            <li>
+                <Link to={this.props.to} className="dropdown-item">
+                    <Icon.Label icon={this.props.icon} label={this.props.label} />
+                </Link>
+            </li>
         );
     }
 }

@@ -93,9 +93,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     private closeButton = () => {
         if (this.props.static) { return null; }
         return (
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close"></button>
         );
     }
     private header = () => {
@@ -232,9 +230,7 @@ export class ModalHeader extends React.Component<{}, {}> {
         return (
             <div className="modal-header">
                 { this.props.children }
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close"></button>
             </div>
         );
     }

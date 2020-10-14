@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Script } from '../../types/Script';
 import { Link } from 'react-router-dom';
-import { Dropdown, MenuItem } from '../../components/Menu';
+import { Dropdown, MenuItem, MenuLink } from '../../components/Menu';
 import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
@@ -11,19 +11,7 @@ import { Rand } from '../../services/Rand';
 import { RunModal } from '../run/RunModal';
 
 export interface ScriptListItemProps { script: Script, onReload: () => (void); }
-
-interface ScriptListItemState { navigateToEdit?: boolean }
-
-export class ScriptListItem extends React.Component<ScriptListItemProps, ScriptListItemState> {
-    constructor(props: ScriptListItemProps) {
-        super(props);
-        this.state = { };
-    }
-
-    private editMenuClick = () => {
-        this.setState({ navigateToEdit: true });
-    }
-
+export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
     private deleteMenuClick = () => {
         this.props.script.DeleteModal().then(confirmed => {
             if (confirmed) {
@@ -66,7 +54,7 @@ export class ScriptListItem extends React.Component<ScriptListItemProps, ScriptL
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
                         <MenuItem label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
-                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editMenuClick}/>
+                        <MenuLink label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
                         { this.enableDisableMenu() }
                         <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
                     </Dropdown>

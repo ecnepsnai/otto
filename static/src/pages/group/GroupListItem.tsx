@@ -1,25 +1,13 @@
 import * as React from 'react';
 import { Group } from '../../types/Group';
 import { Link } from 'react-router-dom';
-import { Dropdown, MenuItem } from '../../components/Menu';
+import { Dropdown, MenuItem, MenuLink } from '../../components/Menu';
 import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 
 export interface GroupListItemProps { group: Group, hosts: string[], onReload: () => (void); }
-
-interface GroupListItemState { navigateToEdit?: boolean }
-
-export class GroupListItem extends React.Component<GroupListItemProps, GroupListItemState> {
-    constructor(props: GroupListItemProps) {
-        super(props);
-        this.state = { };
-    }
-
-    private editMenuClick = () => {
-        this.setState({ navigateToEdit: true });
-    }
-
+export class GroupListItem extends React.Component<GroupListItemProps, {}> {
     private deleteMenuClick = () => {
         this.props.group.DeleteModal().then(confirmed => {
             if (confirmed) {
@@ -43,7 +31,7 @@ export class GroupListItem extends React.Component<GroupListItemProps, GroupList
                 <td>{ this.props.group.ScriptIDs.length }</td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editMenuClick}/>
+                        <MenuLink label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + this.props.group.ID + '/edit'}/>
                         <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
                     </Dropdown>
                 </td>

@@ -13,9 +13,7 @@ export class Alert extends React.Component<AlertProps, {}> {
         }
 
         return (
-        <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={this.props.onClose}>
-            <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" className="btn-close" data-dismiss="alert" aria-label="Close" onClick={this.props.onClose}></button>
         );
     }
     render(): JSX.Element {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Schedule } from '../../types/Schedule';
 import { Link } from 'react-router-dom';
-import { Dropdown, MenuItem } from '../../components/Menu';
+import { Dropdown, MenuItem, MenuLink } from '../../components/Menu';
 import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
@@ -11,19 +11,7 @@ import { SchedulePattern } from './SchedulePattern';
 import { DateLabel } from '../../components/DateLabel';
 
 export interface ScheduleListItemProps { schedule: Schedule, script: Script, onReload: () => (void); }
-
-interface ScheduleListItemState { navigateToEdit?: boolean }
-
-export class ScheduleListItem extends React.Component<ScheduleListItemProps, ScheduleListItemState> {
-    constructor(props: ScheduleListItemProps) {
-        super(props);
-        this.state = { };
-    }
-
-    private editMenuClick = () => {
-        this.setState({ navigateToEdit: true });
-    }
-
+export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}> {
     private deleteMenuClick = () => {
         this.props.schedule.DeleteModal().then(confirmed => {
             if (confirmed) {
@@ -59,7 +47,7 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, Sch
                 <td><EnabledBadge value={this.props.schedule.Enabled} /></td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editMenuClick}/>
+                        <MenuLink label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
                         <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
                     </Dropdown>
                 </td>
