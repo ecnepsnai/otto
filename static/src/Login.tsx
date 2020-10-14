@@ -131,10 +131,10 @@ class Login extends React.Component<LoginProps, LoginState> {
             <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
             <form onSubmit={this.formSubmit}>
                 { this.loginError() }
-                <label htmlFor="username" className="sr-only">Username</label>
-                <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control top" placeholder="Username" required autoFocus disabled={this.state.loading}/>
-                <label htmlFor="password" className="sr-only">Password</label>
-                <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control bottom" placeholder="Password" required  disabled={this.state.loading}/>
+                <label htmlFor="username" className="visually-hidden">Username</label>
+                <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control" placeholder="Username" required autoFocus disabled={this.state.loading}/>
+                <label htmlFor="password" className="visually-hidden">Password</label>
+                <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control" placeholder="Password" required  disabled={this.state.loading}/>
                 <button className="btn btn-lg login-button btn-block" id="login_button" type="submit" disabled={this.state.loading}>Sign in</button>
             </form>
         </div>
