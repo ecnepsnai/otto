@@ -66,7 +66,7 @@ export class GroupList extends React.Component<GroupListProps, GroupListState> {
                     <Table.Body>
                         {
                             this.state.groups.map(group => {
-                                return <GroupListItem group={group} hosts={this.state.membership[group.ID]} key={group.ID} onReload={this.loadData}></GroupListItem>;
+                                return <GroupListItem group={group} hosts={this.state.membership[group.ID]} key={group.ID} onReload={this.loadData} numGroups={this.state.groups.length}></GroupListItem>;
                             })
                         }
                     </Table.Body>

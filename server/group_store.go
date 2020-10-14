@@ -182,6 +182,10 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 		return ErrorUser("Can't delete group that is used in a schedule")
 	}
 
+	if groups, _ := s.AllGroups(); len(groups) <= 1 {
+		return ErrorUser("At least one group must exist")
+	}
+
 	if err := s.Table.Delete(*group); err != nil {
 		log.Error("Error deleting group '%s': %s", group.Name, err.Error())
 		return ErrorFrom(err)

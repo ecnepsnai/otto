@@ -6,7 +6,7 @@ import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 
-export interface GroupListItemProps { group: Group, hosts: string[], onReload: () => (void); }
+export interface GroupListItemProps { group: Group, hosts: string[], onReload: () => (void), numGroups: number }
 export class GroupListItem extends React.Component<GroupListItemProps, {}> {
     private deleteMenuClick = () => {
         this.props.group.DeleteModal().then(confirmed => {
@@ -24,6 +24,12 @@ export class GroupListItem extends React.Component<GroupListItemProps, {}> {
             outline: true,
             size: Style.Size.XS,
         };
+
+        let deleteMenuItem: JSX.Element = null;
+        if (this.props.numGroups > 1) {
+            deleteMenuItem = (<MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>);
+        }
+
         return (
             <Table.Row>
                 <td>{ link }</td>
@@ -32,7 +38,7 @@ export class GroupListItem extends React.Component<GroupListItemProps, {}> {
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
                         <MenuLink label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + this.props.group.ID + '/edit'}/>
-                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                        {deleteMenuItem}
                     </Dropdown>
                 </td>
             </Table.Row>
