@@ -61,6 +61,7 @@ export class ScheduleList extends React.Component<ScheduleListProps, ScheduleLis
                 </Buttons>
                 <Table.Table>
                     <Table.Head>
+                        <Table.Column>Name</Table.Column>
                         <Table.Column>Script</Table.Column>
                         <Table.Column>Frequency</Table.Column>
                         <Table.Column>Scope</Table.Column>

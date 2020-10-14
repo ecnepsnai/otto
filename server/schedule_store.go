@@ -98,6 +98,24 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Er
 	return schedules, nil
 }
 
+func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
+	object, err := s.Table.GetUnique("Name", name)
+	if err != nil {
+		log.Error("Error getting schedule by name: %s", err.Error())
+		return nil
+	}
+	if object == nil {
+		return nil
+	}
+
+	schedule, ok := object.(Schedule)
+	if !ok {
+		log.Error("Invalid type")
+		return nil
+	}
+	return &schedule
+}
+
 func (s scheduleStoreObject) RunSchedules() {
 	schedules, err := s.AllSchedules()
 	if err != nil {
@@ -119,7 +137,8 @@ func (s scheduleStoreObject) RunSchedules() {
 }
 
 type newScheduleParameters struct {
-	ScriptID string `ds:"index"`
+	ScriptID string
+	Name     string
 	Scope    ScheduleScope
 	Pattern  string
 }
@@ -131,7 +150,9 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 	if len(params.Scope.GroupIDs) <= 0 && len(params.Scope.HostIDs) <= 0 {
 		return nil, ErrorUser("Must specify at least one group or host")
 	}
-
+	if schedule, _ := s.Table.GetUnique("Name", params.Name); schedule != nil {
+		return nil, ErrorUser("Duplicate script name")
+	}
 	if script, _ := ScriptStore.ScriptWithID(params.ScriptID); script == nil {
 		return nil, ErrorUser("Unknown script ID '%s'", params.ScriptID)
 	}
@@ -150,6 +171,7 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 
 	schedule := Schedule{
 		ID:       NewID(),
+		Name:     params.Name,
 		ScriptID: params.ScriptID,
 		Scope: ScheduleScope{
 			HostIDs:  params.Scope.HostIDs,
@@ -169,6 +191,7 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 }
 
 type editScheduleParameters struct {
+	Name    string
 	Scope   ScheduleScope
 	Pattern string
 	Enabled bool
@@ -180,6 +203,9 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 	}
 	if len(params.Scope.GroupIDs) <= 0 && len(params.Scope.HostIDs) <= 0 {
 		return nil, ErrorUser("Must specify at least one group or host")
+	}
+	if existing := s.ScheduleWithName(params.Name); existing != nil && existing.ID != schedule.ID {
+		return nil, ErrorUser("Schedule with name '%s' already exists", params.Name)
 	}
 
 	for _, groupID := range params.Scope.GroupIDs {
@@ -194,6 +220,7 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 		}
 	}
 
+	schedule.Name = params.Name
 	schedule.Scope.HostIDs = params.Scope.HostIDs
 	schedule.Scope.GroupIDs = params.Scope.GroupIDs
 	schedule.Pattern = params.Pattern

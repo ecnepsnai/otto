@@ -164,6 +164,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
                             <Card.Card>
                                 <Card.Header>Schedule Information</Card.Header>
                                 <ListGroup.List>
+                                    <ListGroup.TextItem title="Name">{ this.state.schedule.Name }</ListGroup.TextItem>
                                     <ListGroup.TextItem title="Script"><Link to={'/scripts/script/' + this.state.schedule.ScriptID}>{this.state.script.Name}</Link></ListGroup.TextItem>
                                     <ListGroup.TextItem title="Frequency"><SchedulePattern pattern={this.state.schedule.Pattern} /></ListGroup.TextItem>
                                     <ListGroup.TextItem title="Last Run"><DateLabel date={this.state.schedule.LastRunTime} /></ListGroup.TextItem>

@@ -84,6 +84,14 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
         });
     }
 
+    private changeName = (Name: string) => {
+        this.setState(state => {
+            const schedule = state.schedule;
+            schedule.Name = Name;
+            return { schedule: schedule };
+        });
+    }
+
     private changeScriptID = (ScriptID: string) => {
         this.setState(state => {
             const schedule = state.schedule;
@@ -229,6 +237,12 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
         return (
         <Page title={ this.state.isNew ? 'New Schedule' : 'Edit Schedule' }>
             <Form showSaveButton onSubmit={this.formSave}>
+                <Input
+                    label="Name"
+                    type="text"
+                    defaultValue={this.state.schedule.Name}
+                    onChange={this.changeName}
+                    required />
                 <Select
                     label="Script"
                     defaultValue={this.state.schedule.ScriptID}

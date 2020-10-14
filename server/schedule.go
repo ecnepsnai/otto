@@ -9,6 +9,7 @@ import (
 // Schedule describes a recurring task
 type Schedule struct {
 	ID          string `ds:"primary"`
+	Name        string `ds:"unique"`
 	ScriptID    string `ds:"index"`
 	Scope       ScheduleScope
 	Pattern     string
@@ -89,7 +90,7 @@ func (s Schedule) RunNow() {
 		for _, id := range s.Scope.GroupIDs {
 			hostIDs, ok := GetGroupCache()[id]
 			if !ok {
-				log.Error("Group cache empty, canot run scheduled script")
+				log.Error("Group cache empty, cannot run scheduled script")
 				return
 			}
 			for _, hostID := range hostIDs {

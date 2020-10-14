@@ -31,7 +31,7 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
     }
 
     render(): JSX.Element {
-        const link = <Link to={'/schedules/schedule/' + this.props.schedule.ID}>{ this.props.script.Name }</Link>;
+        const link = <Link to={'/schedules/schedule/' + this.props.schedule.ID}>{ this.props.schedule.Name }</Link>;
         const dropdownLabel = <Icon.Bars />;
         const buttonProps = {
             color: Style.Palette.Secondary,
@@ -41,6 +41,7 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
         return (
             <Table.Row>
                 <td>{ link }</td>
+                <td>{ this.props.script.Name }</td>
                 <td><SchedulePattern pattern={this.props.schedule.Pattern} /></td>
                 {this.enabledOnColumn()}
                 <td><DateLabel date={this.props.schedule.LastRunTime} /></td>

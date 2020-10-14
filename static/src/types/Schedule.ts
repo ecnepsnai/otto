@@ -7,6 +7,7 @@ import { Script } from "./Script";
 
 export class Schedule {
     ID: string;
+    Name: string;
     ScriptID: string;
     Scope: ScheduleScope;
     Pattern: string;
@@ -15,6 +16,7 @@ export class Schedule {
 
     public constructor(json: any) {
         this.ID = json.ID as string;
+        this.Name = json.Name as string;
         this.ScriptID = json.ScriptID as string;
         this.Scope = json.Scope as ScheduleScope;
         this.Pattern = json.Pattern as string;
@@ -27,6 +29,7 @@ export class Schedule {
      */
     public static Blank(): Schedule {
         return new Schedule({
+            Name: '',
             ScriptID: '',
             Scope: {
                 HostIDs: [],
@@ -169,12 +172,14 @@ export interface ScheduleScope {
 }
 
 export interface NewScheduleParameters {
+    Name: string;
     ScriptID: string;
     Scope: ScheduleScope;
     Pattern: string;
 }
 
 export interface EditScheduleParameters {
+    Name: string;
     Scope: ScheduleScope;
     Pattern: string;
     Enabled: boolean;
