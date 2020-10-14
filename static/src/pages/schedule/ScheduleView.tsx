@@ -18,7 +18,6 @@ import { SchedulePattern } from './SchedulePattern';
 import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
 import { Nothing } from '../../components/Nothing';
-import { Popover } from '../../components/Popover';
 
 export interface ScheduleViewProps {
     match: match;

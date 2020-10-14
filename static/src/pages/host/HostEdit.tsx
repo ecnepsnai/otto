@@ -140,7 +140,7 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
                 defaultValue={this.state.host.Address}
                 onChange={this.changeAddress}
                 required />
-        )
+        );
     }
 
     render(): JSX.Element {

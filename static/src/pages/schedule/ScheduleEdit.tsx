@@ -236,7 +236,7 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
                 <p>At least one script and host is required before you can create a schedule</p>
                 <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
             </Alert>
-        </Page>)
+        </Page>);
         if (this.state.loading) { return (<PageLoading />); }
 
         const runOnChoices: RadioChoice[] = [
