@@ -117,6 +117,16 @@ func newRequest(c net.Conn) {
 }
 
 func runScript(script otto.Script) otto.ScriptResult {
+	for _, file := range script.Files {
+		if err := uploadFile(file); err != nil {
+			log.Error("Error uploading script file '%s': %s", file.Path, err.Error())
+			return otto.ScriptResult{
+				Success:   false,
+				ExecError: err.Error(),
+			}
+		}
+	}
+
 	tmp, err := ioutil.TempFile("", "otto")
 	if err != nil {
 		panic(err)

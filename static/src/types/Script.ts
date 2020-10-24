@@ -4,6 +4,7 @@ import { Notification } from "../components/Notification";
 import { Group } from "./Group";
 import { Variable } from "./Variable";
 import { Schedule } from "./Schedule";
+import { File } from "./File";
 
 export class Script {
     ID: string;
@@ -16,6 +17,7 @@ export class Script {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    FileIDs: string[];
 
     constructor(json: any) {
         this.ID = json.ID as string;
@@ -28,6 +30,7 @@ export class Script {
         this.GID = json.GID as number;
         this.WorkingDirectory = json.WorkingDirectory as string;
         this.AfterExecution = json.AfterExecution as string;
+        this.FileIDs = (json.FileIDs || []) as string[];
     }
 
     /**
@@ -42,6 +45,7 @@ export class Script {
             Enabled: '',
             GroupIDs: [],
             Environment: [],
+            FileIDs: [],
         });
     }
 
@@ -171,6 +175,23 @@ export class Script {
             return new Schedule(obj);
         });
     }
+
+    /**
+     * List all files for this script
+     */
+    public async Files(): Promise<File[]> {
+        return Script.Files(this.ID);
+    }
+
+    /**
+     * List all files for a script
+     */
+    public static async Files(id: string): Promise<File[]> {
+        const data = await API.GET('/api/scripts/script/' + id + '/files');
+        return (data as any[]).map(obj => {
+            return new File(obj);
+        });
+    }
 }
 
 export interface ScriptEnabledHost {
@@ -191,6 +212,7 @@ export interface NewScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    FileIDs: string[];
 }
 
 export interface EditScriptParameters {
@@ -203,4 +225,5 @@ export interface EditScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    FileIDs: string[];
 }

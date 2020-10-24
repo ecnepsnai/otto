@@ -46,6 +46,7 @@ type Script struct {
 	Environment      map[string]string
 	WorkingDirectory string
 	Executable       string
+	Files            []File
 	Data             []byte
 }
 

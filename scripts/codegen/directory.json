@@ -7,7 +7,13 @@
     {
         "name": "Data",
         "dir_name": "data",
-        "is_data": true
+        "is_data": true,
+        "subdirs": [
+            {
+                "name": "Files",
+                "dir_name": "files"
+            }
+        ]
     },
     {
         "name": "Static",
