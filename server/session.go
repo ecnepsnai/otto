@@ -26,7 +26,7 @@ func (s sessionStoreObject) NewSessionForUser(user *User) (Session, string, *Err
 		Username: user.Username,
 		Expires:  time.Now().AddDate(0, 0, 1).Unix(),
 	}
-	sessionHash := security.HashString(session.Secret + session.Username)
+	sessionHash := security.HashSHA256String(session.Secret + session.Username)
 	sessionCookie := session.ID + "$" + sessionHash
 	log.Info("Started new session for user: '%s' with session ID: '%s'", user.Username, session.ID)
 

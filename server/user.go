@@ -88,11 +88,17 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 		return nil, ErrorUser("User with email '%s' already exists", params.Email)
 	}
 
+	hashedPassword, erro := security.HashPassword([]byte(params.Password))
+	if erro != nil {
+		log.Error("Error hasing user password: %s", erro.Error())
+		return nil, ErrorFrom(erro)
+	}
+
 	user := User{
 		Username:     params.Username,
 		Email:        params.Email,
 		Enabled:      true,
-		PasswordHash: security.HashPassword(params.Password),
+		PasswordHash: *hashedPassword,
 	}
 
 	if err := s.Table.Add(user); err != nil {
@@ -123,7 +129,13 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 	user.Email = params.Email
 	user.Enabled = params.Enabled
 	if params.Password != "" {
-		user.PasswordHash = security.HashPassword(params.Password)
+		hashedPassword, erro := security.HashPassword([]byte(params.Password))
+		if erro != nil {
+			log.Error("Error hasing user password: %s", erro.Error())
+			return nil, ErrorFrom(erro)
+		}
+
+		user.PasswordHash = *hashedPassword
 	}
 
 	if err := s.Table.Update(*user); err != nil {

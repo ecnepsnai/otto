@@ -61,7 +61,7 @@ func authenticateUser(sessionCookie *http.Cookie) *Session {
 		return nil
 	}
 
-	trustedHash := security.HashString(session.Secret + session.Username)
+	trustedHash := security.HashSHA256String(session.Secret + session.Username)
 	if trustedHash != sessionHash {
 		log.Warn("Invalid otto session hash")
 		log.Debug("'%s' != '%s'", trustedHash, sessionHash)
@@ -96,9 +96,18 @@ func AuthenticateUser(credentials Credentials, req *http.Request) (*Authenticati
 		return nil, web.CommonErrors.Unauthorized
 	}
 
-	if !user.PasswordHash.Compare(credentials.Password) {
+	if !user.PasswordHash.Compare([]byte(credentials.Password)) {
 		log.Warn("Incorrect password provided for user: '%s'", user.Username)
 		return nil, web.CommonErrors.Unauthorized
+	}
+
+	if upgradedPassword := user.PasswordHash.Upgrade([]byte(credentials.Password)); upgradedPassword != nil {
+		user.PasswordHash = *upgradedPassword
+		if err := UserStore.Table.Update(*user); err != nil {
+			log.Error("Error upgrading user password: %s", err.Error())
+		} else {
+			log.Info("Upgraded password for user '%s'", user.Username)
+		}
 	}
 
 	session, cookieValue, err := SessionStore.NewSessionForUser(user)
