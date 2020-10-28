@@ -1,5 +1,7 @@
 /*
 Package otto an automation toolkit for Unix-like computers.
+
+This package contains the common interfaces and methods shared by the Otto client and Otto server.
 */
 package otto
 
@@ -15,6 +17,9 @@ import (
 )
 
 var log = logtic.Connect("libotto")
+
+// ProtocolVersion the version of the otto protocol
+const ProtocolVersion = uint32(1)
 
 func init() {
 	gob.Register(Request{})
@@ -135,6 +140,17 @@ func readEncryptedMessage(r io.Reader, psk string) ([]byte, error) {
 
 // ReadRequest try to read a request from the given reader
 func ReadRequest(r io.Reader, psk string) (*Request, error) {
+	versionBuf := make([]byte, 4)
+	if _, err := io.ReadFull(r, versionBuf); err != nil {
+		log.Error("Error reading version: %s", err.Error())
+		return nil, err
+	}
+	version := binary.LittleEndian.Uint32(versionBuf)
+	log.Debug("Protocol version: %d", version)
+	if version != ProtocolVersion {
+		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
+	}
+
 	data, err := readEncryptedMessage(r, psk)
 	if err != nil {
 		log.Error("Error reading encrypted data: %s", err.Error())
@@ -152,6 +168,17 @@ func ReadRequest(r io.Reader, psk string) (*Request, error) {
 
 // ReadReply try to read a reply from the given reader
 func ReadReply(r io.Reader, psk string) (*Reply, error) {
+	versionBuf := make([]byte, 4)
+	if _, err := io.ReadFull(r, versionBuf); err != nil {
+		log.Error("Error reading version: %s", err.Error())
+		return nil, err
+	}
+	version := binary.LittleEndian.Uint32(versionBuf)
+	log.Debug("Protocol version: %d", version)
+	if version != ProtocolVersion {
+		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
+	}
+
 	data, err := readEncryptedMessage(r, psk)
 	if err != nil {
 		log.Error("Error reading encrypted data: %s", err.Error())
@@ -174,13 +201,21 @@ func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
 		return nil
 	}
 
-	length := len(encryptedData)
-	lenBuf := make([]byte, 4)
-	log.Debug("Encrypted data length: %d", length)
-	binary.LittleEndian.PutUint32(lenBuf, uint32(length))
+	versionBuf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(versionBuf, ProtocolVersion)
 
-	replyBuf := make([]byte, 4+length)
+	dataLength := len(encryptedData)
+	lenBuf := make([]byte, 4)
+	log.Debug("Encrypted data length: %d", dataLength)
+	binary.LittleEndian.PutUint32(lenBuf, uint32(dataLength))
+
+	replyLength := len(versionBuf) + len(lenBuf) + dataLength
+	replyBuf := make([]byte, replyLength)
 	i := 0
+	for _, b := range versionBuf {
+		replyBuf[i] = b
+		i++
+	}
 	for _, b := range lenBuf {
 		replyBuf[i] = b
 		i++

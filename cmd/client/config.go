@@ -7,6 +7,7 @@ import (
 )
 
 type clientConfig struct {
+	ListenAddr string `json:"listen_addr"`
 	PSK        string `json:"psk"`
 	LogPath    string `json:"log_path"`
 	DefaultUID uint32 `json:"default_uid"`
@@ -28,7 +29,12 @@ func loadConfig() error {
 	}
 	defer f.Close()
 
-	c := clientConfig{}
+	c := clientConfig{
+		ListenAddr: "localhost:12444",
+		LogPath:    ".",
+		DefaultUID: 0,
+		DefaultGID: 0,
+	}
 	if err := json.NewDecoder(f).Decode(&c); err != nil {
 		return err
 	}
@@ -36,6 +42,10 @@ func loadConfig() error {
 
 	if config.PSK == "" {
 		return fmt.Errorf("empty PSK prohibited")
+	}
+
+	if config.ListenAddr == "" {
+		return fmt.Errorf("empty listen address prohibited")
 	}
 
 	return nil

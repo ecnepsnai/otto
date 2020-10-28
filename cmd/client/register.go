@@ -148,7 +148,7 @@ func tryAutoRegister() {
 	}
 }
 
-// envMap return a map of all envrionment variables
+// envMap return a map of all environment variables
 func envMap() map[string]string {
 	results := map[string]string{}
 	for _, env := range os.Environ() {

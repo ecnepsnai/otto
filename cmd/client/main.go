@@ -30,11 +30,11 @@ func main() {
 	logtic.Open()
 	log = logtic.Connect("otto")
 
-	l, err := net.Listen("tcp", "0.0.0.0:12444")
+	l, err := net.Listen("tcp", config.ListenAddr)
 	if err != nil {
 		panic(err)
 	}
-	log.Info("Otto client listening on 0.0.0.0:12444")
+	log.Info("Otto client listening on %s", config.ListenAddr)
 	for {
 		c, err := l.Accept()
 		if err != nil {
@@ -54,7 +54,7 @@ func parseArgs() {
 	for i < len(args) {
 		arg := args[i]
 		if arg == "-v" || arg == "--version" {
-			fmt.Printf("Otto client %s (Runtime %s)\n", MainVersion, runtime.Version())
+			fmt.Printf("Otto client %s, Protocol version: %d, Runtime %s\n", MainVersion, otto.ProtocolVersion, runtime.Version())
 			os.Exit(0)
 		}
 		i++
@@ -133,10 +133,12 @@ func runScript(script otto.Script) otto.ScriptResult {
 	}
 	log.Debug("Writing script to %s", tmp.Name())
 	if err := tmp.Chmod(0777); err != nil {
+		tmp.Close()
 		panic(err)
 	}
 	defer os.Remove(tmp.Name())
 	if _, err := io.CopyBuffer(tmp, bytes.NewBuffer(script.Data), nil); err != nil {
+		tmp.Close()
 		panic(err)
 	}
 	tmp.Close()
