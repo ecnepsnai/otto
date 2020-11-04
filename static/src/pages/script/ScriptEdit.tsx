@@ -11,6 +11,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
+import { FileList } from './file/FileList';
 
 export interface ScriptEditProps { match: match }
 interface ScriptEditState {
@@ -131,6 +132,13 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         });
     }
 
+    private changeFiles = (FileIDs: string[]) => {
+        this.setState(state => {
+            state.script.FileIDs = FileIDs;
+            return state;
+        });
+    }
+
     private formSave = () => {
         let promise: Promise<Script>;
         if (this.state.isNew) {
@@ -203,6 +211,12 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     <Card.Header>Groups</Card.Header>
                     <Card.Body>
                         <GroupCheckList selectedGroups={this.state.groupIDs} onChange={this.changeGroupIDs}/>
+                    </Card.Body>
+                </Card.Card>
+                <Card.Card className="mt-3">
+                    <Card.Header>Files</Card.Header>
+                    <Card.Body>
+                        <FileList scriptID={this.state.script.ID} didUpdateFiles={this.changeFiles}/>
                     </Card.Body>
                 </Card.Card>
                 <hr/>
