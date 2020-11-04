@@ -74,11 +74,11 @@ func (host *Host) Ping() *Error {
 func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	start := time.Now()
 
-	fileIDs, err := script.Files()
+	fileIDs, err := script.Attachments()
 	if err != nil {
 		return nil, err
 	}
-	files := make([]otto.File, len(script.FileIDs))
+	files := make([]otto.File, len(script.AttachmentIDs))
 	for i, file := range fileIDs {
 		file, erro := file.OttoFile()
 		if erro != nil {

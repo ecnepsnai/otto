@@ -93,17 +93,17 @@ func RouterSetup() {
 	server.API.GET("/api/scripts/script/:id/hosts", h.ScriptGetHosts, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/groups", h.ScriptGetGroups, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/schedules", h.ScriptGetSchedules, authenticatedOptions)
-	server.API.GET("/api/scripts/script/:id/files", h.ScriptGetFiles, authenticatedOptions)
+	server.API.GET("/api/scripts/script/:id/attachments", h.ScriptGetAttachments, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id/groups", h.ScriptSetGroups, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id", h.ScriptEdit, authenticatedOptions)
 	server.API.DELETE("/api/scripts/script/:id", h.ScriptDelete, authenticatedOptions)
 
-	// Script Files
-	server.API.GET("/api/files/file", h.FileList, authenticatedOptions)
-	server.API.PUT("/api/files/file", h.FileUpload, authenticatedOptions)
-	server.API.GET("/api/files/file/:id", h.FileGet, authenticatedOptions)
-	server.API.POST("/api/files/file/:id", h.FileEdit, authenticatedOptions)
-	server.API.DELETE("/api/files/file/:id", h.FileDelete, authenticatedOptions)
+	// Attachments
+	server.API.GET("/api/attachments", h.AttachmentList, authenticatedOptions)
+	server.API.PUT("/api/attachments", h.AttachmentUpload, authenticatedOptions)
+	server.API.GET("/api/attachments/attachment/:id", h.AttachmentGet, authenticatedOptions)
+	server.API.POST("/api/attachments/attachment/:id", h.AttachmentEdit, authenticatedOptions)
+	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions)
 
 	// Request
 	server.API.PUT("/api/request", h.RequestNew, authenticatedOptions)

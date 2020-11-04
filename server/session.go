@@ -21,7 +21,7 @@ type Session struct {
 // NewSessionForUser start a new session for the given user
 func (s sessionStoreObject) NewSessionForUser(user *User) (Session, string, *Error) {
 	session := Session{
-		ID:       NewID(),
+		ID:       newID(),
 		Secret:   GenerateSessionSecret(),
 		Username: user.Username,
 		Expires:  time.Now().AddDate(0, 0, 1).Unix(),

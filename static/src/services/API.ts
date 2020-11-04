@@ -105,13 +105,13 @@ export class API {
     }
 
     /**
-     * Perform a HTTP POST Multipart Upload to the specified URL
+     * Perform a HTTP PUT Multipart Upload to the specified URL
      * @param url the URL to request
      * @param file The file data
      * @param data Additional paramaters to add to the form data
      * @returns The JSON object of the results
      */
-    public static async POSTFile(url: string, file: Blob, data: { [key: string]: string; }): Promise<Object> {
+    public static async PUTFile(url: string, file: File, data: { [key: string]: string; }): Promise<Object> {
         const fd = new FormData();
         fd.append('file', file);
         Object.keys(data).forEach(key => {
@@ -119,7 +119,7 @@ export class API {
         });
 
         return this.do(url, {
-            method: 'POST',
+            method: 'PUT',
             body: fd
         });
     }

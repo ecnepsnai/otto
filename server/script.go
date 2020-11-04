@@ -17,7 +17,7 @@ type Script struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
-	FileIDs          []string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) ScriptWithID(id string) (*Script, *Error) {
@@ -88,7 +88,7 @@ type newScriptParameters struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
-	FileIDs          []string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Error) {
@@ -105,7 +105,7 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 	}
 
 	script := Script{
-		ID:               NewID(),
+		ID:               newID(),
 		Name:             params.Name,
 		Executable:       params.Executable,
 		Script:           params.Script,
@@ -115,7 +115,7 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		Enabled:          true,
 		WorkingDirectory: params.WorkingDirectory,
 		AfterExecution:   params.AfterExecution,
-		FileIDs:          params.FileIDs,
+		AttachmentIDs:    params.AttachmentIDs,
 	}
 
 	if err := s.Table.Add(script); err != nil {
@@ -137,7 +137,7 @@ type editScriptParameters struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
-	FileIDs          []string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (*Script, *Error) {
@@ -162,7 +162,7 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	script.GID = params.GID
 	script.WorkingDirectory = params.WorkingDirectory
 	script.AfterExecution = params.AfterExecution
-	script.FileIDs = params.FileIDs
+	script.AttachmentIDs = params.AttachmentIDs
 
 	if err := s.Table.Update(*script); err != nil {
 		log.Error("Error updating script '%s': %s", params.Name, err.Error())
@@ -179,9 +179,9 @@ func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
 		return ErrorFrom(err)
 	}
 
-	for _, id := range script.FileIDs {
-		if err := FileStore.DeleteFile(id); err != nil {
-			log.Error("Error deleting script file '%s': %s", id, err.Message)
+	for _, id := range script.AttachmentIDs {
+		if err := AttachmentStore.DeleteAttachment(id); err != nil {
+			log.Error("Error deleting attachment '%s': %s", id, err.Message)
 		}
 	}
 
@@ -304,20 +304,20 @@ func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error 
 	return nil
 }
 
-// Files all files for this script
-func (s *Script) Files() ([]File, *Error) {
-	if len(s.FileIDs) == 0 {
-		return []File{}, nil
+// Attachments all files for this script
+func (s *Script) Attachments() ([]Attachment, *Error) {
+	if len(s.AttachmentIDs) == 0 {
+		return []Attachment{}, nil
 	}
 
-	files := make([]File, len(s.FileIDs))
-	for i, id := range s.FileIDs {
-		file, err := FileStore.FileWithID(id)
+	files := make([]Attachment, len(s.AttachmentIDs))
+	for i, id := range s.AttachmentIDs {
+		file, err := AttachmentStore.AttachmentWithID(id)
 		if err != nil {
 			return nil, err
 		}
 		if file == nil {
-			log.Error("File '%s' does not exist, found on script '%s'", id, s.ID)
+			log.Error("Attachment '%s' does not exist, found on script '%s'", id, s.ID)
 			return nil, ErrorServer("missing file")
 		}
 		files[i] = *file

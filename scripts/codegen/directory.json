@@ -10,8 +10,8 @@
         "is_data": true,
         "subdirs": [
             {
-                "name": "Files",
-                "dir_name": "files"
+                "name": "Attachments",
+                "dir_name": "attachments"
             }
         ]
     },

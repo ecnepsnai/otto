@@ -4,7 +4,7 @@ import { Notification } from "../components/Notification";
 import { Group } from "./Group";
 import { Variable } from "./Variable";
 import { Schedule } from "./Schedule";
-import { File } from "./File";
+import { Attachment } from "./Attachment";
 
 export class Script {
     ID: string;
@@ -17,7 +17,7 @@ export class Script {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
-    FileIDs: string[];
+    AttachmentIDs: string[];
 
     constructor(json: any) {
         this.ID = json.ID as string;
@@ -30,7 +30,7 @@ export class Script {
         this.GID = json.GID as number;
         this.WorkingDirectory = json.WorkingDirectory as string;
         this.AfterExecution = json.AfterExecution as string;
-        this.FileIDs = (json.FileIDs || []) as string[];
+        this.AttachmentIDs = (json.AttachmentIDs || []) as string[];
     }
 
     /**
@@ -45,7 +45,7 @@ export class Script {
             Enabled: '',
             GroupIDs: [],
             Environment: [],
-            FileIDs: [],
+            AttachmentIDs: [],
         });
     }
 
@@ -177,19 +177,19 @@ export class Script {
     }
 
     /**
-     * List all files for this script
+     * List all attachments for this script
      */
-    public async Files(): Promise<File[]> {
-        return Script.Files(this.ID);
+    public async Attachments(): Promise<Attachment[]> {
+        return Script.Attachments(this.ID);
     }
 
     /**
-     * List all files for a script
+     * List all attachments for a script
      */
-    public static async Files(id: string): Promise<File[]> {
-        const data = await API.GET('/api/scripts/script/' + id + '/files');
+    public static async Attachments(id: string): Promise<Attachment[]> {
+        const data = await API.GET('/api/scripts/script/' + id + '/attachments');
         return (data as any[]).map(obj => {
-            return new File(obj);
+            return new Attachment(obj);
         });
     }
 }
@@ -212,7 +212,7 @@ export interface NewScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
-    FileIDs: string[];
+    AttachmentIDs: string[];
 }
 
 export interface EditScriptParameters {
@@ -225,5 +225,5 @@ export interface EditScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
-    FileIDs: string[];
+    AttachmentIDs: string[];
 }

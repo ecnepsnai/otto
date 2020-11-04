@@ -80,7 +80,7 @@ func (s Schedule) RunNow() {
 	}
 
 	report := ScheduleReport{
-		ID:         NewID(),
+		ID:         newID(),
 		ScheduleID: s.ID,
 	}
 	start := time.Now()

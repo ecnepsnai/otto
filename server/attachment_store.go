@@ -2,22 +2,22 @@ package server
 
 import "time"
 
-func (s fileStoreObject) AllFiles() ([]File, *Error) {
+func (s attachmentStoreObject) AllAttachments() ([]Attachment, *Error) {
 	objects, err := s.Table.GetAll(nil)
 	if err != nil {
 		log.Error("Error getting all script files: %s", err.Error())
 		return nil, ErrorFrom(err)
 	}
 	if objects == nil || len(objects) == 0 {
-		return []File{}, nil
+		return []Attachment{}, nil
 	}
 
-	files := make([]File, len(objects))
+	files := make([]Attachment, len(objects))
 	for i, obj := range objects {
-		file, k := obj.(File)
+		file, k := obj.(Attachment)
 		if !k {
-			log.Error("Object is not of type 'File'")
-			return []File{}, ErrorServer("incorrect type")
+			log.Error("Object is not of type 'Attachment'")
+			return []Attachment{}, ErrorServer("incorrect type")
 		}
 		files[i] = file
 	}
@@ -25,22 +25,22 @@ func (s fileStoreObject) AllFiles() ([]File, *Error) {
 	return files, nil
 }
 
-func (s fileStoreObject) AllFilesForScript(scriptID string) ([]File, *Error) {
+func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) ([]Attachment, *Error) {
 	objects, err := s.Table.GetIndex("ScriptID", scriptID, nil)
 	if err != nil {
 		log.Error("Error getting all script files for script '%s': %s", scriptID, err.Error())
 		return nil, ErrorFrom(err)
 	}
 	if objects == nil || len(objects) == 0 {
-		return []File{}, nil
+		return []Attachment{}, nil
 	}
 
-	files := make([]File, len(objects))
+	files := make([]Attachment, len(objects))
 	for i, obj := range objects {
-		file, k := obj.(File)
+		file, k := obj.(Attachment)
 		if !k {
-			log.Error("Object is not of type 'File'")
-			return []File{}, ErrorServer("incorrect type")
+			log.Error("Object is not of type 'Attachment'")
+			return []Attachment{}, ErrorServer("incorrect type")
 		}
 		files[i] = file
 	}
@@ -48,7 +48,7 @@ func (s fileStoreObject) AllFilesForScript(scriptID string) ([]File, *Error) {
 	return files, nil
 }
 
-func (s fileStoreObject) FileWithID(id string) (*File, *Error) {
+func (s attachmentStoreObject) AttachmentWithID(id string) (*Attachment, *Error) {
 	obj, err := s.Table.Get(id)
 	if err != nil {
 		log.Error("Error getting script file with ID '%s': %s", id, err.Error())
@@ -57,24 +57,24 @@ func (s fileStoreObject) FileWithID(id string) (*File, *Error) {
 	if obj == nil {
 		return nil, nil
 	}
-	file, k := obj.(File)
+	file, k := obj.(Attachment)
 	if !k {
-		log.Error("Object is not of type 'File'")
+		log.Error("Object is not of type 'Attachment'")
 		return nil, ErrorServer("incorrect type")
 	}
 
 	return &file, nil
 }
 
-type editFileParams struct {
+type editAttachmentParams struct {
 	Path string
 	UID  int
 	GID  int
 	Mode uint32
 }
 
-func (s fileStoreObject) EditFile(id string, params editFileParams) (*File, *Error) {
-	file, err := s.FileWithID(id)
+func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (*Attachment, *Error) {
+	file, err := s.AttachmentWithID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +96,8 @@ func (s fileStoreObject) EditFile(id string, params editFileParams) (*File, *Err
 	return file, nil
 }
 
-func (s fileStoreObject) DeleteFile(id string) *Error {
-	file, err := s.FileWithID(id)
+func (s attachmentStoreObject) DeleteAttachment(id string) *Error {
+	file, err := s.AttachmentWithID(id)
 	if err != nil {
 		return err
 	}
@@ -113,9 +113,9 @@ func (s fileStoreObject) DeleteFile(id string) *Error {
 	return nil
 }
 
-func (s fileStoreObject) Cleanup() *Error {
+func (s attachmentStoreObject) Cleanup() *Error {
 	filesWithScripts := map[string]bool{}
-	files, err := s.AllFiles()
+	files, err := s.AllAttachments()
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (s fileStoreObject) Cleanup() *Error {
 	}
 	for _, file := range files {
 		for _, script := range scripts {
-			if StringSliceContains(file.ID, script.FileIDs) {
+			if StringSliceContains(file.ID, script.AttachmentIDs) {
 				filesWithScripts[file.ID] = true
 				break
 			}
@@ -139,7 +139,7 @@ func (s fileStoreObject) Cleanup() *Error {
 
 		if time.Since(file.Modified) > 1*time.Hour {
 			log.Warn("Removing orphaned script file '%s'", file.ID)
-			if err := s.DeleteFile(file.ID); err != nil {
+			if err := s.DeleteAttachment(file.ID); err != nil {
 				return err
 			}
 		}

@@ -11,7 +11,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
-import { FileList } from './file/FileList';
+import { AttachmentList } from './attachment/AttachmentList';
 
 export interface ScriptEditProps { match: match }
 interface ScriptEditState {
@@ -132,9 +132,9 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         });
     }
 
-    private changeFiles = (FileIDs: string[]) => {
+    private changeAttachments = (AttachmentIDs: string[]) => {
         this.setState(state => {
-            state.script.FileIDs = FileIDs;
+            state.script.AttachmentIDs = AttachmentIDs;
             return state;
         });
     }
@@ -214,9 +214,9 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     </Card.Body>
                 </Card.Card>
                 <Card.Card className="mt-3">
-                    <Card.Header>Files</Card.Header>
+                    <Card.Header>Attachments</Card.Header>
                     <Card.Body>
-                        <FileList scriptID={this.state.script.ID} didUpdateFiles={this.changeFiles}/>
+                        <AttachmentList scriptID={this.state.script.ID} didUpdateAttachments={this.changeAttachments}/>
                     </Card.Body>
                 </Card.Card>
                 <hr/>

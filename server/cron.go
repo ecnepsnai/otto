@@ -33,9 +33,9 @@ func CronSetup() {
 		},
 		{
 			Pattern: "0 * * * *",
-			Name:    "CleanupScriptFiles",
+			Name:    "CleanupAttachments",
 			Exec: func() {
-				FileStore.Cleanup()
+				AttachmentStore.Cleanup()
 			},
 		},
 	})

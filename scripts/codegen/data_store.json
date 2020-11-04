@@ -29,8 +29,8 @@
         "object": "ScheduleReport"
     },
     {
-        "name": "File",
-        "object": "File",
+        "name": "Attachment",
+        "object": "Attachment",
         "unordered": true
     }
 ]

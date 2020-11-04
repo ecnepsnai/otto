@@ -813,3 +813,45 @@ export class Radio extends React.Component<RadioProps, RadioState> {
         );
     }
 }
+
+export interface FileBrowserProps {
+    /**
+     * The label that appears above the input
+     */
+    label: string;
+    /**
+     * Event called when a file is selected
+     */
+    onChange: (file: File) => (void);
+}
+interface FileBrowserState {
+    fileName?: string;
+}
+export class FileBrowser extends React.Component<FileBrowserProps, FileBrowserState> {
+    constructor(props: FileBrowserProps) {
+        super(props);
+        this.state = {};
+    }
+
+    private didSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files[0];
+        this.props.onChange(file);
+        this.setState({ fileName: file.name });
+    }
+
+    render(): JSX.Element {
+        const fileLabel = this.state.fileName || 'Choose file...';
+        return (
+            <div className="mb-3">
+                <label className="form-label">{this.props.label}</label>
+                <div className="form-file">
+                    <input type="file" className="form-file-input" id="customFile" onChange={this.didSelectFile}/>
+                    <label className="form-file-label" htmlFor="customFile">
+                        <span className="form-file-text">{fileLabel}</span>
+                        <span className="form-file-button">Browse</span>
+                    </label>
+                </div>
+            </div>
+        );
+    }
+}

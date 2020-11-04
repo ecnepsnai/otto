@@ -130,7 +130,7 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	}
 
 	host := Host{
-		ID:          NewID(),
+		ID:          newID(),
 		Name:        params.Name,
 		Address:     params.Address,
 		Port:        params.Port,
