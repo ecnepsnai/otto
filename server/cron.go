@@ -31,6 +31,13 @@ func CronSetup() {
 				ScheduleStore.RunSchedules()
 			},
 		},
+		{
+			Pattern: "0 * * * *",
+			Name:    "CleanupScriptFiles",
+			Exec: func() {
+				FileStore.Cleanup()
+			},
+		},
 	})
 	if !cronDisabled {
 		go schedule.Start()

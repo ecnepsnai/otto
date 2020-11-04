@@ -1,49 +1,51 @@
 package server
 
+import "time"
+
 func (s fileStoreObject) AllFiles() ([]File, *Error) {
-	objs, err := s.Table.GetAll(nil)
+	objects, err := s.Table.GetAll(nil)
 	if err != nil {
 		log.Error("Error getting all script files: %s", err.Error())
 		return nil, ErrorFrom(err)
 	}
-	if objs == nil || len(objs) == 0 {
+	if objects == nil || len(objects) == 0 {
 		return []File{}, nil
 	}
 
-	filess := make([]File, len(objs))
-	for i, obj := range objs {
-		files, k := obj.(File)
+	files := make([]File, len(objects))
+	for i, obj := range objects {
+		file, k := obj.(File)
 		if !k {
 			log.Error("Object is not of type 'File'")
 			return []File{}, ErrorServer("incorrect type")
 		}
-		filess[i] = files
+		files[i] = file
 	}
 
-	return filess, nil
+	return files, nil
 }
 
 func (s fileStoreObject) AllFilesForScript(scriptID string) ([]File, *Error) {
-	objs, err := s.Table.GetIndex("ScriptID", scriptID, nil)
+	objects, err := s.Table.GetIndex("ScriptID", scriptID, nil)
 	if err != nil {
 		log.Error("Error getting all script files for script '%s': %s", scriptID, err.Error())
 		return nil, ErrorFrom(err)
 	}
-	if objs == nil || len(objs) == 0 {
+	if objects == nil || len(objects) == 0 {
 		return []File{}, nil
 	}
 
-	filess := make([]File, len(objs))
-	for i, obj := range objs {
-		files, k := obj.(File)
+	files := make([]File, len(objects))
+	for i, obj := range objects {
+		file, k := obj.(File)
 		if !k {
 			log.Error("Object is not of type 'File'")
 			return []File{}, ErrorServer("incorrect type")
 		}
-		filess[i] = files
+		files[i] = file
 	}
 
-	return filess, nil
+	return files, nil
 }
 
 func (s fileStoreObject) FileWithID(id string) (*File, *Error) {
@@ -84,6 +86,7 @@ func (s fileStoreObject) EditFile(id string, params editFileParams) (*File, *Err
 	file.UID = params.UID
 	file.GID = params.GID
 	file.Mode = params.Mode
+	file.Modified = time.Now()
 
 	if err := s.Table.Update(*file); err != nil {
 		log.Error("Error updating script file '%s': %s", file.ID, err.Error())
@@ -105,6 +108,41 @@ func (s fileStoreObject) DeleteFile(id string) *Error {
 	if err := s.Table.Delete(*file); err != nil {
 		log.Error("Error deleting script file '%s': %s", file.ID, err.Error())
 		return ErrorFrom(err)
+	}
+
+	return nil
+}
+
+func (s fileStoreObject) Cleanup() *Error {
+	filesWithScripts := map[string]bool{}
+	files, err := s.AllFiles()
+	if err != nil {
+		return err
+	}
+	scripts, err := ScriptStore.AllScripts()
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		for _, script := range scripts {
+			if StringSliceContains(file.ID, script.FileIDs) {
+				filesWithScripts[file.ID] = true
+				break
+			}
+		}
+	}
+
+	for _, file := range files {
+		if filesWithScripts[file.ID] {
+			continue
+		}
+
+		if time.Since(file.Modified) > 1*time.Hour {
+			log.Warn("Removing orphaned script file '%s'", file.ID)
+			if err := s.DeleteFile(file.ID); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

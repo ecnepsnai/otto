@@ -4,17 +4,20 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 
 	"github.com/ecnepsnai/otto"
 )
 
 // File describes a file for a script
 type File struct {
-	ID   string `ds:"primary"`
-	Path string
-	UID  int
-	GID  int
-	Mode uint32
+	ID       string `ds:"primary"`
+	Path     string
+	UID      int
+	GID      int
+	Created  time.Time
+	Modified time.Time
+	Mode     uint32
 }
 
 // OttoFile return an otto common file

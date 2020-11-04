@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/ecnepsnai/web"
 )
@@ -46,11 +47,13 @@ func (h *handle) FileUpload(request web.Request) (interface{}, *web.Error) {
 	}
 
 	file := File{
-		ID:   NewID(),
-		Path: pathStr,
-		UID:  uid,
-		GID:  gid,
-		Mode: uint32(mode),
+		ID:       NewID(),
+		Path:     pathStr,
+		UID:      uid,
+		GID:      gid,
+		Mode:     uint32(mode),
+		Created:  time.Now(),
+		Modified: time.Now(),
 	}
 
 	f, err := os.OpenFile(file.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
