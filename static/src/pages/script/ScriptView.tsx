@@ -17,6 +17,7 @@ import { GlobalModalFrame } from '../../components/Modal';
 import { RunModal } from '../run/RunModal';
 import { Rand } from '../../services/Rand';
 import { Group } from '../../types/Group';
+import { Pre } from '../../components/Pre';
 
 export interface ScriptViewProps { match: match; }
 interface ScriptViewState {
@@ -95,76 +96,72 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
 
         return (
             <Page title="View Script">
-                <Layout.Container>
-                    <Buttons>
-                        <EditButton to={'/scripts/script/' + this.state.script.ID + '/edit'} />
-                        <DeleteButton onClick={this.deleteClick} />
-                        <Button color={Style.Palette.Success} outline onClick={this.executeClick}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
-                    </Buttons>
-                    <Layout.Row>
-                        <Layout.Column>
-                            <Card.Card>
-                                <Card.Header>Script Details</Card.Header>
-                                <ListGroup.List>
-                                    <ListGroup.TextItem title="Name">{this.state.script.Name}</ListGroup.TextItem>
-                                    <ListGroup.TextItem title="Run As">User: {this.state.script.UID} Group: {this.state.script.GID}</ListGroup.TextItem>
-                                    <ListGroup.TextItem title="Working Directory">{this.state.script.WorkingDirectory}</ListGroup.TextItem>
-                                    <ListGroup.TextItem title="Executable">{this.state.script.Executable}</ListGroup.TextItem>
-                                    <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>
-                                </ListGroup.List>
-                            </Card.Card>
-                        </Layout.Column>
-                        <Layout.Column>
-                            <Card.Card>
-                                <Card.Header>Enabled on Hosts</Card.Header>
-                                <ListGroup.List>
-                                    {
-                                        this.state.hosts.map((host, index) => {
-                                            return (
-                                            <ListGroup.Item key={index}>
-                                                <div className="d-flex justify-content-between">
-                                                    <div>
-                                                        <Icon.LayerGroup />
-                                                        <Link to={'/groups/group/' + host.GroupID} className="ml-1">{ host.GroupName }</Link>
-                                                    </div>
-                                                    <div>
-                                                        <SmallPlayButton onClick={this.runScriptGroupClick(host.GroupID)} />
-                                                    </div>
+                <Buttons>
+                    <EditButton to={'/scripts/script/' + this.state.script.ID + '/edit'} />
+                    <DeleteButton onClick={this.deleteClick} />
+                    <Button color={Style.Palette.Success} outline onClick={this.executeClick}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
+                </Buttons>
+                <Layout.Row>
+                    <Layout.Column>
+                        <Card.Card>
+                            <Card.Header>Script Details</Card.Header>
+                            <ListGroup.List>
+                                <ListGroup.TextItem title="Name">{this.state.script.Name}</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Run As">User: {this.state.script.UID} Group: {this.state.script.GID}</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Working Directory">{this.state.script.WorkingDirectory}</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Executable">{this.state.script.Executable}</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>
+                            </ListGroup.List>
+                        </Card.Card>
+                    </Layout.Column>
+                    <Layout.Column>
+                        <Card.Card>
+                            <Card.Header>Enabled on Hosts</Card.Header>
+                            <ListGroup.List>
+                                {
+                                    this.state.hosts.map((host, index) => {
+                                        return (
+                                        <ListGroup.Item key={index}>
+                                            <div className="d-flex justify-content-between">
+                                                <div>
+                                                    <Icon.LayerGroup />
+                                                    <Link to={'/groups/group/' + host.GroupID} className="ml-1">{ host.GroupName }</Link>
                                                 </div>
-                                                <div className="d-flex justify-content-between">
-                                                    <div>
-                                                        <Icon.Descendant />
-                                                        <Icon.Desktop />
-                                                        <Link to={'/hosts/host/' + host.HostID} className="ml-1">{ host.HostName }</Link>
-                                                    </div>
-                                                    <div>
-                                                        <SmallPlayButton onClick={this.runScriptHostClick(host.HostID)} />
-                                                    </div>
+                                                <div>
+                                                    <SmallPlayButton onClick={this.runScriptGroupClick(host.GroupID)} />
                                                 </div>
-                                            </ListGroup.Item>
-                                            );
-                                        })
-                                    }
-                                </ListGroup.List>
-                            </Card.Card>
-                        </Layout.Column>
-                    </Layout.Row>
-                    <Layout.Row>
-                        <Layout.Column>
-                            <EnvironmentVariableCard variables={this.state.script.Environment} />
-                        </Layout.Column>
-                        <Layout.Column>
-                            <Card.Card>
-                                <Card.Header>Script</Card.Header>
-                                <Card.Body>
-                                    <pre>
-                                        { this.state.script.Script }
-                                    </pre>
-                                </Card.Body>
-                            </Card.Card>
-                        </Layout.Column>
-                    </Layout.Row>
-                </Layout.Container>
+                                            </div>
+                                            <div className="d-flex justify-content-between">
+                                                <div>
+                                                    <Icon.Descendant />
+                                                    <Icon.Desktop />
+                                                    <Link to={'/hosts/host/' + host.HostID} className="ml-1">{ host.HostName }</Link>
+                                                </div>
+                                                <div>
+                                                    <SmallPlayButton onClick={this.runScriptHostClick(host.HostID)} />
+                                                </div>
+                                            </div>
+                                        </ListGroup.Item>
+                                        );
+                                    })
+                                }
+                            </ListGroup.List>
+                        </Card.Card>
+                    </Layout.Column>
+                </Layout.Row>
+                <Layout.Row>
+                    <Layout.Column>
+                        <EnvironmentVariableCard variables={this.state.script.Environment} />
+                    </Layout.Column>
+                    <Layout.Column>
+                        <Card.Card>
+                            <Card.Header>Script</Card.Header>
+                            <Card.Body>
+                                <Pre>{this.state.script.Script}</Pre>
+                            </Card.Body>
+                        </Card.Card>
+                    </Layout.Column>
+                </Layout.Row>
             </Page>
         );
     }

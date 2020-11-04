@@ -183,7 +183,8 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     type="text"
                     defaultValue={this.state.script.WorkingDirectory}
                     onChange={this.changeWorkingDirectory}
-                    helpText="Optional directory that the script should run in." />
+                    helpText="Optional directory that the script should run in."
+                    fixedWidth />
                 <Select
                     label="After Script Execution"
                     defaultValue={this.state.script.AfterExecution}
@@ -198,6 +199,7 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     type="text"
                     defaultValue={this.state.script.Executable}
                     onChange={this.changeExecutable}
+                    fixedWidth
                     required />
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>

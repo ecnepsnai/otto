@@ -93,7 +93,7 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
             <Modal static={this.state.loading} title={title}>
                 <Form showSaveButton onSubmit={this.saveAttachment} loading={this.state.loading}>
                     { this.fileInput() }
-                    <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts"/>
+                    <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
                     <NumberInput label="Owner User ID" defaultValue={this.state.attachment.UID} required onChange={this.changeUID} helpText="The user ID (UID) that this file will be owned by" />
                     <NumberInput label="Owner Group ID" defaultValue={this.state.attachment.GID} required onChange={this.changeGID} helpText="The group ID (GID) that this file will be owned by" />
                     <NumberInput label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />

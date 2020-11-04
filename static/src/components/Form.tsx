@@ -164,6 +164,10 @@ export interface InputProps {
      * You do not need to validate if a required field has any value, that is done automatically.
      */
     validate?: (value: string) => Promise<ValidationResult>;
+    /**
+     * If true then a fixed width font is used
+     */
+    fixedWidth?: boolean;
 }
 
 interface InputState { value: string; labelID: string; valid: ValidationResult; touched: boolean; }
@@ -228,6 +232,9 @@ export class Input extends React.Component<InputProps, InputState> {
         let className = 'form-control';
         if (this.state.touched && !this.state.valid.valid) {
             className += ' is-invalid';
+        }
+        if (this.props.fixedWidth) {
+            className += ' fixed-width';
         }
         return (
             <input

@@ -1,9 +1,11 @@
 import * as React from 'react';
 import '../../css/layout.scss';
+import { Style } from './Style';
 
 export namespace Layout {
     export interface LayoutProps {
         className?: string;
+        size?: Style.Size;
     }
 
     export class Container extends React.Component<LayoutProps, {}> {
@@ -36,10 +38,7 @@ export namespace Layout {
 
     export class Column extends React.Component<LayoutProps, {}> {
         render(): JSX.Element {
-            let className = 'col';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
+            const className = this.props.className || 'col-md';
             return (
                 <div className={className}>
                     { this.props.children }

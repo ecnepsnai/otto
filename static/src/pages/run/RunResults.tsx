@@ -2,6 +2,7 @@ import * as React from 'react';
 import { ScriptRun } from '../../types/Result';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Card } from '../../components/Card';
+import { Pre } from '../../components/Pre';
 
 export interface RunResultsProps {
     results: ScriptRun;
@@ -24,13 +25,13 @@ export class RunResults extends React.Component<RunResultsProps, RunResultsState
                 <Card.Card>
                     <Card.Header>Standard Out (stdout)</Card.Header>
                     <Card.Body>
-                        <pre>{this.props.results.Result.Stdout}</pre>
+                        <Pre>{this.props.results.Result.Stdout}</Pre>
                     </Card.Body>
                 </Card.Card>
                 <Card.Card>
                     <Card.Header>Standard Error (stderr)</Card.Header>
                     <Card.Body>
-                        <pre>{this.props.results.Result.Stderr}</pre>
+                        <Pre>{this.props.results.Result.Stderr}</Pre>
                     </Card.Body>
                 </Card.Card>
             </Card.Body>

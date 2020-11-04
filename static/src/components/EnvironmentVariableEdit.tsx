@@ -169,7 +169,8 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
                         label="Key"
                         type="text"
                         defaultValue={this.state.key}
-                        onChange={this.changeKey} />
+                        onChange={this.changeKey}
+                        fixedWidth />
                     <Textarea
                         label="Value"
                         defaultValue={this.state.value}
