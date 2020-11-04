@@ -271,10 +271,14 @@ export class Input extends React.Component<InputProps, InputState> {
         </div>
         );
     };
+    private requiredFlag = () => {
+        if (!this.props.required) { return null; }
+        return (<span className="form-required">*</span>);
+    }
     render(): JSX.Element {
         return (
             <FormGroup>
-                <label htmlFor={this.state.labelID} className="form-label">{this.props.label}</label>
+                <label htmlFor={this.state.labelID} className="form-label">{this.props.label} {this.requiredFlag()}</label>
                 { this.content() }
                 { this.helpText() }
             </FormGroup>
@@ -462,10 +466,14 @@ export class NumberInput extends React.Component<NumberInputProps, NumberInputSt
         </div>
         );
     };
+    private requiredFlag = () => {
+        if (!this.props.required) { return null; }
+        return (<span className="form-required">*</span>);
+    }
     render(): JSX.Element {
         return (
             <FormGroup>
-                <label htmlFor={this.state.labelID} className="form-label">{this.props.label}</label>
+                <label htmlFor={this.state.labelID} className="form-label">{this.props.label} {this.requiredFlag()}</label>
                 { this.content() }
                 { this.helpText() }
             </FormGroup>
@@ -498,9 +506,16 @@ export interface SelectProps {
      * Should the input be disabled
      */
     disabled?: boolean;
+    /**
+     * Optional method to invoke for validating the value of this input.
+     * Return a promise that resolves with a validation result.
+     *
+     * You do not need to validate if a required field has any value, that is done automatically.
+     */
+    validate?: (value: string) => Promise<ValidationResult>;
 }
 
-interface SelectState { value: string; labelID: string; }
+interface SelectState { value: string; labelID: string; valid: ValidationResult; touched: boolean; }
 
 /**
  * A dropdown, or <select> input, where the user picks a single option from a list
@@ -508,10 +523,20 @@ interface SelectState { value: string; labelID: string; }
 export class Select extends React.Component<SelectProps, SelectState> {
     constructor(props: SelectProps) {
         super(props);
-        this.state = { value: '', labelID: Rand.ID() };
+        const initialValidState: ValidationResult = {
+            valid: true
+        };
+        if (props.required && (props.defaultValue == null || props.defaultValue == '')) {
+            initialValidState.valid = false;
+            initialValidState.invalidMessage = 'A selection is required';
+        }
+        this.state = { value: props.defaultValue, labelID: Rand.ID(), valid: initialValidState, touched: false };
     }
     private onChange = (event: React.FormEvent<HTMLSelectElement>) => {
         const target = event.target as HTMLSelectElement;
+        this.validate(target.value).then(valid => {
+            this.setState({ valid: valid });
+        });
         this.setState({ value: target.value });
         this.props.onChange(target.value);
     }
@@ -522,11 +547,62 @@ export class Select extends React.Component<SelectProps, SelectState> {
             return null;
         }
     }
+    private requiredFlag = () => {
+        if (!this.props.required) { return null; }
+        return (<span className="form-required">*</span>);
+    }
+    private defaultSelection = () => {
+        if (this.props.required && this.state.value) {
+            return null;
+        }
+
+        return (<option selected>Select One...</option>);
+    }
+    private validate = (value: string): Promise<ValidationResult> => {
+        return new Promise((resolve) => {
+            if (this.props.required && value == '') {
+                resolve({
+                    valid: false,
+                    invalidMessage: 'A value is required'
+                });
+                return;
+            }
+            if (this.props.validate) {
+                this.props.validate(value).then(valid => {
+                    resolve(valid);
+                });
+                return;
+            }
+            resolve({ valid: true });
+        });
+    }
+    private onBlur = () => {
+        this.setState({ touched: true });
+    }
+    private validationError() {
+        if (!this.state.valid.invalidMessage || !this.state.touched) { return null; }
+        return (<div className="invalid-feedback">{this.state.valid.invalidMessage}</div>);
+    }
     render(): JSX.Element {
+        let className = 'form-select';
+        if (this.state.touched && !this.state.valid.valid) {
+            className += ' is-invalid';
+        }
         return (
             <FormGroup>
-                <label htmlFor={this.state.labelID} className="form-label">{this.props.label}</label>
-                <select defaultValue={this.props.defaultValue} className="form-select" id={this.state.labelID} onChange={this.onChange} disabled={this.props.disabled}>{ this.props.children }</select>
+                <label htmlFor={this.state.labelID} className="form-label">{this.props.label} {this.requiredFlag()}</label>
+                <select
+                    defaultValue={this.props.defaultValue}
+                    className={className}
+                    id={this.state.labelID}
+                    onChange={this.onChange}
+                    disabled={this.props.disabled}
+                    onBlur={this.onBlur}
+                    data-valid={this.state.valid.valid ? 'valid' : 'invalid'}>
+                        { this.defaultSelection() }
+                        { this.props.children }
+                </select>
+                { this.validationError() }
                 { this.helpText() }
             </FormGroup>
         );
@@ -548,7 +624,11 @@ export interface CheckboxProps {
     /**
      * The default value used for the input
      */
-    defaultValue: boolean;
+    defaultValue?: boolean;
+    /**
+     * The value used for the input
+     */
+    checked?: boolean;
     /**
      * Optional help text to appear below this input
      */
@@ -584,7 +664,7 @@ export class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
     render(): JSX.Element {
         return (
             <FormGroup className="form-check">
-                <input type="checkbox" className="form-check-input" id={this.state.labelID} defaultChecked={this.props.defaultValue} onChange={this.onChange} disabled={this.props.disabled}/>
+                <input type="checkbox" className="form-check-input" id={this.state.labelID} checked={this.props.checked} defaultChecked={this.props.defaultValue} onChange={this.onChange} disabled={this.props.disabled}/>
                 <label htmlFor={this.state.labelID} className="form-check-label">{this.props.label}</label>
                 { this.helpText() }
             </FormGroup>
@@ -699,6 +779,10 @@ export class Textarea extends React.Component<TextareaProps, TextareaState> {
         if (!this.state.valid.invalidMessage || !this.state.touched) { return null; }
         return (<div className="invalid-feedback">{this.state.valid.invalidMessage}</div>);
     }
+    private requiredFlag = () => {
+        if (!this.props.required) { return null; }
+        return (<span className="form-required">*</span>);
+    }
     render(): JSX.Element {
         let className = 'form-control';
         if (this.state.touched && !this.state.valid) {
@@ -709,7 +793,7 @@ export class Textarea extends React.Component<TextareaProps, TextareaState> {
         }
         return (
             <FormGroup>
-                <label htmlFor={this.state.labelID} className="form-label">{this.props.label}</label>
+                <label htmlFor={this.state.labelID} className="form-label">{this.props.label} {this.requiredFlag()}</label>
                 <textarea
                     className={className}
                     id={this.state.labelID}
@@ -732,7 +816,7 @@ export class Textarea extends React.Component<TextareaProps, TextareaState> {
  * Describes the properties for a choice in a group of radio buttons
  */
 export interface RadioChoice {
-    value: string;
+    value: string|number;
     label: string;
 }
 /**
@@ -750,14 +834,18 @@ export interface RadioProps {
     /**
      * The default value to be selected
      */
-    defaultValue?: string;
+    defaultValue?: string|number;
     /**
      * Called when a new value is selected
      */
-    onChange: (value: string) => (void);
+    onChange: (value: string|number) => (void);
+    /**
+     * If toggle buttons should be used instead of classic radio controls
+     */
+    buttons?: boolean;
 }
 interface RadioState {
-    value: string;
+    value: string|number;
 }
 /**
  * A group of radio buttons for selecting a single choice from a list
@@ -783,6 +871,14 @@ export class Radio extends React.Component<RadioProps, RadioState> {
         };
     }
 
+    componentDidUpdate(props: RadioProps): void {
+        if (props.defaultValue !== this.props.defaultValue) {
+            this.setState({ value: this.props.defaultValue }, () => {
+                this.props.onChange(this.props.defaultValue);
+            });
+        }
+    }
+
     private onChange = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
         if (target.checked) {
@@ -792,10 +888,9 @@ export class Radio extends React.Component<RadioProps, RadioState> {
         }
     }
 
-    render(): JSX.Element {
+    private input = () => {
         return (
-            <div className="mb-3">
-                <label className="form-label">{this.props.label}</label>
+            <React.Fragment>
                 {
                     this.props.choices.map(choice => {
                         const labelID = Rand.ID();
@@ -809,6 +904,42 @@ export class Radio extends React.Component<RadioProps, RadioState> {
                         );
                     })
                 }
+            </React.Fragment>
+        );
+    }
+
+    private buttons = () => {
+        return (
+            <div>
+                <div className="btn-group">
+                    {
+                        this.props.choices.map(choice => {
+                            const labelID = Rand.ID();
+                            return (
+                                <React.Fragment key={labelID}>
+                                    <input type="radio" className="btn-check" name={labelID} id={labelID} value={choice.value} checked={this.state.value===choice.value} onChange={this.onChange} />
+                                    <label className="btn btn-secondary btn-sm" htmlFor={labelID}>{choice.label}</label>
+                                </React.Fragment>
+                            );
+                        })
+                    }
+                </div>
+            </div>
+        );
+    }
+
+    render(): JSX.Element {
+        let content: JSX.Element;
+        if (this.props.buttons) {
+            content = this.buttons();
+        } else {
+            content = this.input();
+        }
+
+        return (
+            <div className="mb-3">
+                <label className="form-label">{this.props.label}</label>
+                {content}
             </div>
         );
     }
@@ -824,9 +955,11 @@ export interface FileBrowserProps {
      */
     onChange: (file: File) => (void);
 }
+
 interface FileBrowserState {
     fileName?: string;
 }
+
 export class FileBrowser extends React.Component<FileBrowserProps, FileBrowserState> {
     constructor(props: FileBrowserProps) {
         super(props);

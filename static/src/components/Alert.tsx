@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { Style } from './Style';
 
 export interface AlertProps {
