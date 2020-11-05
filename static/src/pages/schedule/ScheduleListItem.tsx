@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { Schedule } from '../../types/Schedule';
 import { Link } from 'react-router-dom';
-import { Dropdown, MenuItem, MenuLink } from '../../components/Menu';
-import { Style } from '../../components/Style';
+import { MenuItem, MenuLink } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { Script } from '../../types/Script';
@@ -32,12 +31,7 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
 
     render(): JSX.Element {
         const link = <Link to={'/schedules/schedule/' + this.props.schedule.ID}>{ this.props.schedule.Name }</Link>;
-        const dropdownLabel = <Icon.Bars />;
-        const buttonProps = {
-            color: Style.Palette.Secondary,
-            outline: true,
-            size: Style.Size.XS,
-        };
+
         return (
             <Table.Row>
                 <td>{ link }</td>
@@ -46,12 +40,10 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
                 {this.enabledOnColumn()}
                 <td><DateLabel date={this.props.schedule.LastRunTime} /></td>
                 <td><EnabledBadge value={this.props.schedule.Enabled} /></td>
-                <td>
-                    <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuLink label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
-                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
-                    </Dropdown>
-                </td>
+                <Table.Menu>
+                    <MenuLink label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
+                    <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                </Table.Menu>
             </Table.Row>
         );
     }

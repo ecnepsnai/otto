@@ -1,6 +1,9 @@
 import * as React from 'react';
 import '../../css/table.scss';
+import { Icon } from './Icon';
+import { Dropdown } from './Menu';
 import { Nothing } from './Nothing';
+import { Style } from './Style';
 
 export namespace Table {
     export interface TableProps { className?: string; }
@@ -70,6 +73,22 @@ export namespace Table {
             return (
                 <tr className={className}>{this.props.children}</tr>
             );
+        }
+    }
+
+    export interface MenuProps { disabled?: boolean; }
+    export class Menu extends React.Component<MenuProps, {}> {
+        render(): JSX.Element {
+            const buttonProps = {
+                color: Style.Palette.Secondary,
+                outline: true,
+                size: Style.Size.XS,
+            };
+            return (<td>
+                <Dropdown label={<Icon.Bars />} button={buttonProps}>
+                    {this.props.children}
+                </Dropdown>
+            </td>);
         }
     }
 }
