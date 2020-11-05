@@ -42,10 +42,11 @@ single, top-level object. The `otto_client.conf` configuration file must be in t
 
 |Property|Required|Description|
 |-|-|-|
+|`listen_addr`|No|The address to listen to. Defaults to `0.0.0.0:12444`.|
 |`psk`|Yes|The PSK configured for this host on the server|
-|`log_path`|Yes|The path to a file where the Otto client should log|
-|`default_uid`|No|The default UID if not specified by the script|
-|`default_gid`|No|The default GID if not specified by the script|
+|`log_path`|No|The path to a file where the Otto client should log. Defaults to the directory where the otto binary is.|
+|`default_uid`|No|The default UID if not specified by the script. Defaults to `0`.|
+|`default_gid`|No|The default GID if not specified by the script. Defaults to `0`.|
 |`path`|No|The value of $PATH when scripts are executed|
 
 **Example:**

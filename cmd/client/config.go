@@ -30,7 +30,7 @@ func loadConfig() error {
 	defer f.Close()
 
 	c := clientConfig{
-		ListenAddr: "localhost:12444",
+		ListenAddr: "0.0.0.0:12444",
 		LogPath:    ".",
 		DefaultUID: 0,
 		DefaultGID: 0,
