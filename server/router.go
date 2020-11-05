@@ -19,7 +19,7 @@ var bindAddress = "localhost:8080"
 func RouterSetup() {
 	server := web.New(bindAddress)
 
-	maxBodyLength := uint64(10240)
+	maxBodyLength := uint64(104857600)
 
 	authenticatedOptions := web.HandleOptions{
 		AuthenticateMethod: func(request *http.Request) interface{} {
