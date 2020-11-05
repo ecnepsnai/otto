@@ -202,12 +202,12 @@ func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
 	}
 
 	versionBuf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(versionBuf, ProtocolVersion)
+	binary.BigEndian.PutUint32(versionBuf, ProtocolVersion)
 
 	dataLength := len(encryptedData)
 	lenBuf := make([]byte, 4)
 	log.Debug("Encrypted data length: %d", dataLength)
-	binary.LittleEndian.PutUint32(lenBuf, uint32(dataLength))
+	binary.BigEndian.PutUint32(lenBuf, uint32(dataLength))
 
 	replyLength := len(versionBuf) + len(lenBuf) + dataLength
 	replyBuf := make([]byte, replyLength)
