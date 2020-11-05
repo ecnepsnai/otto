@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { FileBrowser, Form, Input, NumberInput } from '../../../components/Form';
-import { GlobalModalFrame, Modal } from '../../../components/Modal';
+import { FileBrowser, Input, NumberInput } from '../../../components/Form';
+import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Attachment } from '../../../types/Attachment';
 
 export interface AttachmentEditProps {
@@ -24,15 +24,15 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
 
     private saveAttachment = () => {
         if (this.props.attachment) {
-            this.editAttachment();
+            return this.editAttachment();
         } else {
-            this.uploadAttachment();
+            return this.uploadAttachment();
         }
     }
 
     private uploadAttachment = () => {
         this.setState({ loading: true });
-        Attachment.New(this.state.file, this.state.attachment).then(attachment => {
+        return Attachment.New(this.state.file, this.state.attachment).then(attachment => {
             this.props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
         }, () => {
@@ -42,7 +42,7 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
 
     private editAttachment = () => {
         this.setState({ loading: false });
-        this.props.attachment.Save().then(attachment => {
+        return this.props.attachment.Save().then(attachment => {
             this.props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
         }, () => {
@@ -90,15 +90,13 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
     render(): JSX.Element {
         const title = this.props.attachment ? 'Edit Attachment' : 'New Attachment';
         return (
-            <Modal static={this.state.loading} title={title}>
-                <Form showSaveButton onSubmit={this.saveAttachment} loading={this.state.loading}>
-                    { this.fileInput() }
-                    <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
-                    <NumberInput label="Owner User ID" defaultValue={this.state.attachment.UID} required onChange={this.changeUID} helpText="The user ID (UID) that this file will be owned by" />
-                    <NumberInput label="Owner Group ID" defaultValue={this.state.attachment.GID} required onChange={this.changeGID} helpText="The group ID (GID) that this file will be owned by" />
-                    <NumberInput label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
-                </Form>
-            </Modal>
+            <ModalForm title={title} onSubmit={this.saveAttachment}>
+                { this.fileInput() }
+                <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
+                <NumberInput label="Owner User ID" defaultValue={this.state.attachment.UID} required onChange={this.changeUID} helpText="The user ID (UID) that this file will be owned by" />
+                <NumberInput label="Owner Group ID" defaultValue={this.state.attachment.GID} required onChange={this.changeGID} helpText="The group ID (GID) that this file will be owned by" />
+                <NumberInput label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
+            </ModalForm>
         );
     }
 }

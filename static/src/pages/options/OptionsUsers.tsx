@@ -10,8 +10,8 @@ import { Style } from '../../components/Style';
 import { Rand } from '../../services/Rand';
 import { MenuItem } from '../../components/Menu';
 import { StateManager } from '../../services/StateManager';
-import { ModalButton, Modal, GlobalModalFrame } from '../../components/Modal';
-import { Input, Checkbox, Form } from '../../components/Form';
+import { Modal, GlobalModalFrame, ModalForm } from '../../components/Modal';
+import { Input, Checkbox } from '../../components/Form';
 
 export class UserManager {
     public static EditCurrentUser(): Promise<User> {
@@ -228,42 +228,34 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         );
     }
 
+    private onSubmit = () => {
+        return new Promise(resolve => {
+            this.props.onUpdate(this.state.value);
+            resolve();
+        });
+    }
+
     render(): JSX.Element {
         const title = this.state.value.Username != '' ? 'Edit User' : 'New User';
-        const buttons: ModalButton[] = [
-            {
-                label: 'Discard',
-                color: Style.Palette.Secondary,
-            },
-            {
-                label: 'Save',
-                color: Style.Palette.Primary,
-                onClick: () => {
-                    this.props.onUpdate(this.state.value);
-                }
-            }
-        ];
 
         return (
-            <Modal title={title} static buttons={buttons}>
-                <Form>
-                    <Input
-                        type="text"
-                        label="Username"
-                        defaultValue={this.state.value.Username}
-                        onChange={this.changeUsername}
-                        disabled={this.props.user != undefined}
-                        required />
-                    <Input
-                        type="email"
-                        label="Email"
-                        defaultValue={this.state.value.Email}
-                        onChange={this.changeEmail}
-                        required />
-                    { this.passwordField() }
-                    { this.enabledCheckbox() }
-                </Form>
-            </Modal>
+            <ModalForm title={title} onSubmit={this.onSubmit}>
+                <Input
+                    type="text"
+                    label="Username"
+                    defaultValue={this.state.value.Username}
+                    onChange={this.changeUsername}
+                    disabled={this.props.user != undefined}
+                    required />
+                <Input
+                    type="email"
+                    label="Email"
+                    defaultValue={this.state.value.Email}
+                    onChange={this.changeEmail}
+                    required />
+                { this.passwordField() }
+                { this.enabledCheckbox() }
+            </ModalForm>
         );
     }
 }

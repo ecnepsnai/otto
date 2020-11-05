@@ -46,6 +46,20 @@ export class Form extends React.Component<FormProps, FormState> {
         this.state = {};
     }
 
+    /**
+     * Performs validation on the form
+     * @returns true if the form is valid, false if invalid
+     */
+    public validateForm = (): boolean => {
+        const elemn = this.domRef.current;
+        const invalidNodes = elemn.querySelectorAll('[data-valid="invalid"]');
+        if (invalidNodes.length > 0) {
+            this.setState({ invalid: true });
+            return false;
+        }
+        return true;
+    }
+
     private onClick = () => {
         this.submitForm();
     }
@@ -56,12 +70,7 @@ export class Form extends React.Component<FormProps, FormState> {
     }
 
     private submitForm = () => {
-        const elemn = this.domRef.current;
-        const invalidNodes = elemn.querySelectorAll('[data-valid="invalid"]');
-        if (invalidNodes.length > 0) {
-            this.setState({ invalid: true });
-            return;
-        }
+        this.validateForm();
 
         if (this.props.onSubmit) {
             this.props.onSubmit();
