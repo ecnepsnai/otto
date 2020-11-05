@@ -113,7 +113,7 @@ func readEncryptedMessage(r io.Reader, psk string) ([]byte, error) {
 		log.Error("Error reading data length: %s", err.Error())
 		return nil, err
 	}
-	dataLength := binary.LittleEndian.Uint32(dataLengthBuf)
+	dataLength := binary.BigEndian.Uint32(dataLengthBuf)
 	log.Debug("Data length: %d", dataLength)
 
 	encryptedData := make([]byte, dataLength)
@@ -145,7 +145,7 @@ func ReadRequest(r io.Reader, psk string) (*Request, error) {
 		log.Error("Error reading version: %s", err.Error())
 		return nil, err
 	}
-	version := binary.LittleEndian.Uint32(versionBuf)
+	version := binary.BigEndian.Uint32(versionBuf)
 	log.Debug("Protocol version: %d", version)
 	if version != ProtocolVersion {
 		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
@@ -173,7 +173,7 @@ func ReadReply(r io.Reader, psk string) (*Reply, error) {
 		log.Error("Error reading version: %s", err.Error())
 		return nil, err
 	}
-	version := binary.LittleEndian.Uint32(versionBuf)
+	version := binary.BigEndian.Uint32(versionBuf)
 	log.Debug("Protocol version: %d", version)
 	if version != ProtocolVersion {
 		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
