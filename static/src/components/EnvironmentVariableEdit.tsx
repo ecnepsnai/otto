@@ -4,8 +4,8 @@ import { CreateButton } from './Button';
 import { Icon } from './Icon';
 import { Style } from './Style';
 import { Dropdown, MenuItem } from './Menu';
-import { Modal, ModalButton, GlobalModalFrame } from './Modal';
-import { Form, Input, Textarea, Checkbox } from './Form';
+import { Modal, GlobalModalFrame, ModalForm } from './Modal';
+import { Input, Textarea, Checkbox } from './Form';
 import { Variable } from '../types/Variable';
 
 export interface EnvironmentVariableEditProps {
@@ -144,44 +144,39 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
         this.setState({ secret: secret });
     }
 
+    private onSave = () => {
+        return new Promise(resolve => {
+            this.props.onSave({
+                Key: this.state.key,
+                Value: this.state.value,
+                Secret: this.state.secret,
+            });
+            resolve();
+        });
+    }
+
     render(): JSX.Element {
         const title = this.props.default.Key != '' ? 'Edit Variable' : 'New Variable';
-        const buttons: ModalButton[] = [
-            {
-                label: 'Discard',
-                color: Style.Palette.Secondary,
-            },
-            {
-                label: 'Add',
-                onClick: () => {
-                    this.props.onSave({
-                        Key: this.state.key,
-                        Value: this.state.value,
-                        Secret: this.state.secret,
-                    });
-                },
-            }
-        ];
         return (
-            <Modal title={title} buttons={buttons} static>
-                <Form>
-                    <Input
-                        label="Key"
-                        type="text"
-                        defaultValue={this.state.key}
-                        onChange={this.changeKey} />
-                    <Textarea
-                        label="Value"
-                        defaultValue={this.state.value}
-                        onChange={this.changeValue}
-                        fixedWidth />
-                    <Checkbox
-                        label="Secret"
-                        defaultValue={this.state.secret}
-                        onChange={this.changeSecret}
-                        helpText="If checked then the value of this variable is obscured" />
-                </Form>
-            </Modal>
+            <ModalForm title={title} onSubmit={this.onSave}>
+                <Input
+                    label="Key"
+                    type="text"
+                    defaultValue={this.state.key}
+                    onChange={this.changeKey}
+                    fixedWidth
+                    required />
+                <Textarea
+                    label="Value"
+                    defaultValue={this.state.value}
+                    onChange={this.changeValue}
+                    fixedWidth />
+                <Checkbox
+                    label="Secret"
+                    defaultValue={this.state.secret}
+                    onChange={this.changeSecret}
+                    helpText="If checked then the value of this variable is obscured" />
+            </ModalForm>
         );
     }
 }

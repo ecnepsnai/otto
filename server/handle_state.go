@@ -37,7 +37,7 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 	}
 
 	if user.Username == defaultUser.Username {
-		if user.PasswordHash.Compare(defaultUser.Password) {
+		if user.PasswordHash.Compare([]byte(defaultUser.Password)) {
 			s.Warnings = append(s.Warnings, "default_user_password")
 		}
 	}

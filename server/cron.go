@@ -31,6 +31,13 @@ func CronSetup() {
 				ScheduleStore.RunSchedules()
 			},
 		},
+		{
+			Pattern: "0 * * * *",
+			Name:    "CleanupAttachments",
+			Exec: func() {
+				AttachmentStore.Cleanup()
+			},
+		},
 	})
 	if !cronDisabled {
 		go schedule.Start()

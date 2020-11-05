@@ -19,7 +19,7 @@ var bindAddress = "localhost:8080"
 func RouterSetup() {
 	server := web.New(bindAddress)
 
-	maxBodyLength := uint64(10240)
+	maxBodyLength := uint64(104857600)
 
 	authenticatedOptions := web.HandleOptions{
 		AuthenticateMethod: func(request *http.Request) interface{} {
@@ -93,9 +93,17 @@ func RouterSetup() {
 	server.API.GET("/api/scripts/script/:id/hosts", h.ScriptGetHosts, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/groups", h.ScriptGetGroups, authenticatedOptions)
 	server.API.GET("/api/scripts/script/:id/schedules", h.ScriptGetSchedules, authenticatedOptions)
+	server.API.GET("/api/scripts/script/:id/attachments", h.ScriptGetAttachments, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id/groups", h.ScriptSetGroups, authenticatedOptions)
 	server.API.POST("/api/scripts/script/:id", h.ScriptEdit, authenticatedOptions)
 	server.API.DELETE("/api/scripts/script/:id", h.ScriptDelete, authenticatedOptions)
+
+	// Attachments
+	server.API.GET("/api/attachments", h.AttachmentList, authenticatedOptions)
+	server.API.PUT("/api/attachments", h.AttachmentUpload, authenticatedOptions)
+	server.API.GET("/api/attachments/attachment/:id", h.AttachmentGet, authenticatedOptions)
+	server.API.POST("/api/attachments/attachment/:id", h.AttachmentEdit, authenticatedOptions)
+	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions)
 
 	// Request
 	server.API.PUT("/api/request", h.RequestNew, authenticatedOptions)

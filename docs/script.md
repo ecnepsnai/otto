@@ -26,3 +26,10 @@ Lastly, there are a number of implicit variables that are automatically included
 |`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on|
 
 When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in the web interface.
+
+## Attachments
+
+You can attach files to scripts that will be uploaded and placed on hosts at specific paths. Attachments are uploaded
+every time the script runs, and it will overwrite any existing files at the same path.
+
+Attachments can be owned by specific UID/GID, and have a specific mode. Attachments have a maximum file size of 100MiB.

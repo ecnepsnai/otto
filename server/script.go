@@ -17,6 +17,7 @@ type Script struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) ScriptWithID(id string) (*Script, *Error) {
@@ -87,6 +88,7 @@ type newScriptParameters struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Error) {
@@ -103,7 +105,7 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 	}
 
 	script := Script{
-		ID:               NewID(),
+		ID:               newID(),
 		Name:             params.Name,
 		Executable:       params.Executable,
 		Script:           params.Script,
@@ -113,6 +115,7 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		Enabled:          true,
 		WorkingDirectory: params.WorkingDirectory,
 		AfterExecution:   params.AfterExecution,
+		AttachmentIDs:    params.AttachmentIDs,
 	}
 
 	if err := s.Table.Add(script); err != nil {
@@ -134,6 +137,7 @@ type editScriptParameters struct {
 	GID              uint32
 	WorkingDirectory string
 	AfterExecution   string
+	AttachmentIDs    []string
 }
 
 func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (*Script, *Error) {
@@ -158,6 +162,7 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	script.GID = params.GID
 	script.WorkingDirectory = params.WorkingDirectory
 	script.AfterExecution = params.AfterExecution
+	script.AttachmentIDs = params.AttachmentIDs
 
 	if err := s.Table.Update(*script); err != nil {
 		log.Error("Error updating script '%s': %s", params.Name, err.Error())
@@ -172,6 +177,12 @@ func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
 	if err := s.Table.Delete(*script); err != nil {
 		log.Error("Error deleting script '%s': %s", script.Name, err.Error())
 		return ErrorFrom(err)
+	}
+
+	for _, id := range script.AttachmentIDs {
+		if err := AttachmentStore.DeleteAttachment(id); err != nil {
+			log.Error("Error deleting attachment '%s': %s", id, err.Message)
+		}
 	}
 
 	GroupStore.CleanupDeadScripts()
@@ -291,4 +302,26 @@ func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error 
 	}
 
 	return nil
+}
+
+// Attachments all files for this script
+func (s *Script) Attachments() ([]Attachment, *Error) {
+	if len(s.AttachmentIDs) == 0 {
+		return []Attachment{}, nil
+	}
+
+	files := make([]Attachment, len(s.AttachmentIDs))
+	for i, id := range s.AttachmentIDs {
+		file, err := AttachmentStore.AttachmentWithID(id)
+		if err != nil {
+			return nil, err
+		}
+		if file == nil {
+			log.Error("Attachment '%s' does not exist, found on script '%s'", id, s.ID)
+			return nil, ErrorServer("missing file")
+		}
+		files[i] = *file
+	}
+
+	return files, nil
 }

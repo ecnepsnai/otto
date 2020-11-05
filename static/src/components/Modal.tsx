@@ -3,6 +3,7 @@ import { Style } from './Style';
 import { Button } from './Button';
 import { Bootstrap, BSModule } from '../services/Bootstrap';
 import { Rand } from '../services/Rand';
+import { Form } from './Form';
 
 export interface ModalButton {
     /**
@@ -21,6 +22,10 @@ export interface ModalButton {
      * If true, clicking this button will not dismiss the modal
      */
     dontDismiss?: boolean;
+    /**
+     * If true the button is disabled
+     */
+    disabled?: boolean;
 }
 
 export interface ModalProps {
@@ -119,7 +124,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                 {
                     this.props.buttons.map(button => {
                         button.color = button.color ?? Style.Palette.Primary;
-                        return <Button color={button.color} onClick={this.buttonClick(button)} key={Rand.ID()}>{ button.label }</Button>;
+                        return <Button color={button.color} onClick={this.buttonClick(button)} key={Rand.ID()} disabled={button.disabled}>{ button.label }</Button>;
                     })
                 }
             </div>
@@ -276,6 +281,70 @@ export class GlobalModalFrame extends React.Component<GlobalModalFrameProps, Glo
                     this.state.modal
                 }
             </div>
+        );
+    }
+}
+
+export interface ModalFormProps {
+    /**
+     * The title of the modal
+     */
+    title: string;
+    /**
+     * Submit method - called when the submit button is clicked if the form is valid. Return a promise that when resolved
+     * will dismiss the modal.
+     */
+    onSubmit: () => (Promise<unknown>);
+}
+interface ModalFormState {
+    loading?: boolean;
+}
+/**
+ * A modal with a form element. Buttons in the footer of the modal are used for the form element.
+ */
+export class ModalForm extends React.Component<ModalFormProps, ModalFormState> {
+    constructor(props: ModalFormProps) {
+        super(props);
+        this.state = {};
+        this.formRef = React.createRef();
+    }
+    private formRef: React.RefObject<Form>;
+
+    private saveClick = () => {
+        if (!this.formRef.current.validateForm()) {
+            return;
+        }
+
+        this.setState({ loading: true });
+        this.props.onSubmit().then(() => {
+            GlobalModalFrame.removeModal();
+        }, () => {
+            this.setState({ loading: false });
+        });
+    }
+
+    render(): JSX.Element {
+        const buttons: ModalButton[] = [
+            {
+                label: 'Discard',
+                color: Style.Palette.Secondary,
+                disabled: this.state.loading,
+            },
+            {
+                label: 'Save',
+                color: Style.Palette.Primary,
+                onClick: this.saveClick,
+                dontDismiss: true,
+                disabled: this.state.loading,
+            }
+        ];
+
+        return (
+            <Modal title={this.props.title} buttons={buttons} static>
+                <Form ref={this.formRef}>
+                    { this.props.children }
+                </Form>
+            </Modal>
         );
     }
 }

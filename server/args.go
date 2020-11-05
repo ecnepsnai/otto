@@ -125,7 +125,7 @@ func postBootstrapArgs() {
 			x := int64(0)
 			for x < 10 {
 				report := ScheduleReport{
-					ID:         NewID(),
+					ID:         newID(),
 					ScheduleID: schedule.ID,
 					HostIDs:    []string{el7Host.ID, el8Host.ID},
 					Time: ScheduleReportTime{

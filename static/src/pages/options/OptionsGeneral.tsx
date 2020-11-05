@@ -24,7 +24,16 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
     }
 
     private originWarning = () => {
-        if (location.origin === this.props.defaultValue.ServerURL) {
+        let origin = location.origin;
+        if (!origin.endsWith('/')) {
+            origin = origin + '/';
+        }
+        let serverURL = this.props.defaultValue.ServerURL;
+        if (!serverURL.endsWith('/')) {
+            serverURL = serverURL + '/';
+        }
+
+        if (origin === serverURL) {
             return null;
         }
 

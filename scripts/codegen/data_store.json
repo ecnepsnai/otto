@@ -27,5 +27,10 @@
     {
         "name": "ScheduleReport",
         "object": "ScheduleReport"
+    },
+    {
+        "name": "Attachment",
+        "object": "Attachment",
+        "unordered": true
     }
 ]

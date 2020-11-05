@@ -11,6 +11,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
+import { AttachmentList } from './attachment/AttachmentList';
 
 export interface ScriptEditProps { match: match }
 interface ScriptEditState {
@@ -131,6 +132,13 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         });
     }
 
+    private changeAttachments = (AttachmentIDs: string[]) => {
+        this.setState(state => {
+            state.script.AttachmentIDs = AttachmentIDs;
+            return state;
+        });
+    }
+
     private formSave = () => {
         let promise: Promise<Script>;
         if (this.state.isNew) {
@@ -175,7 +183,8 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     type="text"
                     defaultValue={this.state.script.WorkingDirectory}
                     onChange={this.changeWorkingDirectory}
-                    helpText="Optional directory that the script should run in." />
+                    helpText="Optional directory that the script should run in."
+                    fixedWidth />
                 <Select
                     label="After Script Execution"
                     defaultValue={this.state.script.AfterExecution}
@@ -190,6 +199,7 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     type="text"
                     defaultValue={this.state.script.Executable}
                     onChange={this.changeExecutable}
+                    fixedWidth
                     required />
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>
@@ -203,6 +213,12 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     <Card.Header>Groups</Card.Header>
                     <Card.Body>
                         <GroupCheckList selectedGroups={this.state.groupIDs} onChange={this.changeGroupIDs}/>
+                    </Card.Body>
+                </Card.Card>
+                <Card.Card className="mt-3">
+                    <Card.Header>Attachments</Card.Header>
+                    <Card.Body>
+                        <AttachmentList scriptID={this.state.script.ID} didUpdateAttachments={this.changeAttachments}/>
                     </Card.Body>
                 </Card.Card>
                 <hr/>

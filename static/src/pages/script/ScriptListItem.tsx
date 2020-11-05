@@ -1,9 +1,7 @@
 import * as React from 'react';
-
 import { Script } from '../../types/Script';
 import { Link } from 'react-router-dom';
-import { Dropdown, MenuItem, MenuLink } from '../../components/Menu';
-import { Style } from '../../components/Style';
+import { MenuItem, MenuLink } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { GlobalModalFrame } from '../../components/Modal';
@@ -41,24 +39,17 @@ export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
 
     render(): JSX.Element {
         const link = <Link to={'/scripts/script/' + this.props.script.ID}>{ this.props.script.Name }</Link>;
-        const dropdownLabel = <Icon.Bars />;
-        const buttonProps = {
-            color: Style.Palette.Secondary,
-            outline: true,
-            size: Style.Size.XS,
-        };
+
         return (
             <Table.Row disabled={!this.props.script.Enabled}>
                 <td>{ link }</td>
                 <td>{ this.props.script.Executable }</td>
-                <td>
-                    <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuItem label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
-                        <MenuLink label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
-                        { this.enableDisableMenu() }
-                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
-                    </Dropdown>
-                </td>
+                <Table.Menu>
+                    <MenuItem label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
+                    <MenuLink label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
+                    { this.enableDisableMenu() }
+                    <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                </Table.Menu>
             </Table.Row>
         );
     }

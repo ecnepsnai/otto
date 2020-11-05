@@ -81,6 +81,31 @@ func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Erro
 	return schedules, nil
 }
 
+func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	script, err := ScriptStore.ScriptWithID(id)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+	if script == nil {
+		return nil, web.ValidationError("No script with ID %s", id)
+	}
+
+	files, err := script.Attachments()
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return files, nil
+}
+
 func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

@@ -74,6 +74,19 @@ func (host *Host) Ping() *Error {
 func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	start := time.Now()
 
+	fileIDs, err := script.Attachments()
+	if err != nil {
+		return nil, err
+	}
+	files := make([]otto.File, len(script.AttachmentIDs))
+	for i, file := range fileIDs {
+		file, erro := file.OttoFile()
+		if erro != nil {
+			return nil, ErrorFrom(erro)
+		}
+		files[i] = *file
+	}
+
 	scriptRequest := otto.Script{
 		Name:             script.Name,
 		UID:              script.UID,
@@ -82,6 +95,7 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 		Data:             []byte(script.Script),
 		WorkingDirectory: script.WorkingDirectory,
 		Environment:      map[string]string{},
+		Files:            files,
 	}
 
 	variables := environ.Merge(staticEnvironment(), []environ.Variable{

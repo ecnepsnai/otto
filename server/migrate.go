@@ -7,7 +7,7 @@ import (
 	"github.com/ecnepsnai/security"
 )
 
-var neededTableVersion = 4
+var neededTableVersion = 5
 
 func migrateIfNeeded() {
 	currentVersion := State.GetTableVersion()
@@ -24,8 +24,8 @@ func migrateIfNeeded() {
 
 	i := currentVersion
 	for i <= neededTableVersion {
-		if i == 4 {
-			migrate4()
+		if i == 5 {
+			migrate5()
 		}
 		i++
 	}
@@ -33,32 +33,45 @@ func migrateIfNeeded() {
 	State.SetTableVersion(i)
 }
 
-// #4 Add schedule names
-func migrate4() {
-	log.Debug("Start migrate 4")
+// #5 Update user password
+func migrate5() {
+	log.Debug("Start migrate 5")
 
-	if !FileExists(path.Join(Directories.Data, "schedule.db")) {
+	if !FileExists(path.Join(Directories.Data, "user.db")) {
 		return
 	}
 
+	type oldUser struct {
+		Username     string `ds:"primary"`
+		Email        string `ds:"unique"`
+		Enabled      bool
+		PasswordHash string
+	}
+	type newUser struct {
+		Username     string `ds:"primary"`
+		Email        string `ds:"unique"`
+		Enabled      bool
+		PasswordHash security.HashedPassword
+	}
+
 	result := ds.Migrate(ds.MigrateParams{
-		TablePath: path.Join(Directories.Data, "schedule.db"),
-		NewPath:   path.Join(Directories.Data, "schedule.db"),
-		OldType:   Schedule{},
-		NewType:   Schedule{},
+		TablePath: path.Join(Directories.Data, "user.db"),
+		NewPath:   path.Join(Directories.Data, "user.db"),
+		OldType:   oldUser{},
+		NewType:   newUser{},
 		MigrateObject: func(o interface{}) (interface{}, error) {
-			schedule := o.(Schedule)
-			var name = security.RandomString(5)
-			script, _ := ScriptStore.ScriptWithID(schedule.ScriptID)
-			if script != nil {
-				name = script.Name
-			}
-			schedule.Name = name
-			return schedule, nil
+			oldUser := o.(oldUser)
+			newHash := []byte(string(security.HashingAlgorithmBCrypt) + "$" + oldUser.PasswordHash)
+			return User{
+				Username:     oldUser.Username,
+				Email:        oldUser.Email,
+				Enabled:      oldUser.Enabled,
+				PasswordHash: security.HashedPassword(newHash),
+			}, nil
 		},
 	})
 	if !result.Success {
-		log.Fatal("Error migrating schedule table: %s", result.Error.Error())
+		log.Fatal("Error migrating user table: %s", result.Error.Error())
 	}
 	log.Warn("Schedule store migration results: %+v", result)
 }

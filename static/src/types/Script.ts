@@ -4,6 +4,7 @@ import { Notification } from "../components/Notification";
 import { Group } from "./Group";
 import { Variable } from "./Variable";
 import { Schedule } from "./Schedule";
+import { Attachment } from "./Attachment";
 
 export class Script {
     ID: string;
@@ -16,6 +17,7 @@ export class Script {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    AttachmentIDs: string[];
 
     constructor(json: any) {
         this.ID = json.ID as string;
@@ -28,6 +30,7 @@ export class Script {
         this.GID = json.GID as number;
         this.WorkingDirectory = json.WorkingDirectory as string;
         this.AfterExecution = json.AfterExecution as string;
+        this.AttachmentIDs = (json.AttachmentIDs || []) as string[];
     }
 
     /**
@@ -42,6 +45,7 @@ export class Script {
             Enabled: '',
             GroupIDs: [],
             Environment: [],
+            AttachmentIDs: [],
         });
     }
 
@@ -171,6 +175,23 @@ export class Script {
             return new Schedule(obj);
         });
     }
+
+    /**
+     * List all attachments for this script
+     */
+    public async Attachments(): Promise<Attachment[]> {
+        return Script.Attachments(this.ID);
+    }
+
+    /**
+     * List all attachments for a script
+     */
+    public static async Attachments(id: string): Promise<Attachment[]> {
+        const data = await API.GET('/api/scripts/script/' + id + '/attachments');
+        return (data as any[]).map(obj => {
+            return new Attachment(obj);
+        });
+    }
 }
 
 export interface ScriptEnabledHost {
@@ -191,6 +212,7 @@ export interface NewScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    AttachmentIDs: string[];
 }
 
 export interface EditScriptParameters {
@@ -203,4 +225,5 @@ export interface EditScriptParameters {
     GID: number;
     WorkingDirectory: string;
     AfterExecution: string;
+    AttachmentIDs: string[];
 }

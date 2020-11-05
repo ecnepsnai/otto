@@ -102,7 +102,7 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 	}
 
 	group := Group{
-		ID:          NewID(),
+		ID:          newID(),
 		Name:        params.Name,
 		ScriptIDs:   enabledScripts,
 		Environment: params.Environment,

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Card } from '../../components/Card';
 import { Icon } from '../../components/Icon';
-import { Checkbox, Input, Select, Form, RadioChoice, Radio } from '../../components/Form';
+import { Checkbox, Input, Select, RadioChoice, Radio } from '../../components/Form';
 import { Options } from '../../types/Options';
 import { CreateButton } from '../../components/Button';
-import { Modal, GlobalModalFrame, ModalButton } from '../../components/Modal';
+import { Modal, GlobalModalFrame, ModalForm } from '../../components/Modal';
 import { Loading } from '../../components/Loading';
 import { Group } from '../../types/Group';
 import { Style } from '../../components/Style';
@@ -104,7 +104,8 @@ export class OptionsRegister extends React.Component<OptionsRegisterProps, Optio
                     label="Register PSK"
                     helpText="Clients that wish to register with this server must specify this PSK to authenticate"
                     defaultValue={this.state.value.PSK}
-                    onChange={this.changePSK} />
+                    onChange={this.changePSK}
+                    required />
                 <label className="form-label">Rules</label>
                 <RegisterRules defaultValue={this.state.value.Rules} onChange={this.changeRules} groups={this.state.groups}/>
                 <Select
@@ -359,7 +360,16 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
         });
     }
 
-    private content = () => {
+    private onSubmit = () => {
+        return new Promise(resolve => {
+            this.props.onSave(this.state.value);
+            resolve();
+        });
+    }
+
+    render(): JSX.Element {
+        const title = this.props.defaultValue ? 'Edit Rule' : 'New Rule';
+
         const radioChoices: RadioChoice[] = [
             {
                 value: 'uname',
@@ -372,7 +382,7 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
         ];
 
         return (
-            <Form>
+            <ModalForm title={title} onSubmit={this.onSubmit}>
                 <Radio
                     label="Property"
                     choices={radioChoices}
@@ -387,31 +397,8 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
                         { this.props.groups.map((group, idx) => {
                             return ( <option key={idx} value={group.ID}>{group.Name}</option> );
                         }) }
-                    </Select>
-            </Form>
-        );
-    }
-
-    render(): JSX.Element {
-        const title = this.props.defaultValue ? 'Edit Rule' : 'New Rule';
-        const buttons: ModalButton[] = [
-            {
-                label: 'Discard',
-                color: Style.Palette.Secondary,
-            },
-            {
-                label: 'Save',
-                color: Style.Palette.Primary,
-                onClick: () => {
-                    this.props.onSave(this.state.value);
-                },
-            }
-        ];
-
-        return (
-            <Modal title={title} static buttons={buttons}>
-                { this.content() }
-            </Modal>
+                </Select>
+            </ModalForm>
         );
     }
 }

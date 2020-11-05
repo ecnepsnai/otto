@@ -170,7 +170,7 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 	}
 
 	schedule := Schedule{
-		ID:       NewID(),
+		ID:       newID(),
 		Name:     params.Name,
 		ScriptID: params.ScriptID,
 		Scope: ScheduleScope{
