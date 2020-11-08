@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -40,7 +41,7 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 		return nil, web.ValidationError("Invalid mode '%s'", modeStr)
 	}
 
-	fileUpload, _, err := request.HTTP.FormFile("file")
+	fileUpload, info, err := request.HTTP.FormFile("file")
 	if err != nil {
 		log.Error("Error getting form file: %s", err.Error())
 		return nil, web.CommonErrors.BadRequest
@@ -49,11 +50,14 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 	file := Attachment{
 		ID:       newPlainID(),
 		Path:     pathStr,
+		Name:     info.Filename,
+		MimeType: info.Header.Get("Content-Type"),
 		UID:      uid,
 		GID:      gid,
 		Mode:     uint32(mode),
 		Created:  time.Now(),
 		Modified: time.Now(),
+		Size:     uint64(info.Size),
 	}
 
 	f, err := os.OpenFile(file.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
@@ -88,6 +92,32 @@ func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
 	}
 
 	return file, nil
+}
+
+func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.Response) {
+	fileID := request.Params.ByName("id")
+
+	file, erro := AttachmentStore.AttachmentWithID(fileID)
+	if erro != nil {
+		if erro.Server {
+			response.Status = 500
+			return
+		}
+		response.Status = 400
+		return
+	}
+
+	f, err := os.OpenFile(file.FilePath(), os.O_RDONLY, 0644)
+	if err != nil {
+		response.Status = 500
+		return
+	}
+	response.ContentType = file.MimeType
+	response.Headers = map[string]string{
+		"Content-Disposition": fmt.Sprintf("attachment; filename=\"%s\"", file.Name),
+	}
+	response.Reader = f
+	return
 }
 
 func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {

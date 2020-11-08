@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Icon } from '../../../components/Icon';
-import { MenuItem } from '../../../components/Menu';
+import { MenuAnchor, MenuItem } from '../../../components/Menu';
 import { GlobalModalFrame } from '../../../components/Modal';
 import { Table } from '../../../components/Table';
+import { Formatter } from '../../../services/Formatter';
 import { Attachment } from '../../../types/Attachment';
 import { AttachmentEdit } from './AttachmentEdit';
 
@@ -38,10 +39,13 @@ export class AttachmentListItem extends React.Component<AttachmentListItemProps,
         return (
             <Table.Row>
                 <td>{ this.props.attachment.Path }</td>
+                <td>{ this.props.attachment.MimeType }</td>
                 <td>{ this.props.attachment.UID + ':' + this.props.attachment.GID }</td>
                 <td>{ this.props.attachment.Mode }</td>
+                <td>{ Formatter.Bytes(this.props.attachment.Size) }</td>
                 <Table.Menu>
                     <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editClick}/>
+                    <MenuAnchor label="Download" icon={<Icon.Download />} href={'/api/attachments/attachment/' + this.props.attachment.ID + '/download'} />
                     <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteClick}/>
                 </Table.Menu>
             </Table.Row>

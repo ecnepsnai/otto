@@ -102,6 +102,7 @@ func RouterSetup() {
 	server.API.GET("/api/attachments", h.AttachmentList, authenticatedOptions)
 	server.API.PUT("/api/attachments", h.AttachmentUpload, authenticatedOptions)
 	server.API.GET("/api/attachments/attachment/:id", h.AttachmentGet, authenticatedOptions)
+	server.HTTP.GET("/api/attachments/attachment/:id/download", v.AttachmentDownload, authenticatedOptions)
 	server.API.POST("/api/attachments/attachment/:id", h.AttachmentEdit, authenticatedOptions)
 	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions)
 

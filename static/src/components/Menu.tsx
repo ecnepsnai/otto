@@ -78,3 +78,17 @@ export class MenuLink extends React.Component<MenuLinkProps, {}> {
         );
     }
 }
+
+export interface MenuAnchorProps {
+    icon?: JSX.Element;
+    label: string;
+    href: string;
+}
+
+export class MenuAnchor extends React.Component<MenuAnchorProps, {}> {
+    render(): JSX.Element {
+        return (
+            <li><a className="dropdown-item" href={this.props.href}>{ this.props.icon }<span className="ml-1">{ this.props.label }</span></a></li>
+        );
+    }
+}

@@ -5,16 +5,22 @@ import { API } from "../services/API";
 export class Attachment {
     ID: string;
     Path: string;
+    Name: string;
+    MimeType: string;
     UID: number;
     GID: number;
     Mode: number;
+    Size: number;
 
     constructor(json: any) {
         this.ID = json.ID as string;
         this.Path = json.Path as string;
+        this.Name = json.Name as string;
+        this.MimeType = json.MimeType as string;
         this.UID = json.UID as number;
         this.GID = json.GID as number;
         this.Mode = json.Mode as number;
+        this.Size = json.Size as number;
     }
 
     /**
@@ -23,6 +29,7 @@ export class Attachment {
     public static Blank(): Attachment {
         return new Attachment({
             Path: '',
+            Name: '',
             UID: 0,
             GID: 0,
             Mode: 644,

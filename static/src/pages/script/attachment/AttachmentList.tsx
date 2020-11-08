@@ -86,8 +86,10 @@ export class AttachmentList extends React.Component<AttachmentListProps, Attachm
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Path</Table.Column>
+                    <Table.Column>Type</Table.Column>
                     <Table.Column>Owner</Table.Column>
-                    <Table.Column>Mode</Table.Column>
+                    <Table.Column>Permission</Table.Column>
+                    <Table.Column>Size</Table.Column>
                     <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>

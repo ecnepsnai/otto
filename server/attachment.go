@@ -13,11 +13,14 @@ import (
 type Attachment struct {
 	ID       string `ds:"primary"`
 	Path     string
+	Name     string
+	MimeType string
 	UID      int
 	GID      int
 	Created  time.Time
 	Modified time.Time
 	Mode     uint32
+	Size     uint64
 }
 
 // OttoFile return an otto common file
