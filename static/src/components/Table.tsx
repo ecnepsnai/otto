@@ -14,7 +14,7 @@ export namespace Table {
                 className += ' ' + this.props.className;
             }
             return (
-                <div className="table-responsive">
+                <div>
                     <table className={className}>{this.props.children}</table>
                 </div>
             );

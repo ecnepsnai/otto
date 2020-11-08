@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Schedule } from '../../types/Schedule';
 import { Link } from 'react-router-dom';
-import { MenuItem, MenuLink } from '../../components/Menu';
+import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { Script } from '../../types/Script';
@@ -21,9 +21,17 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
 
     private enabledOnColumn = () => {
         if (this.props.schedule.Scope.GroupIDs.length > 0) {
-            return (<td>{this.props.schedule.Scope.GroupIDs.length} groups</td>);
+            let unit = 'groups';
+            if (this.props.schedule.Scope.GroupIDs.length  == 1) {
+                unit = 'group';
+            }
+            return (<td>{this.props.schedule.Scope.GroupIDs.length} {unit}</td>);
         } else if (this.props.schedule.Scope.HostIDs.length > 0) {
-            return (<td>{this.props.schedule.Scope.HostIDs.length} hosts</td>);
+            let unit = 'hosts';
+            if (this.props.schedule.Scope.HostIDs.length == 1) {
+                unit = 'host';
+            }
+            return (<td>{this.props.schedule.Scope.HostIDs.length} {unit}</td>);
         }
 
         return (<td></td>);
@@ -41,8 +49,9 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
                 <td><DateLabel date={this.props.schedule.LastRunTime} /></td>
                 <td><EnabledBadge value={this.props.schedule.Enabled} /></td>
                 <Table.Menu>
-                    <MenuLink label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
-                    <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                    <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
+                    <Menu.Divider />
+                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
                 </Table.Menu>
             </Table.Row>
         );

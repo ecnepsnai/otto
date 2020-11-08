@@ -45,6 +45,7 @@ export class ScriptList extends React.Component<ScriptListProps, ScriptListState
                     <Table.Head>
                         <Table.Column>Name</Table.Column>
                         <Table.Column>Executable</Table.Column>
+                        <Table.Column>Attachments</Table.Column>
                         <Table.MenuColumn />
                     </Table.Head>
                     <Table.Body>

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { Script } from '../../types/Script';
 import { Link } from 'react-router-dom';
-import { MenuItem, MenuLink } from '../../components/Menu';
+import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { GlobalModalFrame } from '../../components/Modal';
 import { Rand } from '../../services/Rand';
 import { RunModal } from '../run/RunModal';
+import { Formatter } from '../../services/Formatter';
 
 export interface ScriptListItemProps { script: Script, onReload: () => (void); }
 export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
@@ -28,9 +29,9 @@ export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
 
     private enableDisableMenu = () => {
         if (this.props.script.Enabled) {
-            return ( <MenuItem icon={<Icon.TimesCircle />} onClick={this.toggleMenuClick} label="Disable" /> );
+            return ( <Menu.Item icon={<Icon.TimesCircle />} onClick={this.toggleMenuClick} label="Disable" /> );
         }
-        return ( <MenuItem icon={<Icon.CheckCircle />} onClick={this.toggleMenuClick} label="Enable" /> );
+        return ( <Menu.Item icon={<Icon.CheckCircle />} onClick={this.toggleMenuClick} label="Enable" /> );
     }
 
     private executeScriptMenuClick = () => {
@@ -44,11 +45,13 @@ export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
             <Table.Row disabled={!this.props.script.Enabled}>
                 <td>{ link }</td>
                 <td>{ this.props.script.Executable }</td>
+                <td>{ Formatter.ValueOrNothing(this.props.script.AttachmentIDs.length) }</td>
                 <Table.Menu>
-                    <MenuItem label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
-                    <MenuLink label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
+                    <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
+                    <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
                     { this.enableDisableMenu() }
-                    <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                    <Menu.Divider />
+                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
                 </Table.Menu>
             </Table.Row>
         );

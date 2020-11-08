@@ -8,7 +8,7 @@ import { Table } from '../../components/Table';
 import { EnabledBadge } from '../../components/Badge';
 import { Style } from '../../components/Style';
 import { Rand } from '../../services/Rand';
-import { MenuItem } from '../../components/Menu';
+import { Menu } from '../../components/Menu';
 import { StateManager } from '../../services/StateManager';
 import { Modal, GlobalModalFrame, ModalForm } from '../../components/Modal';
 import { Input, Checkbox } from '../../components/Form';
@@ -93,7 +93,10 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
     private userRow = (user: User) => {
         let deleteMenuItem: JSX.Element;
         if (StateManager.Current().User.Username != user.Username) {
-            deleteMenuItem = (<MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteUserMenuClick(user)}/>);
+            deleteMenuItem = (<React.Fragment>
+                <Menu.Divider />
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteUserMenuClick(user)}/>
+            </React.Fragment>);
         }
 
         return (
@@ -102,7 +105,7 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
                 <td>{user.Email}</td>
                 <td><EnabledBadge value={user.Enabled} /></td>
                 <Table.Menu>
-                    <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editUserMenuClick(user)}/>
+                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editUserMenuClick(user)}/>
                     { deleteMenuItem }
                 </Table.Menu>
             </Table.Row>

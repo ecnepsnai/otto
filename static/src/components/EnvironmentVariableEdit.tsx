@@ -3,7 +3,7 @@ import { Table } from './Table';
 import { CreateButton } from './Button';
 import { Icon } from './Icon';
 import { Style } from './Style';
-import { Dropdown, MenuItem } from './Menu';
+import { Dropdown, Menu } from './Menu';
 import { Modal, GlobalModalFrame, ModalForm } from './Modal';
 import { Input, Textarea, Checkbox } from './Form';
 import { Variable } from '../types/Variable';
@@ -104,8 +104,9 @@ class EnvironmentVariableEditListItem extends React.Component<EnvironmentVariabl
                 </td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.props.requestEdit}/>
-                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.props.requestDelete}/>
+                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.props.requestEdit}/>
+                        <Menu.Divider />
+                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.props.requestDelete}/>
                     </Dropdown>
                 </td>
             </Table.Row>

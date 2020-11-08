@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Group } from '../../types/Group';
 import { Link } from 'react-router-dom';
-import { MenuItem, MenuLink } from '../../components/Menu';
+import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
+import { Formatter } from '../../services/Formatter';
 
 export interface GroupListItemProps { group: Group, hosts: string[], onReload: () => (void), numGroups: number }
 export class GroupListItem extends React.Component<GroupListItemProps, {}> {
@@ -20,16 +21,21 @@ export class GroupListItem extends React.Component<GroupListItemProps, {}> {
 
         let deleteMenuItem: JSX.Element = null;
         if (this.props.numGroups > 1) {
-            deleteMenuItem = (<MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>);
+            deleteMenuItem = (
+                <React.Fragment>
+                    <Menu.Divider />
+                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
+                </React.Fragment>
+            );
         }
 
         return (
             <Table.Row>
                 <td>{ link }</td>
-                <td>{ this.props.hosts.length }</td>
-                <td>{ this.props.group.ScriptIDs.length }</td>
+                <td>{ Formatter.ValueOrNothing(this.props.hosts.length) }</td>
+                <td>{ Formatter.ValueOrNothing(this.props.group.ScriptIDs.length) }</td>
                 <Table.Menu>
-                    <MenuLink label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + this.props.group.ID + '/edit'}/>
+                    <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + this.props.group.ID + '/edit'}/>
                     {deleteMenuItem}
                 </Table.Menu>
             </Table.Row>

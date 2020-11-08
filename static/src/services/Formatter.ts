@@ -52,4 +52,12 @@ export class Formatter {
 
         return input + ' B';
     }
+
+    public static ValueOrNothing(v: number): string {
+        if (!v || isNaN(v) || v == 0) {
+            return '';
+        }
+
+        return v.toString();
+    }
 }

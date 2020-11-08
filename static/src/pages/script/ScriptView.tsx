@@ -20,6 +20,7 @@ import { Group } from '../../types/Group';
 import { Pre } from '../../components/Pre';
 import { Attachment } from '../../types/Attachment';
 import { Formatter } from '../../services/Formatter';
+import { Nothing } from '../../components/Nothing';
 
 export interface ScriptViewProps { match: match; }
 interface ScriptViewState {
@@ -101,6 +102,30 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
         };
     }
 
+    private attachmentList = () => {
+        if (!this.state.attachments || this.state.attachments.length == 0) {
+            return (<Card.Body><Nothing /></Card.Body>);
+        }
+
+        return (<ListGroup.List>{
+            this.state.attachments.map((attachment, idx) => {
+                return (<ListGroup.Item key={idx}>
+                    <div className="d-flex justify-content-between">
+                        <span>
+                            <Icon.Label icon={<Icon.Paperclip />} label={attachment.Name} />
+                            <span className="text-muted ml-1">
+                                {Formatter.Bytes(attachment.Size)}
+                            </span>
+                        </span>
+                        <a href={'/api/attachments/attachment/' + attachment.ID + '/download'} className={Button.className({ color: Style.Palette.Secondary, outline: true, size: Style.Size.XS })} download>
+                            <Icon.Download />
+                        </a>
+                    </div>
+                </ListGroup.Item>);
+            })
+        }</ListGroup.List>);
+    }
+
     render(): JSX.Element {
         if (this.state.loading) { return (<PageLoading />); }
 
@@ -164,25 +189,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                         <EnvironmentVariableCard variables={this.state.script.Environment} />
                         <Card.Card className="mt-3">
                             <Card.Header>Attachments</Card.Header>
-                            <ListGroup.List>
-                                {
-                                    this.state.attachments.map((attachment, idx) => {
-                                        return (<ListGroup.Item key={idx}>
-                                            <div className="d-flex justify-content-between">
-                                                <span>
-                                                    <Icon.Label icon={<Icon.Paperclip />} label={attachment.Name} />
-                                                    <span className="text-muted ml-1">
-                                                        {Formatter.Bytes(attachment.Size)}
-                                                    </span>
-                                                </span>
-                                                <a href={'/api/attachments/attachment/' + attachment.ID + '/download'} className={Button.className({ color: Style.Palette.Secondary, outline: true, size: Style.Size.XS })} download>
-                                                    <Icon.Download />
-                                                </a>
-                                            </div>
-                                        </ListGroup.Item>);
-                                    })
-                                }
-                            </ListGroup.List>
+                            {this.attachmentList()}
                         </Card.Card>
                     </Layout.Column>
                     <Layout.Column>

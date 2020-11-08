@@ -10,7 +10,7 @@ import { Group } from '../../types/Group';
 import { Style } from '../../components/Style';
 import { Table } from '../../components/Table';
 import { Rand } from '../../services/Rand';
-import { Dropdown, MenuItem } from '../../components/Menu';
+import { Dropdown, Menu } from '../../components/Menu';
 
 export interface OptionsRegisterProps {
     defaultValue: Options.Register;
@@ -244,8 +244,9 @@ class RegisterRules extends React.Component<RegisterRulesProps, RegisterRulesSta
                 <td>{groupName}</td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
-                        <MenuItem label="Edit" icon={<Icon.Edit />} onClick={this.editRuleMenuClick(idx)}/>
-                        <MenuItem label="Delete" icon={<Icon.Delete />} onClick={this.deleteRuleMenuClick(idx)}/>
+                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editRuleMenuClick(idx)}/>
+                        <Menu.Divider />
+                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteRuleMenuClick(idx)}/>
                     </Dropdown>
                 </td>
             </Table.Row>
