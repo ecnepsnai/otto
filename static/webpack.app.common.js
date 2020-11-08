@@ -13,6 +13,7 @@ module.exports = {
                 { from: 'img/*.png', to: 'assets/', noErrorOnMissing: true},
                 { from: 'img/*.svg', to: 'assets/', noErrorOnMissing: true},
                 { from: 'img/*.jpg', to: 'assets/', noErrorOnMissing: true},
+                { from: 'img/*.ico', to: 'assets/', noErrorOnMissing: true},
             ]
         })
     ],

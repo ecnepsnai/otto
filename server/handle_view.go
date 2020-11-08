@@ -30,10 +30,13 @@ func (v *view) Login(request web.Request, writer web.Writer) (response web.Respo
 	return
 }
 
-func (v *view) AngularJS(request web.Request, writer web.Writer) web.Response {
+func (v *view) JavaScript(request web.Request, writer web.Writer) web.Response {
 	file, err := os.OpenFile(path.Join(Directories.Build, "index.html"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		panic(err)
+		log.Error("Error serving javascript: %s", err.Error())
+		return web.Response{
+			Status: 500,
+		}
 	}
 	return web.Response{
 		Reader: file,
@@ -41,12 +44,16 @@ func (v *view) AngularJS(request web.Request, writer web.Writer) web.Response {
 }
 
 func (v *view) Favicon(request web.Request, writer web.Writer) web.Response {
-	file, err := os.OpenFile(path.Join(Directories.Build, "assets", "img", "logo.png"), os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile(path.Join(Directories.Build, "assets", "img", "favicon.ico"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		panic(err)
+		log.Error("Error serving favicon: %s", err.Error())
+		return web.Response{
+			Status: 500,
+		}
 	}
 	return web.Response{
-		Reader: file,
+		ContentType: "image/x-icon",
+		Reader:      file,
 	}
 }
 

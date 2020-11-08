@@ -169,7 +169,7 @@ func RouterSetup() {
 		"/options/users/user/:username",
 	}
 	for _, route := range ngRoutes {
-		server.HTTP.GET(route, v.AngularJS, authenticatedOptions)
+		server.HTTP.GET(route, v.JavaScript, authenticatedOptions)
 	}
 
 	server.Start()
