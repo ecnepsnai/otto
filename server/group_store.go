@@ -164,25 +164,30 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 		return err
 	}
 	if len(hosts) > 0 {
+		log.Error("Can't delete group '%s' with hosts", group.Name)
 		return ErrorUser("Can't delete group with hosts")
 	}
 
 	if Options.Register.DefaultGroupID == group.ID {
+		log.Error("Can't delete group '%s' that is the default group for host registration", group.Name)
 		return ErrorUser("Can't delete group that is the default group for host registration")
 	}
 
 	for _, rule := range Options.Register.Rules {
 		if rule.GroupID == group.ID {
+			log.Error("Can't delete group '%s' that is used in a host registration rule", group.Name)
 			return ErrorUser("Can't delete group that is used in a host registration rule")
 		}
 	}
 
 	schedules, _ := ScheduleStore.AllSchedulesForGroup(group.ID)
 	if len(schedules) > 0 {
+		log.Error("Can't delete group '%s' that is used in a schedule", group.Name)
 		return ErrorUser("Can't delete group that is used in a schedule")
 	}
 
 	if groups, _ := s.AllGroups(); len(groups) <= 1 {
+		log.Error("At least one group must exist")
 		return ErrorUser("At least one group must exist")
 	}
 

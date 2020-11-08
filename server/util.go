@@ -106,3 +106,15 @@ func StringSliceContains(n string, h []string) bool {
 	}
 	return false
 }
+
+// FilterStringSlice remove any occurrence of `r` from `s`, returning a new slice
+func FilterStringSlice(r string, s []string) []string {
+	sl := []string{}
+	for _, i := range s {
+		if i == r {
+			continue
+		}
+		sl = append(sl, i)
+	}
+	return sl
+}

@@ -65,7 +65,7 @@ func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) ([]Schedule, *
 		}
 	}
 
-	return schedules, nil
+	return matchedSchedules, nil
 }
 
 func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Error) {
@@ -95,7 +95,7 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Er
 		}
 	}
 
-	return schedules, nil
+	return matchedSchedules, nil
 }
 
 func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {

@@ -85,7 +85,25 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
 
+	var addedHosts []string
+	var removedHosts []string
+
+	currentHosts := group.HostIDs()
 	for _, hostID := range r.Hosts {
+		if !StringSliceContains(hostID, currentHosts) {
+			addedHosts = append(addedHosts, hostID)
+		}
+	}
+	for _, hostID := range currentHosts {
+		if !StringSliceContains(hostID, r.Hosts) {
+			removedHosts = append(removedHosts, hostID)
+		}
+	}
+
+	log.Debug("Will add hosts to group %s: %+v", id, addedHosts)
+	log.Debug("Will remove hosts from group %s: %+v", id, removedHosts)
+
+	for _, hostID := range addedHosts {
 		host, err := HostStore.HostWithID(hostID)
 		if err != nil {
 			if err.Server {
@@ -104,6 +122,30 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			PSK:         host.PSK,
 			Enabled:     host.Enabled,
 			GroupIDs:    append(host.GroupIDs, id),
+			Environment: host.Environment,
+		}); err != nil {
+			return nil, web.CommonErrors.ServerError
+		}
+	}
+	for _, hostID := range removedHosts {
+		host, err := HostStore.HostWithID(hostID)
+		if err != nil {
+			if err.Server {
+				return nil, web.CommonErrors.ServerError
+			}
+			return nil, web.ValidationError(err.Message)
+		}
+		if !StringSliceContains(id, host.GroupIDs) {
+			continue
+		}
+
+		if _, err := HostStore.EditHost(host, editHostParameters{
+			Name:        host.Name,
+			Address:     host.Address,
+			Port:        host.Port,
+			PSK:         host.PSK,
+			Enabled:     host.Enabled,
+			GroupIDs:    FilterStringSlice(id, host.GroupIDs),
 			Environment: host.Environment,
 		}); err != nil {
 			return nil, web.CommonErrors.ServerError
