@@ -17,7 +17,7 @@ You can use a pre-defined frequency template of:
 - Every day at midnight
 - Every monday at midnight
 
-Or define your own schedule using cron patterns.
+Or define your own schedule using [cron patterns](https://en.wikipedia.org/wiki/Cron#Overview).
 
 Last, select the individual hosts or groups that you want this script to run.
 
