@@ -58,6 +58,9 @@ function build_client() {
 
 for OS in 'linux' 'freebsd' 'openbsd' 'netbsd' 'darwin' 'solaris'; do
     build_client ${OS} amd64
+done
+
+for OS in 'linux' 'freebsd' 'openbsd' 'netbsd' 'darwin' 'solaris'; do
     build_server ${OS} amd64 ${PRODUCT_NAME}
 done
 

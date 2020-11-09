@@ -3,7 +3,7 @@ FROM alpine
 EXPOSE 8080
 RUN mkdir /otto_data
 VOLUME [ "/otto_data" ]
-ADD "otto" /otto
+COPY "otto" /otto
 ADD "entrypoint.sh" /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
