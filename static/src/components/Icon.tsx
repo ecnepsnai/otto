@@ -7,6 +7,7 @@ import {
     faBars,
     faCalendarAlt,
     faCheckCircle,
+    faClipboard,
     faCog,
     faDesktop,
     faDownload,
@@ -65,6 +66,7 @@ export namespace Icon {
     export class Bars extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faBars} options={this.props}/> );}}
     export class Calendar extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faCalendarAlt} options={this.props}/> );}}
     export class CheckCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faCheckCircle} options={this.props}/> );}}
+    export class Clipboard extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faClipboard} options={this.props}/> );}}
     export class Cog extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faCog} options={this.props}/> );}}
     export class Delete extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faTrashAlt} options={this.props}/> );}}
     export class Desktop extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faDesktop} options={this.props}/> );}}

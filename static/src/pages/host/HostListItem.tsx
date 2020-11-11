@@ -7,6 +7,7 @@ import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { HeartbeatBadge } from '../../components/Badge';
 import { Heartbeat } from '../../types/Heartbeat';
+import { Formatter } from '../../services/Formatter';
 
 export interface HostListItemProps { host: Host, heartbeat: Heartbeat, onReload: () => (void); }
 export class HostListItem extends React.Component<HostListItemProps, {}> {
@@ -24,6 +25,7 @@ export class HostListItem extends React.Component<HostListItemProps, {}> {
             <Table.Row disabled={!this.props.host.Enabled}>
                 <td>{ link }</td>
                 <td>{ this.props.host.Address }</td>
+                <td>{ Formatter.ValueOrNothing(this.props.host.GroupIDs.length) }</td>
                 <td><HeartbeatBadge heartbeat={this.props.heartbeat} /></td>
                 <Table.Menu>
                     <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/hosts/host/' + this.props.host.ID +'/edit'}/>

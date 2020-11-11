@@ -17,6 +17,7 @@ import { Schedule } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
+import { CopyButton } from '../../components/CopyButton';
 
 export interface HostViewProps { match: match }
 interface HostViewState {
@@ -104,6 +105,7 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
                                     <ListGroup.TextItem title="Name">{ this.state.host.Name }</ListGroup.TextItem>
                                     <ListGroup.TextItem title="Address">{ this.state.host.Address }:{ this.state.host.Port }</ListGroup.TextItem>
                                     <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.host.Enabled} /></ListGroup.TextItem>
+                                    <ListGroup.TextItem title="PSK"><code>*****</code> <CopyButton text={this.state.host.PSK} /></ListGroup.TextItem>
                                 </ListGroup.List>
                             </Card.Card>
                             <EnvironmentVariableCard className="mb-3" variables={this.state.host.Environment} />
