@@ -5,7 +5,7 @@ import "github.com/ecnepsnai/otto/server/environ"
 // Group describes a group object
 type Group struct {
 	ID          string `ds:"primary"`
-	Name        string `ds:"unique"`
+	Name        string `ds:"unique" min:"1" max:"140"`
 	ScriptIDs   []string
 	Environment []environ.Variable
 }

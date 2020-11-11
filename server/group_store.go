@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
@@ -111,6 +112,9 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 		ScriptIDs:   enabledScripts,
 		Environment: params.Environment,
 	}
+	if err := limits.Check(group); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Add(group); err != nil {
 		log.Error("Error adding new group '%s': %s", params.Name, err.Error())
@@ -155,6 +159,9 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 	group.Name = params.Name
 	group.ScriptIDs = enabledScripts
 	group.Environment = params.Environment
+	if err := limits.Check(group); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Update(*group); err != nil {
 		log.Error("Error updating group '%s': %s", params.Name, err.Error())

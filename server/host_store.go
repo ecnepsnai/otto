@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
@@ -143,6 +144,9 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 		GroupIDs:    groupIDs,
 		Environment: params.Environment,
 	}
+	if err := limits.Check(host); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Add(host); err != nil {
 		log.Error("Error adding new host '%s': %s", params.Name, err.Error())
@@ -195,6 +199,9 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	host.Enabled = params.Enabled
 	host.GroupIDs = groupIDs
 	host.Environment = params.Environment
+	if err := limits.Check(host); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Update(*host); err != nil {
 		log.Error("Error updating host '%s': %s", params.Name, err.Error())

@@ -39,11 +39,13 @@ export class Script {
     public static Blank(): Script {
         return new Script({
             Name: '',
-            Address: '',
-            Port: 12444,
-            PSK: '',
-            Enabled: '',
-            GroupIDs: [],
+            Enabled: true,
+            Executable: '/bin/bash',
+            Script: '',
+            UID: 0,
+            GID: 0,
+            WorkingDirectory: '',
+            AfterExecution: '',
             Environment: [],
             AttachmentIDs: [],
         });

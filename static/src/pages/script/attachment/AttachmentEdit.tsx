@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FileBrowser, Input, NumberInput } from '../../../components/Form';
+import { FileBrowser, IDInput, Input, NumberInput } from '../../../components/Form';
 import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Attachment } from '../../../types/Attachment';
 
@@ -61,15 +61,9 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
         this.setState({ file: file });
     }
 
-    private changeUID = (UID: number) => {
+    private changeOwner = (UID: number, GID: number) => {
         this.setState(state => {
             state.attachment.UID = UID;
-            return state;
-        });
-    }
-
-    private changeGID = (GID: number) => {
-        this.setState(state => {
             state.attachment.GID = GID;
             return state;
         });
@@ -93,8 +87,7 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
             <ModalForm title={title} onSubmit={this.saveAttachment}>
                 { this.fileInput() }
                 <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
-                <NumberInput label="Owner User ID" defaultValue={this.state.attachment.UID} required onChange={this.changeUID} helpText="The user ID (UID) that this file will be owned by" />
-                <NumberInput label="Owner Group ID" defaultValue={this.state.attachment.GID} required onChange={this.changeGID} helpText="The group ID (GID) that this file will be owned by" />
+                <IDInput label="Owned By" defaultUID={this.state.attachment.UID} defaultGID={this.state.attachment.GID} onChange={this.changeOwner} />
                 <NumberInput label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
             </ModalForm>
         );

@@ -5,11 +5,11 @@ import "github.com/ecnepsnai/otto/server/environ"
 // Host describes a otto host
 type Host struct {
 	ID          string `ds:"primary"`
-	Name        string `ds:"unique"`
-	Address     string `ds:"unique"`
+	Name        string `ds:"unique" min:"1" max:"140"`
+	Address     string `ds:"unique" min:"1"`
 	Port        uint32
-	PSK         string
-	Enabled     bool `ds:"index"`
+	PSK         string `min:"1" max:"512"`
+	Enabled     bool   `ds:"index"`
 	GroupIDs    []string
 	Environment []environ.Variable
 }

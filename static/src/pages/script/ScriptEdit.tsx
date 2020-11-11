@@ -4,7 +4,7 @@ import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Form, Input, Checkbox, NumberInput, Select, Textarea } from '../../components/Form';
+import { Form, Input, Checkbox, Select, Textarea, IDInput } from '../../components/Form';
 import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdit';
 import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
@@ -90,15 +90,9 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         });
     }
 
-    private changeUID = (UID: number) => {
+    private changeID = (UID: number, GID: number) => {
         this.setState(state => {
             state.script.UID = UID;
-            return state;
-        });
-    }
-
-    private changeGID = (GID: number) => {
-        this.setState(state => {
             state.script.GID = GID;
             return state;
         });
@@ -168,16 +162,11 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     onChange={this.changeName}
                     required />
                 { this.enabledCheckbox() }
-                <NumberInput
-                    label="User ID"
-                    defaultValue={this.state.script.UID}
-                    onChange={this.changeUID}
-                    required />
-                <NumberInput
-                    label="Group ID"
-                    defaultValue={this.state.script.GID}
-                    onChange={this.changeGID}
-                    required />
+                <IDInput
+                    label="Run Script As"
+                    defaultUID={this.state.script.UID}
+                    defaultGID={this.state.script.GID}
+                    onChange={this.changeID} />
                 <Input
                     label="Working Directory"
                     type="text"

@@ -1036,3 +1036,120 @@ export class FileBrowser extends React.Component<FileBrowserProps, FileBrowserSt
         );
     }
 }
+
+export interface IDInputProps {
+    label: string;
+    defaultUID: number;
+    defaultGID: number;
+    onChange: (uid: number, gid: number) => (void);
+}
+interface IDInputState {
+    uid: string;
+    gid: string;
+    valid: ValidationResult;
+    touched: boolean;
+}
+
+export class IDInput extends React.Component<IDInputProps, IDInputState> {
+    constructor(props: IDInputProps) {
+        super(props);
+        const initialValidState: ValidationResult = {
+            valid: true
+        };
+        this.state = {
+            uid: (props.defaultUID || 0).toString(),
+            gid: (props.defaultGID || 0).toString(),
+            valid: initialValidState,
+            touched: false,
+        };
+    }
+
+    private validate = (value: number): Promise<ValidationResult> => {
+        return new Promise((resolve) => {
+            if (isNaN(value) || value == null) {
+                resolve({
+                    valid: false,
+                    invalidMessage: 'A numeric value is required',
+                });
+                return;
+            }
+            if (!isNaN(0) && value < 0) {
+                resolve({
+                    valid: false,
+                    invalidMessage: 'Value must be at least ' + 0,
+                });
+                return;
+            }
+            resolve({ valid: true });
+        });
+    }
+
+    private onBlur = () => {
+        this.setState({ touched: true });
+    }
+
+    private onChangeUID = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.validate(parseInt(target.value)).then(valid => {
+            this.setState({ valid: valid });
+        });
+        this.setState({ uid: target.value }, () => {
+            this.props.onChange(parseFloat(this.state.uid), parseFloat(this.state.gid));
+        });
+    }
+
+    private onChangeGID = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.validate(parseInt(target.value)).then(valid => {
+            this.setState({ valid: valid });
+        });
+        this.setState({ gid: target.value }, () => {
+            this.props.onChange(parseFloat(this.state.uid), parseFloat(this.state.gid));
+        });
+    }
+
+    private validationError() {
+        if (!this.state.valid.invalidMessage || !this.state.touched) { return null; }
+        return (<div className="invalid-feedback force-show">{this.state.valid.invalidMessage}</div>);
+    }
+
+    render(): JSX.Element {
+        const labelID = Rand.ID();
+        let className = 'form-control';
+        if (this.state.touched && !this.state.valid) {
+            className += ' is-invalid';
+        }
+
+        return (<FormGroup>
+            <label htmlFor={labelID} className="form-label">{this.props.label} <span className="form-required">*</span></label>
+            <div className="input-group">
+                <span className="input-group-text">UID</span>
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className={className}
+                    id={labelID}
+                    placeholder="0"
+                    defaultValue={this.state.uid}
+                    onChange={this.onChangeUID}
+                    onBlur={this.onBlur}
+                    data-valid={this.state.valid.valid ? 'valid' : 'invalid'}
+                    required />
+                <span className="input-group-text">GID</span>
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className={className}
+                    placeholder="0"
+                    defaultValue={this.state.gid}
+                    onChange={this.onChangeGID}
+                    onBlur={this.onBlur}
+                    data-valid={this.state.valid.valid ? 'valid' : 'invalid'}
+                    required />
+            </div>
+            {this.validationError()}
+        </FormGroup>);
+    }
+}

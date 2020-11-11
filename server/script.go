@@ -2,16 +2,17 @@ package server
 
 import (
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
 // Script describes an otto script
 type Script struct {
 	ID               string `ds:"primary"`
-	Name             string `ds:"unique"`
+	Name             string `ds:"unique" min:"1" max:"140"`
 	Enabled          bool   `ds:"index"`
-	Executable       string
-	Script           string
+	Executable       string `min:"1"`
+	Script           string `min:"1"`
 	Environment      []environ.Variable
 	UID              uint32
 	GID              uint32
@@ -121,6 +122,9 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		AfterExecution:   params.AfterExecution,
 		AttachmentIDs:    params.AttachmentIDs,
 	}
+	if err := limits.Check(script); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Add(script); err != nil {
 		log.Error("Error adding new script '%s': %s", params.Name, err.Error())
@@ -171,6 +175,9 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	script.WorkingDirectory = params.WorkingDirectory
 	script.AfterExecution = params.AfterExecution
 	script.AttachmentIDs = params.AttachmentIDs
+	if err := limits.Check(script); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Update(*script); err != nil {
 		log.Error("Error updating script '%s': %s", params.Name, err.Error())

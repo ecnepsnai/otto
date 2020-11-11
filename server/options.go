@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 	"sync"
@@ -90,6 +91,9 @@ func LoadOptions() {
 		if err := json.NewDecoder(f).Decode(&options); err != nil {
 			log.Fatal("Error decoding options: %s", err.Error())
 		}
+		if err := options.Validate(); err != nil {
+			log.Fatal("Invalid Otto Server Options: %s", err.Error())
+		}
 		Options = &options
 	}
 }
@@ -112,5 +116,32 @@ func (o *OttoOptions) Save() error {
 
 	Options = o
 
+	return nil
+}
+
+// Validate returns an error if the options is not valid
+func (o *OttoOptions) Validate() error {
+	if o.General.ServerURL == "" {
+		return fmt.Errorf("A server URL is required")
+	}
+	if err := environ.Validate(o.General.GlobalEnvironment); err != nil {
+		return err
+	}
+	if !IsIPVersionOption(o.Network.ForceIPVersion) {
+		return fmt.Errorf("Invalid value for IP version")
+	}
+	if o.Register.Enabled {
+		if o.Register.PSK == "" {
+			return fmt.Errorf("A register PSK is required if auto registration is enabled")
+		}
+		for _, rule := range o.Register.Rules {
+			if rule.GroupID == "" {
+				return fmt.Errorf("Invalid group ID on registration rule")
+			}
+			if rule.Hostname == "" && rule.Uname == "" {
+				return fmt.Errorf("Invalid registration rule, needs either hostname or uname")
+			}
+		}
+	}
 	return nil
 }
