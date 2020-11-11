@@ -1,6 +1,8 @@
 // Package environ is a custom environment variable utilities for otto
 package environ
 
+import "fmt"
+
 // Variable describes a single variable
 type Variable struct {
 	Key    string
@@ -25,7 +27,7 @@ func FromMap(m map[string]string) []Variable {
 	return vars
 }
 
-// Merge will merge the given two varialbe slices. Objects from `original` will be replaces by any from `adding`
+// Merge will merge the given two variable slices. Objects from `original` will be replaces by any from `adding`
 // if there are duplicate keys
 func Merge(original []Variable, adding []Variable) []Variable {
 	keyIdxMap := map[string]int{}
@@ -53,4 +55,25 @@ func Map(vars []Variable) map[string]string {
 		m[v.Key] = v.Value
 	}
 	return m
+}
+
+// ReservedKeys keys reserved by the otto system
+var ReservedKeys = []string{
+	"OTTO_SERVER_VERSION",
+	"OTTO_SERVER_URL",
+	"OTTO_HOST_ADDRESS",
+	"OTTO_HOST_PORT",
+	"OTTO_HOST_PSK",
+}
+
+// Validate will return if any of the variables are invalid
+func Validate(vars []Variable) error {
+	for _, v := range vars {
+		for _, key := range ReservedKeys {
+			if v.Key == key {
+				return fmt.Errorf("Key is reserved by the Otto system")
+			}
+		}
+	}
+	return nil
 }

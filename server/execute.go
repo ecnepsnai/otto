@@ -101,16 +101,19 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	variables := environ.Merge(staticEnvironment(), []environ.Variable{
 		environ.New("OTTO_HOST_ADDRESS", host.Address),
 		environ.New("OTTO_HOST_PORT", fmt.Sprintf("%d", host.Port)),
-		{Key: "OTTO_HOST_PSK", Value: host.PSK, Secret: true},
 	})
 
-	// 1. Global envrionment variables
+	if Options.Security.IncludePSKEnv {
+		variables = append(variables, environ.Variable{Key: "OTTO_HOST_PSK", Value: host.PSK, Secret: true})
+	}
+
+	// 1. Global environment variables
 	variables = environ.Merge(variables, Options.General.GlobalEnvironment)
 
-	// 2. Script envrionment variables
+	// 2. Script environment variables
 	variables = environ.Merge(variables, script.Environment)
 
-	// 3. Group envrionment variables
+	// 3. Group environment variables
 	groups, err := host.Groups()
 	if err != nil {
 		return nil, err
@@ -119,7 +122,7 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 		variables = environ.Merge(variables, group.Environment)
 	}
 
-	// 4. Host envrionment variables
+	// 4. Host environment variables
 	variables = environ.Merge(variables, host.Environment)
 
 	scriptRequest.Environment = environ.Map(variables)

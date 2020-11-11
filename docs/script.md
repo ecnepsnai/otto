@@ -19,11 +19,11 @@ Lastly, there are a number of implicit variables that are automatically included
 
 |Key|Value|
 |-|-|
-|`OTTO_URL`|The absolute URL to the Otto server, configured in the options page|
-|`OTTO_VERSION`|The version of the Otto software|
-|`OTTO_HOST_ADDRESS`|The configured address of the host this script is executing on|
-|`OTTO_HOST_PORT`|The configured port of the host this script is executing on|
-|`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on|
+|`OTTO_SERVER_URL`|The absolute URL to the Otto server, configured in the options page.|
+|`OTTO_SERVER_VERSION`|The version of the Otto software.|
+|`OTTO_HOST_ADDRESS`|The configured address of the host this script is executing on.|
+|`OTTO_HOST_PORT`|The configured port of the host this script is executing on.|
+|`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on. This variable can be disabled in the server's settings page.|
 
 When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in the web interface.
 

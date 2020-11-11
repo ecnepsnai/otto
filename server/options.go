@@ -14,12 +14,18 @@ type OttoOptions struct {
 	General  OptionsGeneral
 	Network  OptionsNetwork
 	Register OptionsRegister
+	Security OptionsSecurity
 }
 
 // OptionsGeneral describes the general options
 type OptionsGeneral struct {
 	ServerURL         string
 	GlobalEnvironment []environ.Variable
+}
+
+// OptionsSecurity describes security options
+type OptionsSecurity struct {
+	IncludePSKEnv bool
 }
 
 // OptionsNetwork describes network options for connecting to otto clients
@@ -63,6 +69,9 @@ func LoadOptions() {
 		Register: OptionsRegister{
 			Enabled: false,
 			Rules:   []RegisterRule{},
+		},
+		Security: OptionsSecurity{
+			IncludePSKEnv: false,
 		},
 	}
 

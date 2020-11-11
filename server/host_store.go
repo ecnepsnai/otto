@@ -116,6 +116,10 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 		return nil, ErrorUser("Name or Address already in use")
 	}
 
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
+
 	var groupIDs = make([]string, len(params.GroupIDs))
 	for i, group := range params.GroupIDs {
 		s, err := GroupStore.GroupWithID(group)
@@ -165,6 +169,10 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	if dupID != "" && dupID != host.ID {
 		log.Warn("Host with name '%s' or address '%s' already exists", params.Name, params.Address)
 		return nil, ErrorUser("Name or Address already in use")
+	}
+
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
 	}
 
 	var groupIDs = make([]string, len(params.GroupIDs))

@@ -24,6 +24,7 @@ import {
     faPlus,
     faQuestionCircle,
     faScroll,
+    faShieldAlt,
     faSignOutAlt,
     faSpinner,
     faStarOfLife,
@@ -80,6 +81,7 @@ export namespace Icon {
     export class Plus extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faPlus} options={this.props}/> );}}
     export class QuestionCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faQuestionCircle} options={this.props}/> );}}
     export class Scroll extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faScroll} options={this.props}/> );}}
+    export class ShieldAlt extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faShieldAlt} options={this.props}/> );}}
     export class SignOut extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faSignOutAlt} options={this.props}/> );}}
     export class Spinner extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faSpinner} options={this.props}/> );}}
     export class TimesCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faTimesCircle} options={this.props}/> );}}

@@ -3,6 +3,7 @@ package server
 import (
 	"strings"
 
+	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/web"
 )
 
@@ -23,6 +24,10 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 
 	if !strings.HasSuffix(options.General.ServerURL, "/") {
 		options.General.ServerURL = options.General.ServerURL + "/"
+	}
+
+	if err := environ.Validate(options.General.GlobalEnvironment); err != nil {
+		return nil, web.ValidationError(err.Error())
 	}
 
 	if err := options.Save(); err != nil {

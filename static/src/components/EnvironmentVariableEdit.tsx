@@ -5,7 +5,7 @@ import { Icon } from './Icon';
 import { Style } from './Style';
 import { Dropdown, Menu } from './Menu';
 import { Modal, GlobalModalFrame, ModalForm } from './Modal';
-import { Input, Textarea, Checkbox } from './Form';
+import { Input, Textarea, Checkbox, ValidationResult } from './Form';
 import { Variable } from '../types/Variable';
 
 export interface EnvironmentVariableEditProps {
@@ -156,6 +156,26 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
         });
     }
 
+    private validateKey = (value: string): Promise<ValidationResult> => {
+        const reserved = [
+            'OTTO_SERVER_VERSION',
+            'OTTO_SERVER_URL',
+            'OTTO_HOST_ADDRESS',
+            'OTTO_HOST_PORT',
+            'OTTO_HOST_PSK'
+        ].includes(value);
+
+        if (reserved) {
+            return Promise.resolve({
+                valid: false,
+                invalidMessage: 'Key is reserved by the Otto system',
+            });
+        }
+        return Promise.resolve({
+            valid: true,
+        });
+    }
+
     render(): JSX.Element {
         const title = this.props.default.Key != '' ? 'Edit Variable' : 'New Variable';
         return (
@@ -166,6 +186,7 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
                     defaultValue={this.state.key}
                     onChange={this.changeKey}
                     fixedWidth
+                    validate={this.validateKey}
                     required />
                 <Textarea
                     label="Value"

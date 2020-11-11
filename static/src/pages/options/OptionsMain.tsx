@@ -8,6 +8,7 @@ import { OptionsNetwork } from './OptionsNetwork';
 import { OptionsRegister } from './OptionsRegister';
 import { OptionsUsers } from './OptionsUsers';
 import { Notification } from '../../components/Notification';
+import { OptionsSecurity } from './OptionsSecurity';
 
 export interface OptionsMainProps {}
 interface OptionsMainState {
@@ -38,6 +39,14 @@ export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainSt
         });
     }
 
+    private changeSecurity = (value: Options.Security) => {
+        this.setState(state => {
+            const options = state.options;
+            options.Security = value;
+            return { options: options };
+        });
+    }
+
     private changeRegister = (value: Options.Register) => {
         this.setState(state => {
             const options = state.options;
@@ -62,6 +71,7 @@ export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainSt
                 <Form className="cards" showSaveButton onSubmit={this.onSubmit} loading={this.state.loading}>
                     <OptionsGeneral defaultValue={this.state.options.General} onUpdate={this.changeGeneral}/>
                     <OptionsNetwork defaultValue={this.state.options.Network} onUpdate={this.changeNetwork}/>
+                    <OptionsSecurity defaultValue={this.state.options.Security} onUpdate={this.changeSecurity}/>
                     <OptionsRegister defaultValue={this.state.options.Register} onUpdate={this.changeRegister}/>
                     <OptionsUsers />
                     <div className="mb-2"></div>

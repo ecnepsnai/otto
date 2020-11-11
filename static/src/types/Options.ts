@@ -6,6 +6,7 @@ export namespace Options {
         General: General;
         Network: Network;
         Register: Register;
+        Security: Security;
     }
 
     export interface General {
@@ -24,6 +25,10 @@ export namespace Options {
         PSK: string;
         Rules: RegisterRule[];
         DefaultGroupID: string;
+    }
+
+    export interface Security {
+        IncludePSKEnv: boolean;
     }
 
     export interface RegisterRule {

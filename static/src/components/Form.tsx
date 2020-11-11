@@ -208,6 +208,7 @@ export class Input extends React.Component<InputProps, InputState> {
             }
             if (this.props.validate) {
                 this.debouncedValidate(value).then(valid => {
+                    console.log(valid);
                     resolve(valid);
                 });
                 return;

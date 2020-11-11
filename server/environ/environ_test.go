@@ -28,3 +28,13 @@ func TestEnviron(t *testing.T) {
 		t.Fatalf("Missing variable after merge")
 	}
 }
+
+func TestValidate(t *testing.T) {
+	vars := []environ.Variable{
+		environ.New(environ.ReservedKeys[0], "foo"),
+	}
+
+	if err := environ.Validate(vars); err == nil {
+		t.Fatalf("No error seen with invalid environment variable")
+	}
+}

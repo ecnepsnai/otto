@@ -88,6 +88,10 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 		return nil, ErrorUser("Name already in use")
 	}
 
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
+
 	var enabledScripts = make([]string, len(params.ScriptIDs))
 	for i, script := range params.ScriptIDs {
 		s, err := ScriptStore.ScriptWithID(script)
@@ -129,6 +133,10 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 	if dupID != "" && dupID != group.ID {
 		log.Warn("Group with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Name already in use")
+	}
+
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
 	}
 
 	var enabledScripts = make([]string, len(params.ScriptIDs))

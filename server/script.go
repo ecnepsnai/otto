@@ -104,6 +104,10 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
 	}
 
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
+
 	script := Script{
 		ID:               newID(),
 		Name:             params.Name,
@@ -151,6 +155,10 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	}
 	if params.AfterExecution != "" && !IsClientAction(params.AfterExecution) {
 		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
+	}
+
+	if err := environ.Validate(params.Environment); err != nil {
+		return nil, ErrorUser(err.Error())
 	}
 
 	script.Name = params.Name
