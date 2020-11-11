@@ -6,6 +6,7 @@ import { Variable } from '../types/Variable';
 
 export interface EnvironmentVariableCardProps {
     variables: Variable[];
+    className?: string;
 }
 export class EnvironmentVariableCard extends React.Component<EnvironmentVariableCardProps, {}> {
     private list = () => {
@@ -40,7 +41,7 @@ export class EnvironmentVariableCard extends React.Component<EnvironmentVariable
 
     render(): JSX.Element {
         return (
-        <Card.Card>
+        <Card.Card className={this.props.className}>
             <Card.Header>Environment Variables</Card.Header>
             { this.content() }
         </Card.Card>

@@ -7,16 +7,16 @@ import { Host } from '../../types/Host';
 import { Script } from '../../types/Script';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
-import { Buttons, EditButton, DeleteButton, SmallPlayButton } from '../../components/Button';
+import { Buttons, EditButton, DeleteButton } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
 import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Nothing } from '../../components/Nothing';
 import { Redirect } from '../../components/Redirect';
-import { GlobalModalFrame } from '../../components/Modal';
-import { RunModal } from '../run/RunModal';
-import { Rand } from '../../services/Rand';
+import { ScriptListCard } from '../../components/ScriptListCard';
+import { Schedule } from '../../types/Schedule';
+import { ScheduleListCard } from '../../components/ScheduleListCard';
 
 export interface GroupViewProps {
     match: match;
@@ -26,6 +26,7 @@ interface GroupViewState {
     group?: Group;
     hosts?: Host[];
     scripts?: Script[];
+    schedules?: Schedule[];
 }
 export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
     private groupID: string;
@@ -59,8 +60,15 @@ export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
         });
     }
 
+    private loadSchedules = async () => {
+        const schedules = await Group.Schedules(this.groupID);
+        this.setState({
+            schedules: schedules,
+        });
+    }
+
     private loadData = () => {
-        Promise.all([this.loadGroup(), this.loadHosts(), this.loadScripts()]).then(() => {
+        Promise.all([this.loadGroup(), this.loadHosts(), this.loadScripts(), this.loadSchedules()]).then(() => {
             this.setState({
                 loading: false,
             });
@@ -93,29 +101,21 @@ export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
                     </Buttons>
                     <Layout.Row>
                         <Layout.Column>
-                            <Card.Card>
+                            <Card.Card className="mb-3">
                                 <Card.Header>Host Information</Card.Header>
                                 <ListGroup.List>
                                     <ListGroup.TextItem title="Name">{ this.state.group.Name }</ListGroup.TextItem>
                                 </ListGroup.List>
                             </Card.Card>
+                            <EnvironmentVariableCard variables={this.state.group.Environment} className="mb-3" />
+                            <ScheduleListCard schedules={this.state.schedules} className="mb-3" />
                         </Layout.Column>
                         <Layout.Column>
-                            <Card.Card>
+                            <Card.Card className="mb-3">
                                 <Card.Header>Hosts</Card.Header>
                                 <HostListCard hosts={this.state.hosts} />
                             </Card.Card>
-                        </Layout.Column>
-                    </Layout.Row>
-                    <Layout.Row>
-                        <Layout.Column>
-                            <EnvironmentVariableCard variables={this.state.group.Environment} />
-                        </Layout.Column>
-                        <Layout.Column>
-                            <Card.Card>
-                                <Card.Header>Script</Card.Header>
-                                <ScriptListCard scripts={this.state.scripts} groupID={this.state.group.ID}/>
-                            </Card.Card>
+                            <ScriptListCard scripts={this.state.scripts} hostIDs={this.state.hosts.map(h => h.ID)} className="mb-3" />
                         </Layout.Column>
                     </Layout.Row>
                 </Layout.Container>
@@ -144,52 +144,6 @@ class HostListCard extends React.Component<HostListCardProps, {}> {
                         <ListGroup.Item key={index}>
                             <Icon.Desktop />
                             <Link to={'/hosts/host/' + host.ID} className="ml-1">{ host.Name }</Link>
-                        </ListGroup.Item>
-                        );
-                    })
-                }
-            </ListGroup.List>
-        );
-    }
-}
-
-interface ScriptListCardProps {
-    groupID: string;
-    scripts: Script[];
-}
-class ScriptListCard extends React.Component<ScriptListCardProps, {}> {
-    private runScriptClick = (scriptID: string) => {
-        return () => {
-            Group.Hosts(this.props.groupID).then(hosts => {
-                const hostIDs = hosts.map(host => { return host.ID; });
-                GlobalModalFrame.showModal(<RunModal scriptID={scriptID} hostIDs={hostIDs} key={Rand.ID()}/>);
-            });
-        };
-    }
-
-    render(): JSX.Element {
-        if (!this.props.scripts || this.props.scripts.length < 1) {
-            return (
-                <Card.Body>
-                    <Nothing />
-                </Card.Body>
-            );
-        }
-        return (
-            <ListGroup.List>
-                {
-                    this.props.scripts.map((script, index) => {
-                        return (
-                        <ListGroup.Item key={index}>
-                            <div className="d-flex justify-content-between">
-                                <div>
-                                    <Icon.Scroll />
-                                    <Link to={'/scripts/script/' + script.ID} className="ml-1">{ script.Name }</Link>
-                                </div>
-                                <div>
-                                    <SmallPlayButton onClick={this.runScriptClick(script.ID)} />
-                                </div>
-                            </div>
                         </ListGroup.Item>
                         );
                     })

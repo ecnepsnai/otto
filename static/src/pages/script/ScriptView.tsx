@@ -21,6 +21,8 @@ import { Pre } from '../../components/Pre';
 import { Attachment } from '../../types/Attachment';
 import { Formatter } from '../../services/Formatter';
 import { Nothing } from '../../components/Nothing';
+import { Schedule } from '../../types/Schedule';
+import { ScheduleListCard } from '../../components/ScheduleListCard';
 
 export interface ScriptViewProps { match: match; }
 interface ScriptViewState {
@@ -28,6 +30,7 @@ interface ScriptViewState {
     script?: Script;
     hosts?: ScriptEnabledHost[];
     attachments?: Attachment[];
+    schedules?: Schedule[];
 }
 export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState> {
     private scriptID: string;
@@ -61,8 +64,15 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
         });
     }
 
+    private loadSchedules = async () => {
+        const schedules = await Script.Schedules(this.scriptID);
+        this.setState({
+            schedules: schedules,
+        });
+    }
+
     private loadData = () => {
-        Promise.all([this.loadHosts(), this.loadScript(), this.loadAttachments()]).then(() => {
+        Promise.all([this.loadHosts(), this.loadScript(), this.loadAttachments(), this.loadSchedules()]).then(() => {
             this.setState({
                 loading: false,
             });
@@ -138,7 +148,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                 </Buttons>
                 <Layout.Row>
                     <Layout.Column>
-                        <Card.Card>
+                        <Card.Card className="mb-3">
                             <Card.Header>Script Details</Card.Header>
                             <ListGroup.List>
                                 <ListGroup.TextItem title="Name">{this.state.script.Name}</ListGroup.TextItem>
@@ -148,9 +158,15 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                 <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>
                             </ListGroup.List>
                         </Card.Card>
+                        <EnvironmentVariableCard variables={this.state.script.Environment} className="mb-3"/>
+                        <Card.Card className="mb-3">
+                            <Card.Header>Attachments</Card.Header>
+                            {this.attachmentList()}
+                        </Card.Card>
+                        <ScheduleListCard schedules={this.state.schedules} className="mb-3" />
                     </Layout.Column>
                     <Layout.Column>
-                        <Card.Card>
+                        <Card.Card className="mb-3">
                             <Card.Header>Enabled on Hosts</Card.Header>
                             <ListGroup.List>
                                 {
@@ -182,18 +198,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                 }
                             </ListGroup.List>
                         </Card.Card>
-                    </Layout.Column>
-                </Layout.Row>
-                <Layout.Row>
-                    <Layout.Column>
-                        <EnvironmentVariableCard variables={this.state.script.Environment} />
-                        <Card.Card className="mt-3">
-                            <Card.Header>Attachments</Card.Header>
-                            {this.attachmentList()}
-                        </Card.Card>
-                    </Layout.Column>
-                    <Layout.Column>
-                        <Card.Card>
+                        <Card.Card className="mb-3">
                             <Card.Header>Script</Card.Header>
                             <Card.Body>
                                 <Pre>{this.state.script.Script}</Pre>
