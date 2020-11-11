@@ -34,23 +34,22 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 
 	groupID := Options.Register.DefaultGroupID
 	for _, rule := range Options.Register.Rules {
-		if rule.Uname != "" {
-			pattern, err := regexp.Compile(rule.Uname)
-			if err != nil {
-				continue
-			}
+		pattern, err := regexp.Compile(rule.Pattern)
+		if err != nil {
+			log.Error("Invalid registration rule regex: %s: %s", rule.Pattern, err.Error())
+			continue
+		}
+
+		switch rule.Property {
+		case RegisterRulePropertyUname:
 			if pattern.MatchString(r.Uname) {
-				log.Debug("Client uname '%s' matches pattern '%s'", r.Uname, rule.Uname)
+				log.Debug("Client uname '%s' matches pattern '%s'", r.Uname, rule.Property)
 				groupID = rule.GroupID
 				break
 			}
-		} else if rule.Hostname != "" {
-			pattern, err := regexp.Compile(rule.Hostname)
-			if err != nil {
-				continue
-			}
+		case RegisterRulePropertyHostname:
 			if pattern.MatchString(r.Hostname) {
-				log.Debug("Client hostname '%s' matches pattern '%s'", r.Hostname, rule.Hostname)
+				log.Debug("Client hostname '%s' matches pattern '%s'", r.Hostname, rule.Property)
 				groupID = rule.GroupID
 				break
 			}

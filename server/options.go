@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"sync"
 
 	"github.com/ecnepsnai/otto/server/environ"
@@ -46,8 +47,8 @@ type OptionsRegister struct {
 
 // RegisterRule describes a register rule
 type RegisterRule struct {
-	Uname    string
-	Hostname string
+	Property string
+	Pattern  string
 	GroupID  string
 }
 
@@ -138,8 +139,14 @@ func (o *OttoOptions) Validate() error {
 			if rule.GroupID == "" {
 				return fmt.Errorf("Invalid group ID on registration rule")
 			}
-			if rule.Hostname == "" && rule.Uname == "" {
-				return fmt.Errorf("Invalid registration rule, needs either hostname or uname")
+			if !IsRegisterRuleProperty(rule.Property) {
+				return fmt.Errorf("Invalid registration rule property")
+			}
+			if rule.Pattern == "" {
+				return fmt.Errorf("Missing registration rule pattern")
+			}
+			if _, err := regexp.Compile(rule.Pattern); err != nil {
+				return fmt.Errorf("Invalid regex pattern on registration rule")
 			}
 		}
 	}

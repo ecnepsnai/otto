@@ -32,9 +32,9 @@ export namespace Options {
     }
 
     export interface RegisterRule {
-        Uname?: string;
-        Hostname?: string;
-        GroupID?: string;
+        Property: string;
+        Pattern: string;
+        GroupID: string;
     }
 
     export class Options {

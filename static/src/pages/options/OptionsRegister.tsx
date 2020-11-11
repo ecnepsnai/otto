@@ -223,8 +223,6 @@ class RegisterRules extends React.Component<RegisterRulesProps, RegisterRulesSta
     }
 
     private ruleRow = (rule: Options.RegisterRule, idx: number) => {
-        const prop = rule.Uname ? 'Uname' : 'Hostname';
-        const propValue = rule.Uname || rule.Hostname;
         let groupName = '';
         this.props.groups.forEach(group => {
             if (group.ID === rule.GroupID) {
@@ -241,8 +239,8 @@ class RegisterRules extends React.Component<RegisterRulesProps, RegisterRulesSta
 
         return (
             <Table.Row key={Rand.ID()}>
-                <td>{prop}</td>
-                <td>{propValue}</td>
+                <td>{rule.Property}</td>
+                <td>{rule.Pattern}</td>
                 <td>{groupName}</td>
                 <td>
                     <Dropdown label={dropdownLabel} button={buttonProps}>
@@ -281,19 +279,15 @@ interface RuleModalProps {
     groups: Group[];
 }
 interface RuleModalState {
-    propType: string;
-    value?: Options.RegisterRule;
+    value: Options.RegisterRule;
 }
 class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
     constructor(props: RuleModalProps) {
         super(props);
-        let propType = 'uname';
-        if (props.defaultValue && props.defaultValue.Hostname) {
-            propType = 'hostname';
-        }
         this.state = {
-            propType: propType,
             value: props.defaultValue || {
+                Property: 'uname',
+                Pattern: '',
                 GroupID: props.groups[0].ID,
             },
         };
@@ -302,57 +296,17 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
     private changePropType = (propType: string) => {
         this.setState(state => {
             const rule = state.value;
-            if (propType === 'uname') {
-                rule.Hostname = undefined;
-            } else if (propType === 'hostname') {
-                rule.Uname = undefined;
-            }
-            return { propType: propType, value: rule };
-        });
-    }
-
-    private changeUname = (Uname: string) => {
-        this.setState(state => {
-            const rule = state.value;
-            rule.Uname = Uname;
+            rule.Property = propType;
             return { value: rule };
         });
     }
 
-    private unameInput = () => {
-        if (this.state.propType !== 'uname') { return null; }
-
-        return (
-            <Input
-                label="Uname (Regex)"
-                type="text"
-                placeholder="Regular Expression"
-                defaultValue={this.state.value.Uname}
-                onChange={this.changeUname}
-                required />
-        );
-    }
-
-    private changeHostname = (Hostname: string) => {
+    private changePattern = (Pattern: string) => {
         this.setState(state => {
             const rule = state.value;
-            rule.Hostname = Hostname;
+            rule.Pattern = Pattern;
             return { value: rule };
         });
-    }
-
-    private hostnameInput = () => {
-        if (this.state.propType !== 'hostname') { return null; }
-
-        return (
-            <Input
-                label="Hostname (Regex)"
-                type="text"
-                placeholder="Regular Expression"
-                defaultValue={this.state.value.Hostname}
-                onChange={this.changeHostname}
-                required />
-        );
     }
 
     private changeGroupID = (GroupID: string) => {
@@ -389,10 +343,15 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
                 <Radio
                     label="Property"
                     choices={radioChoices}
-                    defaultValue={this.state.propType}
+                    defaultValue={this.state.value.Property}
                     onChange={this.changePropType} />
-                { this.unameInput() }
-                { this.hostnameInput() }
+                <Input
+                    label="Regex Pattern"
+                    type="text"
+                    placeholder="Regular Expression"
+                    defaultValue={this.state.value.Pattern}
+                    onChange={this.changePattern}
+                    required />
                 <Select
                     label="Add To Group"
                     defaultValue={this.state.value.GroupID}

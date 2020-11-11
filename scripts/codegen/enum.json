@@ -71,5 +71,21 @@
                 "value": "2"
             }
         ]
+    },
+    {
+        "name": "RegisterRuleProperty",
+        "type": "string",
+        "values": [
+            {
+                "key": "Uname",
+                "description": "The host uname",
+                "value": "\"uname\""
+            },
+            {
+                "key": "Hostname",
+                "description": "The hosts name",
+                "value": "\"hostname\""
+            }
+        ]
     }
 ]
