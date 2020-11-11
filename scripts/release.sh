@@ -24,6 +24,7 @@ rm -rf artifacts/
 mkdir -p artifacts/
 
 function build_server() {
+    echo "Building server ${1}/${2}"
     cd ${OTTO_PATH}/cmd/server
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${3}
     NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
@@ -42,6 +43,7 @@ function build_server() {
 }
 
 function build_client() {
+    echo "Building client ${1}/${2}"
     cd ${OTTO_PATH}/cmd/client
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w"
     NAME=${PRODUCT_NAME}client-${VERSION}_${1}-${2}
@@ -56,11 +58,13 @@ function build_client() {
     rm -rf ${PACKAGE_NAME}
 }
 
-for OS in 'linux' 'freebsd' 'openbsd' 'netbsd' 'darwin' 'solaris'; do
-    build_client ${OS} amd64
+for ARCH in 'amd64' 'arm64'; do
+    for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
+        build_client ${OS} ${ARCH}
+    done
 done
 
-for OS in 'linux' 'freebsd' 'openbsd' 'netbsd' 'darwin' 'solaris'; do
+for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
     build_server ${OS} amd64 ${PRODUCT_NAME}
 done
 
