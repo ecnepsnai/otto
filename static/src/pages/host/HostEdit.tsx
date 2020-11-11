@@ -11,6 +11,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
+import { RandomPSK } from '../../components/RandomPSK';
 
 export interface HostEditProps { match: match }
 interface HostEditState {
@@ -54,6 +55,9 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     private changeName = (Name: string) => {
         this.setState(state => {
             state.host.Name = Name;
+            if (state.useHostName) {
+                state.host.Address = Name;
+            }
             return state;
         });
     }
@@ -167,7 +171,9 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
                     type="password"
                     defaultValue={this.state.host.PSK}
                     onChange={this.changePSK}
+                    className=""
                     required />
+                <RandomPSK newPSK={this.changePSK} />
                 { this.enabledCheckbox() }
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>

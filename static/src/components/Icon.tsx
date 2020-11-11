@@ -23,6 +23,7 @@ import {
     faPlayCircle,
     faPlus,
     faQuestionCircle,
+    faRandom,
     faScroll,
     faShieldAlt,
     faSignOutAlt,
@@ -80,6 +81,7 @@ export namespace Icon {
     export class PlayCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faPlayCircle} options={this.props}/> );}}
     export class Plus extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faPlus} options={this.props}/> );}}
     export class QuestionCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faQuestionCircle} options={this.props}/> );}}
+    export class Random extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faRandom} options={this.props}/> );}}
     export class Scroll extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faScroll} options={this.props}/> );}}
     export class ShieldAlt extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faShieldAlt} options={this.props}/> );}}
     export class SignOut extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faSignOutAlt} options={this.props}/> );}}

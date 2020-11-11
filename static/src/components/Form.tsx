@@ -51,8 +51,8 @@ export class Form extends React.Component<FormProps, FormState> {
      * @returns true if the form is valid, false if invalid
      */
     public validateForm = (): boolean => {
-        const elemn = this.domRef.current;
-        const invalidNodes = elemn.querySelectorAll('[data-valid="invalid"]');
+        const elem = this.domRef.current;
+        const invalidNodes = elem.querySelectorAll('[data-valid="invalid"]');
         if (invalidNodes.length > 0) {
             this.setState({ invalid: true });
             return false;
@@ -64,13 +64,15 @@ export class Form extends React.Component<FormProps, FormState> {
         this.submitForm();
     }
 
-    private onSubmut = (event: React.FormEvent<HTMLFormElement>) => {
+    private onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         this.submitForm();
     }
 
     private submitForm = () => {
-        this.validateForm();
+        if (!this.validateForm()) {
+            return;
+        }
 
         if (this.props.onSubmit) {
             this.props.onSubmit();
@@ -101,7 +103,7 @@ export class Form extends React.Component<FormProps, FormState> {
 
         return (
             <div className="mt-2">
-                <Icon.Label icon={<Icon.TimesCircle color={Style.Palette.Danger}/>} label="Correct Errors Before Contuining" />
+                <Icon.Label icon={<Icon.TimesCircle color={Style.Palette.Danger}/>} label="Correct errors before continuing" />
             </div>
         );
     }
@@ -109,7 +111,7 @@ export class Form extends React.Component<FormProps, FormState> {
     render(): JSX.Element {
         const className = this.props.className || '';
         return (
-        <form onSubmit={this.onSubmut} ref={this.domRef} className={className}>
+        <form onSubmit={this.onSubmit} ref={this.domRef} className={className}>
             <fieldset>{ this.props.children }</fieldset>
             { this.saveButton() }
             { this.error() }
@@ -121,7 +123,7 @@ export class Form extends React.Component<FormProps, FormState> {
 export interface FormGroupProps { className?: string }
 export class FormGroup extends React.Component<FormGroupProps, {}> {
     render(): JSX.Element {
-        return ( <div className={ (this.props.className ?? '') + ' mb-3'}>{ this.props.children }</div> );
+        return ( <div className={this.props.className ?? 'mb-3'}>{ this.props.children }</div> );
     }
 }
 
@@ -177,12 +179,16 @@ export interface InputProps {
      * If true then a fixed width font is used
      */
     fixedWidth?: boolean;
+    /**
+     *
+     */
+    className?: string;
 }
 
 interface InputState { value: string; labelID: string; valid: ValidationResult; touched: boolean; }
 
 /**
- * An input node for regular text inputs. This component is only sutible for text or password types.
+ * An input node for regular text inputs. This component is only suitable for text or password types.
  */
 export class Input extends React.Component<InputProps, InputState> {
     constructor(props: InputProps) {
@@ -196,7 +202,24 @@ export class Input extends React.Component<InputProps, InputState> {
         }
         this.state = { value: '', labelID: Rand.ID(), valid: initialValidState, touched: false, };
     }
+
+    componentDidUpdate(prevProps: InputProps): void {
+        if (!this.props.required) {
+            return;
+        }
+        if (prevProps.defaultValue !== this.props.defaultValue) {
+            this.setState({
+                value: this.props.defaultValue
+            }, () => {
+                this.validate(this.state.value).then(valid => {
+                    this.setState({ valid: valid });
+                });
+            });
+        }
+    }
+
     private debouncedValidate = debounce(this.props.validate, 250);
+
     private validate = (value: string): Promise<ValidationResult> => {
         return new Promise((resolve) => {
             if (this.props.required && value == '') {
@@ -216,9 +239,11 @@ export class Input extends React.Component<InputProps, InputState> {
             resolve({ valid: true });
         });
     }
+
     private onBlur = () => {
         this.setState({ touched: true });
     }
+
     private onChange = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
         this.validate(target.value).then(valid => {
@@ -227,6 +252,7 @@ export class Input extends React.Component<InputProps, InputState> {
         this.setState({ value: target.value });
         this.props.onChange(target.value);
     }
+
     private helpText() {
         if (this.props.helpText) {
             return <div id={this.state.labelID + 'help'} className="form-text">{this.props.helpText}</div>;
@@ -234,10 +260,12 @@ export class Input extends React.Component<InputProps, InputState> {
             return null;
         }
     }
+
     private validationError() {
         if (!this.state.valid.invalidMessage || !this.state.touched) { return null; }
         return (<div className="invalid-feedback">{this.state.valid.invalidMessage}</div>);
     }
+
     private input = () => {
         let className = 'form-control';
         if (this.state.touched && !this.state.valid.valid) {
@@ -260,6 +288,7 @@ export class Input extends React.Component<InputProps, InputState> {
             />
         );
     }
+
     private content = () => {
         if (!this.props.prepend && !this.props.append) {
             return (
@@ -288,13 +317,15 @@ export class Input extends React.Component<InputProps, InputState> {
         </div>
         );
     };
+
     private requiredFlag = () => {
         if (!this.props.required) { return null; }
         return (<span className="form-required">*</span>);
     }
+
     render(): JSX.Element {
         return (
-            <FormGroup>
+            <FormGroup className={this.props.className}>
                 <label htmlFor={this.state.labelID} className="form-label">{this.props.label} {this.requiredFlag()}</label>
                 { this.content() }
                 { this.helpText() }
@@ -360,8 +391,8 @@ export interface NumberInputProps {
 interface NumberInputState { value: string; labelID: string; valid: ValidationResult; touched: boolean; }
 
 /**
- * An input node for number type inputs. Sutible for integer and floating points, but not sutible
- * for hexedecimal or scientific-notation values.
+ * An input node for number type inputs. Suitable for integer and floating points, but not suitable
+ * for hexadecimal or scientific-notation values.
  */
 export class NumberInput extends React.Component<NumberInputProps, NumberInputState> {
     constructor(props: NumberInputProps) {
@@ -680,7 +711,7 @@ export class Checkbox extends React.Component<CheckboxProps, CheckboxState> {
     }
     render(): JSX.Element {
         return (
-            <FormGroup className="form-check">
+            <FormGroup className="form-check mb-3">
                 <input type="checkbox" className="form-check-input" id={this.state.labelID} checked={this.props.checked} defaultChecked={this.props.defaultValue} onChange={this.onChange} disabled={this.props.disabled}/>
                 <label htmlFor={this.state.labelID} className="form-check-label">{this.props.label}</label>
                 { this.helpText() }

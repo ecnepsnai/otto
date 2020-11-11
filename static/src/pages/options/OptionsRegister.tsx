@@ -11,6 +11,7 @@ import { Style } from '../../components/Style';
 import { Table } from '../../components/Table';
 import { Rand } from '../../services/Rand';
 import { Dropdown, Menu } from '../../components/Menu';
+import { RandomPSK } from '../../components/RandomPSK';
 
 export interface OptionsRegisterProps {
     defaultValue: Options.Register;
@@ -106,6 +107,7 @@ export class OptionsRegister extends React.Component<OptionsRegisterProps, Optio
                     defaultValue={this.state.value.PSK}
                     onChange={this.changePSK}
                     required />
+                <RandomPSK newPSK={this.changePSK} />
                 <label className="form-label">Rules</label>
                 <RegisterRules defaultValue={this.state.value.Rules} onChange={this.changeRules} groups={this.state.groups}/>
                 <Select
