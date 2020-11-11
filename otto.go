@@ -77,7 +77,7 @@ type File struct {
 type RegisterRequest struct {
 	Address  string `json:"address"`
 	PSK      string `json:"psk"`
-	Uname    string `json:"unane"`
+	Uname    string `json:"uname"`
 	Hostname string `json:"hostname"`
 	Port     uint32 `json:"port"`
 }
