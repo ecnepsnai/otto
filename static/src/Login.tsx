@@ -135,7 +135,9 @@ class Login extends React.Component<LoginProps, LoginState> {
                 <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control" placeholder="Username" required autoFocus disabled={this.state.loading}/>
                 <label htmlFor="password" className="visually-hidden">Password</label>
                 <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control" placeholder="Password" required  disabled={this.state.loading}/>
-                <button className="btn btn-lg login-button btn-block" id="login_button" type="submit" disabled={this.state.loading}>Sign in</button>
+                <div className="d-grid">
+                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.state.loading}>Sign in</button>
+                </div>
             </form>
         </div>
         );
