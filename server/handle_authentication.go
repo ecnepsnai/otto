@@ -23,10 +23,11 @@ func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
 	}
 
 	request.AddCookie(&http.Cookie{
-		Name:    ottoSessionCookie,
-		Value:   result.CookieValue,
-		Path:    "/",
-		Expires: time.Now().AddDate(0, 0, 1),
+		Name:     ottoSessionCookie,
+		Value:    result.CookieValue,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		Expires:  time.Now().AddDate(0, 0, 1),
 	})
 
 	return result.Session, nil
