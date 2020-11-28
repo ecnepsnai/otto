@@ -48,6 +48,7 @@ single, top-level object. The `otto_client.conf` configuration file must be in t
 |`default_uid`|No|The default UID if not specified by the script. Defaults to `0`.|
 |`default_gid`|No|The default GID if not specified by the script. Defaults to `0`.|
 |`path`|No|The value of $PATH when scripts are executed|
+|`allow_from`|No|A CIDR address where connections from Otto Servers will be allowed from. Defaults to `0.0.0.0/0`.|
 
 **Example:**
 
@@ -57,6 +58,7 @@ single, top-level object. The `otto_client.conf` configuration file must be in t
     "log_path": ".",
     "path":"/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin",
     "default_uid": 0,
-    "default_gid": 0
+    "default_gid": 0,
+    "allow_from": "10.0.0.0/8"
 }
 ```

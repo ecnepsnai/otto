@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 )
 
@@ -13,6 +14,7 @@ type clientConfig struct {
 	DefaultUID uint32 `json:"default_uid"`
 	DefaultGID uint32 `json:"default_gid"`
 	Path       string `json:"path"`
+	AllowFrom  string `json:"allow_from"`
 }
 
 var config *clientConfig
@@ -34,6 +36,7 @@ func loadConfig() error {
 		LogPath:    ".",
 		DefaultUID: 0,
 		DefaultGID: 0,
+		AllowFrom:  "0.0.0.0/0",
 	}
 	if err := json.NewDecoder(f).Decode(&c); err != nil {
 		return err
@@ -46,6 +49,10 @@ func loadConfig() error {
 
 	if config.ListenAddr == "" {
 		return fmt.Errorf("empty listen address prohibited")
+	}
+
+	if _, _, err := net.ParseCIDR(c.AllowFrom); err != nil {
+		return fmt.Errorf("invalid allow_from CIDR")
 	}
 
 	return nil

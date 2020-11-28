@@ -41,6 +41,15 @@ func main() {
 		if err != nil {
 			continue
 		}
+
+		_, network, _ := net.ParseCIDR(config.AllowFrom)
+		if !network.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
+			log.Warn("Rejecting connection from server outside of allowed network: %s", c.RemoteAddr().String())
+			c.Close()
+			continue
+		}
+
+		c.RemoteAddr()
 		go newRequest(c)
 	}
 }
