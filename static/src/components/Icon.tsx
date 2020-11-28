@@ -14,9 +14,11 @@ import {
     faEdit,
     faExclamationCircle,
     faExclamationTriangle,
+    faEye,
     faInfoCircle,
     faLayerGroup,
     faLevelDownAlt,
+    faListAlt,
     faMagic,
     faMinus,
     faNetworkWired,
@@ -74,8 +76,10 @@ export namespace Icon {
     export class Edit extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faEdit} options={this.props}/> );}}
     export class ExclamationCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faExclamationCircle} options={this.props}/> );}}
     export class ExclamationTriangle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faExclamationTriangle} options={this.props}/> );}}
+    export class Eye extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faEye} options={this.props}/> );}}
     export class InfoCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faInfoCircle} options={this.props}/> );}}
     export class LayerGroup extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faLayerGroup} options={this.props}/> );}}
+    export class ListAlt extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faListAlt} options={this.props}/> );}}
     export class Magic extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faMagic} options={this.props}/> );}}
     export class Minus extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faMinus} options={this.props}/> );}}
     export class NetworkWired extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faNetworkWired} options={this.props}/> );}}

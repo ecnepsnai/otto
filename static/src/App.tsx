@@ -20,6 +20,7 @@ import { ScheduleList } from './pages/schedule/ScheduleList';
 import { OptionsMain } from './pages/options/OptionsMain';
 import '../css/main.scss';
 import { Loading } from './components/Loading';
+import { EventList } from './pages/event/EventList';
 
 export interface AppProps {}
 interface AppState { loading: boolean; }
@@ -61,6 +62,7 @@ export class App extends React.Component<AppProps, AppState> {
                     <Route path="/schedules/schedule" component={ScheduleEdit} />
                     <Route path="/schedules" component={ScheduleList} />
                     <Route path="/options" component={OptionsMain} />
+                    <Route path="/events" component={EventList} />
                 </Switch>
                 <GlobalModalFrame />
                 <GlobalNotificationFrame />

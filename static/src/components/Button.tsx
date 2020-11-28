@@ -1,8 +1,9 @@
 import * as React from 'react';
 import '../../css/button.scss';
 import { Style } from './Style';
-import { Redirect } from 'react-router-dom';
 import { Icon } from './Icon';
+import { Redirect } from './Redirect';
+import { GlobalModalFrame } from './Modal';
 
 export interface ButtonProps {
     /**
@@ -84,23 +85,16 @@ export interface ButtonLinkProps {
      */
     disabled?: boolean;
 }
-interface ButtonLinkState { doNavigate: boolean }
 
 /**
  * A button that acts as a link. When clicked it redirects the user to the destination.
  */
-export class ButtonLink extends React.Component<ButtonLinkProps, ButtonLinkState> {
-    constructor(props: ButtonLinkProps) {
-        super(props);
-        this.state = { doNavigate: false };
-    }
+export class ButtonLink extends React.Component<ButtonLinkProps, {}> {
     private onClick = () => {
-        this.setState({ doNavigate: true });
+        GlobalModalFrame.removeModal();
+        Redirect.To(this.props.to);
     }
     render(): JSX.Element {
-        if (this.state.doNavigate) {
-            return <Redirect push to={this.props.to} />;
-        }
         return <Button
             color={this.props.color}
             outline={this.props.outline}

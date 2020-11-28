@@ -39,6 +39,7 @@ export class Nav extends React.Component<{}, {}> {
                                 <NavItem link="/groups" icon={<Icon.LayerGroup />} label="Groups" />
                                 <NavItem link="/scripts" icon={<Icon.Scroll />} label="Scripts" />
                                 <NavItem link="/schedules" icon={<Icon.Calendar />} label="Schedules" />
+                                <NavItem link="/events" icon={<Icon.ListAlt />} label="Audit Log" />
                                 <NavItem link="/options" icon={<Icon.Cog />} label="Options" />
                             </ul>
                             <ul className="navbar-nav navbar-links">
