@@ -79,9 +79,7 @@ func LoadOptions() {
 
 	if !FileExists(path.Join(Directories.Data, "otto_server.conf")) {
 		Options = &defaults
-		if err := Options.Save(); err != nil {
-			log.Fatal("Error setting default options: %s", err.Error())
-		}
+		Options.Save()
 	} else {
 		f, err := os.OpenFile(path.Join(Directories.Data, "otto_server.conf"), os.O_RDONLY, os.ModePerm)
 		if err != nil {
@@ -99,25 +97,29 @@ func LoadOptions() {
 	}
 }
 
-// Save save the options to disk
-func (o *OttoOptions) Save() error {
+// Save save the options to disk. Will panic on any error.
+func (o *OttoOptions) Save() {
 	optionsLock.Lock()
 	defer optionsLock.Unlock()
 
-	f, err := os.OpenFile(path.Join(Directories.Data, "otto_server.conf"), os.O_RDWR|os.O_CREATE, os.ModePerm)
+	atomicPath := path.Join(Directories.Data, fmt.Sprintf(".otto_server.conf_%s", newPlainID()))
+	realPath := path.Join(Directories.Data, "otto_server.conf")
+
+	f, err := os.OpenFile(atomicPath, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		log.Error("Error opening config file: %s", err.Error())
-		return err
+		log.Panic("Error opening config file: %s", err.Error())
 	}
-	defer f.Close()
 	if err := json.NewEncoder(f).Encode(o); err != nil {
-		log.Error("Error encoding options: %s", err.Error())
-		return err
+		f.Close()
+		log.Panic("Error encoding options: %s", err.Error())
+	}
+	f.Close()
+
+	if err := os.Rename(atomicPath, realPath); err != nil {
+		log.Panic("Error updating config file: %s", err.Error())
 	}
 
 	Options = o
-
-	return nil
 }
 
 // Validate returns an error if the options is not valid

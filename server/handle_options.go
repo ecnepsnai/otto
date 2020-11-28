@@ -29,9 +29,7 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Error())
 	}
 
-	if err := options.Save(); err != nil {
-		return nil, web.CommonErrors.ServerError
-	}
+	options.Save()
 
 	return options, nil
 }
