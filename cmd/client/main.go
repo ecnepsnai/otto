@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto"
@@ -71,7 +72,9 @@ func newRequest(c net.Conn) {
 		return
 	}
 
-	reply := otto.Reply{}
+	reply := otto.Reply{
+		Version: MainVersion,
+	}
 	switch request.Action {
 	case otto.ActionPing, otto.ActionExit, otto.ActionReboot, otto.ActionShutdown:
 		// No action
@@ -117,12 +120,15 @@ func newRequest(c net.Conn) {
 }
 
 func runScript(script otto.Script) otto.ScriptResult {
+	start := time.Now()
+
 	for _, file := range script.Files {
 		if err := uploadFile(file); err != nil {
 			log.Error("Error uploading script file '%s': %s", file.Path, err.Error())
 			return otto.ScriptResult{
 				Success:   false,
 				ExecError: err.Error(),
+				Elapsed:   time.Since(start),
 			}
 		}
 	}
@@ -197,6 +203,7 @@ func runScript(script otto.Script) otto.ScriptResult {
 
 	result.Stderr = string(stderr.Bytes())
 	result.Stdout = string(stdout.Bytes())
+	result.Elapsed = time.Since(start)
 	log.Debug("Stdout: %s", result.Stdout)
 	log.Debug("Stderr: %s", result.Stderr)
 

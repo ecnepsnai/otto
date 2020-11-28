@@ -3,6 +3,8 @@ package server
 import (
 	"sync"
 	"time"
+
+	"github.com/ecnepsnai/otto"
 )
 
 // Heartbeat describes a heartbeat to a host
@@ -11,6 +13,7 @@ type Heartbeat struct {
 	IsReachable bool
 	LastReply   time.Time
 	LastAttempt time.Time
+	LastVersion string
 }
 
 type heartbeatStoreType struct {
@@ -60,18 +63,20 @@ func (s *hostStoreObject) PingAll() error {
 		return err.Error
 	}
 	for _, h := range hosts {
-		host := &h
-		host.Ping()
+		go func(host Host) {
+			host.Ping()
+		}(h)
 	}
 	return nil
 }
 
-func (s *heartbeatStoreType) MarkHostReachable(host *Host) (*Heartbeat, *Error) {
+func (s *heartbeatStoreType) MarkHostReachable(host *Host, reply *otto.Reply) (*Heartbeat, *Error) {
 	heartbeat := Heartbeat{
 		Address:     host.Address,
 		IsReachable: true,
 		LastReply:   time.Now(),
 		LastAttempt: time.Now(),
+		LastVersion: reply.Version,
 	}
 	s.Lock.Lock()
 	defer s.Lock.Unlock()

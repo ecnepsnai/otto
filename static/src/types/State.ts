@@ -6,7 +6,6 @@ export class State {
     public readonly Runtime: Runtime;
     public readonly StartDate: string;
     public readonly Hostname: string;
-    public readonly Version: string;
     public readonly Warnings: string[];
     public readonly Options: Options.OttoOptions;
 
@@ -15,9 +14,20 @@ export class State {
         this.Runtime = json.Runtime as Runtime;
         this.StartDate = json.StartDate as string;
         this.Hostname = json.Hostname as string;
-        this.Version = json.Version as string;
         this.Warnings = json.Warnings as string[];
         this.Options = json.Options as Options.OttoOptions;
+    }
+
+    /**
+     * Get a integer representation of the current system version
+     */
+    public VersionNumber(): number {
+        const version = parseInt(this.Runtime.Version.replace(/\./g, ''));
+        if (isNaN(version)) {
+            return 0;
+        }
+
+        return version;
     }
 }
 

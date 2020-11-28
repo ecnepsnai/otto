@@ -8,6 +8,7 @@ import { Table } from '../../components/Table';
 import { HeartbeatBadge } from '../../components/Badge';
 import { Heartbeat } from '../../types/Heartbeat';
 import { Formatter } from '../../services/Formatter';
+import { ClientVersion } from '../../components/ClientVersion';
 
 export interface HostListItemProps { host: Host, heartbeat: Heartbeat, onReload: () => (void); }
 export class HostListItem extends React.Component<HostListItemProps, {}> {
@@ -26,7 +27,8 @@ export class HostListItem extends React.Component<HostListItemProps, {}> {
                 <td>{ link }</td>
                 <td>{ this.props.host.Address }</td>
                 <td>{ Formatter.ValueOrNothing(this.props.host.GroupIDs.length) }</td>
-                <td><HeartbeatBadge heartbeat={this.props.heartbeat} /></td>
+                <td><HeartbeatBadge heartbeat={this.props.heartbeat}/></td>
+                <td><ClientVersion heartbeat={this.props.heartbeat} /></td>
                 <Table.Menu>
                     <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/hosts/host/' + this.props.host.ID +'/edit'}/>
                     <Menu.Divider />

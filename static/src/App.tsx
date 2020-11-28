@@ -30,6 +30,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
     componentDidMount(): void {
         StateManager.Refresh().then(() => {
+            console.log('App bootstrapped');
             this.setState({ loading: false });
         });
     }

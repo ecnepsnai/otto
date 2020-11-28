@@ -62,6 +62,7 @@ export class HostList extends React.Component<HostListProps, HostListState> {
                         <Table.Column>Address</Table.Column>
                         <Table.Column>Groups</Table.Column>
                         <Table.Column>Reachable</Table.Column>
+                        <Table.Column>Version</Table.Column>
                         <Table.MenuColumn />
                     </Table.Head>
                     <Table.Body>

@@ -54,7 +54,7 @@ func (host *Host) PerformRequest(request otto.Request) (*otto.Reply, *Error) {
 		return nil, ErrorFrom(err)
 	}
 
-	heartbeatStore.MarkHostReachable(host)
+	heartbeatStore.MarkHostReachable(host, reply)
 	return reply, nil
 }
 

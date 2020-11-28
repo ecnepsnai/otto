@@ -4,6 +4,7 @@ import { Loading } from './Loading';
 import { Group } from '../types/Group';
 import { Script } from '../types/Script';
 import { Host } from '../types/Host';
+import { Nothing } from './Nothing';
 
 interface CheckListProps {
     selectedKeys: string[],
@@ -44,6 +45,8 @@ class CheckList extends React.Component<CheckListProps, CheckListState> {
     };
 
     render(): JSX.Element {
+        if (!this.props.keys || this.props.keys.length == 0) { return (<div><Nothing /></div>); }
+
         return (
             <div>
                 {

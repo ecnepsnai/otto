@@ -10,7 +10,7 @@ import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
-import { EnabledBadge } from '../../components/Badge';
+import { EnabledBadge, HeartbeatBadge } from '../../components/Badge';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Redirect } from '../../components/Redirect';
 import { Schedule } from '../../types/Schedule';
@@ -18,15 +18,17 @@ import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 import { CopyButton } from '../../components/CopyButton';
+import { DateLabel } from '../../components/DateLabel';
+import { ClientVersion } from '../../components/ClientVersion';
 
 export interface HostViewProps { match: match }
 interface HostViewState {
     loading: boolean;
     host?: Host;
+    heartbeat?: Heartbeat;
     groups?: Group[];
     scripts?: ScriptEnabledGroup[];
     schedules?: Schedule[];
-    heartbeat?: Heartbeat;
 }
 export class HostView extends React.Component<HostViewProps, HostViewState> {
     private hostID: string;
@@ -43,6 +45,15 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
         const host = await Host.Get(this.hostID);
         this.setState({
             host: host,
+        });
+
+        const heartbeats = await Heartbeat.List();
+        heartbeats.forEach(heartbeat => {
+            if (heartbeat.Address === host.Address) {
+                this.setState({
+                    heartbeat: heartbeat,
+                });
+            }
         });
     }
 
@@ -87,6 +98,18 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
         });
     }
 
+    private lastReply = (): JSX.Element => {
+        if (!this.state.heartbeat) { return null; }
+
+        return (<ListGroup.TextItem title="Last Heartbeat"><DateLabel date={this.state.heartbeat.LastReply} /></ListGroup.TextItem>);
+    }
+
+    private clientVersion = (): JSX.Element => {
+        if (!this.state.heartbeat) { return null; }
+
+        return (<ListGroup.TextItem title="Client Version"><ClientVersion heartbeat={this.state.heartbeat} /></ListGroup.TextItem>);
+    }
+
     render(): JSX.Element {
         if (this.state.loading) { return (<PageLoading />); }
 
@@ -106,6 +129,14 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
                                     <ListGroup.TextItem title="Address">{ this.state.host.Address }:{ this.state.host.Port }</ListGroup.TextItem>
                                     <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.host.Enabled} /></ListGroup.TextItem>
                                     <ListGroup.TextItem title="PSK"><code>*****</code> <CopyButton text={this.state.host.PSK} /></ListGroup.TextItem>
+                                </ListGroup.List>
+                            </Card.Card>
+                            <Card.Card className="mb-3">
+                                <Card.Header>Otto Client Information</Card.Header>
+                                <ListGroup.List>
+                                    <ListGroup.TextItem title="Status"><HeartbeatBadge heartbeat={this.state.heartbeat} /></ListGroup.TextItem>
+                                    { this.lastReply() }
+                                    { this.clientVersion() }
                                 </ListGroup.List>
                             </Card.Card>
                             <EnvironmentVariableCard className="mb-3" variables={this.state.host.Environment} />

@@ -11,6 +11,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/security"
@@ -41,6 +42,7 @@ type Reply struct {
 	Error        error
 	ScriptResult ScriptResult
 	File         File
+	Version      string
 }
 
 // Script describes a script
@@ -62,6 +64,7 @@ type ScriptResult struct {
 	Code      int
 	Stdout    string
 	Stderr    string
+	Elapsed   time.Duration
 }
 
 // File Describes a file
