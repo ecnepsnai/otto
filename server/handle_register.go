@@ -20,6 +20,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	}
 
 	if Options.Register.PSK != r.PSK {
+		EventStore.HostRegisterIncorrectPSK(r)
 		log.Error("Invalid PSK for register request")
 		return nil, web.CommonErrors.Unauthorized
 	}
@@ -33,6 +34,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	}
 
 	groupID := Options.Register.DefaultGroupID
+	var matchedRule *RegisterRule
 	for _, rule := range Options.Register.Rules {
 		pattern, err := regexp.Compile(rule.Pattern)
 		if err != nil {
@@ -45,12 +47,14 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 			if pattern.MatchString(r.Uname) {
 				log.Debug("Client uname '%s' matches pattern '%s'", r.Uname, rule.Property)
 				groupID = rule.GroupID
+				matchedRule = &rule
 				break
 			}
 		case RegisterRulePropertyHostname:
 			if pattern.MatchString(r.Hostname) {
 				log.Debug("Client hostname '%s' matches pattern '%s'", r.Hostname, rule.Property)
 				groupID = rule.GroupID
+				matchedRule = &rule
 				break
 			}
 		}
@@ -69,6 +73,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		return nil, web.CommonErrors.ServerError
 	}
 	log.Info("Registered new host '%s' -> '%s'", r.Hostname, host.ID)
+	EventStore.HostRegisterSuccess(host, r, matchedRule)
 	return otto.RegisterResponse{
 		PSK: psk,
 	}, nil

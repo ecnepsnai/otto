@@ -1,7 +1,9 @@
 package server
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"strings"
@@ -117,4 +119,27 @@ func FilterStringSlice(r string, s []string) []string {
 		sl = append(sl, i)
 	}
 	return sl
+}
+
+func sliceFirst(s []string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	return s[0]
+}
+
+func hashFile(filePath string) (string, error) {
+	h := sha256.New()
+
+	f, err := os.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

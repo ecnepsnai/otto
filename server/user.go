@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/security"
 )
 
@@ -99,6 +100,10 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 		Email:        params.Email,
 		Enabled:      true,
 		PasswordHash: *hashedPassword,
+	}
+
+	if err := limits.Check(user); err != nil {
+		return nil, ErrorUser(err.Error())
 	}
 
 	if err := s.Table.Add(user); err != nil {

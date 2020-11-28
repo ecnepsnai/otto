@@ -29,15 +29,19 @@ func atLeastOneGroup() bool {
 func checkFirstRun() {
 	if !atLeastOneUser() {
 		log.Warn("Creating default user")
-		if _, err := UserStore.NewUser(defaultUser); err != nil {
+		user, err := UserStore.NewUser(defaultUser)
+		if err != nil {
 			log.Fatal("Unable to make default user: %s", err.Message)
 		}
+		EventStore.UserAdded(user, "system")
 	}
 
 	if !atLeastOneGroup() {
 		log.Warn("Creating default group")
-		if _, err := GroupStore.NewGroup(defaultGroup); err != nil {
+		group, err := GroupStore.NewGroup(defaultGroup)
+		if err != nil {
 			log.Fatal("Unable to make default group: %s", err.Message)
 		}
+		EventStore.GroupAdded(group, "system")
 	}
 }

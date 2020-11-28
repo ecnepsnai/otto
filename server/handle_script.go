@@ -140,6 +140,8 @@ func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) ScriptNew(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	params := newScriptParameters{}
 	if err := request.Decode(&params); err != nil {
 		return nil, err
@@ -153,10 +155,14 @@ func (h *handle) ScriptNew(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.ScriptAdded(script, session.Username)
+
 	return script, nil
 }
 
 func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	script, err := ScriptStore.ScriptWithID(id)
@@ -183,10 +189,14 @@ func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.ScriptModified(script, session.Username)
+
 	return script, nil
 }
 
 func (h *handle) ScriptDelete(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	script, err := ScriptStore.ScriptWithID(id)
@@ -206,6 +216,8 @@ func (h *handle) ScriptDelete(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.ScriptDeleted(script, session.Username)
 
 	return true, nil
 }

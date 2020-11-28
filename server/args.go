@@ -142,6 +142,8 @@ func postBootstrapArgs() {
 
 		i++
 	}
+
+	EventStore.ServerStarted(args)
 }
 
 func printHelpAndExit() {

@@ -123,6 +123,9 @@ func RouterSetup() {
 	server.API.GET("/api/options", h.OptionsGet, authenticatedOptions)
 	server.API.POST("/api/options", h.OptionsSet, authenticatedOptions)
 
+	// Events
+	server.API.GET("/api/events", h.EventsGet, authenticatedOptions)
+
 	// Redirect
 	server.HTTP.GET("/", v.Redirect, unauthenticatedOptions)
 

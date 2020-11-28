@@ -90,6 +90,8 @@ func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) HostNew(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	params := newHostParameters{}
 	if err := request.Decode(&params); err != nil {
 		return nil, err
@@ -103,10 +105,14 @@ func (h *handle) HostNew(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.HostAdded(host, session.Username)
+
 	return host, nil
 }
 
 func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	host, err := HostStore.HostWithID(id)
@@ -133,10 +139,14 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.HostModified(host, session.Username)
+
 	return host, nil
 }
 
 func (h *handle) HostDelete(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	host, err := HostStore.HostWithID(id)
@@ -156,6 +166,8 @@ func (h *handle) HostDelete(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.HostDeleted(host, session.Username)
 
 	return true, nil
 }

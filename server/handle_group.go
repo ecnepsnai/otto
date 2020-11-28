@@ -203,6 +203,8 @@ func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error
 }
 
 func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	params := newGroupParameters{}
 	if err := request.Decode(&params); err != nil {
 		return nil, err
@@ -216,10 +218,14 @@ func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.GroupAdded(group, session.Username)
+
 	return group, nil
 }
 
 func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	group, err := GroupStore.GroupWithID(id)
@@ -246,10 +252,14 @@ func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.GroupModified(group, session.Username)
+
 	return group, nil
 }
 
 func (h *handle) GroupDelete(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	id := request.Params.ByName("id")
 
 	group, err := GroupStore.GroupWithID(id)
@@ -269,6 +279,8 @@ func (h *handle) GroupDelete(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.GroupDeleted(group, session.Username)
 
 	return true, nil
 }

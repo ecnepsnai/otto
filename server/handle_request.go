@@ -3,6 +3,8 @@ package server
 import "github.com/ecnepsnai/web"
 
 func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	type requestParams struct {
 		HostID   string
 		Action   string
@@ -50,6 +52,8 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		if err != nil {
 			return nil, web.ValidationError(err.Message)
 		}
+
+		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 
 		return result, nil
 	} else if r.Action == ClientActionExitClient {

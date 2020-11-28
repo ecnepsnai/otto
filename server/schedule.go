@@ -128,6 +128,7 @@ func (s Schedule) RunNow() {
 			success++
 		}
 
+		EventStore.ScriptRun(script, host, &result.Result, &s, "")
 		log.Info("Result: %v", result)
 	}
 

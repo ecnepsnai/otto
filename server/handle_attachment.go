@@ -11,7 +11,7 @@ import (
 )
 
 func (h *handle) AttachmentList(request web.Request) (interface{}, *web.Error) {
-	files, err := AttachmentStore.AllAttachments()
+	attachments, err := AttachmentStore.AllAttachments()
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -19,10 +19,12 @@ func (h *handle) AttachmentList(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
-	return files, nil
+	return attachments, nil
 }
 
 func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	pathStr := request.HTTP.FormValue("Path")
 	uidStr := request.HTTP.FormValue("UID")
 	gidStr := request.HTTP.FormValue("GID")
@@ -47,7 +49,7 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	file := Attachment{
+	attachment := Attachment{
 		ID:       newPlainID(),
 		Path:     pathStr,
 		Name:     info.Filename,
@@ -60,30 +62,32 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 		Size:     uint64(info.Size),
 	}
 
-	f, err := os.OpenFile(file.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		log.Error("Error opening script file '%s': %s", file.FilePath(), err.Error())
+		log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
 		return nil, web.CommonErrors.ServerError
 	}
 	defer f.Close()
 
 	if _, err := io.Copy(f, fileUpload); err != nil {
-		log.Error("Error writing script file '%s': %s", file.FilePath(), err.Error())
+		log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
 		return nil, web.CommonErrors.ServerError
 	}
 
-	if err := AttachmentStore.Table.Add(file); err != nil {
-		log.Error("Error saving script file '%s': %s", file.ID, err.Error())
+	if err := AttachmentStore.Table.Add(attachment); err != nil {
+		log.Error("Error saving script attachment '%s': %s", attachment.ID, err.Error())
 		return nil, web.CommonErrors.ServerError
 	}
 
-	return file, nil
+	EventStore.AttachmentAdded(&attachment, session.Username)
+
+	return attachment, nil
 }
 
 func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
-	fileID := request.Params.ByName("id")
+	attachmentID := request.Params.ByName("id")
 
-	file, err := AttachmentStore.AttachmentWithID(fileID)
+	attachment, err := AttachmentStore.AttachmentWithID(attachmentID)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -91,13 +95,13 @@ func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
-	return file, nil
+	return attachment, nil
 }
 
 func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.Response) {
-	fileID := request.Params.ByName("id")
+	attachmentID := request.Params.ByName("id")
 
-	file, erro := AttachmentStore.AttachmentWithID(fileID)
+	attachment, erro := AttachmentStore.AttachmentWithID(attachmentID)
 	if erro != nil {
 		if erro.Server {
 			response.Status = 500
@@ -107,23 +111,25 @@ func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (respo
 		return
 	}
 
-	f, err := os.OpenFile(file.FilePath(), os.O_RDONLY, 0644)
+	f, err := os.OpenFile(attachment.FilePath(), os.O_RDONLY, 0644)
 	if err != nil {
 		response.Status = 500
 		return
 	}
-	response.ContentType = file.MimeType
+	response.ContentType = attachment.MimeType
 	response.Headers = map[string]string{
-		"Content-Disposition": fmt.Sprintf("attachment; filename=\"%s\"", file.Name),
+		"Content-Disposition": fmt.Sprintf("attachment; filename=\"%s\"", attachment.Name),
 	}
 	response.Reader = f
 	return
 }
 
 func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
-	fileID := request.Params.ByName("id")
+	session := request.UserData.(*Session)
 
-	file, err := AttachmentStore.AttachmentWithID(fileID)
+	attachmentID := request.Params.ByName("id")
+
+	attachment, err := AttachmentStore.AttachmentWithID(attachmentID)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -136,7 +142,7 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	file, err = AttachmentStore.EditAttachment(fileID, req)
+	attachment, err = AttachmentStore.EditAttachment(attachmentID, req)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -144,18 +150,24 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
-	return file, nil
+	EventStore.AttachmentModified(attachment, session.Username)
+
+	return attachment, nil
 }
 
 func (h *handle) AttachmentDelete(request web.Request) (interface{}, *web.Error) {
-	fileID := request.Params.ByName("id")
+	session := request.UserData.(*Session)
 
-	if err := AttachmentStore.DeleteAttachment(fileID); err != nil {
+	attachmentID := request.Params.ByName("id")
+
+	if err := AttachmentStore.DeleteAttachment(attachmentID); err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.AttachmentDeleted(attachmentID, session.Username)
 
 	return true, nil
 }

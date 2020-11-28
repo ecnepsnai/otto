@@ -34,9 +34,15 @@ func (h *handle) UserGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) UserNew(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	params := newUserParameters{}
 	if err := request.Decode(&params); err != nil {
 		return nil, err
+	}
+
+	if params.Username == "system" {
+		return nil, web.ValidationError("Username is reserved")
 	}
 
 	user, err := UserStore.NewUser(params)
@@ -47,10 +53,14 @@ func (h *handle) UserNew(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.UserAdded(user, session.Username)
+
 	return user, nil
 }
 
 func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	username := request.Params.ByName("username")
 
 	user, err := UserStore.UserWithUsername(username)
@@ -76,6 +86,8 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.UserModified(user.Username, session.Username)
 
 	return user, nil
 }
@@ -104,6 +116,8 @@ func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	EventStore.UserDeleted(user.Username, session.Username)
 
 	return true, nil
 }

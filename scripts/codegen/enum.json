@@ -87,5 +87,141 @@
                 "value": "\"hostname\""
             }
         ]
+    },
+    {
+        "name": "EventType",
+        "type": "string",
+        "values": [
+            {
+                "key": "UserLoggedIn",
+                "description": "UserLoggedIn event",
+                "value": "\"UserLoggedIn\""
+            },
+            {
+                "key": "UserIncorrectPassword",
+                "description": "UserIncorrectPassword event",
+                "value": "\"UserIncorrectPassword\""
+            },
+            {
+                "key": "UserLoggedOut",
+                "description": "UserLoggedOut event",
+                "value": "\"UserLoggedOut\""
+            },
+            {
+                "key": "UserAdded",
+                "description": "UserAdded event",
+                "value": "\"UserAdded\""
+            },
+            {
+                "key": "UserModified",
+                "description": "UserModified event",
+                "value": "\"UserModified\""
+            },
+            {
+                "key": "UserDeleted",
+                "description": "UserDeleted event",
+                "value": "\"UserDeleted\""
+            },
+            {
+                "key": "HostAdded",
+                "description": "HostAdded event",
+                "value": "\"HostAdded\""
+            },
+            {
+                "key": "HostModified",
+                "description": "HostModified event",
+                "value": "\"HostModified\""
+            },
+            {
+                "key": "HostDeleted",
+                "description": "HostDeleted event",
+                "value": "\"HostDeleted\""
+            },
+            {
+                "key": "HostRegisterSuccess",
+                "description": "HostRegisterSuccess event",
+                "value": "\"HostRegisterSuccess\""
+            },
+            {
+                "key": "HostRegisterIncorrectPSK",
+                "description": "HostRegisterIncorrectPSK event",
+                "value": "\"HostRegisterIncorrectPSK\""
+            },
+            {
+                "key": "GroupAdded",
+                "description": "GroupAdded event",
+                "value": "\"GroupAdded\""
+            },
+            {
+                "key": "GroupModified",
+                "description": "GroupModified event",
+                "value": "\"GroupModified\""
+            },
+            {
+                "key": "GroupDeleted",
+                "description": "GroupDeleted event",
+                "value": "\"GroupDeleted\""
+            },
+            {
+                "key": "ScheduleAdded",
+                "description": "ScheduleAdded event",
+                "value": "\"ScheduleAdded\""
+            },
+            {
+                "key": "ScheduleModified",
+                "description": "ScheduleModified event",
+                "value": "\"ScheduleModified\""
+            },
+            {
+                "key": "ScheduleDeleted",
+                "description": "ScheduleDeleted event",
+                "value": "\"ScheduleDeleted\""
+            },
+            {
+                "key": "AttachmentAdded",
+                "description": "AttachmentAdded event",
+                "value": "\"AttachmentAdded\""
+            },
+            {
+                "key": "AttachmentModified",
+                "description": "AttachmentModified event",
+                "value": "\"AttachmentModified\""
+            },
+            {
+                "key": "AttachmentDeleted",
+                "description": "AttachmentDeleted event",
+                "value": "\"AttachmentDeleted\""
+            },
+            {
+                "key": "ScriptAdded",
+                "description": "ScriptAdded event",
+                "value": "\"ScriptAdded\""
+            },
+            {
+                "key": "ScriptModified",
+                "description": "ScriptModified event",
+                "value": "\"ScriptModified\""
+            },
+            {
+                "key": "ScriptDeleted",
+                "description": "ScriptDeleted event",
+                "value": "\"ScriptDeleted\""
+            },
+            {
+                "key": "ScriptRun",
+                "description": "ScriptRun event",
+                "value": "\"ScriptRun\""
+            },
+            {
+                "key": "ServerStarted",
+                "description": "ServerStarted event",
+                "value": "\"ServerStarted\""
+            },
+            {
+                "key": "ServerOptionsModified",
+                "description": "ServerOptionsModified event",
+                "value": "\"ServerOptionsModified\""
+            }
+        ]
     }
 ]

@@ -44,5 +44,7 @@ func (h *handle) Logout(request web.Request) (interface{}, *web.Error) {
 		Expires: time.Now().AddDate(0, 0, -1),
 	})
 
+	EventStore.UserLoggedOut(session.Username)
+
 	return nil, nil
 }

@@ -97,6 +97,7 @@ func AuthenticateUser(credentials Credentials, req *http.Request) (*Authenticati
 	}
 
 	if !user.PasswordHash.Compare([]byte(credentials.Password)) {
+		EventStore.UserIncorrectPassword(credentials.Username, req.RemoteAddr)
 		log.Warn("Incorrect password provided for user: '%s'", user.Username)
 		return nil, web.CommonErrors.Unauthorized
 	}
@@ -124,6 +125,8 @@ func AuthenticateUser(credentials Credentials, req *http.Request) (*Authenticati
 		Session:     session,
 		CookieValue: cookieValue,
 	}
+
+	EventStore.UserLoggedIn(credentials.Username, req.RemoteAddr)
 
 	return &result, nil
 }

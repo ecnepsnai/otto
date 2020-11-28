@@ -11,6 +11,8 @@ func (h *handle) OptionsGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
 	options := OttoOptions{}
 
 	if err := request.Decode(&options); err != nil {
@@ -29,7 +31,10 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Error())
 	}
 
-	options.Save()
+	hash, didChange := options.Save()
+	if didChange {
+		EventStore.ServerOptionsModified(hash, session.Username)
+	}
 
 	return options, nil
 }

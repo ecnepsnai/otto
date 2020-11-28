@@ -11,6 +11,8 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
+const configFileName = "otto_server.conf"
+
 // OttoOptions describes options for the otto server
 type OttoOptions struct {
 	General  OptionsGeneral
@@ -56,7 +58,7 @@ type RegisterRule struct {
 var Options *OttoOptions
 var optionsLock = sync.Mutex{}
 
-// LoadOptions load E6 options
+// LoadOptions load Otto Server options
 func LoadOptions() {
 	defaults := OttoOptions{
 		General: OptionsGeneral{
@@ -77,11 +79,11 @@ func LoadOptions() {
 		},
 	}
 
-	if !FileExists(path.Join(Directories.Data, "otto_server.conf")) {
+	if !FileExists(path.Join(Directories.Data, configFileName)) {
 		Options = &defaults
 		Options.Save()
 	} else {
-		f, err := os.OpenFile(path.Join(Directories.Data, "otto_server.conf"), os.O_RDONLY, os.ModePerm)
+		f, err := os.OpenFile(path.Join(Directories.Data, configFileName), os.O_RDONLY, os.ModePerm)
 		if err != nil {
 			log.Fatal("Error opening config file: %s", err.Error())
 		}
@@ -97,13 +99,15 @@ func LoadOptions() {
 	}
 }
 
-// Save save the options to disk. Will panic on any error.
-func (o *OttoOptions) Save() {
+// Save save the options to disk. Will panic on any error. Returns true if the options did change
+func (o *OttoOptions) Save() (string, bool) {
 	optionsLock.Lock()
 	defer optionsLock.Unlock()
 
-	atomicPath := path.Join(Directories.Data, fmt.Sprintf(".otto_server.conf_%s", newPlainID()))
-	realPath := path.Join(Directories.Data, "otto_server.conf")
+	beforeHash := optionsFileHash()
+
+	atomicPath := path.Join(Directories.Data, fmt.Sprintf(".%s_%s", configFileName, newPlainID()))
+	realPath := path.Join(Directories.Data, configFileName)
 
 	f, err := os.OpenFile(atomicPath, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -120,6 +124,23 @@ func (o *OttoOptions) Save() {
 	}
 
 	Options = o
+
+	afterHash := optionsFileHash()
+	return afterHash, beforeHash != afterHash
+}
+
+func optionsFileHash() string {
+	configPath := path.Join(Directories.Data, configFileName)
+	if !FileExists(configPath) {
+		return ""
+	}
+
+	h, err := hashFile(configPath)
+	if err != nil {
+		log.Panic("Error hasing config file: %s", err.Error())
+	}
+
+	return h
 }
 
 // Validate returns an error if the options is not valid
