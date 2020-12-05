@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Modal, ModalButton } from '../../components/Modal';
 import { RunSetup } from './RunSetup';
 import { RunScript } from './RunScript';
+import { Style } from '../../components/Style';
+import { Card } from '../../components/Card';
 
 enum RunStage {
     Setup,
@@ -61,7 +63,7 @@ export class RunModal extends React.Component<RunModalProps, RunModalState> {
 
     private running = () => {
         return (
-            <div>
+            <div className="cards">
                 { this.state.selectedHostIDs.map(hostID => {
                     return (
                         <RunScript scriptID={this.props.scriptID} hostID={hostID} key={hostID} onFinished={this.scriptFinished(hostID)}/>
@@ -108,7 +110,7 @@ export class RunModal extends React.Component<RunModalProps, RunModalState> {
 
     render(): JSX.Element {
         return (
-            <Modal title="Run Script" buttons={this.buttons()} static={this.state.stage === RunStage.Running}>
+            <Modal title="Run Script" size={Style.Size.L} buttons={this.buttons()} static={this.state.stage === RunStage.Running}>
                 { this.content() }
             </Modal>
         );

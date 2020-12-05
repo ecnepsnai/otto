@@ -1,25 +1,25 @@
 .card {
     &.card-success {
-        .card-header {
+        & > .card-header {
             background-color: #b2dfbc;
         }
 
-        border-color: #6dc381;
-
-        .list-group-item {
+        & > .list-group-item {
             border-color: #6dc381;
         }
+
+        border-color: #6dc381;
     }
     &.card-danger {
-        .card-header {
+        & > .card-header {
             background-color: #f2b6bc;
         }
 
-        border-color: #e77681;
-
-        .list-group-item {
+        & > .list-group-item {
             border-color: #e77681;
         }
+
+        border-color: #e77681;
     }
 }
 

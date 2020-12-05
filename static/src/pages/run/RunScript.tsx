@@ -5,6 +5,7 @@ import { Host } from '../../types/Host';
 import { ProgressBar } from '../../components/ProgressBar';
 import { ScriptRequest, ScriptRun } from '../../types/Result';
 import { RunResults } from './RunResults';
+import { Style } from '../../components/Style';
 
 export interface RunScriptProps {
     hostID: string;
@@ -49,7 +50,22 @@ export class RunScript extends React.Component<RunScriptProps, RunScriptState> {
                 runningScript: false,
                 results: results,
             });
-        }, () => {
+        }, results => {
+            this.setState({
+                runningScript: false,
+                results: results,
+            });
+            this.props.onFinished();
+        }).catch(error => {
+            this.setState({
+                runningScript: false,
+                results: {
+                    Result: {
+                        Success: false,
+                    },
+                    RunError: error,
+                },
+            });
             this.props.onFinished();
         });
     }
@@ -68,8 +84,14 @@ export class RunScript extends React.Component<RunScriptProps, RunScriptState> {
 
     render(): JSX.Element {
         if (this.state.loadingHost) { return (<Loading />); }
+
+        let color: Style.Palette;
+        if (this.state.results && this.state.results.Result && !this.state.results.Result.Success) {
+            color = Style.Palette.Danger;
+        }
+
         return (
-            <Card.Card>
+            <Card.Card color={color}>
                 <Card.Header>{this.state.host.Name}</Card.Header>
                 { this.content() }
             </Card.Card>

@@ -155,7 +155,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                 <ListGroup.TextItem title="Run As">User: {this.state.script.UID} Group: {this.state.script.GID}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Working Directory">{this.state.script.WorkingDirectory}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Executable">{this.state.script.Executable}</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Enabled"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>
+                                <ListGroup.TextItem title="Status"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>
                             </ListGroup.List>
                         </Card.Card>
                         <EnvironmentVariableCard variables={this.state.script.Environment} className="mb-3"/>

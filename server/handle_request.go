@@ -50,7 +50,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 
 		result, err := host.RunScript(script)
 		if err != nil {
-			return nil, web.ValidationError(err.Message)
+			return nil, web.CommonErrors.ServerError
 		}
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)

@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
+	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
 )
@@ -15,6 +17,7 @@ type ScriptResult struct {
 	Duration    time.Duration
 	Environment []environ.Variable
 	Result      otto.ScriptResult
+	RunError    string
 }
 
 var clientActionMap = map[string]uint32{
@@ -70,7 +73,8 @@ func (host *Host) Ping() *Error {
 	return nil
 }
 
-// RunScript run the script on the host
+// RunScript run the script on the host. Error will only ever be populated with internal server
+// errors, such as being unable to read from the database.
 func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	start := time.Now()
 
@@ -125,6 +129,18 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	// 4. Host environment variables
 	variables = environ.Merge(variables, host.Environment)
 
+	if logtic.Log.Level == logtic.LevelDebug {
+		varStr := make([]string, len(variables))
+		for i, variable := range variables {
+			if variable.Secret {
+				varStr[i] = variable.Key + "='*****'"
+			} else {
+				varStr[i] = fmt.Sprintf("%s='%s'", variable.Key, variable.Value)
+			}
+		}
+		log.Debug("Script variables: %s", strings.Join(varStr, " "))
+	}
+
 	scriptRequest.Environment = environ.Map(variables)
 
 	log.Info("Executing script '%s' on host '%s'", script.Name, host.Address)
@@ -134,7 +150,15 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 	})
 	if err != nil {
 		log.Error("Error running script on host '%s': %s", host.Address, err.Message)
-		return nil, err
+		return &ScriptResult{
+			ScriptID:    script.ID,
+			Duration:    time.Since(start),
+			Environment: variables,
+			Result: otto.ScriptResult{
+				Success: false,
+			},
+			RunError: err.Message,
+		}, nil
 	}
 
 	result := reply.ScriptResult
@@ -147,7 +171,15 @@ func (host *Host) RunScript(script *Script) (*ScriptResult, *Error) {
 			})
 			if err != nil {
 				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ExecError)
-				return nil, err
+				return &ScriptResult{
+					ScriptID:    script.ID,
+					Duration:    time.Since(start),
+					Environment: variables,
+					Result: otto.ScriptResult{
+						Success: false,
+					},
+					RunError: err.Message,
+				}, nil
 			}
 		}
 	} else {
