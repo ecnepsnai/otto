@@ -73,11 +73,11 @@ func tryAutoRegister() {
 	// Get the current uid and gid for the defaults
 	uid, gid := getUIDandGID()
 	// Get the local IP
-	localIP := getOutboundIP().String()
+	localIP := getOutboundIP()
 
 	// Make the request
 	request := otto.RegisterRequest{
-		Address:  localIP,
+		Address:  localIP.String(),
 		PSK:      psk,
 		Uname:    uname,
 		Hostname: hostname,
@@ -126,6 +126,13 @@ func tryAutoRegister() {
 		rlog.Fatalf("No PSK returned from otto server")
 	}
 
+	var listenAddr = fmt.Sprintf("0.0.0.0:%d", port)
+	var allowFrom = "0.0.0.0/0"
+	if len(localIP) == 16 {
+		listenAddr = fmt.Sprintf("[::]:%d", port)
+		allowFrom = "::/0"
+	}
+
 	// Save the config
 	conf := clientConfig{
 		PSK:        registerResponse.Data.PSK,
@@ -133,6 +140,8 @@ func tryAutoRegister() {
 		DefaultUID: uid,
 		DefaultGID: gid,
 		Path:       env["PATH"],
+		ListenAddr: listenAddr,
+		AllowFrom:  allowFrom,
 	}
 	f, err := os.OpenFile("otto_client.conf", os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -142,7 +151,7 @@ func tryAutoRegister() {
 	if err := json.NewEncoder(f).Encode(conf); err != nil {
 		rlog.Fatalf("Error encoding options: %s", err.Error())
 	}
-	rlog.Printf("Successfully registered with otto server '%s'", host)
+	rlog.Printf("Successfully registered with otto server '%s', configuration: %+v", host, conf)
 	if exitWhenFinished {
 		os.Exit(0)
 	}

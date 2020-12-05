@@ -52,7 +52,7 @@ func loadConfig() error {
 	}
 
 	if _, _, err := net.ParseCIDR(c.AllowFrom); err != nil {
-		return fmt.Errorf("invalid allow_from CIDR")
+		return fmt.Errorf("invalid allow_from CIDR '%s': %s", c.AllowFrom, err.Error())
 	}
 
 	return nil

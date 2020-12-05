@@ -134,7 +134,7 @@ func (s *eventStoreObject) HostDeleted(host *Host, currentUser string) {
 }
 
 func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.RegisterRequest, matchedRule *RegisterRule) {
-	event := newEvent(EventTypeHostDeleted, map[string]string{
+	event := newEvent(EventTypeHostRegisterSuccess, map[string]string{
 		"host_id":  host.ID,
 		"name":     host.Name,
 		"address":  host.Address,
@@ -151,7 +151,7 @@ func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.Register
 }
 
 func (s *eventStoreObject) HostRegisterIncorrectPSK(request otto.RegisterRequest) {
-	event := newEvent(EventTypeHostDeleted, map[string]string{
+	event := newEvent(EventTypeHostRegisterIncorrectPSK, map[string]string{
 		"address":  request.Address,
 		"uname":    request.Uname,
 		"hostname": request.Hostname,
