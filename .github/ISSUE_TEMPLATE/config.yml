@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 'Otto Security Team'
+    url: https://ianspence.com/
+    about: If you've found a security vulnerability with Otto, please report it privately rather than through a Github issue.
