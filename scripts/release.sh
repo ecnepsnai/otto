@@ -10,21 +10,26 @@ OTTO_PATH=$(realpath ../)
 
 PRODUCT_NAME=otto
 PACKAGE_NAME=otto-${VERSION}
+COLOR_NC='\033[0m'
+COLOR_GREEN='\033[0;32m'
+LOG=${OTTO_PATH}/otto-install.log
 
 cd ${OTTO_PATH}
 git clean -qxdf
 cd ${OTTO_PATH}/scripts
-./install.sh ${VERSION}
+./install_backend.sh ${VERSION}
 cd ${OTTO_PATH}/static/
 rm -rf build/
-npx webpack --config webpack.login.production.js
-npx webpack --config webpack.app.production.js
+echo -en "Building frontend... "
+npm install >> ${LOG} 2>&1
+npx webpack --config webpack.login.production.js >> ${LOG}
+npx webpack --config webpack.app.production.js >> ${LOG}
+echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 cd ${OTTO_PATH}
 rm -rf artifacts/
 mkdir -p artifacts/
 
 function build_server() {
-    echo "Building server ${1}/${2}"
     cd ${OTTO_PATH}/cmd/server
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${3}
     NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
@@ -43,7 +48,6 @@ function build_server() {
 }
 
 function build_client() {
-    echo "Building client ${1}/${2}"
     cd ${OTTO_PATH}/cmd/client
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w"
     NAME=${PRODUCT_NAME}client-${VERSION}_${1}-${2}
@@ -58,15 +62,19 @@ function build_client() {
     rm -rf ${PACKAGE_NAME}
 }
 
+echo -en "Packaging client builds... "
 for ARCH in 'amd64' 'arm64'; do
     for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
         build_client ${OS} ${ARCH}
     done
 done
+echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
+echo -en "Packaging server build... "
 for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
     build_server ${OS} amd64 ${PRODUCT_NAME}
 done
+echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
 cd scripts/
 ./docker.sh ${VERSION}

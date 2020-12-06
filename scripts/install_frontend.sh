@@ -11,21 +11,11 @@ COLOR_BLUE='\033[0;34m'
 OTTO_VERSION=${1:-dev}
 
 LOG=${OTTO_PATH}/otto-install.log
-echo "" > ${LOG}
 
-cd ${SCRIPTS_PATH}/codegen/
-cbgen -n server -v ${OTTO_VERSION}
-mv *.go ${OTTO_PATH}/server
-cd ${OTTO_PATH}/cmd/client
-cbgen -n main -v ${OTTO_VERSION}
-cd ${OTTO_PATH}/
-go build
-
-echo -e "${COLOR_BLUE}[INFO]${COLOR_NC} Building static assets"
+echo -en "Building frontend... "
 cd ${STATIC_DIR}
 npm install >> "${LOG}" 2>&1
-npx webpack --config webpack.login.development.js >> "${LOG}" 2>&1
 npx webpack --config webpack.app.development.js >> "${LOG}" 2>&1
+npx webpack --config webpack.login.development.js >> "${LOG}" 2>&1
 cd ../
-
-echo -e "${COLOR_GREEN}Finished!${COLOR_NC}"
+echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
