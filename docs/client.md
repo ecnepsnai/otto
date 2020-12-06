@@ -4,11 +4,28 @@ An Otto client is a individual host that is running the Otto client daemon. Scri
 
 ## Installing the Client
 
-Client binaries are provided on any Otto server server at `/clients`.
+Client binaries are provided by the Otto server at `/clients`. Otto servers only provide the same version of clients as the server itself.
+
+### System Requirements
+
+**Hardware:**
+- CPU: Any semi-recent amd64/x86_64 or arm64 CPU. Generally, if it can run any of the operating systems listed below, it'll work for Otto. 32-bit CPUs are not supported.
+- RAM: At least 250MiB of available system memory
+- Disk: Varies by log retention, clients are generally less than 10MiB.
+
+**Network:**
+- At least one network interface with a valid IPv4 or IPv6 address
+- Must accept incoming connections on the Otto client port (default: 12444)
+
+**Operating System:**
+- Linux kernel version 2.6.23 or later for amd64/x86_64 systems, 2.33 or later for arm64 systems
+- OpenBSD stable release
+- FreeBSD 10 or later for amd64/x86_64 systems, 12 or later for arm64 systems
+- NetBSD 8 or later. NetBSD 7 may work but is unsupported due to known and unresolved issues
 
 ## Running the Client
 
-The Otto client is a static executable file that supports any *nix like system (Linux, BSD, macOS, Solaris).
+The Otto client is a static executable file that supports Linux and most BSD systems.
 
 It works best if you run it as root, but will run as a non-root user.
 

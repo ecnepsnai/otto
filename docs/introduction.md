@@ -2,7 +2,7 @@
 
 Welcome to Otto! Where things are "Ottomatic Beyond Belief!"
 
-Otto is a way for you to run scripts on remote hosts from a single server. It supports most Unix like systems, including: Linux, BSD (Open, Free, and Net), macOS, and Solaris.
+Otto is a way for you to run scripts on remote hosts from a single server. It currently supports Linux and most BSD systems.
 
 There are two components to Otto: The Server and Client.
 

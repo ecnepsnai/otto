@@ -20,7 +20,22 @@ Navigating to `http://localhost:8080` in your web browser and use the default cr
 
 ### As a Service
 
-You may also wish to run the Otto server as an executable on any Linux, macOS, FreeBSD, or NetBSD host.
+You may also wish to run the Otto server as an executable on any Linux, FreeBSD, NetBSD, or OpenBSD.
+
+### System Requirements
+
+**Hardware:**
+- CPU: Any semi-recent amd64/x86_64 (if it can run the systems listed below, it's fine)
+- RAM: At least 500MiB of available system memory
+- Disk: Varies by use and log retention. 1GiB will be plenty.
+
+**Operating System:**
+- Linux kernel version 2.6.23 or later for amd64/x86_64 systems, 2.33 or later for arm64 systems
+- OpenBSD stable release
+- FreeBSD 10 or later for amd64/x86_64 systems, 12 or later for arm64 systems
+- NetBSD 8 or later. NetBSD 7 may work but is unsupported due to known and unresolved issues
+
+### Usage
 
 Download the binary for your operating system and start run the `otto` executable.
 
@@ -33,9 +48,15 @@ Command line options are:
 --no-scheduler              Disable all automatic tasks
 ```
 
+For example:
+
+```bash
+otto -d /usr/share/otto -b 0.0.0.0:8080
+```
+
 ## Users & Authentication
 
-Otto currently only supports local user accounts. When the server starts up, if there are no user accounts it will create the default account of `admin` with the password `admin`.
+Otto currently only supports local user accounts. When the server starts up and there are no user accounts it will create the default account of `admin` with the password `admin`.
 
 You can add users in the Options tab of the web interface. There needs to be at least one user for Otto to function, but you can delete the `admin` user if you create a new user.
 
@@ -43,7 +64,7 @@ You can add users in the Options tab of the web interface. There needs to be at 
 
 **Reset the Password for Somebody Else**
 
-Any user can change the password for other users simply by editing their user in the options page of the web interface.
+Any user can change the password for other users simply by editing their user in the options page of the web interface. All active sessions for that user will be ended if their password is changed by somebody else.
 
 **Reset/Restore the Default Account**
 
