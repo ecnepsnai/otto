@@ -191,6 +191,7 @@ export interface ScheduleReport {
     HostIDs: string[];
     Time: ScheduleReportTime;
     Result: number;
+    HostResult: {[HostID: string]: number};
 }
 
 export interface ScheduleReportTime {

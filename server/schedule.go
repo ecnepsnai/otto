@@ -104,6 +104,7 @@ func (s Schedule) RunNow() {
 	}
 
 	report.HostIDs = hosts.Values()
+	report.HostResult = map[string]int{}
 	success := 0
 	fail := 0
 
@@ -123,8 +124,10 @@ func (s Schedule) RunNow() {
 		if err != nil {
 			fail++
 			log.Error("Error running scheduled script: schedule=%s script=%s host=%s error='%s'", s.ID, s.ScriptID, host.ID, err.Message)
+			report.HostResult[host.ID] = -1
 			continue
 		} else {
+			report.HostResult[host.ID] = result.Result.Code
 			success++
 		}
 

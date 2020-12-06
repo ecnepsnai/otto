@@ -13,6 +13,7 @@ type ScheduleReport struct {
 	HostIDs    []string
 	Time       ScheduleReportTime
 	Result     int
+	HostResult map[string]int
 }
 
 // ScheduleReportTime describes timing information from a schedule run
