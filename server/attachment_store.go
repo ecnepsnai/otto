@@ -125,7 +125,7 @@ func (s attachmentStoreObject) Cleanup() *Error {
 	}
 	for _, file := range files {
 		for _, script := range scripts {
-			if StringSliceContains(file.ID, script.AttachmentIDs) {
+			if stringSliceContains(file.ID, script.AttachmentIDs) {
 				filesWithScripts[file.ID] = true
 				break
 			}

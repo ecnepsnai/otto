@@ -90,12 +90,12 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 
 	currentHosts := group.HostIDs()
 	for _, hostID := range r.Hosts {
-		if !StringSliceContains(hostID, currentHosts) {
+		if !stringSliceContains(hostID, currentHosts) {
 			addedHosts = append(addedHosts, hostID)
 		}
 	}
 	for _, hostID := range currentHosts {
-		if !StringSliceContains(hostID, r.Hosts) {
+		if !stringSliceContains(hostID, r.Hosts) {
 			removedHosts = append(removedHosts, hostID)
 		}
 	}
@@ -111,7 +111,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			}
 			return nil, web.ValidationError(err.Message)
 		}
-		if StringSliceContains(id, host.GroupIDs) {
+		if stringSliceContains(id, host.GroupIDs) {
 			continue
 		}
 
@@ -135,7 +135,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			}
 			return nil, web.ValidationError(err.Message)
 		}
-		if !StringSliceContains(id, host.GroupIDs) {
+		if !stringSliceContains(id, host.GroupIDs) {
 			continue
 		}
 
@@ -145,7 +145,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			Port:        host.Port,
 			PSK:         host.PSK,
 			Enabled:     host.Enabled,
-			GroupIDs:    FilterStringSlice(id, host.GroupIDs),
+			GroupIDs:    filterStringSlice(id, host.GroupIDs),
 			Environment: host.Environment,
 		}); err != nil {
 			return nil, web.CommonErrors.ServerError

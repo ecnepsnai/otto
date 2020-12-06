@@ -60,7 +60,7 @@ func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) ([]Schedule, *
 		return nil, err
 	}
 	for _, schedule := range schedules {
-		if StringSliceContains(groupID, schedule.Scope.GroupIDs) {
+		if stringSliceContains(groupID, schedule.Scope.GroupIDs) {
 			matchedSchedules = append(matchedSchedules, schedule)
 		}
 	}
@@ -89,7 +89,7 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Er
 				}
 			}
 		} else if len(schedule.Scope.HostIDs) > 0 {
-			if StringSliceContains(hostID, schedule.Scope.HostIDs) {
+			if stringSliceContains(hostID, schedule.Scope.HostIDs) {
 				matchedSchedules = append(matchedSchedules, schedule)
 			}
 		}

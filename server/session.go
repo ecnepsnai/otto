@@ -22,7 +22,7 @@ type Session struct {
 func (s sessionStoreObject) NewSessionForUser(user *User) (Session, string, *Error) {
 	session := Session{
 		ID:       newID(),
-		Secret:   GenerateSessionSecret(),
+		Secret:   generateSessionSecret(),
 		Username: user.Username,
 		Expires:  time.Now().AddDate(0, 0, 1).Unix(),
 	}
