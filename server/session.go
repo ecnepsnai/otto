@@ -75,8 +75,19 @@ func (s sessionStoreObject) SessionForUser(username string) ([]Session, *Error) 
 }
 
 // EndAllForUser end all sessions for user
-func (s sessionStoreObject) EndAllForUser(user User) {
-	s.Table.DeleteAllIndex("Username", user.Username)
+func (s sessionStoreObject) EndAllForUser(username string) {
+	s.Table.DeleteAllIndex("Username", username)
+}
+
+// EndAllOtherForUser end all sessions for the user except the current session
+func (s sessionStoreObject) EndAllOtherForUser(username string, current *Session) {
+	sessions, _ := s.SessionForUser(username)
+	for _, session := range sessions {
+		if session.ID == current.ID {
+			continue
+		}
+		s.DeleteSession(&session)
+	}
 }
 
 // SaveSession save the given session (new or current)

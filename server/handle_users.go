@@ -87,6 +87,16 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	if params.Password != "" {
+		// End all other sessions if the user changes their own password
+		if user.Username == session.Username {
+			SessionStore.EndAllOtherForUser(user.Username, session)
+		} else {
+			// End all sessions if somebody else changes a users password
+			SessionStore.EndAllForUser(user.Username)
+		}
+	}
+
 	EventStore.UserModified(user.Username, session.Username)
 
 	return user, nil
@@ -116,6 +126,8 @@ func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+
+	SessionStore.EndAllForUser(user.Username)
 
 	EventStore.UserDeleted(user.Username, session.Username)
 
