@@ -24,7 +24,7 @@ mv otto-${VERSION} otto
 ${DOCKER_CMD} build -t otto:${VERSION} . >> ${LOG} 2>&1
 cd ../
 rm -rf Docker
-${DOCKER_CMD} save otto:${VERSION} > otto-${VERSION}_docker.tar >> ${LOG} 2>&1
+${DOCKER_CMD} save --quiet -o otto-${VERSION}_docker.tar otto:${VERSION}
 gzip otto-${VERSION}_docker.tar
 mv otto-${VERSION}_docker.tar.gz ../artifacts
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
