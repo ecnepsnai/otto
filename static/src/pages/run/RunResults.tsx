@@ -25,7 +25,7 @@ export class RunResults extends React.Component<RunResultsProps, {}> {
     }
 
     render(): JSX.Element {
-        if (!this.props.results.Result.Success) {
+        if (this.props.results.RunError || this.props.results.Result.ExecError) {
             return this.error();
         }
 
