@@ -17,7 +17,7 @@ export class Dropdown extends React.Component<DropdownProps> {
     render(): JSX.Element {
         return (
             <div className="dropdown">
-                <button className={Button.className(this.props.button)} type="button" id={this.id} data-toggle="dropdown" aria-expanded="false">
+                <button className={Button.className(this.props.button)} type="button" role="button" id={this.id} data-bs-toggle="dropdown" aria-expanded="false">
                     { this.props.label }
                 </button>
                 <Menu.Menu name={this.id}>
@@ -57,7 +57,7 @@ export namespace Menu {
         }
         render(): JSX.Element {
             return (
-                <li><a className="dropdown-item" href="#" onClick={this.onClick}>{ this.props.icon }<span className="ml-1">{ this.props.label }</span></a></li>
+                <li><a className="dropdown-item" href="#" onClick={this.onClick}>{ this.props.icon }<span className="ms-1">{ this.props.label }</span></a></li>
             );
         }
     }
@@ -89,7 +89,7 @@ export namespace Menu {
     export class Anchor extends React.Component<AnchorProps, {}> {
         render(): JSX.Element {
             return (
-                <li><a className="dropdown-item" href={this.props.href}>{ this.props.icon }<span className="ml-1">{ this.props.label }</span></a></li>
+                <li><a className="dropdown-item" href={this.props.href}>{ this.props.icon }<span className="ms-1">{ this.props.label }</span></a></li>
             );
         }
     }

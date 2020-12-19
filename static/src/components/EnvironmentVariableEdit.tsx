@@ -145,7 +145,7 @@ class EnvironmentVariableEditModal extends React.Component<EnvironmentVariableEd
         this.setState({ secret: secret });
     }
 
-    private onSave = () => {
+    private onSave = (): Promise<void> => {
         return new Promise(resolve => {
             this.props.onSave({
                 Key: this.state.key,

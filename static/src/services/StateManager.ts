@@ -6,7 +6,6 @@ export class StateManager {
     public static Refresh(): Promise<State> {
         return API.GET('/api/state').then(data => {
             this.current = new State(data);
-            console.log('State loaded', this.current);
             return this.current;
         });
     }

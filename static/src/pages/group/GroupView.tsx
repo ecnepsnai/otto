@@ -143,7 +143,7 @@ class HostListCard extends React.Component<HostListCardProps, {}> {
                         return (
                         <ListGroup.Item key={index}>
                             <Icon.Desktop />
-                            <Link to={'/hosts/host/' + host.ID} className="ml-1">{ host.Name }</Link>
+                            <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
                         </ListGroup.Item>
                         );
                     })

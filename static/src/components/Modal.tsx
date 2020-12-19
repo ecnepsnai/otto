@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Style } from './Style';
 import { Button } from './Button';
-import { Bootstrap, BSModule } from '../services/Bootstrap';
 import { Rand } from '../services/Rand';
 import { Form } from './Form';
+import { Modal as BSModal } from 'bootstrap';
 
 export interface ModalButton {
     /**
@@ -61,11 +61,11 @@ export interface ModalProps {
 
 interface ModalState {
     id: string;
-    bsModal?: BSModule;
+    bsModal?: BSModal;
 }
 
 export class Modal extends React.Component<ModalProps, ModalState> {
-    private static modals: { [id: string]: BSModule; } = {};
+    private static modals: { [id: string]: BSModal; } = {};
     constructor(props: ModalProps) {
         super(props);
         this.state = { id: props.id ?? Rand.ID() };
@@ -80,11 +80,11 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             GlobalModalFrame.removeModal();
             delete Modal.modals[id];
         });
-        let backdrop: boolean | string = true;
+        let backdrop: 'static' | boolean = true;
         if (this.props.static) {
             backdrop = 'static';
         }
-        const bsm = Bootstrap.Modal(element, { show: true, backdrop: backdrop });
+        const bsm = new BSModal(element, { show: true, backdrop: backdrop });
         bsm.show();
         this.setState({ bsModal: bsm });
         Modal.modals[id] = bsm;

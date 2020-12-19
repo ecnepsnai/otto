@@ -231,7 +231,7 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         );
     }
 
-    private onSubmit = () => {
+    private onSubmit = (): Promise<void> => {
         return new Promise(resolve => {
             this.props.onUpdate(this.state.value);
             resolve();

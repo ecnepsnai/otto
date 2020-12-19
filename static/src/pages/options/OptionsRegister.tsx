@@ -317,7 +317,7 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
         });
     }
 
-    private onSubmit = () => {
+    private onSubmit = (): Promise<void> => {
         return new Promise(resolve => {
             this.props.onSave(this.state.value);
             resolve();

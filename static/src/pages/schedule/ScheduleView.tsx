@@ -113,7 +113,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
                     return (
                         <div key={idx}>
                             <Icon.LayerGroup />
-                            <Link className="ml-1" to={'/groups/group/' + group.ID}>{group.Name}</Link>
+                            <Link className="ms-1" to={'/groups/group/' + group.ID}>{group.Name}</Link>
                         </div>
                     );
                 }) }
@@ -128,7 +128,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
                     return (
                         <div key={idx}>
                             <Icon.Desktop />
-                            <Link className="ml-1" to={'/hosts/host/' + host.ID}>{host.Name}</Link>
+                            <Link className="ms-1" to={'/hosts/host/' + host.ID}>{host.Name}</Link>
                         </div>
                     );
                 }) }
@@ -201,7 +201,7 @@ class ScheduleReportItem extends React.Component<ScheduleReportItemProps, {}> {
         return (
             <ListGroup.Item>
                 {icon}
-                <span className="ml-1">
+                <span className="ms-1">
                     <DateLabel date={this.props.report.Time.Start} /> on {this.props.report.HostIDs.length} hosts
                 </span>
             </ListGroup.Item>

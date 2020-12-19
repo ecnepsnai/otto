@@ -26,7 +26,7 @@ export class ScheduleListCard extends React.Component<ScheduleListCardProps, Sch
                     return (
                     <ListGroup.Item key={index}>
                         <Icon.Calendar />
-                        <Link to={'/schedules/schedule/' + schedule.ID} className="ml-1">{ schedule.Name }</Link>
+                        <Link to={'/schedules/schedule/' + schedule.ID} className="ms-1">{ schedule.Name }</Link>
                     </ListGroup.Item>
                     );
                 })

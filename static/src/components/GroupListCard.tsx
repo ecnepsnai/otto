@@ -26,7 +26,7 @@ export class GroupListCard extends React.Component<GroupListCardProps, GroupList
                     return (
                     <ListGroup.Item key={index}>
                         <Icon.LayerGroup />
-                        <Link to={'/groups/group/' + group.ID} className="ml-1">{ group.Name }</Link>
+                        <Link to={'/groups/group/' + group.ID} className="ms-1">{ group.Name }</Link>
                     </ListGroup.Item>
                     );
                 })

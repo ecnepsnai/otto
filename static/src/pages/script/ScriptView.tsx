@@ -123,7 +123,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                     <div className="d-flex justify-content-between">
                         <span>
                             <Icon.Label icon={<Icon.Paperclip />} label={attachment.Name} />
-                            <span className="text-muted ml-1">
+                            <span className="text-muted ms-1">
                                 {Formatter.Bytes(attachment.Size)}
                             </span>
                         </span>
@@ -176,7 +176,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                             <div className="d-flex justify-content-between">
                                                 <div>
                                                     <Icon.LayerGroup />
-                                                    <Link to={'/groups/group/' + host.GroupID} className="ml-1">{ host.GroupName }</Link>
+                                                    <Link to={'/groups/group/' + host.GroupID} className="ms-1">{ host.GroupName }</Link>
                                                 </div>
                                                 <div>
                                                     <SmallPlayButton onClick={this.runScriptGroupClick(host.GroupID)} />
@@ -186,7 +186,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                                 <div>
                                                     <Icon.Descendant />
                                                     <Icon.Desktop />
-                                                    <Link to={'/hosts/host/' + host.HostID} className="ml-1">{ host.HostName }</Link>
+                                                    <Link to={'/hosts/host/' + host.HostID} className="ms-1">{ host.HostName }</Link>
                                                 </div>
                                                 <div>
                                                     <SmallPlayButton onClick={this.runScriptHostClick(host.HostID)} />

@@ -50,7 +50,7 @@ export class ScriptListCard extends React.Component<ScriptListCardProps, ScriptL
                 <div className="d-flex justify-content-between">
                     <div>
                         <Icon.Scroll />
-                        <Link to={'/scripts/script/' + script.ID} className="ml-1">{ script.Name }</Link>
+                        <Link to={'/scripts/script/' + script.ID} className="ms-1">{ script.Name }</Link>
                     </div>
                     <div>
                         <SmallPlayButton onClick={this.runScriptClick(script.ID, this.props.hostIDs)} />

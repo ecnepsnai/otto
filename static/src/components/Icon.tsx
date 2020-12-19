@@ -108,7 +108,7 @@ export namespace Icon {
             return (
                 <span>
                     { this.props.icon }
-                    <span className="ml-1">{ this.props.label }</span>
+                    <span className="ms-1">{ this.props.label }</span>
                 </span>
             );
         }

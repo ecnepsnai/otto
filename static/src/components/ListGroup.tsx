@@ -39,7 +39,7 @@ export namespace ListGroup {
     export class TextItem extends React.Component<TextItemProps, {}> {
         render(): JSX.Element {
             return (
-                <li className="list-group-item"><strong>{ this.props.title }</strong><span className="ml-1">{ this.props.children }</span></li>
+                <li className="list-group-item"><strong>{ this.props.title }</strong><span className="ms-1">{ this.props.children }</span></li>
             );
         }
     }

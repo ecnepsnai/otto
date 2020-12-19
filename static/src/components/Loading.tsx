@@ -8,7 +8,7 @@ export class Loading extends React.Component<{}, {}> {
         return (
             <div>
                 <Icon.Spinner pulse />
-                <span className="ml-1 loading-text">
+                <span className="ms-1 loading-text">
                     Loading...
                 </span>
             </div>

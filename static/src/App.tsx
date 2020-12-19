@@ -31,14 +31,13 @@ export class App extends React.Component<AppProps, AppState> {
     }
     componentDidMount(): void {
         StateManager.Refresh().then(() => {
-            console.log('App bootstrapped');
             this.setState({ loading: false });
         });
     }
 
     render(): JSX.Element {
         if (this.state.loading) {
-            return (<div className="mt-3 ml-3"><Loading /></div>);
+            return (<div className="mt-3 ms-3"><Loading /></div>);
         }
 
         return (
