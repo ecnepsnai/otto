@@ -20,13 +20,13 @@ export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}>
     }
 
     private enabledOnColumn = () => {
-        if (this.props.schedule.Scope.GroupIDs.length > 0) {
+        if (this.props.schedule.Scope.GroupIDs && this.props.schedule.Scope.GroupIDs.length > 0) {
             let unit = 'groups';
             if (this.props.schedule.Scope.GroupIDs.length  == 1) {
                 unit = 'group';
             }
             return (<td>{this.props.schedule.Scope.GroupIDs.length} {unit}</td>);
-        } else if (this.props.schedule.Scope.HostIDs.length > 0) {
+        } else if (this.props.schedule.Scope.HostIDs && this.props.schedule.Scope.HostIDs.length > 0) {
             let unit = 'hosts';
             if (this.props.schedule.Scope.HostIDs.length == 1) {
                 unit = 'host';

@@ -15,9 +15,10 @@ export class Notification extends React.Component<NotificationProps, {}> {
         GlobalNotificationFrame.removeNotification(this.props.id);
     }
     componentDidMount(): void {
+        const duration = Math.max(this.props.message.length * 100, 1250);
         setTimeout(() => {
             this.onClose();
-        }, 1250);
+        }, duration);
     }
     render(): JSX.Element {
         return (

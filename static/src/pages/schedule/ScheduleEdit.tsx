@@ -57,6 +57,7 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
             const scripts = results[1];
             const groups = results[2];
             const hosts = results[3];
+            let runOn = 'groups';
             let patternTemplate = '';
 
             if (!hosts || hosts.length === 0 || !scripts || scripts.length === 0) {
@@ -80,6 +81,10 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
                         patternTemplate = 'custom';
                         break;
                 }
+
+                if (hosts && hosts.length > 0) {
+                    runOn = 'hosts';
+                }
             }
 
             this.setState({
@@ -89,6 +94,7 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
                 scripts: scripts,
                 groups: groups,
                 hosts: hosts,
+                RunOn: runOn,
                 patternTemplate: patternTemplate,
             });
         });

@@ -79,7 +79,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
     private loadData = () => {
         Promise.all([this.loadSchedule(), this.loadHosts(), this.loadReports(), this.loadScript()]).then(() => {
             let scopePromise: Promise<void> = Promise.resolve();
-            if (this.state.schedule.Scope.GroupIDs.length > 0) {
+            if (this.state.schedule.Scope.GroupIDs && this.state.schedule.Scope.GroupIDs.length > 0) {
                 scopePromise = this.loadGroups();
             }
             scopePromise.then(() => {
