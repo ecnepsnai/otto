@@ -23,19 +23,49 @@ import { Loading } from './components/Loading';
 import { EventList } from './pages/event/EventList';
 
 export interface AppProps {}
-interface AppState { loading: boolean; }
+interface AppState {
+    loading?: boolean;
+    errorDetails?: string;
+}
 export class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
         this.state = { loading: true };
     }
+
     componentDidMount(): void {
         StateManager.Refresh().then(() => {
             this.setState({ loading: false });
         });
     }
 
+    static getDerivedStateFromError(error: Error): AppState {
+        const errData = JSON.stringify(error, Object.getOwnPropertyNames(error), 4);
+        console.log(errData);
+        return { errorDetails: errData };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+        console.error('An error occurred: ' + error, errorInfo);
+    }
+
     render(): JSX.Element {
+        if (this.state.errorDetails) {
+            return (
+                <div className="container">
+                    <div className="card mt-3">
+                        <div className="card-header">
+                            An Error Occurred
+                        </div>
+                        <div className="card-body">
+                            <p>An unrecoverable error occurred while attempting to render this page. Please report this as an issue on <a href="https://github.com/ecnepsnai/otto/issues/new/choose" target="_blank" rel="noreferrer">Github</a> and include the following information:</p>
+                            <pre>{ this.state.errorDetails }</pre>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         if (this.state.loading) {
             return (<div className="mt-3 ms-3"><Loading /></div>);
         }
