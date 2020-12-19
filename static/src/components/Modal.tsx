@@ -84,7 +84,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
         if (this.props.static) {
             backdrop = 'static';
         }
-        const bsm = new BSModal(element, { show: true, backdrop: backdrop });
+        const bsm = new BSModal(element, { backdrop: backdrop });
         bsm.show();
         this.setState({ bsModal: bsm });
         Modal.modals[id] = bsm;
@@ -95,10 +95,13 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             if (!button.dontDismiss) { this.state.bsModal.hide(); }
         };
     };
+    private closeButtonClick = () => {
+        this.state.bsModal.hide();
+    }
     private closeButton = () => {
         if (this.props.static) { return null; }
         return (
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        <button type="button" onClick={this.closeButtonClick} className="btn-close" data-dismiss="modal" aria-label="Close"></button>
         );
     }
     private header = () => {
@@ -295,6 +298,10 @@ export interface ModalFormProps {
      * will dismiss the modal.
      */
     onSubmit: () => (Promise<unknown>);
+    /**
+     * Called when the modal is dismissed without saving
+     */
+    onDismissed?: () => void;
 }
 interface ModalFormState {
     loading?: boolean;
@@ -329,6 +336,7 @@ export class ModalForm extends React.Component<ModalFormProps, ModalFormState> {
                 label: 'Discard',
                 color: Style.Palette.Secondary,
                 disabled: this.state.loading,
+                onClick: this.props.onDismissed,
             },
             {
                 label: 'Save',

@@ -16,7 +16,7 @@ export class Nav extends React.Component<{}, {}> {
                         <a className="navbar-brand" href="/">
                             <img src="assets/img/full_red.svg" className="brand" height="30" />
                         </a>
-                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"></span>
                         </button>
                         <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
