@@ -23,8 +23,6 @@ module.exports = merge.merge(common, {
             patterns: [
                 { from: 'node_modules/react/umd/react.production.min.js', to: 'assets/js/' },
                 { from: 'node_modules/react-dom/umd/react-dom.production.min.js', to: 'assets/js/' },
-                { from: 'node_modules/bootstrap/dist/css/bootstrap.min.css', to: 'assets/css/' },
-                { from: 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', to: 'assets/js/' },
             ]
         }),
     ],

@@ -40,14 +40,19 @@ module.exports = {
             },
             {
                 test: /\.s[ac]ss$/i,
-                use: [
-                    // Creates `style` nodes from JS strings
-                    'style-loader',
-                    // Translates CSS into CommonJS
-                    'css-loader',
-                    // Compiles Sass to CSS
-                    'sass-loader',
-                ],
+                use: [{
+                    // inject CSS to page
+                    loader: 'style-loader'
+                }, {
+                    // translates CSS into CommonJS modules
+                    loader: 'css-loader'
+                }, {
+                    // Run postcss actions
+                    loader: 'postcss-loader'
+                }, {
+                    // compiles Sass to CSS
+                    loader: 'sass-loader'
+                }]
             },
         ]
     },
@@ -60,8 +65,6 @@ module.exports = {
         'react': 'React',
         'react-dom': 'ReactDOM',
         'react-router-dom': 'ReactRouterDOM',
-        'bootstrap': 'Bootstrap',
-        'popper': 'Popper',
     },
 
     output: {

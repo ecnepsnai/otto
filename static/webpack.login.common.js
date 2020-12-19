@@ -37,18 +37,25 @@ module.exports = {
             },
             {
                 test: /\.s[ac]ss$/i,
-                use: [
-                    'style-loader',
-                    'css-loader',
-                    'sass-loader',
-                ],
+                use: [{
+                    // inject CSS to page
+                    loader: 'style-loader'
+                }, {
+                    // translates CSS into CommonJS modules
+                    loader: 'css-loader'
+                }, {
+                    // Run postcss actions
+                    loader: 'postcss-loader'
+                }, {
+                    // compiles Sass to CSS
+                    loader: 'sass-loader'
+                }]
             },
         ]
     },
     externals: {
         'react': 'React',
         'react-dom': 'ReactDOM',
-        'bootstrap': 'Bootstrap',
     },
 
     output: {
