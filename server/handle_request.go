@@ -1,6 +1,10 @@
 package server
 
-import "github.com/ecnepsnai/web"
+import (
+	"fmt"
+
+	"github.com/ecnepsnai/web"
+)
 
 func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
@@ -48,7 +52,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 			return nil, web.ValidationError("No script with ID %s", r.ScriptID)
 		}
 
-		result, err := host.RunScript(script)
+		result, err := host.RunScript(script, nil)
 		if err != nil {
 			return nil, web.CommonErrors.ServerError
 		}
@@ -64,4 +68,112 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 	}
 
 	return nil, nil
+}
+
+func (h handle) RequestStream(request web.Request, conn web.WSConn) {
+	session := request.UserData.(*Session)
+	defer conn.Close()
+
+	type requestParams struct {
+		HostID   string
+		Action   string
+		ScriptID string
+	}
+	type requestResponse struct {
+		Code   int           `json:"Code,omitempty"`
+		Error  string        `json:"Error,omitempty"`
+		Stdout string        `json:"Stdout,omitempty"`
+		Stderr string        `json:"Stderr,omitempty"`
+		Result *ScriptResult `json:"Result,omitempty"`
+	}
+
+	r := requestParams{}
+	if err := conn.ReadJSON(&r); err != nil {
+		conn.WriteJSON(requestResponse{
+			Code:  400,
+			Error: "Invalid request",
+		})
+		return
+	}
+
+	host, err := HostStore.HostWithID(r.HostID)
+	if err != nil {
+		conn.WriteJSON(requestResponse{
+			Code:  400,
+			Error: err.Message,
+		})
+		return
+	}
+	if host == nil {
+		conn.WriteJSON(requestResponse{
+			Code:  400,
+			Error: fmt.Sprintf("No host with ID %s", r.HostID),
+		})
+		return
+	}
+
+	if !IsClientAction(r.Action) {
+		conn.WriteJSON(requestResponse{
+			Code:  400,
+			Error: fmt.Sprintf("Unknown action %s", r.Action),
+		})
+		return
+	}
+
+	if r.Action == ClientActionPing {
+		if err := host.Ping(); err != nil {
+			conn.WriteJSON(requestResponse{
+				Code:  400,
+				Error: fmt.Sprintf("Error pinging host %s", err.Error),
+			})
+			return
+		}
+		conn.WriteJSON(requestResponse{Code: 200})
+		return
+	} else if r.Action == ClientActionRunScript {
+		script, err := ScriptStore.ScriptWithID(r.ScriptID)
+		if err != nil {
+			conn.WriteJSON(requestResponse{
+				Code:  400,
+				Error: err.Message,
+			})
+			return
+		}
+		if script == nil {
+			conn.WriteJSON(requestResponse{
+				Code:  400,
+				Error: fmt.Sprintf("No script with ID %s", r.ScriptID),
+			})
+			return
+		}
+
+		result, err := host.RunScript(script, func(stdout, stderr []byte) {
+			conn.WriteJSON(requestResponse{
+				Code:   100,
+				Stdout: string(stdout),
+				Stderr: string(stderr),
+			})
+		})
+		if err != nil {
+			conn.WriteJSON(requestResponse{
+				Code:  400,
+				Error: err.Message,
+			})
+			return
+		}
+
+		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
+		conn.WriteJSON(requestResponse{
+			Code:   200,
+			Result: result,
+		})
+		return
+	} else if r.Action == ClientActionExitClient {
+		if err := host.ExitClient(); err != nil {
+			conn.WriteJSON(requestResponse{Code: 200})
+			return
+		}
+		conn.WriteJSON(requestResponse{Code: 200})
+		return
+	}
 }

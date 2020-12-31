@@ -107,7 +107,8 @@ func RouterSetup() {
 	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions)
 
 	// Request
-	server.API.PUT("/api/request", h.RequestNew, authenticatedOptions)
+	server.API.PUT("/api/action/sync", h.RequestNew, authenticatedOptions)
+	server.Socket("/api/action/async", h.RequestStream, authenticatedOptions)
 
 	// State
 	server.API.GET("/api/state", h.State, authenticatedOptions)

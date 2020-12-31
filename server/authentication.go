@@ -34,6 +34,7 @@ func IsAuthenticated(r *http.Request) *Session {
 
 func authenticateUser(sessionCookie *http.Cookie) *Session {
 	if sessionCookie == nil {
+		log.Warn("Invalid or missing otto session cookie")
 		return nil
 	}
 

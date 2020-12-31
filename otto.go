@@ -20,30 +20,77 @@ import (
 var log = logtic.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
-const ProtocolVersion = uint32(1)
+const ProtocolVersion = uint32(2)
 
 func init() {
-	gob.Register(Request{})
-	gob.Register(Reply{})
+	gob.Register(MessageHeartbeatRequest{})
+	gob.Register(MessageHeartbeatResponse{})
+	gob.Register(MessageTriggerAction{})
+	gob.Register(MessageActionOutput{})
+	gob.Register(MessageActionResult{})
+	gob.Register(MessageGeneralFailure{})
+
 	gob.Register(Script{})
 	gob.Register(ScriptResult{})
 	gob.Register(File{})
 }
 
-// Request describes an otto request
-type Request struct {
+// Message types
+const (
+	MessageTypeHeartbeatRequest  uint32 = 1
+	MessageTypeHeartbeatResponse uint32 = 2
+	MessageTypeTriggerAction     uint32 = 3
+	MessageTypeActionOutput      uint32 = 4
+	MessageTypeActionResult      uint32 = 5
+	MessageTypeGeneralFailure    uint32 = 6
+)
+
+// MessageHeartbeatRequest describes a heartbeat request
+type MessageHeartbeatRequest struct {
+	ServerVersion string
+}
+
+// MessageHeartbeatResponse describes a heartbeat response
+type MessageHeartbeatResponse struct {
+	ClientVersion string
+}
+
+// MessageTriggerAction describes an action trigger
+type MessageTriggerAction struct {
 	Action uint32
 	Script Script
 	File   File
 }
 
-// Reply describes the reply to an otto request
-type Reply struct {
-	Error        error
-	ScriptResult ScriptResult
-	File         File
-	Version      string
+// MessageActionOutput describes output from an action
+type MessageActionOutput struct {
+	Stdout []byte
+	Stderr []byte
 }
+
+// MessageActionResult describes the result of a triggered action
+type MessageActionResult struct {
+	ScriptResult  ScriptResult
+	Error         error
+	File          File
+	ClientVersion string
+}
+
+// MessageGeneralFailure describes a general failure
+type MessageGeneralFailure struct {
+	Error error
+}
+
+// Actions
+const (
+	ActionRunScript         uint32 = 1
+	ActionReloadConfig      uint32 = 2
+	ActionUploadFile        uint32 = 3
+	ActionUploadFileAndExit uint32 = 4
+	ActionExit              uint32 = 5
+	ActionReboot            uint32 = 6
+	ActionShutdown          uint32 = 7
+)
 
 // Script describes a script
 type Script struct {
@@ -90,34 +137,28 @@ type RegisterResponse struct {
 	PSK string `json:"psk"`
 }
 
-const (
-	// ActionPing ping action
-	ActionPing uint32 = 1
-	// ActionRunScript run script action
-	ActionRunScript uint32 = 2
-	// ActionReloadConfig reload config action
-	ActionReloadConfig uint32 = 3
-	// ActionUploadFile save the provided file on the remote host
-	ActionUploadFile uint32 = 4
-	// ActionUploadFileAndExit save the provided file on the remote host and exit. Used to update otto clients.
-	ActionUploadFileAndExit uint32 = 5
-	// ActionExit exit the otto client
-	ActionExit uint32 = 6
-	// ActionReboot reboot the host
-	ActionReboot uint32 = 7
-	// ActionShutdown power down the host
-	ActionShutdown uint32 = 8
-)
+func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
+	versionBuf := make([]byte, 4)
+	if _, err := io.ReadFull(r, versionBuf); err != nil {
+		if err == io.EOF {
+			// Client closed - nothing to read
+			return nil, nil
+		}
 
-func readEncryptedMessage(r io.Reader, psk string) ([]byte, error) {
+		log.Error("Error reading version: %s", err.Error())
+		return nil, err
+	}
+	version := binary.BigEndian.Uint32(versionBuf)
+	if version != ProtocolVersion {
+		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
+	}
+
 	dataLengthBuf := make([]byte, 4)
-
 	if _, err := io.ReadFull(r, dataLengthBuf); err != nil {
 		log.Error("Error reading data length: %s", err.Error())
 		return nil, err
 	}
 	dataLength := binary.BigEndian.Uint32(dataLengthBuf)
-	log.Debug("Data length: %d", dataLength)
 
 	encryptedData := make([]byte, dataLength)
 	readLength, err := io.ReadFull(r, encryptedData)
@@ -125,12 +166,11 @@ func readEncryptedMessage(r io.Reader, psk string) ([]byte, error) {
 		log.Error("Error reading encrypted data: %s", err.Error())
 		return nil, err
 	}
-	log.Debug("Read length: %#v", readLength)
-	log.Debug("Err: %#v", err)
 	if dataLength != uint32(readLength) {
 		log.Error("Incorrect data length. Reported: %d, actual: %d", dataLength, readLength)
 		return nil, fmt.Errorf("bad request length")
 	}
+	log.Debug("Read frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, readLength)
 
 	data, err := security.Decrypt(encryptedData, psk)
 	if err != nil {
@@ -141,63 +181,57 @@ func readEncryptedMessage(r io.Reader, psk string) ([]byte, error) {
 	return data, nil
 }
 
-// ReadRequest try to read a request from the given reader
-func ReadRequest(r io.Reader, psk string) (*Request, error) {
-	versionBuf := make([]byte, 4)
-	if _, err := io.ReadFull(r, versionBuf); err != nil {
-		log.Error("Error reading version: %s", err.Error())
-		return nil, err
-	}
-	version := binary.BigEndian.Uint32(versionBuf)
-	log.Debug("Protocol version: %d", version)
-	if version != ProtocolVersion {
-		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
-	}
-
-	data, err := readEncryptedMessage(r, psk)
+// ReadMessage try to read a message from the given reader. Returns the message type, the message data, or an error
+func ReadMessage(r io.Reader, psk string) (uint32, interface{}, error) {
+	data, err := readEncryptedFrame(r, psk)
 	if err != nil {
 		log.Error("Error reading encrypted data: %s", err.Error())
-		return nil, err
+		return 0, nil, err
+	}
+	if data == nil {
+		return 0, nil, nil
 	}
 
-	request := Request{}
-	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&request); err != nil {
-		log.Error("Error decoding data as request: %s", err.Error())
-		return nil, err
-	}
-
-	return &request, nil
-}
-
-// ReadReply try to read a reply from the given reader
-func ReadReply(r io.Reader, psk string) (*Reply, error) {
-	versionBuf := make([]byte, 4)
-	if _, err := io.ReadFull(r, versionBuf); err != nil {
-		log.Error("Error reading version: %s", err.Error())
-		return nil, err
-	}
-	version := binary.BigEndian.Uint32(versionBuf)
-	log.Debug("Protocol version: %d", version)
-	if version != ProtocolVersion {
-		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
-	}
-
-	data, err := readEncryptedMessage(r, psk)
+	messageType := binary.BigEndian.Uint32(data[:4])
+	log.Debug("Read message: messageType=%d dataLength=%d", messageType, len(data)-4)
+	message, err := DecodeMessage(messageType, data[4:])
 	if err != nil {
-		log.Error("Error reading encrypted data: %s", err.Error())
-		return nil, err
+		log.Error("Error decoding message data: %s", err.Error())
+		return 0, nil, err
 	}
 
-	reply := Reply{}
-	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&reply); err != nil {
-		log.Error("Error decoding data as reply: %s", err.Error())
-		return nil, err
-	}
-
-	return &reply, nil
+	return messageType, message, nil
 }
 
-func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
+// WriteMessage try to write a message to the given writer.
+func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk string) error {
+	messageData, err := EncodeMessage(messageType, message)
+	if err != nil {
+		log.Error("Error encoding message: %s", err.Error())
+		return err
+	}
+
+	messageTypeBuf := make([]byte, 4)
+	binary.BigEndian.PutUint32(messageTypeBuf, messageType)
+
+	messageDataLength := len(messageTypeBuf)
+	dataLength := messageDataLength + len(messageData)
+	data := make([]byte, dataLength)
+	i := 0
+	for _, b := range messageTypeBuf {
+		data[i] = b
+		i++
+	}
+	for _, b := range messageData {
+		data[i] = b
+		i++
+	}
+
+	log.Debug("Preparing message: messageType=%d dataLength=%d messageLength=%d", messageType, messageDataLength, dataLength)
+	return writeEncryptedFrame(data, psk, w)
+}
+
+func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
 	encryptedData, err := security.Encrypt(data, psk)
 	if err != nil {
 		log.Error("Error encrypting data: %s", err.Error())
@@ -209,7 +243,6 @@ func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
 
 	dataLength := len(encryptedData)
 	lenBuf := make([]byte, 4)
-	log.Debug("Encrypted data length: %d", dataLength)
 	binary.BigEndian.PutUint32(lenBuf, uint32(dataLength))
 
 	replyLength := len(versionBuf) + len(lenBuf) + dataLength
@@ -229,7 +262,11 @@ func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
 	}
 
 	wrote, err := w.Write(replyBuf)
-	log.Debug("Wrote %d bytes", wrote)
+	log.Debug("Wrote frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, wrote)
+	if wrote != replyLength {
+		log.Error("Unable to write all of reply: wrote=%d total=%d", wrote, replyLength)
+		return fmt.Errorf("out of space")
+	}
 	if err != nil {
 		log.Error("Error writing encrypted data: %s", err.Error())
 		return err
@@ -237,34 +274,58 @@ func writeEncryptedMessage(data []byte, psk string, w io.Writer) error {
 	return nil
 }
 
-// WriteRequest write the request to the writer
-func WriteRequest(r Request, psk string, w io.Writer) error {
-	var buf bytes.Buffer
-	if err := gob.NewEncoder(&buf).Encode(r); err != nil {
-		log.Error("Error encoding request: %s", err.Error())
-		return nil
+// DecodeMessage try to decode the given message. The returned object should match the message struct for the message
+// type.
+func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
+	switch messageType {
+	case MessageTypeHeartbeatRequest:
+		message := MessageHeartbeatRequest{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeHeartbeatResponse:
+		message := MessageHeartbeatResponse{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeTriggerAction:
+		message := MessageTriggerAction{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeActionOutput:
+		message := MessageActionOutput{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeActionResult:
+		message := MessageActionResult{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeGeneralFailure:
+		message := MessageGeneralFailure{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
 	}
 
-	if err := writeEncryptedMessage(buf.Bytes(), psk, w); err != nil {
-		log.Error("Error writing encrypted message: %s", err.Error())
-		return err
-	}
-
-	return nil
+	return nil, fmt.Errorf("unknown message type")
 }
 
-// WriteReply write the reply to the writer
-func WriteReply(r Reply, psk string, w io.Writer) error {
-	var buf bytes.Buffer
-	if err := gob.NewEncoder(&buf).Encode(r); err != nil {
-		log.Error("Error encoding reply: %s", err.Error())
-		return nil
+// EncodeMessage try to encode the given message
+func EncodeMessage(messageType uint32, message interface{}) ([]byte, error) {
+	buf := &bytes.Buffer{}
+
+	if err := gob.NewEncoder(buf).Encode(message); err != nil {
+		return nil, err
 	}
 
-	if err := writeEncryptedMessage(buf.Bytes(), psk, w); err != nil {
-		log.Error("Error writing encrypted message: %s", err.Error())
-		return err
-	}
-
-	return nil
+	return buf.Bytes(), nil
 }

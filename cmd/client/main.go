@@ -28,6 +28,11 @@ func main() {
 
 	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
 	logtic.Log.Level = logtic.LevelWarn
+	env := envMap()
+	if _, verbose := env["OTTO_VERBOSE"]; verbose {
+		logtic.Log.Level = logtic.LevelDebug
+	}
+
 	logtic.Open()
 	log = logtic.Connect("otto")
 
@@ -50,7 +55,7 @@ func main() {
 		}
 
 		c.RemoteAddr()
-		go newRequest(c)
+		go newMessage(c)
 	}
 }
 
@@ -71,21 +76,47 @@ func parseArgs() {
 	}
 }
 
-func newRequest(c net.Conn) {
-	log.Info("New request from %s", c.RemoteAddr().String())
+func newMessage(c net.Conn) {
+	log.Info("New message from %s", c.RemoteAddr().String())
 	defer c.Close()
 
-	request, err := otto.ReadRequest(c, config.PSK)
+	messageType, message, err := otto.ReadMessage(c, config.PSK)
 	if err != nil {
-		log.Error("Error reading request from '%s': %s", c.RemoteAddr().String(), err.Error())
+		log.Error("Error reading message from server '%s': %s", c.RemoteAddr().String(), err.Error())
+		return
+	}
+	log.Debug("Message from %s: %d", c.RemoteAddr().String(), messageType)
+
+	switch messageType {
+	case otto.MessageTypeHeartbeatRequest:
+		handleHeartbeatRequest(c, message.(otto.MessageHeartbeatRequest))
+		return
+	case otto.MessageTypeTriggerAction:
+		handleTriggerAction(c, message.(otto.MessageTriggerAction))
 		return
 	}
 
-	reply := otto.Reply{
-		Version: MainVersion,
+	log.Warn("Unexpected message with type %d from %s", messageType, c.RemoteAddr().String())
+}
+
+func handleHeartbeatRequest(c net.Conn, message otto.MessageHeartbeatRequest) {
+	log.Info("Heartbeat from %s (v%s)", c.RemoteAddr().String(), message.ServerVersion)
+
+	response := otto.MessageHeartbeatResponse{
+		ClientVersion: MainVersion,
 	}
-	switch request.Action {
-	case otto.ActionPing, otto.ActionExit, otto.ActionReboot, otto.ActionShutdown:
+
+	if err := otto.WriteMessage(otto.MessageTypeHeartbeatResponse, response, c, config.PSK); err != nil {
+		log.Error("Error writing heartbeat response to '%s': %s", c.RemoteAddr().String(), err.Error())
+	}
+}
+
+func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction) {
+	reply := otto.MessageActionResult{
+		ClientVersion: MainVersion,
+	}
+	switch message.Action {
+	case otto.ActionExit, otto.ActionReboot, otto.ActionShutdown:
 		// No action
 		break
 	case otto.ActionReloadConfig:
@@ -94,41 +125,42 @@ func newRequest(c net.Conn) {
 		}
 		break
 	case otto.ActionRunScript:
-		reply.ScriptResult = runScript(request.Script)
+		reply.ScriptResult = runScript(c, message.Script)
 		break
 	case otto.ActionUploadFile, otto.ActionUploadFileAndExit:
-		if err := uploadFile(request.File); err != nil {
+		if err := uploadFile(message.File); err != nil {
 			reply.Error = err
 		}
 		break
 	default:
-		log.Error("Unknown action %d", request.Action)
+		log.Error("Unknown action %d", message.Action)
 		return
 	}
 
-	if err := otto.WriteReply(reply, config.PSK, c); err != nil {
+	log.Debug("Trigger complete, writing reply")
+	if err := otto.WriteMessage(otto.MessageTypeActionResult, reply, c, config.PSK); err != nil {
 		log.Error("Error writing reply to '%s': %s", c.RemoteAddr().String(), err.Error())
 		return
 	}
 
-	if request.Action == otto.ActionUploadFileAndExit || request.Action == otto.ActionExit {
+	if message.Action == otto.ActionUploadFileAndExit || message.Action == otto.ActionExit {
 		c.Close()
 		log.Warn("Exiting at request of '%s'", c.RemoteAddr().String())
 		os.Exit(1)
 	}
 
-	if request.Action == otto.ActionReboot {
+	if message.Action == otto.ActionReboot {
 		c.Close()
 		log.Warn("Rebooting at request of '%s'", c.RemoteAddr().String())
 		exec.Command("/usr/sbin/reboot").Run()
-	} else if request.Action == otto.ActionShutdown {
+	} else if message.Action == otto.ActionShutdown {
 		c.Close()
 		log.Warn("Shutting down at request of '%s'", c.RemoteAddr().String())
 		exec.Command("/usr/sbin/halt").Run()
 	}
 }
 
-func runScript(script otto.Script) otto.ScriptResult {
+func runScript(c net.Conn, script otto.Script) otto.ScriptResult {
 	start := time.Now()
 
 	for _, file := range script.Files {
@@ -190,13 +222,13 @@ func runScript(script otto.Script) otto.ScriptResult {
 
 	result := otto.ScriptResult{}
 
-	var stderr bytes.Buffer
-	var stdout bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	stderr := &bytes.Buffer{}
+	stdout := &bytes.Buffer{}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 
 	log.Info("Running '%s' as UID %d GID %d", tmp.Name(), script.UID, script.GID)
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		result.Success = false
 		if exitError, ok := err.(*exec.ExitError); ok {
 			result.Code = exitError.ExitCode()
@@ -205,11 +237,40 @@ func runScript(script otto.Script) otto.ScriptResult {
 			log.Error("Error running script: %s", err.Error())
 			result.ExecError = err.Error()
 		}
-	} else {
-		log.Info("Script exit OK")
-		result.Success = true
 	}
-
+	log.Debug("Waiting for script...")
+	didExit := false
+	go func() {
+		lastLen := 0
+		for !didExit {
+			outputLength := stdout.Len() + stderr.Len()
+			if outputLength > lastLen {
+				lastLen = outputLength
+				log.Debug("Read %dB from stdout & stderr", outputLength)
+				otto.WriteMessage(otto.MessageTypeActionOutput, otto.MessageActionOutput{
+					Stdout: stdout.Bytes(),
+					Stderr: stderr.Bytes(),
+				}, c, config.PSK)
+			}
+			time.Sleep(50 * time.Millisecond)
+		}
+	}()
+	err = cmd.Wait()
+	log.Info("Script '%s' exited after %s", time.Since(start))
+	didExit = true
+	if err != nil {
+		result.Success = false
+		if exitError, ok := err.(*exec.ExitError); ok {
+			result.Code = exitError.ExitCode()
+			log.Error("Script exit code: %d", result.Code)
+		} else {
+			log.Error("Error running script: %s", err.Error())
+			result.ExecError = err.Error()
+		}
+		return result
+	}
+	log.Info("Script exit OK")
+	result.Success = true
 	result.Stderr = string(stderr.Bytes())
 	result.Stdout = string(stdout.Bytes())
 	result.Elapsed = time.Since(start)

@@ -120,7 +120,7 @@ func (s Schedule) RunNow() {
 			return
 		}
 
-		result, err := host.RunScript(script)
+		result, err := host.RunScript(script, nil)
 		if err != nil {
 			fail++
 			log.Error("Error running scheduled script: schedule=%s script=%s host=%s error='%s'", s.ID, s.ScriptID, host.ID, err.Message)

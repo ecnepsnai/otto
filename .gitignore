@@ -4,6 +4,7 @@ go.sum
 # executables
 /otto
 /otto_*
+!/otto_test.go
 
 # Artifacts
 artifacts/
