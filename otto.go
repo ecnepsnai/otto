@@ -26,6 +26,7 @@ func init() {
 	gob.Register(MessageHeartbeatRequest{})
 	gob.Register(MessageHeartbeatResponse{})
 	gob.Register(MessageTriggerAction{})
+	gob.Register(MessageCancelAction{})
 	gob.Register(MessageActionOutput{})
 	gob.Register(MessageActionResult{})
 	gob.Register(MessageGeneralFailure{})
@@ -40,9 +41,10 @@ const (
 	MessageTypeHeartbeatRequest  uint32 = 1
 	MessageTypeHeartbeatResponse uint32 = 2
 	MessageTypeTriggerAction     uint32 = 3
-	MessageTypeActionOutput      uint32 = 4
-	MessageTypeActionResult      uint32 = 5
-	MessageTypeGeneralFailure    uint32 = 6
+	MessageTypeCancelAction      uint32 = 4
+	MessageTypeActionOutput      uint32 = 5
+	MessageTypeActionResult      uint32 = 6
+	MessageTypeGeneralFailure    uint32 = 7
 )
 
 // MessageHeartbeatRequest describes a heartbeat request
@@ -61,6 +63,9 @@ type MessageTriggerAction struct {
 	Script Script
 	File   File
 }
+
+// MessageCancelAction describes a request to cancel an action
+type MessageCancelAction struct{}
 
 // MessageActionOutput describes output from an action
 type MessageActionOutput struct {
@@ -292,6 +297,12 @@ func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
 		return message, nil
 	case MessageTypeTriggerAction:
 		message := MessageTriggerAction{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeCancelAction:
+		message := MessageCancelAction{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
 			return nil, err
 		}

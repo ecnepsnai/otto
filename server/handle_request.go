@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ecnepsnai/web"
 )
@@ -52,7 +53,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 			return nil, web.ValidationError("No script with ID %s", r.ScriptID)
 		}
 
-		result, err := host.RunScript(script, nil)
+		result, err := host.RunScript(script, nil, nil)
 		if err != nil {
 			return nil, web.CommonErrors.ServerError
 		}
@@ -147,18 +148,36 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 			return
 		}
 
+		running := true
+		cancel := make(chan bool)
+		go func() {
+			type cancelParams struct {
+				Cancel bool
+			}
+			for running {
+				cancelRequest := cancelParams{}
+				conn.ReadJSON(&cancelRequest)
+				if cancelRequest.Cancel {
+					log.Warn("Request to cancel running script '%s' on host '%s'", r.ScriptID, r.HostID)
+					cancel <- true
+				}
+				time.Sleep(5 * time.Millisecond)
+			}
+		}()
+
 		result, err := host.RunScript(script, func(stdout, stderr []byte) {
 			conn.WriteJSON(requestResponse{
 				Code:   100,
 				Stdout: string(stdout),
 				Stderr: string(stderr),
 			})
-		})
+		}, cancel)
 		if err != nil {
 			conn.WriteJSON(requestResponse{
 				Code:  400,
 				Error: err.Message,
 			})
+			running = false
 			return
 		}
 
@@ -167,6 +186,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 			Code:   200,
 			Result: result,
 		})
+		running = false
 		return
 	} else if r.Action == ClientActionExitClient {
 		if err := host.ExitClient(); err != nil {

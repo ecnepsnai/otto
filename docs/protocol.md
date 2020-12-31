@@ -56,7 +56,8 @@ message type.
 |-|-|-|
 |`HEARTBEAT_REQUEST`|Server to Client|A heartbeat request|
 |`HEARTBEAT_RESPONSE`|Client to Server|A heartbeat response, includes the client version|
-|`TRIGGER_ACTION`|Server to Client|A request to trigger a specific action on the client
+|`TRIGGER_ACTION`|Server to Client|A request to trigger a specific action on the client|
+|`CANCEL_ACTION`|Server to Client|Cancel any in-progress action|
 |`ACTION_OUTPUT`|Client to Server|A portion of, or the entire output (both stdout and stderr) from the action|
 |`ACTION_RESULT`|Client to Server|The result of the action|
 |`GENERAL_FAILURE`|Client to Server|A message to indicate a general error|

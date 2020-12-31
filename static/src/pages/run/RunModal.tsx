@@ -3,7 +3,6 @@ import { Modal, ModalButton } from '../../components/Modal';
 import { RunSetup } from './RunSetup';
 import { RunScript } from './RunScript';
 import { Style } from '../../components/Style';
-import { Card } from '../../components/Card';
 
 enum RunStage {
     Setup,

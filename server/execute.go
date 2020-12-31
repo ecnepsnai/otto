@@ -25,7 +25,14 @@ var clientActionMap = map[string]uint32{
 	ClientActionExitClient: otto.ActionExit,
 }
 
-func (host *Host) connectAndSendMessage(messageType uint32, message interface{}, reply func(messageType uint32, message interface{})) error {
+type hostConnection struct {
+	Host    *Host
+	Address string
+	c       net.Conn
+}
+
+// connect will open a connection to the Otto client on the host
+func (host *Host) connect() (*hostConnection, error) {
 	address := fmt.Sprintf("%s:%d", host.Address, host.Port)
 	log.Debug("Connecting to %s...", address)
 
@@ -41,38 +48,69 @@ func (host *Host) connectAndSendMessage(messageType uint32, message interface{},
 	if err != nil {
 		heartbeatStore.MarkHostUnreachable(host)
 		log.Error("Error connecting to host '%s': %s", address, err.Error())
-		return err
+		return nil, err
 	}
+
 	log.Debug("Connected!")
-	defer c.Close()
+	return &hostConnection{
+		Host:    host,
+		Address: fmt.Sprintf("%s:%d", host.Address, host.Port),
+		c:       c,
+	}, nil
+}
 
-	if err := otto.WriteMessage(messageType, message, c, host.PSK); err != nil {
-		log.Error("Error sending message to host '%s': %s", address, err.Error())
+// SendMessage will send the given Otto message to the host
+func (hc *hostConnection) SendMessage(messageType uint32, message interface{}) error {
+	if err := otto.WriteMessage(messageType, message, hc.c, hc.Host.PSK); err != nil {
+		log.Error("Error sending message to host '%s': %s", hc.Address, err.Error())
 		return err
 	}
 
-	for {
-		replyMessageType, replyMessage, readerr := otto.ReadMessage(c, host.PSK)
-		if readerr == io.EOF || replyMessageType == 0 {
-			break
-		}
-		if readerr != nil {
-			log.Error("Error reading message from client '%s': %s", address, readerr.Error())
-			break
-		}
-		reply(replyMessageType, replyMessage)
-	}
-
-	log.Debug("Host closed connection '%s'", address)
 	return nil
 }
 
-// TriggerAction will trigger the given action on the host
-func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte)) (*otto.ScriptResult, *Error) {
-	var scriptResult *otto.ScriptResult
-	var generalError error
+// ReadMessage will try and read a message from the Otto host.
+func (hc *hostConnection) ReadMessage() (uint32, interface{}, error) {
+	return otto.ReadMessage(hc.c, hc.Host.PSK)
+}
 
-	err := host.connectAndSendMessage(otto.MessageTypeTriggerAction, action, func(messageType uint32, message interface{}) {
+// Close will close the connection to the Otto host
+func (hc *hostConnection) Close() {
+	hc.c.Close()
+}
+
+// TriggerAction will trigger the given action on the host
+func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.ScriptResult, *Error) {
+	conn, err := host.connect()
+	if err != nil {
+		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
+		return nil, ErrorFrom(err)
+	}
+	defer conn.Close()
+
+	if err := conn.SendMessage(otto.MessageTypeTriggerAction, action); err != nil {
+		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
+		return nil, ErrorFrom(err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-cancel:
+				conn.SendMessage(otto.MessageTypeCancelAction, otto.MessageCancelAction{})
+			}
+		}
+	}()
+
+	for true {
+		messageType, message, err := conn.ReadMessage()
+		if err == io.EOF || messageType == 0 {
+			return nil, nil
+		} else if err != nil {
+			log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
+			return nil, ErrorFrom(err)
+		}
+
 		switch messageType {
 		case otto.MessageTypeActionOutput:
 			output := message.(otto.MessageActionOutput)
@@ -82,40 +120,50 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 			break
 		case otto.MessageTypeActionResult:
 			result := message.(otto.MessageActionResult)
-			scriptResult = &result.ScriptResult
+			scriptResult := &result.ScriptResult
 			heartbeatStore.MarkHostReachable(host, result.ClientVersion)
-			break
+			log.Debug("Action completed with result: %+v", *scriptResult)
+			return scriptResult, nil
 		case otto.MessageTypeGeneralFailure:
 			result := message.(otto.MessageGeneralFailure)
-			generalError = result.Error
-			break
+			generalError := result.Error
+			log.Error("General error triggering action on host '%s': %s", host.ID, generalError.Error())
+			return nil, ErrorUser(generalError.Error())
 		}
-	})
-	if err != nil {
-		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if generalError != nil {
-		log.Error("General error triggering action on host '%s': %s", host.ID, generalError.Error())
-		return nil, ErrorUser(generalError.Error())
 	}
 
-	return scriptResult, nil
+	return nil, nil
 }
 
 // Ping ping the host
 func (host *Host) Ping() *Error {
-	err := host.connectAndSendMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{ServerVersion: ServerVersion}, func(messageType uint32, message interface{}) {
-		switch messageType {
-		case otto.MessageTypeHeartbeatResponse:
-			response := message.(otto.MessageHeartbeatResponse)
-			heartbeatStore.MarkHostReachable(host, response.ClientVersion)
-			break
-		}
-	})
+	conn, err := host.connect()
 	if err != nil {
 		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
 		return ErrorFrom(err)
+	}
+	defer conn.Close()
+
+	if err := conn.SendMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{ServerVersion: ServerVersion}); err != nil {
+		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
+		return ErrorFrom(err)
+	}
+	messageType, message, err := conn.ReadMessage()
+	if err == io.EOF {
+		log.Error("Client closed connection before replying to heartbeat '%s'", host.ID)
+		return ErrorServer("Client closed connection")
+	} else if err != nil {
+		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
+		return ErrorFrom(err)
+	}
+	switch messageType {
+	case otto.MessageTypeHeartbeatResponse:
+		response := message.(otto.MessageHeartbeatResponse)
+		heartbeatStore.MarkHostReachable(host, response.ClientVersion)
+		break
+	default:
+		log.Error("Unexpected otto message %d while looking for heartbeat reply", messageType)
+		return ErrorServer("Unexpected response")
 	}
 
 	return nil
@@ -123,7 +171,7 @@ func (host *Host) Ping() *Error {
 
 // RunScript run the script on the host. Error will only ever be populated with internal server
 // errors, such as being unable to read from the database.
-func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte)) (*ScriptResult, *Error) {
+func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte), cancel chan bool) (*ScriptResult, *Error) {
 	start := time.Now()
 
 	fileIDs, err := script.Attachments()
@@ -195,7 +243,10 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 	result, err := host.TriggerAction(otto.MessageTriggerAction{
 		Action: otto.ActionRunScript,
 		Script: scriptRequest,
-	}, scriptOutput)
+	}, scriptOutput, cancel)
+	if result == nil && err == nil {
+		err = ErrorServer("Unexpected end of connection")
+	}
 	if err != nil {
 		log.Error("Error running script on host '%s': %s", host.Address, err.Message)
 		return &ScriptResult{
@@ -214,7 +265,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 			log.Info("Performing post-execution action '%s' on host '%s'", script.AfterExecution, host.Address)
 			_, err = host.TriggerAction(otto.MessageTriggerAction{
 				Action: clientActionMap[script.AfterExecution],
-			}, nil)
+			}, nil, cancel)
 			if err != nil {
 				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ExecError)
 				return &ScriptResult{
@@ -244,7 +295,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 func (host *Host) ExitClient() *Error {
 	_, err := host.TriggerAction(otto.MessageTriggerAction{
 		Action: otto.ActionExit,
-	}, nil)
+	}, nil, nil)
 	if err != nil {
 		log.Error("Error exiting otto client on host '%s': %s", host.Address, err.Message)
 		return err

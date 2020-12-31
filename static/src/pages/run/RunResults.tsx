@@ -44,28 +44,29 @@ export class RunResults extends React.Component<RunResultsProps, {}> {
                     </ListGroup.List>
                 </Card.Card>
                 <EnvironmentVariableCard variables={this.props.results.Environment} />
-                <RunOutput results={this.props.results} />
+                <RunOutput stdout={this.props.results.Result.Stdout} stderr={this.props.results.Result.Stderr} />
             </Card.Body>
         );
     }
 }
 
-interface RunOutputProps {
-    results: ScriptRun;
+export interface RunOutputProps {
+    stdout: string;
+    stderr: string;
 }
-class RunOutput extends React.Component<RunOutputProps, {}> {
+export class RunOutput extends React.Component<RunOutputProps, {}> {
     private content = () => {
-        if (!this.props.results.Result.Stdout && !this.props.results.Result.Stderr) {
+        if (!this.props.stdout && !this.props.stderr) {
             return (<Card.Body><em className="text-muted">Script produced no output</em></Card.Body>);
         }
 
         let stdout: JSX.Element;
-        if (this.props.results.Result.Stdout) {
-            stdout = (<ListGroup.TextItem title="stdout"><Pre>{this.props.results.Result.Stdout}</Pre></ListGroup.TextItem>);
+        if (this.props.stdout) {
+            stdout = (<ListGroup.TextItem title="stdout"><Pre>{this.props.stdout}</Pre></ListGroup.TextItem>);
         }
         let stderr: JSX.Element;
-        if (this.props.results.Result.Stderr) {
-            stderr = (<ListGroup.TextItem title="stderr"><Pre>{this.props.results.Result.Stderr}</Pre></ListGroup.TextItem>);
+        if (this.props.stderr) {
+            stderr = (<ListGroup.TextItem title="stderr"><Pre>{this.props.stderr}</Pre></ListGroup.TextItem>);
         }
 
         return (<ListGroup.List>
@@ -75,8 +76,6 @@ class RunOutput extends React.Component<RunOutputProps, {}> {
     }
 
     render(): JSX.Element {
-
-
         return (
             <Card.Card>
                 <Card.Header>Output</Card.Header>
