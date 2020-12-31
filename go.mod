@@ -10,6 +10,6 @@ require (
 	github.com/ecnepsnai/security v1.2.0
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/store v1.1.0
-	github.com/ecnepsnai/web v1.5.1
+	github.com/ecnepsnai/web v1.5.2
 	github.com/matoous/go-nanoid v1.5.0
 )
