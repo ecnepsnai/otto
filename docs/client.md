@@ -46,6 +46,9 @@ Run the Otto client executable with the following environment variables **only o
 |`REGISTER_NO_TLS_VERIFY`|Optional. If `1` then no TLS verification is done when connecting to the server.|
 |`OTTO_CLIENT_PORT`|Optional. Specify the port that the Otto client will listen on.|
 
+To aid with registration, running the client with the `-v` argument will print out the property values that are passed
+to the Otto server during registration.
+
 **Example:**
 
 ```bash

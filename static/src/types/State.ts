@@ -8,6 +8,7 @@ export class State {
     public readonly Hostname: string;
     public readonly Warnings: string[];
     public readonly Options: Options.OttoOptions;
+    public readonly Enums: { [name: string]: { [key: string] : string; }[]; };
 
     public constructor(json: any) {
         this.User = new User(json.User);
@@ -16,6 +17,7 @@ export class State {
         this.Hostname = json.Hostname as string;
         this.Warnings = json.Warnings as string[];
         this.Options = json.Options as Options.OttoOptions;
+        this.Enums = json.Enums as { [name: string]: { [key: string] : string; }[]; };
     }
 
     /**

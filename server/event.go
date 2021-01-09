@@ -135,11 +135,15 @@ func (s *eventStoreObject) HostDeleted(host *Host, currentUser string) {
 
 func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.RegisterRequest, matchedRule *RegisterRule) {
 	event := newEvent(EventTypeHostRegisterSuccess, map[string]string{
-		"host_id":  host.ID,
-		"name":     host.Name,
-		"address":  host.Address,
-		"uname":    request.Uname,
-		"group_id": host.GroupIDs[0],
+		"host_id":              host.ID,
+		"name":                 host.Name,
+		"address":              host.Address,
+		"group_id":             host.GroupIDs[0],
+		"hostname":             request.Properties.Hostname,
+		"kernel_name":          request.Properties.KernelName,
+		"kernel_version":       request.Properties.KernelVersion,
+		"distribution_name":    request.Properties.DistributionName,
+		"distribution_version": request.Properties.DistributionVersion,
 	})
 	if matchedRule != nil {
 		event.Details["matched_rule_property"] = matchedRule.Property
@@ -152,9 +156,12 @@ func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.Register
 
 func (s *eventStoreObject) HostRegisterIncorrectPSK(request otto.RegisterRequest) {
 	event := newEvent(EventTypeHostRegisterIncorrectPSK, map[string]string{
-		"address":  request.Address,
-		"uname":    request.Uname,
-		"hostname": request.Hostname,
+		"address":              request.Address,
+		"hostname":             request.Properties.Hostname,
+		"kernel_name":          request.Properties.KernelName,
+		"kernel_version":       request.Properties.KernelVersion,
+		"distribution_name":    request.Properties.DistributionName,
+		"distribution_version": request.Properties.DistributionVersion,
 	})
 
 	event.Save()
@@ -317,6 +324,42 @@ func (s *eventStoreObject) ServerOptionsModified(newHash string, currentUser str
 	event := newEvent(EventTypeServerOptionsModified, map[string]string{
 		"config_hash": newHash,
 		"modified_by": currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) RegisterRuleAdded(rule *RegisterRule, currentUser string) {
+	event := newEvent(EventTypeRegisterRuleAdded, map[string]string{
+		"rule_id":  rule.ID,
+		"property": rule.Property,
+		"pattern":  rule.Pattern,
+		"group_id": rule.GroupID,
+		"added_by": currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) RegisterRuleModified(rule *RegisterRule, currentUser string) {
+	event := newEvent(EventTypeRegisterRuleModified, map[string]string{
+		"rule_id":     rule.ID,
+		"property":    rule.Property,
+		"pattern":     rule.Pattern,
+		"group_id":    rule.GroupID,
+		"modified_by": currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) RegisterRuleDeleted(rule *RegisterRule, currentUser string) {
+	event := newEvent(EventTypeRegisterRuleDeleted, map[string]string{
+		"rule_id":    rule.ID,
+		"property":   rule.Property,
+		"pattern":    rule.Pattern,
+		"group_id":   rule.GroupID,
+		"deleted_by": currentUser,
 	})
 
 	event.Save()

@@ -36,5 +36,9 @@
     {
         "name": "Event",
         "object": "Event"
+    },
+    {
+        "name": "RegisterRule",
+        "object": "RegisterRule"
     }
 ]

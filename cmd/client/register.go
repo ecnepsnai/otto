@@ -9,11 +9,11 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/user"
 	"strconv"
 	"strings"
 
+	"github.com/ecnepsnai/osquery"
 	"github.com/ecnepsnai/otto"
 )
 
@@ -57,19 +57,6 @@ func tryAutoRegister() {
 		rlog.Printf("WARNING - TLS Verification disabled, this is insecure and should not be used in production")
 	}
 
-	// Get the uname
-	unameB, err := exec.Command("uname", "-a").CombinedOutput()
-	if err != nil {
-		panic("Unable to get uname of this host: " + err.Error())
-	}
-	uname := string(unameB)
-
-	// Get the hostname
-	hostname, err := os.Hostname()
-	if err != nil {
-		panic("Unable to get hostname of this host: " + err.Error())
-	}
-
 	// Get the current uid and gid for the defaults
 	uid, gid := getUIDandGID()
 	// Get the local IP
@@ -77,11 +64,10 @@ func tryAutoRegister() {
 
 	// Make the request
 	request := otto.RegisterRequest{
-		Address:  localIP.String(),
-		PSK:      psk,
-		Uname:    uname,
-		Hostname: hostname,
-		Port:     port,
+		Address:    localIP.String(),
+		PSK:        psk,
+		Port:       port,
+		Properties: registerProperties(),
 	}
 	data, err := json.Marshal(request)
 	if err != nil {
@@ -94,6 +80,8 @@ func tryAutoRegister() {
 	if err != nil {
 		panic("Error forming HTTP request")
 	}
+
+	req.Header.Add("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
 
 	tr := &http.Transport{}
 	if noTLSVerify {
@@ -154,6 +142,27 @@ func tryAutoRegister() {
 	rlog.Printf("Successfully registered with otto server '%s', configuration: %+v", host, conf)
 	if exitWhenFinished {
 		os.Exit(0)
+	}
+}
+
+func registerProperties() otto.RegisterRequestProperties {
+	// Get the hostname
+	hostname, err := os.Hostname()
+	if err != nil {
+		panic("Error getting system hostname: " + err.Error())
+	}
+
+	info, err := osquery.Get()
+	if err != nil {
+		panic("Error getting system information: " + err.Error())
+	}
+
+	return otto.RegisterRequestProperties{
+		Hostname:            hostname,
+		KernelName:          info.Kernel,
+		KernelVersion:       info.KernelVersion,
+		DistributionName:    info.Variant,
+		DistributionVersion: info.VariantVersion,
 	}
 }
 

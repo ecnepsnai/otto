@@ -23,18 +23,11 @@ export namespace Options {
     export interface Register {
         Enabled: boolean;
         PSK: string;
-        Rules: RegisterRule[];
         DefaultGroupID: string;
     }
 
     export interface Security {
         IncludePSKEnv: boolean;
-    }
-
-    export interface RegisterRule {
-        Property: string;
-        Pattern: string;
-        GroupID: string;
     }
 
     export class Options {

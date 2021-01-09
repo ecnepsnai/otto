@@ -77,14 +77,29 @@
         "type": "string",
         "values": [
             {
-                "key": "Uname",
-                "description": "The host uname",
-                "value": "\"uname\""
+                "key": "Hostname",
+                "description": "Hostname",
+                "value": "\"hostname\""
             },
             {
-                "key": "Hostname",
-                "description": "The hosts name",
-                "value": "\"hostname\""
+                "key": "KernelName",
+                "description": "Kernel Name",
+                "value": "\"kernel_name\""
+            },
+            {
+                "key": "KernelVersion",
+                "description": "Kernel Version",
+                "value": "\"kernel_version\""
+            },
+            {
+                "key": "DistributionName",
+                "description": "Distribution Name",
+                "value": "\"distribution_name\""
+            },
+            {
+                "key": "DistributionVersion",
+                "description": "Distribution Version",
+                "value": "\"distribution_version\""
             }
         ]
     },
@@ -221,6 +236,21 @@
                 "key": "ServerOptionsModified",
                 "description": "ServerOptionsModified event",
                 "value": "\"ServerOptionsModified\""
+            },
+            {
+                "key": "RegisterRuleAdded",
+                "description": "RegisterRuleAdded event",
+                "value": "\"RegisterRuleAdded\""
+            },
+            {
+                "key": "RegisterRuleModified",
+                "description": "RegisterRuleModified event",
+                "value": "\"RegisterRuleModified\""
+            },
+            {
+                "key": "RegisterRuleDeleted",
+                "description": "RegisterRuleDeleted event",
+                "value": "\"RegisterRuleDeleted\""
             }
         ]
     }

@@ -130,11 +130,19 @@ type File struct {
 
 // RegisterRequest describes a register request
 type RegisterRequest struct {
-	Address  string `json:"address"`
-	PSK      string `json:"psk"`
-	Uname    string `json:"uname"`
-	Hostname string `json:"hostname"`
-	Port     uint32 `json:"port"`
+	Address    string                    `json:"address"`
+	PSK        string                    `json:"psk"`
+	Port       uint32                    `json:"port"`
+	Properties RegisterRequestProperties `json:"properties"`
+}
+
+// RegisterRequestProperties describes properties for a register request
+type RegisterRequestProperties struct {
+	Hostname            string `json:"hostname"`
+	KernelName          string `json:"kernel_name"`
+	KernelVersion       string `json:"kernel_version"`
+	DistributionName    string `json:"distribution_name"`
+	DistributionVersion string `json:"distribution_version"`
 }
 
 // RegisterResponse describes the response to a register request

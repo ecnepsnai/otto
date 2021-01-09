@@ -60,9 +60,18 @@ func parseArgs() {
 	for i < len(args) {
 		arg := args[i]
 		if arg == "-v" || arg == "--version" {
-			fmt.Printf("Otto client %s, Protocol version: %d, Runtime %s\n", MainVersion, otto.ProtocolVersion, runtime.Version())
+			fmt.Printf("Otto Client:\n")
+			fmt.Printf("    Version: %s\n    Protocol version: %d\n    Go Runtime: %s\n", MainVersion, otto.ProtocolVersion, runtime.Version())
+			printOSInfo()
 			os.Exit(0)
 		}
 		i++
 	}
+}
+
+func printOSInfo() {
+	properties := registerProperties()
+
+	fmt.Printf("\nHost properties:\n")
+	fmt.Printf("    Hostname: %s\n    Kernel Name: %s\n    Kernel Version: %s\n    Distribution Name: %s\n    Distribution Version: %s\n", properties.Hostname, properties.KernelName, properties.KernelVersion, properties.DistributionName, properties.DistributionVersion)
 }

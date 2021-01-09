@@ -80,3 +80,27 @@ If you have no way to access the Otto service:
 4. Start the Otto server
 
 The default account will be recreated and you can log in using `admin`:`admin`.
+
+## Client Registration
+
+If enabled, Otto clients can register themselves with the Otto server and be assigned to groups based on information
+about the client.
+
+To enable client registration, check "Allow Hosts to Register Themselves" in the options page of the Otto web UI.
+
+A register PSK must be specified. This PSK must be specified when telling the client to register itself with the Otto
+server.
+
+Registration rules can be added to assign hosts to specific groups. Registration rules are regular expression patterns
+that apply to specific details about the host, and a group to assign the host to if the rule matches.
+
+Possible properties are:
+- **Hostname.** The hostname of the host.
+- **Kernel Name.** The name of the kernel running on the host, as determined by running `uname`.
+- **Kernel Version.** The version of the kernel running on the host, as determined by running `uname -r`.
+- **Distribution Name.** The name of the distribution or variant of the host. The value varies by system.
+- **Distribution Version.** The version of the distribution or variant of the host. The value varies by distribution.
+
+Only one rule may apply to the host, meaning any subsequent rules after a matched rule will not apply.
+
+There is an implicit 'any' rule at the end that will assign the host to a default group, much must be specified.

@@ -1,12 +1,12 @@
 package server
 
 import (
+	"encoding/json"
+	"os"
 	"path"
-
-	"github.com/ecnepsnai/ds"
 )
 
-var neededTableVersion = 6
+var neededTableVersion = 7
 
 func migrateIfNeeded() {
 	currentVersion := State.GetTableVersion()
@@ -23,8 +23,8 @@ func migrateIfNeeded() {
 
 	i := currentVersion
 	for i <= neededTableVersion {
-		if i == 6 {
-			migrate6()
+		if i == 7 {
+			migrate7()
 		}
 		i++
 	}
@@ -32,39 +32,60 @@ func migrateIfNeeded() {
 	State.SetTableVersion(i)
 }
 
-// #6 Update schedule report
-func migrate6() {
-	log.Debug("Start migrate 6")
+// #7 Migrate registration rules
+func migrate7() {
+	log.Debug("Start migrate 7")
 
-	if !FileExists(path.Join(Directories.Data, "schedulereport.db")) {
+	type oldRegisterRule struct {
+		Property string
+		Pattern  string
+		GroupID  string
+	}
+
+	type oldOttoOptionsRegister struct {
+		Rules []oldRegisterRule
+	}
+
+	type oldOttoOptions struct {
+		Register oldOttoOptionsRegister
+	}
+
+	configPath := path.Join(Directories.Data, configFileName)
+	if !FileExists(configPath) {
 		return
 	}
 
-	type scheduleReport struct {
-		ID         string `ds:"primary"`
-		ScheduleID string `ds:"index"`
-		HostIDs    []string
-		Time       ScheduleReportTime
-		Result     int
-		HostResult map[string]int
+	oldOptions := oldOttoOptions{}
+	f, err := os.OpenFile(configPath, os.O_RDONLY, 0644)
+	if err != nil {
+		log.Fatal("Error opening config file '%s': %s", configPath, err.Error())
+	}
+	defer f.Close()
+
+	if err := json.NewDecoder(f).Decode(&oldOptions); err != nil {
+		log.Fatal("Error opening config file '%s': %s", configPath, err.Error())
 	}
 
-	result := ds.Migrate(ds.MigrateParams{
-		TablePath: path.Join(Directories.Data, "schedulereport.db"),
-		NewPath:   path.Join(Directories.Data, "schedulereport.db"),
-		OldType:   scheduleReport{},
-		NewType:   scheduleReport{},
-		MigrateObject: func(o interface{}) (interface{}, error) {
-			report := o.(scheduleReport)
-			report.HostResult = map[string]int{}
-			for _, hostID := range report.HostIDs {
-				report.HostResult[hostID] = -1
-			}
-			return report, nil
-		},
-	})
-	if !result.Success {
-		log.Fatal("Error migrating schedulereport table: %s", result.Error.Error())
+	if len(oldOptions.Register.Rules) <= 0 {
+		return
 	}
-	log.Warn("Schedule store migration results: %+v", result)
+
+	cbgenDataStoreRegisterGroupStore()
+	cbgenDataStoreRegisterRegisterRuleStore()
+	for _, oldRule := range oldOptions.Register.Rules {
+		newRule := newRegisterRuleParams{
+			Property: oldRule.Property,
+			Pattern:  oldRule.Pattern,
+			GroupID:  oldRule.GroupID,
+		}
+		if newRule.Property == "uname" {
+			newRule.Property = RegisterRulePropertyKernelName
+		}
+
+		if _, err := RegisterRuleStore.NewRule(newRule); err != nil {
+			log.Error("Error migrating register rule to new format. Old rule: %+v. Error: %s", oldRule, err)
+		}
+	}
+	RegisterRuleStore.Table.Close()
+	GroupStore.Table.Close()
 }

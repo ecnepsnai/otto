@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"regexp"
 	"sync"
 
 	"github.com/ecnepsnai/otto/server/environ"
@@ -43,15 +42,7 @@ type OptionsNetwork struct {
 type OptionsRegister struct {
 	Enabled        bool
 	PSK            string
-	Rules          []RegisterRule
 	DefaultGroupID string
-}
-
-// RegisterRule describes a register rule
-type RegisterRule struct {
-	Property string
-	Pattern  string
-	GroupID  string
 }
 
 // Options the global options
@@ -72,7 +63,6 @@ func LoadOptions() {
 		},
 		Register: OptionsRegister{
 			Enabled: false,
-			Rules:   []RegisterRule{},
 		},
 		Security: OptionsSecurity{
 			IncludePSKEnv: false,
@@ -157,20 +147,6 @@ func (o *OttoOptions) Validate() error {
 	if o.Register.Enabled {
 		if o.Register.PSK == "" {
 			return fmt.Errorf("A register PSK is required if auto registration is enabled")
-		}
-		for _, rule := range o.Register.Rules {
-			if rule.GroupID == "" {
-				return fmt.Errorf("Invalid group ID on registration rule")
-			}
-			if !IsRegisterRuleProperty(rule.Property) {
-				return fmt.Errorf("Invalid registration rule property")
-			}
-			if rule.Pattern == "" {
-				return fmt.Errorf("Missing registration rule pattern")
-			}
-			if _, err := regexp.Compile(rule.Pattern); err != nil {
-				return fmt.Errorf("Invalid regex pattern on registration rule")
-			}
 		}
 	}
 	return nil

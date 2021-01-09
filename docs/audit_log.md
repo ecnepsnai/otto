@@ -105,7 +105,11 @@ Event for when a new host successfully registers itself and is added.
 |`host_id`|The ID of the host|
 |`name`|The name of the host|
 |`address`|The address of the host|
-|`uname`|The uname provided by the host|
+|`hostname`|The hostname provided by the host|
+|`kernel_name`|The name of the kernel running on the host|
+|`kernel_version`|The version of the kernel running on the host|
+|`distribution_name`|The name of the distribution running on the host|
+|`distribution_version`|The version of the distribution running on the host|
 |`group_id`|The ID of the group that the host was added to|
 |`matched_rule_property`|If the host matched a registration rule, the property of the matched rule|
 |`matched_rule_pattern`|If the host matched a registration rule, the pattern of the matched rule|
@@ -118,8 +122,11 @@ Event for when host registration fails with an incorrect pre-shared key.
 |Parameter|Description|
 |-|-|
 |`address`|The address of the host|
-|`uname`|The uname provided by the host|
 |`hostname`|The hostname provided by the host|
+|`kernel_name`|The name of the kernel running on the host|
+|`kernel_version`|The version of the kernel running on the host|
+|`distribution_name`|The name of the distribution running on the host|
+|`distribution_version`|The version of the distribution running on the host|
 
 ### GroupAdded
 
