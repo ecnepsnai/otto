@@ -6,17 +6,21 @@ The Otto server is the central location for all your scripts and hosts.
 
 ### As a Container (Recommended!)
 
-A container image compatible with Docker and Podman is the preferred way of running the Otto server.
+An OCI-compatible container image is the preferred way of running the Otto server. The image can be used with Podman or Docker.
 
-If you were using docker, you can run the container with:
+If you were using Podman, you can run the container with:
 
 ```bash
-docker run -p 8080:8080 -v <data dir>:/otto_data otto:latest
+podman run -p 8080:8080 -v <data dir>:/otto_data otto:latest
 ```
+
+*Substitute `podman` with `docker` if you're using Docker*
 
 Replace `<data dir>` with a directory where you want Otto to store all server data, or omit the volume parameter entirely if you don't care about persistence
 
 Navigating to `http://localhost:8080` in your web browser and use the default credentials of `admin`:`admin` to log in. As long as you are using the default credentials a warning will appear at the top of the page, so be sure to change the password right away by clicking "admin" in the top right and selecting "Edit User" to change your password.
+
+We recommend using a reverse proxy such as NGINX and configuring TLS.
 
 ### As a Service
 

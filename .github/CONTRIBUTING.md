@@ -2,7 +2,8 @@
 
 ## Things you'll need
 
-Otto can be developed on any modern Linux or macOS system. So far we've tested development on Fedora 33 and macOS Big Sur. It may be possible to develop on Windows, but we'd recommend using WSL2 instead if you use Windows.
+Otto can be developed on any modern Linux or macOS system. So far we've tested development on Fedora 33 and macOS Big
+Sur. It may be possible to develop on Windows, but we'd recommend using WSL2 instead if you use Windows.
 
 - The latest version of Golang (seriously, the very latest release)
 - The latest LTS version of node.js
@@ -12,7 +13,7 @@ Otto can be developed on any modern Linux or macOS system. So far we've tested d
 
 ## Server Web UI (aka Frontend)
 
-The web UI for the Otto server is a modern React.JS web application written in Typescript and packaged using Webpack.
+The web UI for the Otto server is a React.JS web application written in Typescript and packaged using Webpack.
 
 Directory structure:
 
@@ -30,7 +31,8 @@ Directory structure:
 
 ## libotto
 
-libotto is a golang library that defines the common data structures shared between the Otto client and server. This is all contained within `otto.go` in the project's root.
+libotto is a golang library that defines the common data structures shared between the Otto client and server. This is
+all contained within `otto.go` in the project's root.
 
 ## Otto Client
 
@@ -40,7 +42,8 @@ Source code for the otto client is located in `/cmd/client`
 
 ## Otto Server
 
-The otto server is a golang application that powers the otto web UI and is what actually interacts with the otto clients.
+The otto server is a golang application that powers the otto web UI and is what actually interacts with the otto
+clients.
 
 Directory structure:
 
@@ -51,9 +54,13 @@ Directory structure:
     /environ   -> Library that defines an environment variable. Broken off for easier testing.
 ```
 
+The actual executable for the server itself is located in `/cmd/server`. The executable is only responsible for starting
+the server and capturing signals from the system.
+
 # Running a Development Build
 
-To run a development build of the server you first need to get everything prepared. The `install_backend.sh` and `install_frontend.sh` scripts will prepare the codebase and compile a debug version of the app.
+To run a development build of the server you first need to get everything prepared. The `install_backend.sh` and
+`install_frontend.sh` scripts will prepare the codebase and compile a debug version of the app.
 
 To run the Otto server:
 

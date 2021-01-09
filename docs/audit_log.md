@@ -1,6 +1,7 @@
 # Audit Log
 
-The Otto server maintains a log of various events, both user triggered and automatic, for later reporting in the audit log.
+The Otto server maintains a log of various events, both user triggered and automatic, for later reporting in the audit
+log.
 
 The most recent 20 events can be viewed in the Otto server web interface.
 

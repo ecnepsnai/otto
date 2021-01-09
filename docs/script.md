@@ -1,19 +1,24 @@
 # Scripts
 
-A script is configured on the Otto server and is executed on the Otto client. Scripts can be in any executable format as long as the executable itself requires only the first and only parameter being the path to the script.
+A script is configured on the Otto server and is executed on the Otto client. Scripts can be in any executable format as
+long as the executable itself requires only the first and only parameter being the path to the script.
 
-For example: `bash <script>`, `python <python file>`
+For example: `bash <script>`, `python <python file>`.
+
+An Otto client can run multiple scripts in parallel.
 
 ## Environment Variables
 
-Environment variables are run-time variables that are passed to the script when it is run on the host. Variables can be configured in a couple different locations, and cascade down overwriting any duplicate keys.
+Environment variables are run-time variables that are passed to the script when it is run on the host. Variables can be
+configured in a couple different locations, and cascade down overwriting any duplicate keys.
 
 1. **Global**. Configured in the options page on the Otto server. These are included in all scripts.
 2. **Script**. Configured in the script. These overwrite global variables.
 3. **Group**. Configured in the group. These overwrite script variables.
 4. **Host**. Configured in the host. These overwrite host variables.
 
-For example, you may want to have a script that sets a users password. The script will contain a default password but individual groups could specify a different password that would be used by the script.
+For example, you may want to have a script that sets a users password. The script will contain a default password but
+individual groups could specify a different password that would be used by the script.
 
 Lastly, there are a number of implicit variables that are automatically included and can not be overwritten:
 
@@ -23,13 +28,18 @@ Lastly, there are a number of implicit variables that are automatically included
 |`OTTO_SERVER_VERSION`|The version of the Otto software.|
 |`OTTO_HOST_ADDRESS`|The configured address of the host this script is executing on.|
 |`OTTO_HOST_PORT`|The configured port of the host this script is executing on.|
-|`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on. This variable can be disabled in the server's settings page.|
+|`OTTO_HOST_PSK`|The configured PSK of the host this script is executing on. **This variable can be disabled in the server's settings page.**|
 
-When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in the web interface.
+When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in
+the web interface.
 
 ## Attachments
 
-You can attach files to scripts that will be uploaded and placed on hosts at specific paths. Attachments are uploaded
-every time the script runs, and it will overwrite any existing files at the same path.
+You can attach files to scripts that will be uploaded and placed on hosts at specified paths before the script is run.
+Attachments are uploaded each time a script runs, and will overwrite any existing files at the same path.
 
-Attachments can be owned by specific UID/GID, and have a specific mode. Attachments have a maximum file size of 100MiB.
+The destination directory for the attachment must already exist and be accessible by the Otto client. Script execution
+will fail if the Otto client cannot write the attachment to the specified path.
+
+Attachments can be owned by specific UID/GID, and have a specific permission mode. Attachments have a maximum file size
+of 100MiB.

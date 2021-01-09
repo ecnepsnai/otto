@@ -1,7 +1,7 @@
 # Otto Protocol
 
 The Otto client and server communicate using the Otto protocol. The Otto protocol is a message based system where a
-'frame' encapsulates each 'message'. The message itself is encrypted in the frame.
+'frame' encapsulates each 'message'. The message itself is encrypted within the frame.
 
 # Protocol Components
 
@@ -64,8 +64,8 @@ message type.
 
 # Process
 
-Except in host registration (which does not use the Otto protocol), Otto Servers always connect to Otto clients, never
-the other way around.
+Except in host registration (which does not use the Otto protocol), Otto Servers always connect to Otto clients, however
+the Otto protocol is not request then reply, such as HTTP.
 
 When a message is received the recipient must first determine wether or not it can understand the message by checking
 the protocol version. Otto clients will refuse messages using different protocol versions.
@@ -79,6 +79,8 @@ will log out an error and silently close the connection.
 With the original message in hand, the client can determine what data type the message data is by using the message type
 value. The binary data of the message is a [gob](https://golang.org/pkg/encoding/gob/) encoded byte-slice.
 
-The same connection is re-used for any responses from the Otto client to the server, however some actions may take place
-after the client has closed the connection. For example, clients may restart after disconnecting form the server when
-requested.
+The connection is then used for further messages from either the Otto client to server. For example, the server may tell
+the client to cancel a running script after it has started.
+
+Some actions will happen after the client has closed the connection, for example clients may exit after closing the
+connection when requested by the server.

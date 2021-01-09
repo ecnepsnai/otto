@@ -2,7 +2,7 @@
 
 The Otto server is controlled via a REST API. This document details how you may use that API.
 
-**⚠️ Otto is still in active development and the REST API may change dramatically between releases.**
+**⚠️ Otto is still in active development and there are frequently breaking changes between releases.**
 
 ## Using the API
 

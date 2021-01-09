@@ -4,12 +4,14 @@ An Otto client is a individual host that is running the Otto client daemon. Scri
 
 ## Installing the Client
 
-Client binaries are provided by the Otto server at `/clients`. Otto servers only provide the same version of clients as the server itself.
+Client binaries are provided by the Otto server at `/clients`. Otto servers only provide the same version of clients as
+the server itself.
 
 ### System Requirements
 
 **Hardware:**
-- CPU: Any semi-recent amd64/x86_64 or arm64 CPU. Generally, if it can run any of the operating systems listed below, it'll work for Otto. 32-bit CPUs are not supported.
+- CPU: Any semi-recent amd64/x86_64 or arm64 CPU. Generally, if it can run any of the operating systems listed below,
+it'll work for Otto. 32-bit CPUs are not supported.
 - RAM: At least 250MiB of available system memory
 - Disk: Varies by log retention, clients are generally less than 10MiB.
 
@@ -55,7 +57,8 @@ The client will then configure itself and exit with a status code of `0` and wil
 ### Manual Configuration
 
 You may also manually configure the Otto client with a configuration file. The configuration file is a JSON file with a
-single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client binary.
+single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client
+binary.
 
 |Property|Required|Description|
 |-|-|-|
