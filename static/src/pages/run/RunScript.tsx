@@ -6,7 +6,6 @@ import { ProgressBar } from '../../components/ProgressBar';
 import { ScriptRequest, ScriptRun } from '../../types/Result';
 import { RunOutput, RunResults } from './RunResults';
 import { Style } from '../../components/Style';
-import { Button } from '../../components/Button';
 
 export interface RunScriptProps {
     hostID: string;
@@ -89,8 +88,7 @@ export class RunScript extends React.Component<RunScriptProps, RunScriptState> {
         if (this.state.stdout || this.state.stderr) {
             return (
                 <Card.Body>
-                    <ProgressBar intermediate />
-                    <Button color={Style.Palette.Danger} onClick={this.cancelClick}>Cancel</Button>
+                    <ProgressBar intermediate cancelClick={this.cancelClick} />
                     <RunOutput stdout={this.state.stdout } stderr={this.state.stderr}/>
                 </Card.Body>
             );

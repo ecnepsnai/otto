@@ -1,0 +1,13 @@
+div.progress-wrapper {
+    display: flex;
+    align-items: center;
+
+    div.progress {
+        flex-grow: 1;
+        height: 25px;
+    }
+
+    button {
+        margin-left: 0.5rem;
+    }
+}
