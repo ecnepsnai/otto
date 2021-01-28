@@ -26,12 +26,9 @@ type ScheduleScope struct {
 // Groups get the groups for this schedule
 func (s ScheduleScope) Groups() ([]Group, *Error) {
 	groups := make([]Group, len(s.GroupIDs))
-	for i, id := range s.GroupIDs {
-		g, err := GroupStore.GroupWithID(id)
-		if err != nil {
-			return nil, err
-		}
-		groups[i] = *g
+	for i, groupID := range s.GroupIDs {
+		group := GroupStore.GroupWithID(groupID)
+		groups[i] = *group
 	}
 
 	return groups, nil
@@ -57,17 +54,14 @@ func (s ScheduleScope) Hosts() ([]Host, *Error) {
 	}
 
 	if hostIDs.Length() == 0 {
-		log.Warn("Schedule with no hosts or groups: %s")
+		log.Warn("Schedule with no hosts or groups")
 		return []Host{}, nil
 	}
 
 	hosts := make([]Host, hostIDs.Length())
-	for i, id := range hostIDs.Values() {
-		g, err := HostStore.HostWithID(id)
-		if err != nil {
-			return nil, err
-		}
-		hosts[i] = *g
+	for i, hostID := range hostIDs.Values() {
+		host := HostStore.HostWithID(hostID)
+		hosts[i] = *host
 	}
 
 	return hosts, nil
@@ -109,12 +103,12 @@ func (s Schedule) RunNow() {
 	fail := 0
 
 	for _, hostID := range hosts.Values() {
-		host, err := HostStore.HostWithID(hostID)
-
-		script, err := ScriptStore.ScriptWithID(s.ScriptID)
-		if err != nil {
-			continue
+		host := HostStore.HostWithID(hostID)
+		if host == nil {
+			log.Error("Schedule for nonexistant host: schedule=%s host=%s", s.ID, hostID)
+			return
 		}
+		script := ScriptStore.ScriptWithID(s.ScriptID)
 		if script == nil {
 			log.Error("Schedule for nonexistant script: schedule=%s script=%s", s.ID, s.ScriptID)
 			return

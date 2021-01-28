@@ -56,10 +56,7 @@ func StartHeartbeatMonitor() {
 }
 
 func (s *hostStoreObject) PingAll() error {
-	hosts, err := s.AllHosts()
-	if err != nil {
-		return err.Error
-	}
+	hosts := s.AllHosts()
 	for _, h := range hosts {
 		go func(host Host) {
 			host.Ping()
@@ -101,10 +98,7 @@ func (s *heartbeatStoreType) CleanupHeartbeats() *Error {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 	for _, heartbeat := range heartbeats {
-		host, err := HostStore.HostWithAddress(heartbeat.Address)
-		if err != nil {
-			return err
-		}
+		host := HostStore.HostWithAddress(heartbeat.Address)
 		if host == nil {
 			delete(s.Heartbeats, heartbeat.Address)
 		}

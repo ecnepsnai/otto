@@ -21,13 +21,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	host, err := HostStore.HostWithID(r.HostID)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(r.HostID)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", r.HostID)
 	}
@@ -42,13 +36,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		}
 		return true, nil
 	} else if r.Action == ClientActionRunScript {
-		script, err := ScriptStore.ScriptWithID(r.ScriptID)
-		if err != nil {
-			if err.Server {
-				return nil, web.CommonErrors.ServerError
-			}
-			return nil, web.ValidationError(err.Message)
-		}
+		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			return nil, web.ValidationError("No script with ID %s", r.ScriptID)
 		}
@@ -97,14 +85,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		return
 	}
 
-	host, err := HostStore.HostWithID(r.HostID)
-	if err != nil {
-		conn.WriteJSON(requestResponse{
-			Code:  400,
-			Error: err.Message,
-		})
-		return
-	}
+	host := HostStore.HostWithID(r.HostID)
 	if host == nil {
 		conn.WriteJSON(requestResponse{
 			Code:  400,
@@ -132,14 +113,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		conn.WriteJSON(requestResponse{Code: 200})
 		return
 	} else if r.Action == ClientActionRunScript {
-		script, err := ScriptStore.ScriptWithID(r.ScriptID)
-		if err != nil {
-			conn.WriteJSON(requestResponse{
-				Code:  400,
-				Error: err.Message,
-			})
-			return
-		}
+		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			conn.WriteJSON(requestResponse{
 				Code:  400,

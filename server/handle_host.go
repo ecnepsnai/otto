@@ -5,27 +5,13 @@ import (
 )
 
 func (h *handle) HostList(request web.Request) (interface{}, *web.Error) {
-	hosts, err := HostStore.AllHosts()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
-	return hosts, nil
+	return HostStore.AllHosts(), nil
 }
 
 func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host, err := HostStore.HostWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -36,13 +22,7 @@ func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host, err := HostStore.HostWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -61,27 +41,14 @@ func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedules, err := ScheduleStore.AllSchedulesForHost(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
+	schedules := ScheduleStore.AllSchedulesForHost(id)
 	return schedules, nil
 }
 
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host, err := HostStore.HostWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -115,13 +82,7 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	host, err := HostStore.HostWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -131,7 +92,7 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	host, err = HostStore.EditHost(host, params)
+	host, err := HostStore.EditHost(host, params)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -149,13 +110,7 @@ func (h *handle) HostDelete(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	host, err := HostStore.HostWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	host := HostStore.HostWithID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}

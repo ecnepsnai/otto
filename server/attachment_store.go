@@ -1,69 +1,121 @@
 package server
 
-import "time"
+import (
+	"io"
+	"os"
+	"time"
 
-func (s attachmentStoreObject) AllAttachments() ([]Attachment, *Error) {
+	"github.com/ecnepsnai/limits"
+)
+
+func (s attachmentStoreObject) AllAttachments() []Attachment {
 	objects, err := s.Table.GetAll(nil)
 	if err != nil {
-		log.Error("Error getting all script files: %s", err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error listing attachments: error='%s'", err.Error())
+		return []Attachment{}
 	}
 	if objects == nil || len(objects) == 0 {
-		return []Attachment{}, nil
+		return []Attachment{}
 	}
 
 	files := make([]Attachment, len(objects))
-	for i, obj := range objects {
-		file, k := obj.(Attachment)
+	for i, objects := range objects {
+		file, k := objects.(Attachment)
 		if !k {
-			log.Error("Object is not of type 'Attachment'")
-			return []Attachment{}, ErrorServer("incorrect type")
+			log.Fatal("Error listing attachments: error='%s'", "invalid type")
 		}
 		files[i] = file
 	}
 
-	return files, nil
+	return files
 }
 
-func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) ([]Attachment, *Error) {
-	objects, err := s.Table.GetIndex("ScriptID", scriptID, nil)
-	if err != nil {
-		log.Error("Error getting all script files for script '%s': %s", scriptID, err.Error())
-		return nil, ErrorFrom(err)
+func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) []Attachment {
+	script := ScriptStore.ScriptWithID(scriptID)
+	if script == nil {
+		return []Attachment{}
 	}
-	if objects == nil || len(objects) == 0 {
-		return []Attachment{}, nil
+	count := len(script.AttachmentIDs)
+	if count == 0 {
+		return []Attachment{}
 	}
 
-	files := make([]Attachment, len(objects))
-	for i, obj := range objects {
-		file, k := obj.(Attachment)
-		if !k {
-			log.Error("Object is not of type 'Attachment'")
-			return []Attachment{}, ErrorServer("incorrect type")
+	attachments := make([]Attachment, count)
+	for i, id := range script.AttachmentIDs {
+		attachment := s.AttachmentWithID(id)
+		if attachment == nil {
+			log.Error("Script references non-existant attachment: script_id='%s' attachment_id='%s'", scriptID, id)
 		}
-		files[i] = file
+		attachments[i] = *attachment
 	}
 
-	return files, nil
+	return attachments
 }
 
-func (s attachmentStoreObject) AttachmentWithID(id string) (*Attachment, *Error) {
-	obj, err := s.Table.Get(id)
+func (s attachmentStoreObject) AttachmentWithID(id string) *Attachment {
+	object, err := s.Table.Get(id)
 	if err != nil {
-		log.Error("Error getting script file with ID '%s': %s", id, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting attachment: id='%s' error='%s'", id, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	file, k := obj.(Attachment)
+	file, k := object.(Attachment)
 	if !k {
-		log.Error("Object is not of type 'Attachment'")
-		return nil, ErrorServer("incorrect type")
+		log.Fatal("Error getting attachment: id='%s' error='%s'", id, "invalid type")
 	}
 
-	return &file, nil
+	return &file
+}
+
+type newAttachmentParameters struct {
+	Data     io.Reader
+	Path     string `min:"1"`
+	Name     string `min:"1"`
+	MimeType string `min:"1"`
+	UID      int
+	GID      int
+	Mode     uint32
+	Size     uint64
+}
+
+func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*Attachment, *Error) {
+	if err := limits.Check(params); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
+
+	attachment := Attachment{
+		ID:       newPlainID(),
+		Path:     params.Path,
+		Name:     params.Name,
+		MimeType: params.MimeType,
+		UID:      params.UID,
+		GID:      params.GID,
+		Mode:     params.Mode,
+		Created:  time.Now(),
+		Modified: time.Now(),
+		Size:     params.Size,
+	}
+
+	f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
+		return nil, ErrorFrom(err)
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, params.Data); err != nil {
+		log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
+		return nil, ErrorFrom(err)
+	}
+
+	if err := AttachmentStore.Table.Add(attachment); err != nil {
+		log.Error("Error saving script attachment '%s': %s", attachment.ID, err.Error())
+		return nil, ErrorFrom(err)
+	}
+
+	return &attachment, nil
 }
 
 type editAttachmentParams struct {
@@ -74,72 +126,68 @@ type editAttachmentParams struct {
 }
 
 func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (*Attachment, *Error) {
-	file, err := s.AttachmentWithID(id)
-	if err != nil {
-		return nil, err
-	}
-	if file == nil {
+	attachment := s.AttachmentWithID(id)
+	if attachment == nil {
 		return nil, ErrorUser("No script with ID")
 	}
 
-	file.Path = params.Path
-	file.UID = params.UID
-	file.GID = params.GID
-	file.Mode = params.Mode
-	file.Modified = time.Now()
+	attachment.Path = params.Path
+	attachment.UID = params.UID
+	attachment.GID = params.GID
+	attachment.Mode = params.Mode
+	attachment.Modified = time.Now()
 
-	if err := s.Table.Update(*file); err != nil {
-		log.Error("Error updating script file '%s': %s", file.ID, err.Error())
+	if err := s.Table.Update(*attachment); err != nil {
+		log.Error("Error updating script attachment '%s': %s", attachment.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
-	return file, nil
+	return attachment, nil
 }
 
 func (s attachmentStoreObject) DeleteAttachment(id string) *Error {
-	file, err := s.AttachmentWithID(id)
-	if err != nil {
-		return err
-	}
-	if file == nil {
+	attachment := s.AttachmentWithID(id)
+	if attachment == nil {
 		return ErrorUser("No script with ID")
 	}
 
-	if err := s.Table.Delete(*file); err != nil {
-		log.Error("Error deleting script file '%s': %s", file.ID, err.Error())
+	attachmentPath := attachment.FilePath()
+
+	if err := s.Table.Delete(*attachment); err != nil {
+		log.Error("Error deleting script attachment '%s': %s", attachment.ID, err.Error())
 		return ErrorFrom(err)
 	}
 
+	if err := os.Remove(attachmentPath); err != nil {
+		log.Error("Error deleing attachment file: attachment_id='%s' file_path='%s' error='%s'", id, attachmentPath, err.Error())
+		return ErrorFrom(err)
+	}
+
+	log.Info("Deleted attachment: attachment_id='%s' file_path='%s'", id, attachmentPath)
 	return nil
 }
 
 func (s attachmentStoreObject) Cleanup() *Error {
-	filesWithScripts := map[string]bool{}
-	files, err := s.AllAttachments()
-	if err != nil {
-		return err
-	}
-	scripts, err := ScriptStore.AllScripts()
-	if err != nil {
-		return err
-	}
-	for _, file := range files {
+	attachmentsWithScripts := map[string]bool{}
+	attachments := s.AllAttachments()
+	scripts := ScriptStore.AllScripts()
+	for _, attachment := range attachments {
 		for _, script := range scripts {
-			if stringSliceContains(file.ID, script.AttachmentIDs) {
-				filesWithScripts[file.ID] = true
+			if stringSliceContains(attachment.ID, script.AttachmentIDs) {
+				attachmentsWithScripts[attachment.ID] = true
 				break
 			}
 		}
 	}
 
-	for _, file := range files {
-		if filesWithScripts[file.ID] {
+	for _, attachment := range attachments {
+		if attachmentsWithScripts[attachment.ID] {
 			continue
 		}
 
-		if time.Since(file.Modified) > 1*time.Hour {
-			log.Warn("Removing orphaned script file '%s'", file.ID)
-			if err := s.DeleteAttachment(file.ID); err != nil {
+		if time.Since(attachment.Modified) > 1*time.Hour {
+			log.Warn("Removing orphaned script attachment '%s'", attachment.ID)
+			if err := s.DeleteAttachment(attachment.ID); err != nil {
 				return err
 			}
 		}

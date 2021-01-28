@@ -7,10 +7,14 @@ import (
 // WarmCache warm all caches
 func WarmCache() {
 	UpdateGroupCache()
+	UpdateUserCache()
 }
 
 var groupCacheLock = &sync.RWMutex{}
 var groupCacheCurrent = map[string][]string{}
+
+var userCacheLock = &sync.RWMutex{}
+var userCacheCurrent = map[string]User{}
 
 // GetGroupCache get the group cache
 func GetGroupCache() map[string][]string {
@@ -25,21 +29,34 @@ func UpdateGroupCache() {
 	defer groupCacheLock.Unlock()
 
 	groupCacheCurrent = map[string][]string{}
-	groups, err := GroupStore.AllGroups()
-	if err != nil {
-		log.Fatal("Error building group cache: %s", err.Message)
-	}
+	groups := GroupStore.AllGroups()
 	for _, group := range groups {
 		groupCacheCurrent[group.ID] = []string{}
 	}
 
-	hosts, err := HostStore.AllHosts()
-	if err != nil {
-		log.Fatal("Error building group cache: %s", err.Message)
-	}
+	hosts := HostStore.AllHosts()
 	for _, host := range hosts {
 		for _, groupID := range host.GroupIDs {
 			groupCacheCurrent[groupID] = append(groupCacheCurrent[groupID], host.ID)
 		}
+	}
+}
+
+// GetUserCache get the user cache
+func GetUserCache() map[string]User {
+	userCacheLock.RLock()
+	defer userCacheLock.RUnlock()
+	return userCacheCurrent
+}
+
+// UpdateUserCache update the user cache
+func UpdateUserCache() {
+	userCacheLock.Lock()
+	defer userCacheLock.Unlock()
+
+	userCacheCurrent = map[string]User{}
+	users := UserStore.AllUsers()
+	for _, user := range users {
+		userCacheCurrent[user.Username] = user
 	}
 }

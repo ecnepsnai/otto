@@ -6,72 +6,63 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
-func (s *hostStoreObject) HostWithID(id string) (*Host, *Error) {
-	obj, err := s.Table.Get(id)
+func (s *hostStoreObject) HostWithID(id string) *Host {
+	object, err := s.Table.Get(id)
 	if err != nil {
-		log.Error("Error getting host with ID '%s': %s", id, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting host: id='%s' error='%s'", id, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	host, k := obj.(Host)
+	host, k := object.(Host)
 	if !k {
-		log.Error("Object is not of type 'Host'")
-		return nil, ErrorServer("incorrect type")
+		log.Error("Error getting host: id='%s' error='%s'", id, "invalid type")
 	}
 
-	return &host, nil
+	return &host
 }
 
-func (s *hostStoreObject) HostWithAddress(address string) (*Host, *Error) {
-	obj, err := s.Table.GetUnique("Address", address)
+func (s *hostStoreObject) HostWithAddress(address string) *Host {
+	object, err := s.Table.GetUnique("Address", address)
 	if err != nil {
-		log.Error("Error getting host with address '%s': %s", address, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting host: address='%s' error='%s'", address, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	host, k := obj.(Host)
+	host, k := object.(Host)
 	if !k {
-		log.Error("Object is not of type 'Host'")
-		return nil, ErrorServer("incorrect type")
+		log.Error("Error getting host: address='%s' error='%s'", address, "invalid type")
 	}
 
-	return &host, nil
+	return &host
 }
 
-func (s *hostStoreObject) HostWithName(name string) (*Host, *Error) {
-	obj, err := s.Table.GetUnique("Name", name)
+func (s *hostStoreObject) HostWithName(name string) *Host {
+	object, err := s.Table.GetUnique("Name", name)
 	if err != nil {
-		log.Error("Error getting host with name '%s': %s", name, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting host: name='%s' error='%s'", name, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	host, k := obj.(Host)
+	host, k := object.(Host)
 	if !k {
-		log.Error("Object is not of type 'Host'")
-		return nil, ErrorServer("incorrect type")
+		log.Error("Error getting host: name='%s' error='%s'", name, "invalid type")
 	}
 
-	return &host, nil
+	return &host
 }
 
 func (s *hostStoreObject) findDuplicate(name, address string) string {
-	nameHost, err := s.HostWithName(name)
-	if err != nil {
-		return ""
-	}
+	nameHost := s.HostWithName(name)
 	if nameHost != nil {
 		return nameHost.ID
 	}
-	addressHost, err := s.HostWithAddress(address)
-	if err != nil {
-		return ""
-	}
+	addressHost := s.HostWithAddress(address)
 	if addressHost != nil {
 		return addressHost.ID
 	}
@@ -79,27 +70,26 @@ func (s *hostStoreObject) findDuplicate(name, address string) string {
 	return ""
 }
 
-func (s *hostStoreObject) AllHosts() ([]Host, *Error) {
-	objs, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *hostStoreObject) AllHosts() []Host {
+	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
-		log.Error("Error getting all hosts: %s", err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error listing all hosts: error='%s'", err.Error())
+		return []Host{}
 	}
-	if objs == nil || len(objs) == 0 {
-		return []Host{}, nil
+	if objects == nil || len(objects) == 0 {
+		return []Host{}
 	}
 
-	hosts := make([]Host, len(objs))
-	for i, obj := range objs {
+	hosts := make([]Host, len(objects))
+	for i, obj := range objects {
 		host, k := obj.(Host)
 		if !k {
-			log.Error("Object is not of type 'Host'")
-			return []Host{}, ErrorServer("incorrect type")
+			log.Fatal("Error listing all hosts: error='%s'", "invalid type")
 		}
 		hosts[i] = host
 	}
 
-	return hosts, nil
+	return hosts
 }
 
 type newHostParameters struct {
@@ -122,16 +112,13 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	}
 
 	var groupIDs = make([]string, len(params.GroupIDs))
-	for i, group := range params.GroupIDs {
-		s, err := GroupStore.GroupWithID(group)
-		if err != nil {
-			return nil, err
-		}
+	for i, groupID := range params.GroupIDs {
+		group := GroupStore.GroupWithID(groupID)
 		if s == nil {
-			log.Warn("No group with ID '%s'", group)
-			return nil, ErrorUser("No group with ID '%s'", group)
+			log.Warn("No group with ID '%s'", groupID)
+			return nil, ErrorUser("No group with ID '%s'", groupID)
 		}
-		groupIDs[i] = s.ID
+		groupIDs[i] = group.ID
 	}
 
 	host := Host{
@@ -180,16 +167,13 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	}
 
 	var groupIDs = make([]string, len(params.GroupIDs))
-	for i, group := range params.GroupIDs {
-		s, err := GroupStore.GroupWithID(group)
-		if err != nil {
-			return nil, err
-		}
+	for i, groupID := range params.GroupIDs {
+		group := GroupStore.GroupWithID(groupID)
 		if s == nil {
-			log.Warn("No group with ID '%s'", group)
-			return nil, ErrorUser("No group with ID '%s'", group)
+			log.Warn("No group with ID '%s'", groupID)
+			return nil, ErrorUser("No group with ID '%s'", groupID)
 		}
-		groupIDs[i] = s.ID
+		groupIDs[i] = group.ID
 	}
 
 	host.Name = params.Name

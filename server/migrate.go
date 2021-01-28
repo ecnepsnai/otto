@@ -1,11 +1,5 @@
 package server
 
-import (
-	"encoding/json"
-	"os"
-	"path"
-)
-
 var neededTableVersion = 7
 
 func migrateIfNeeded() {
@@ -23,69 +17,8 @@ func migrateIfNeeded() {
 
 	i := currentVersion
 	for i <= neededTableVersion {
-		if i == 7 {
-			migrate7()
-		}
 		i++
 	}
 
 	State.SetTableVersion(i)
-}
-
-// #7 Migrate registration rules
-func migrate7() {
-	log.Debug("Start migrate 7")
-
-	type oldRegisterRule struct {
-		Property string
-		Pattern  string
-		GroupID  string
-	}
-
-	type oldOttoOptionsRegister struct {
-		Rules []oldRegisterRule
-	}
-
-	type oldOttoOptions struct {
-		Register oldOttoOptionsRegister
-	}
-
-	configPath := path.Join(Directories.Data, configFileName)
-	if !FileExists(configPath) {
-		return
-	}
-
-	oldOptions := oldOttoOptions{}
-	f, err := os.OpenFile(configPath, os.O_RDONLY, 0644)
-	if err != nil {
-		log.Fatal("Error opening config file '%s': %s", configPath, err.Error())
-	}
-	defer f.Close()
-
-	if err := json.NewDecoder(f).Decode(&oldOptions); err != nil {
-		log.Fatal("Error opening config file '%s': %s", configPath, err.Error())
-	}
-
-	if len(oldOptions.Register.Rules) <= 0 {
-		return
-	}
-
-	cbgenDataStoreRegisterGroupStore()
-	cbgenDataStoreRegisterRegisterRuleStore()
-	for _, oldRule := range oldOptions.Register.Rules {
-		newRule := newRegisterRuleParams{
-			Property: oldRule.Property,
-			Pattern:  oldRule.Pattern,
-			GroupID:  oldRule.GroupID,
-		}
-		if newRule.Property == "uname" {
-			newRule.Property = RegisterRulePropertyKernelName
-		}
-
-		if _, err := RegisterRuleStore.NewRule(newRule); err != nil {
-			log.Error("Error migrating register rule to new format. Old rule: %+v. Error: %s", oldRule, err)
-		}
-	}
-	RegisterRuleStore.Table.Close()
-	GroupStore.Table.Close()
 }

@@ -5,27 +5,13 @@ import (
 )
 
 func (h *handle) UserList(request web.Request) (interface{}, *web.Error) {
-	users, err := UserStore.AllUsers()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
-	return users, nil
+	return UserStore.AllUsers(), nil
 }
 
 func (h *handle) UserGet(request web.Request) (interface{}, *web.Error) {
 	username := request.Params.ByName("username")
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}
@@ -63,13 +49,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 
 	username := request.Params.ByName("username")
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}
@@ -79,7 +59,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	user, err = UserStore.EditUser(user, params)
+	user, err := UserStore.EditUser(user, params)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -109,13 +89,7 @@ func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError("Cannot delete own user")
 	}
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}

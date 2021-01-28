@@ -6,75 +6,60 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
-func (s *groupStoreObject) GroupWithID(id string) (*Group, *Error) {
-	obj, err := s.Table.Get(id)
+func (s *groupStoreObject) GroupWithID(id string) *Group {
+	object, err := s.Table.Get(id)
 	if err != nil {
-		log.Error("Error getting group with ID '%s': %s", id, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting group: id='%s' error='%s'", id, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	group, k := obj.(Group)
+	group, k := object.(Group)
 	if !k {
-		log.Error("Object is not of type 'Group'")
-		return nil, ErrorServer("incorrect type")
+		log.Fatal("Error getting group: id='%s' error='%s'", id, "invalid type")
 	}
 
-	return &group, nil
+	return &group
 }
 
-func (s *groupStoreObject) GroupWithName(name string) (*Group, *Error) {
-	obj, err := s.Table.GetUnique("Name", name)
+func (s *groupStoreObject) GroupWithName(name string) *Group {
+	object, err := s.Table.GetUnique("Name", name)
 	if err != nil {
-		log.Error("Error getting group with name '%s': %s", name, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error getting group: name='%s' error='%s'", name, err.Error())
+		return nil
 	}
-	if obj == nil {
-		return nil, nil
+	if object == nil {
+		return nil
 	}
-	group, k := obj.(Group)
+	group, k := object.(Group)
 	if !k {
-		log.Error("Object is not of type 'Group'")
-		return nil, ErrorServer("incorrect type")
+		log.Fatal("Error getting group: name='%s' error='%s'", name, "invalid type")
 	}
 
-	return &group, nil
+	return &group
 }
 
-func (s *groupStoreObject) findDuplicate(name string) string {
-	nameGroup, err := s.GroupWithName(name)
+func (s *groupStoreObject) AllGroups() []Group {
+	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
-		return ""
+		log.Error("Error listing all groups: error='%s'", err.Error())
+		return []Group{}
 	}
-	if nameGroup != nil {
-		return nameGroup.ID
-	}
-
-	return ""
-}
-
-func (s *groupStoreObject) AllGroups() ([]Group, *Error) {
-	objs, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
-	if err != nil {
-		log.Error("Error getting all groups: %s", err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if objs == nil || len(objs) == 0 {
-		return []Group{}, nil
+	if objects == nil || len(objects) == 0 {
+		return []Group{}
 	}
 
-	groups := make([]Group, len(objs))
-	for i, obj := range objs {
+	groups := make([]Group, len(objects))
+	for i, obj := range objects {
 		group, k := obj.(Group)
 		if !k {
-			log.Error("Object is not of type 'Group'")
-			return []Group{}, ErrorServer("incorrect type")
+			log.Fatal("Error listing all groups: error='%s'", "invalid type")
 		}
 		groups[i] = group
 	}
 
-	return groups, nil
+	return groups
 }
 
 type newGroupParameters struct {
@@ -84,7 +69,7 @@ type newGroupParameters struct {
 }
 
 func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) {
-	if s.findDuplicate(params.Name) != "" {
+	if s.GroupWithName(params.Name) != nil {
 		log.Warn("Group with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Name already in use")
 	}
@@ -94,16 +79,13 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 	}
 
 	var enabledScripts = make([]string, len(params.ScriptIDs))
-	for i, script := range params.ScriptIDs {
-		s, err := ScriptStore.ScriptWithID(script)
-		if err != nil {
-			return nil, err
+	for i, scriptID := range params.ScriptIDs {
+		script := ScriptStore.ScriptWithID(scriptID)
+		if script == nil {
+			log.Warn("No script with ID '%s'", scriptID)
+			return nil, ErrorUser("No script with ID '%s'", scriptID)
 		}
-		if s == nil {
-			log.Warn("No script with ID '%s'", script)
-			return nil, ErrorUser("No script with ID '%s'", script)
-		}
-		enabledScripts[i] = s.ID
+		enabledScripts[i] = script.ID
 	}
 
 	group := Group{
@@ -133,8 +115,7 @@ type editGroupParameters struct {
 }
 
 func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (*Group, *Error) {
-	dupID := s.findDuplicate(params.Name)
-	if dupID != "" && dupID != group.ID {
+	if existingGroup := s.GroupWithName(params.Name); existingGroup != nil && existingGroup.ID != group.ID {
 		log.Warn("Group with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Name already in use")
 	}
@@ -144,16 +125,13 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 	}
 
 	var enabledScripts = make([]string, len(params.ScriptIDs))
-	for i, script := range params.ScriptIDs {
-		s, err := ScriptStore.ScriptWithID(script)
-		if err != nil {
-			return nil, err
+	for i, scriptID := range params.ScriptIDs {
+		script := ScriptStore.ScriptWithID(scriptID)
+		if script == nil {
+			log.Warn("No script with ID '%s'", scriptID)
+			return nil, ErrorUser("No script with ID '%s'", scriptID)
 		}
-		if s == nil {
-			log.Warn("No script with ID '%s'", script)
-			return nil, ErrorUser("No script with ID '%s'", script)
-		}
-		enabledScripts[i] = s.ID
+		enabledScripts[i] = script.ID
 	}
 
 	group.Name = params.Name
@@ -193,13 +171,13 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 		return ErrorUser("Can't delete group that is used in a host registration rule")
 	}
 
-	schedules, _ := ScheduleStore.AllSchedulesForGroup(group.ID)
+	schedules := ScheduleStore.AllSchedulesForGroup(group.ID)
 	if len(schedules) > 0 {
 		log.Error("Can't delete group '%s' that is used in a schedule", group.Name)
 		return ErrorUser("Can't delete group that is used in a schedule")
 	}
 
-	if groups, _ := s.AllGroups(); len(groups) <= 1 {
+	if groups := s.AllGroups(); len(groups) <= 1 {
 		log.Error("At least one group must exist")
 		return ErrorUser("At least one group must exist")
 	}
@@ -216,19 +194,11 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 }
 
 func (s *groupStoreObject) CleanupDeadScripts() *Error {
-	groups, err := s.AllGroups()
-	if err != nil {
-		log.Error("Error getting all groups: %s", err.Message)
-		return err
-	}
-
+	groups := s.AllGroups()
 	for _, group := range groups {
 		i := len(group.ScriptIDs) - 1
 		for i >= 0 {
-			script, err := ScriptStore.ScriptWithID(group.ScriptIDs[i])
-			if err != nil {
-				return err
-			}
+			script := ScriptStore.ScriptWithID(group.ScriptIDs[i])
 			if script == nil {
 				log.Warn("Removing non-existant script '%s' from group '%s'", group.ScriptIDs[i], group.Name)
 				group.ScriptIDs = append(group.ScriptIDs[:i], group.ScriptIDs[i+1:]...)

@@ -69,9 +69,8 @@ func authenticateUser(sessionCookie *http.Cookie) *Session {
 		return nil
 	}
 
-	user, err := UserStore.UserWithUsername(session.Username)
-	if err != nil || user == nil {
-		log.Warn("Session for non-existant user: '%s'", session.Username)
+	if user := UserStore.UserWithUsername(session.Username); user == nil {
+		log.Warn("Session for nonexistant user: session_id='%s' username='%s'", session.ID, session.Username)
 		return nil
 	}
 
@@ -84,10 +83,7 @@ func authenticateUser(sessionCookie *http.Cookie) *Session {
 
 // AuthenticateUser authenticate a user
 func AuthenticateUser(credentials Credentials, req *http.Request) (*AuthenticationResult, *web.Error) {
-	user, err := UserStore.UserWithUsername(credentials.Username)
-	if err != nil {
-		return nil, web.CommonErrors.Unauthorized
-	}
+	user := UserStore.UserWithUsername(credentials.Username)
 	if user == nil {
 		return nil, web.CommonErrors.Unauthorized
 	}

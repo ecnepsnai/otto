@@ -7,73 +7,65 @@ import (
 	"github.com/ecnepsnai/ds"
 )
 
-func (s scheduleStoreObject) AllSchedules() ([]Schedule, *Error) {
-	objs, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s scheduleStoreObject) AllSchedules() []Schedule {
+	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
-		log.Error("Error getting all schedules: %s", err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error listing all schedules: error='%s'", err.Error())
+		return []Schedule{}
 	}
-	if objs == nil || len(objs) == 0 {
-		return []Schedule{}, nil
+	if objects == nil || len(objects) == 0 {
+		return []Schedule{}
 	}
 
-	schedules := make([]Schedule, len(objs))
-	for i, obj := range objs {
+	schedules := make([]Schedule, len(objects))
+	for i, obj := range objects {
 		host, k := obj.(Schedule)
 		if !k {
-			log.Error("Object is not of type 'Schedule'")
-			return []Schedule{}, ErrorServer("incorrect type")
+			log.Fatal("Error listing all schedules: error='%s'", "invalid type")
 		}
 		schedules[i] = host
 	}
 
-	return schedules, nil
+	return schedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForScript(scriptID string) ([]Schedule, *Error) {
-	objs, err := s.Table.GetIndex("ScriptID", scriptID, &ds.GetOptions{Sorted: true, Ascending: true})
+func (s scheduleStoreObject) AllSchedulesForScript(scriptID string) []Schedule {
+	objects, err := s.Table.GetIndex("ScriptID", scriptID, &ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
-		log.Error("Error getting all schedules for script %s: %s", scriptID, err.Error())
-		return nil, ErrorFrom(err)
+		log.Error("Error listing all schedules for script: script_id='%s' error='%s'", scriptID, err.Error())
+		return []Schedule{}
 	}
-	if objs == nil || len(objs) == 0 {
-		return []Schedule{}, nil
+	if objects == nil || len(objects) == 0 {
+		return []Schedule{}
 	}
 
-	schedules := make([]Schedule, len(objs))
-	for i, obj := range objs {
+	schedules := make([]Schedule, len(objects))
+	for i, obj := range objects {
 		host, k := obj.(Schedule)
 		if !k {
-			log.Error("Object is not of type 'Schedule'")
-			return []Schedule{}, ErrorServer("incorrect type")
+			log.Fatal("Error listing all schedules for script: script_id='%s' error='%s'", scriptID, "invalid type")
 		}
 		schedules[i] = host
 	}
 
-	return schedules, nil
+	return schedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) ([]Schedule, *Error) {
+func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) []Schedule {
 	matchedSchedules := []Schedule{}
-	schedules, err := s.AllSchedules()
-	if err != nil {
-		return nil, err
-	}
+	schedules := s.AllSchedules()
 	for _, schedule := range schedules {
 		if stringSliceContains(groupID, schedule.Scope.GroupIDs) {
 			matchedSchedules = append(matchedSchedules, schedule)
 		}
 	}
 
-	return matchedSchedules, nil
+	return matchedSchedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Error) {
+func (s scheduleStoreObject) AllSchedulesForHost(hostID string) []Schedule {
 	matchedSchedules := []Schedule{}
-	schedules, err := s.AllSchedules()
-	if err != nil {
-		return nil, err
-	}
+	schedules := s.AllSchedules()
 	for _, schedule := range schedules {
 		if len(schedule.Scope.GroupIDs) > 0 {
 			for _, groupID := range schedule.Scope.GroupIDs {
@@ -95,13 +87,13 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) ([]Schedule, *Er
 		}
 	}
 
-	return matchedSchedules, nil
+	return matchedSchedules
 }
 
-func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
-	object, err := s.Table.GetUnique("Name", name)
+func (s scheduleStoreObject) ScheduleWithID(id string) *Schedule {
+	object, err := s.Table.Get(id)
 	if err != nil {
-		log.Error("Error getting schedule by name: %s", err.Error())
+		log.Error("Error getting schedule: id='%s' error='%s'", id, err.Error())
 		return nil
 	}
 	if object == nil {
@@ -110,19 +102,30 @@ func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
 
 	schedule, ok := object.(Schedule)
 	if !ok {
-		log.Error("Invalid type")
+		log.Fatal("Error getting schedule: id='%s' error='%s'", id, "invalid type")
+	}
+	return &schedule
+}
+
+func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
+	object, err := s.Table.GetUnique("Name", name)
+	if err != nil {
+		log.Error("Error getting schedule: name='%s' error='%s'", name, err.Error())
 		return nil
+	}
+	if object == nil {
+		return nil
+	}
+
+	schedule, ok := object.(Schedule)
+	if !ok {
+		log.Fatal("Error getting schedule: name='%s' error='%s'", name, "invalid type")
 	}
 	return &schedule
 }
 
 func (s scheduleStoreObject) RunSchedules() {
-	schedules, err := s.AllSchedules()
-	if err != nil {
-		log.Error("Error fetching all schedules: %s", err.Message)
-		return
-	}
-
+	schedules := s.AllSchedules()
 	for _, schedule := range schedules {
 		if !schedule.Enabled {
 			log.Debug("Skipping disabled schedule: %s", schedule.ID)
@@ -153,18 +156,18 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 	if schedule, _ := s.Table.GetUnique("Name", params.Name); schedule != nil {
 		return nil, ErrorUser("Duplicate script name")
 	}
-	if script, _ := ScriptStore.ScriptWithID(params.ScriptID); script == nil {
+	if script := ScriptStore.ScriptWithID(params.ScriptID); script == nil {
 		return nil, ErrorUser("Unknown script ID '%s'", params.ScriptID)
 	}
 
 	for _, groupID := range params.Scope.GroupIDs {
-		if group, _ := GroupStore.GroupWithID(groupID); group == nil {
+		if group := GroupStore.GroupWithID(groupID); group == nil {
 			return nil, ErrorUser("Unknown group ID '%s'", groupID)
 		}
 	}
 
 	for _, hostID := range params.Scope.HostIDs {
-		if host, _ := HostStore.HostWithID(hostID); host == nil {
+		if host := HostStore.HostWithID(hostID); host == nil {
 			return nil, ErrorUser("Unknown host ID '%s'", hostID)
 		}
 	}
@@ -209,13 +212,13 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 	}
 
 	for _, groupID := range params.Scope.GroupIDs {
-		if group, _ := GroupStore.GroupWithID(groupID); group == nil {
+		if group := GroupStore.GroupWithID(groupID); group == nil {
 			return nil, ErrorUser("Unknown group ID '%s'", groupID)
 		}
 	}
 
 	for _, hostID := range params.Scope.HostIDs {
-		if host, _ := HostStore.HostWithID(hostID); host == nil {
+		if host := HostStore.HostWithID(hostID); host == nil {
 			return nil, ErrorUser("Unknown host ID '%s'", hostID)
 		}
 	}

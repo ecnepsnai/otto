@@ -26,12 +26,14 @@ func testSetup() {
 	// Overwrite the operating directory with the temporary directory
 	operatingDirectory = *tmpDir
 	Directories = apiDirectories{
-		Base:   operatingDirectory,
-		Logs:   path.Join(operatingDirectory, "logs"),
-		Data:   path.Join(operatingDirectory, "data"),
-		Static: path.Join(operatingDirectory, "static"),
+		Base:        operatingDirectory,
+		Attachments: path.Join(operatingDirectory, "attachments"),
+		Logs:        path.Join(operatingDirectory, "logs"),
+		Data:        path.Join(operatingDirectory, "data"),
+		Static:      path.Join(operatingDirectory, "static"),
 	}
 
+	os.Mkdir(Directories.Attachments, os.ModePerm)
 	os.Mkdir(Directories.Logs, os.ModePerm)
 	os.Mkdir(Directories.Data, os.ModePerm)
 	os.Mkdir(Directories.Static, os.ModePerm)
@@ -43,6 +45,7 @@ func testSetup() {
 	GobSetup()
 	StateSetup()
 	DataStoreSetup()
+	WarmCache()
 	LoadOptions()
 }
 

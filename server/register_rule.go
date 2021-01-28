@@ -93,7 +93,7 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 		return nil, ErrorUser("Invalid pattern regex")
 	}
 
-	if group, _ := GroupStore.GroupWithID(params.GroupID); group == nil {
+	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
 		return nil, ErrorUser("Unknown group ID")
 	}
 
@@ -132,7 +132,7 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 		return nil, ErrorUser("Invalid pattern regex")
 	}
 
-	if group, _ := GroupStore.GroupWithID(params.GroupID); group == nil {
+	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
 		return nil, ErrorUser("Unknown group ID")
 	}
 

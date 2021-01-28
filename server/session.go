@@ -11,7 +11,7 @@ type Session struct {
 	// ID the session ID
 	ID string `ds:"primary"`
 	// Secret the salt used when hashing the users email for the session auth cookie value
-	Secret string `json:"-" structs:"-" ds:"unique"`
+	Secret string `ds:"unique" json:"-"`
 	// Username the username of the user for this session
 	Username string `ds:"index"`
 	// Expires when this session expires (unix timestamp)
@@ -28,10 +28,10 @@ func (s sessionStoreObject) NewSessionForUser(user *User) (Session, string, *Err
 	}
 	sessionHash := security.HashSHA256String(session.Secret + session.Username)
 	sessionCookie := session.ID + "$" + sessionHash
-	log.Info("Started new session for user: '%s' with session ID: '%s'", user.Username, session.ID)
+	log.Info("Started new session: username='%s' session_id='%s'", user.Username, session.ID)
 
 	if err := s.Table.Add(session); err != nil {
-		log.Error("Error adding new session for user '%s': %s", user.Username, err.Error())
+		log.Error("Error starting new session: username='%s' session_id='%s' error='%s'", user.Username, session.ID, err.Error())
 		return session, sessionCookie, ErrorFrom(err)
 	}
 
@@ -101,8 +101,7 @@ func (s sessionStoreObject) SaveSession(session *Session) *Error {
 
 // User get the user object for this session
 func (s Session) User() *User {
-	user, _ := UserStore.UserWithUsername(s.Username)
-	return user
+	return UserStore.UserWithUsername(s.Username)
 }
 
 func (s sessionStoreObject) CleanupSessions() *Error {
