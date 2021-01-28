@@ -1,11 +1,18 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) HostList(request web.Request) (interface{}, *web.Error) {
-	return HostStore.AllHosts(), nil
+	hosts := HostStore.AllHosts()
+	sort.Slice(hosts, func(i int, j int) bool {
+		return hosts[i].Name < hosts[j].Name
+	})
+
+	return hosts, nil
 }
 
 func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
@@ -35,6 +42,10 @@ func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Message)
 	}
 
+	sort.Slice(groups, func(i int, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
+
 	return groups, nil
 }
 
@@ -42,6 +53,10 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 	id := request.Params.ByName("id")
 
 	schedules := ScheduleStore.AllSchedulesForHost(id)
+	sort.Slice(schedules, func(i int, j int) bool {
+		return schedules[i].Name < schedules[j].Name
+	})
+
 	return schedules, nil
 }
 
@@ -53,7 +68,12 @@ func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
 
-	return host.Scripts(), nil
+	scripts := host.Scripts()
+	sort.Slice(scripts, func(i int, j int) bool {
+		return scripts[i].ScriptName < scripts[j].ScriptName
+	})
+
+	return scripts, nil
 }
 
 func (h *handle) HostNew(request web.Request) (interface{}, *web.Error) {

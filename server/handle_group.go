@@ -1,11 +1,18 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) GroupList(request web.Request) (interface{}, *web.Error) {
-	return GroupStore.AllGroups(), nil
+	groups := GroupStore.AllGroups()
+	sort.Slice(groups, func(i int, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
+
+	return groups, nil
 }
 
 func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.Error) {
@@ -38,6 +45,9 @@ func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(hosts, func(i int, j int) bool {
+		return hosts[i].Name < hosts[j].Name
+	})
 
 	return hosts, nil
 }
@@ -140,6 +150,9 @@ func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) 
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(scripts, func(i int, j int) bool {
+		return scripts[i].Name < scripts[j].Name
+	})
 
 	return scripts, nil
 }
@@ -148,6 +161,10 @@ func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error
 	id := request.Params.ByName("id")
 
 	schedules := ScheduleStore.AllSchedulesForGroup(id)
+	sort.Slice(schedules, func(i int, j int) bool {
+		return schedules[i].Name < schedules[j].Name
+	})
+
 	return schedules, nil
 }
 

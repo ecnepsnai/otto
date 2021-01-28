@@ -1,11 +1,18 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) UserList(request web.Request) (interface{}, *web.Error) {
-	return UserStore.AllUsers(), nil
+	users := UserStore.AllUsers()
+	sort.Slice(users, func(i int, j int) bool {
+		return users[i].Username < users[j].Username
+	})
+
+	return users, nil
 }
 
 func (h *handle) UserGet(request web.Request) (interface{}, *web.Error) {

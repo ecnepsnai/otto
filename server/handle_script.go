@@ -1,11 +1,18 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) ScriptList(request web.Request) (interface{}, *web.Error) {
-	return ScriptStore.AllScripts(), nil
+	scripts := ScriptStore.AllScripts()
+	sort.Slice(scripts, func(i int, j int) bool {
+		return scripts[i].Name < scripts[j].Name
+	})
+
+	return scripts, nil
 }
 
 func (h *handle) ScriptGet(request web.Request) (interface{}, *web.Error) {
@@ -26,8 +33,12 @@ func (h *handle) ScriptGetGroups(request web.Request) (interface{}, *web.Error) 
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
+	groups := script.Groups()
+	sort.Slice(groups, func(i int, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
 
-	return script.Groups(), nil
+	return groups, nil
 }
 
 func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
@@ -37,14 +48,22 @@ func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
+	hosts := script.Hosts()
+	sort.Slice(hosts, func(i int, j int) bool {
+		return hosts[i].HostName < hosts[j].HostName
+	})
 
-	return script.Hosts(), nil
+	return hosts, nil
 }
 
 func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
 	schedules := ScheduleStore.AllSchedulesForScript(id)
+	sort.Slice(schedules, func(i int, j int) bool {
+		return schedules[i].Name < schedules[j].Name
+	})
+
 	return schedules, nil
 }
 
@@ -63,6 +82,9 @@ func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Er
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(files, func(i int, j int) bool {
+		return files[i].Name < files[j].Name
+	})
 
 	return files, nil
 }

@@ -1,11 +1,18 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) ScheduleList(request web.Request) (interface{}, *web.Error) {
-	return ScheduleStore.AllSchedules(), nil
+	schedules := ScheduleStore.AllSchedules()
+	sort.Slice(schedules, func(i int, j int) bool {
+		return schedules[i].Name < schedules[j].Name
+	})
+
+	return schedules, nil
 }
 
 func (h *handle) ScheduleGet(request web.Request) (interface{}, *web.Error) {
@@ -39,6 +46,9 @@ func (h *handle) ScheduleGetGroups(request web.Request) (interface{}, *web.Error
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(groups, func(i int, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
 
 	return groups, nil
 }
@@ -58,6 +68,9 @@ func (h *handle) ScheduleGetHosts(request web.Request) (interface{}, *web.Error)
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(hosts, func(i int, j int) bool {
+		return hosts[i].Name < hosts[j].Name
+	})
 
 	return hosts, nil
 }
