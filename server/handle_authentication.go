@@ -22,23 +22,28 @@ func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Error())
 	}
 
-	sessionKey := authenticateUser(login.Username, login.Password, request.HTTP)
+	authenticationResult := authenticateUser(login.Username, login.Password, request.HTTP)
 	login.Password = ""
 	login = credentials{}
-	if sessionKey == nil {
+	if authenticationResult == nil {
 		return nil, web.CommonErrors.Unauthorized
 	}
 
 	request.AddCookie(&http.Cookie{
 		Name:     ottoSessionCookie,
-		Value:    *sessionKey,
+		Value:    authenticationResult.SessionKey,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 		Expires:  time.Now().AddDate(0, 0, 1),
 		Secure:   Options.Authentication.SecureOnly,
 	})
 
-	return true, nil
+	var statusCode = 0
+	if authenticationResult.MustChangePassword {
+		statusCode = 1
+	}
+
+	return statusCode, nil
 }
 
 func (h *handle) Logout(request web.Request) (interface{}, *web.Error) {

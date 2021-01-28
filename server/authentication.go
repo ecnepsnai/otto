@@ -9,7 +9,13 @@ const (
 	ottoSessionCookie = "otto-session"
 )
 
-func sessionForHTTPRequest(r *http.Request) *Session {
+// AuthenticationResult describes an authentication result
+type AuthenticationResult struct {
+	SessionKey         string
+	MustChangePassword bool
+}
+
+func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 	sessionCookie, _ := r.Cookie(ottoSessionCookie)
 	if sessionCookie == nil {
 		return nil
@@ -32,12 +38,16 @@ func sessionForHTTPRequest(r *http.Request) *Session {
 		return nil
 	}
 
+	if session.Partial && !allowPartial {
+		return nil
+	}
+
 	log.Info("HTTP request: session_id='%s' method='%s' url='%s' username='%s'", session.ShortID, r.Method, r.URL.String(), session.Username)
 	updatedSession := SessionStore.UpdateSessionExpiry(session.Key)
 	return &updatedSession
 }
 
-func authenticateUser(username, password string, req *http.Request) *string {
+func authenticateUser(username, password string, req *http.Request) *AuthenticationResult {
 	usernameLen := len(username)
 	passwordLen := len(password)
 	if usernameLen == 0 || usernameLen > 32 || passwordLen == 0 || passwordLen > 256 {
@@ -51,8 +61,8 @@ func authenticateUser(username, password string, req *http.Request) *string {
 		return nil
 	}
 
-	if !user.Enabled {
-		log.Warn("Reject login from disabled user: username='%s'", user.Username)
+	if !user.CanLogIn {
+		log.Warn("User prohibited from accessing system: username='%s'", user.Username)
 		return nil
 	}
 
@@ -74,5 +84,8 @@ func authenticateUser(username, password string, req *http.Request) *string {
 
 	session := SessionStore.NewSessionForUser(user)
 	EventStore.UserLoggedIn(username, req.RemoteAddr)
-	return &session.Key
+	return &AuthenticationResult{
+		SessionKey:         session.Key,
+		MustChangePassword: user.MustChangePassword,
+	}
 }

@@ -56,6 +56,7 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
             Username: user.Username,
             Email: user.Email,
             Password: user.Password,
+            MustChangePassword: user.MustChangePassword,
         }).then(() => {
             this.loadUsers();
         });
@@ -103,7 +104,7 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
             <Table.Row key={Rand.ID()}>
                 <td>{user.Username}</td>
                 <td>{user.Email}</td>
-                <td><EnabledBadge value={user.Enabled} /></td>
+                <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
                 <Table.Menu>
                     <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editUserMenuClick(user)}/>
                     { deleteMenuItem }
@@ -122,7 +123,7 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
                     <Table.Head>
                         <Table.Column>Username</Table.Column>
                         <Table.Column>Email</Table.Column>
-                        <Table.Column>Enabled</Table.Column>
+                        <Table.Column>Can Login</Table.Column>
                         <Table.MenuColumn />
                     </Table.Head>
                     <Table.Body>
@@ -178,10 +179,18 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         });
     }
 
-    private changeEnabled = (Enabled: boolean) => {
+    private changeCanLogIn = (CanLogIn: boolean) => {
         this.setState(state => {
             const user = state.value;
-            user.Enabled = Enabled;
+            user.CanLogIn = CanLogIn;
+            return { value: user };
+        });
+    }
+
+    private changeMustChangePassword = (MustChangePassword: boolean) => {
+        this.setState(state => {
+            const user = state.value;
+            user.MustChangePassword = MustChangePassword;
             return { value: user };
         });
     }
@@ -208,14 +217,15 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         );
     }
 
-    private enabledCheckbox = () => {
-        if (this.state.isNew || StateManager.Current().User.Username == this.props.user.Username) { return null; }
+    private canLogInCheckbox = () => {
+        if (this.props.user && StateManager.Current().User.Username == this.props.user.Username) { return null; }
 
         return (
             <Checkbox
-                label="Enabled"
-                defaultValue={this.state.value.Enabled}
-                onChange={this.changeEnabled} />
+                    label="Must Change Password"
+                    defaultValue={this.state.value.MustChangePassword}
+                    onChange={this.changeMustChangePassword}
+                    helpText="If checked this user must change their password the next time they log in" />
         );
     }
 
@@ -245,7 +255,7 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
                     onChange={this.changeEmail}
                     required />
                 { this.passwordField() }
-                { this.enabledCheckbox() }
+                { this.canLogInCheckbox() }
             </ModalForm>
         );
     }

@@ -53,9 +53,10 @@ func (s *userStoreObject) AllUsers() []User {
 }
 
 type newUserParameters struct {
-	Username string
-	Email    string
-	Password string
+	Username           string `max:"32" min:"1"`
+	Email              string `max:"128" min:"1"`
+	Password           string
+	MustChangePassword bool
 }
 
 func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
@@ -75,10 +76,11 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 	}
 
 	user := User{
-		Username:     params.Username,
-		Email:        params.Email,
-		Enabled:      true,
-		PasswordHash: *hashedPassword,
+		Username:           params.Username,
+		Email:              params.Email,
+		PasswordHash:       *hashedPassword,
+		CanLogIn:           true,
+		MustChangePassword: params.MustChangePassword,
 	}
 
 	if err := limits.Check(user); err != nil {
@@ -97,9 +99,10 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 }
 
 type editUserParameters struct {
-	Email    string
-	Enabled  bool
-	Password string
+	Email              string `max:"128" min:"1"`
+	Password           string
+	CanLogIn           bool
+	MustChangePassword bool
 }
 
 func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User, *Error) {
@@ -109,7 +112,8 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 	}
 
 	user.Email = params.Email
-	user.Enabled = params.Enabled
+	user.CanLogIn = params.CanLogIn
+	user.MustChangePassword = params.MustChangePassword
 	if params.Password != "" {
 		hashedPassword, err := security.HashPassword([]byte(params.Password))
 		if err != nil {
@@ -127,6 +131,30 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 
 	UpdateUserCache()
 
+	return user, nil
+}
+
+func (s *userStoreObject) ResetPassword(username string, newPassword []byte) (*User, *Error) {
+	user := s.UserWithUsername(username)
+	if user == nil {
+		return nil, ErrorUser("no user with username %s", username)
+	}
+
+	passwordHash, err := security.HashPassword(newPassword)
+	if err != nil {
+		log.Error("Error hasing password for user: username='%s' error='%s'", username, err.Error())
+		return nil, ErrorFrom(err)
+	}
+
+	user.PasswordHash = *passwordHash
+	user.MustChangePassword = false
+
+	if err := s.Table.Update(*user); err != nil {
+		log.Error("Error updating user '%s': %s", username, err.Error())
+		return nil, ErrorFrom(err)
+	}
+
+	UpdateUserCache()
 	return user, nil
 }
 

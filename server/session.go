@@ -10,6 +10,7 @@ type Session struct {
 	Key      string
 	ShortID  string
 	Username string
+	Partial  bool
 	Expires  time.Time
 }
 
@@ -31,6 +32,7 @@ func (s *sessionStoreObject) NewSessionForUser(user *User) Session {
 		ShortID:  newPlainID(),
 		Username: user.Username,
 		Expires:  time.Now().AddDate(0, 0, 1),
+		Partial:  user.MustChangePassword,
 	}
 	log.Info("Started new session: username='%s' session_id='%s'", user.Username, session.ShortID)
 	s.l.Lock()
@@ -104,6 +106,16 @@ func (s *sessionStoreObject) UpdateSessionExpiry(sessionKey string) Session {
 	s.l.Lock()
 	session := s.m[sessionKey]
 	session.Expires = time.Now().Add(time.Duration(Options.Authentication.MaxAgeMinutes) * time.Minute)
+	s.m[sessionKey] = session
+	log.Debug("Sessions: %+v", s.m)
+	s.l.Unlock()
+	return session
+}
+
+func (s *sessionStoreObject) CompletePartialSession(sessionKey string) Session {
+	s.l.Lock()
+	session := s.m[sessionKey]
+	session.Partial = false
 	s.m[sessionKey] = session
 	log.Debug("Sessions: %+v", s.m)
 	s.l.Unlock()

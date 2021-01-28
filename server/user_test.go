@@ -41,8 +41,8 @@ func TestEditUser(t *testing.T) {
 	}
 
 	_, err = UserStore.EditUser(user, editUserParameters{
-		Email:   randomString(6),
-		Enabled: true,
+		Email:    randomString(6),
+		CanLogIn: true,
 	})
 	if err != nil {
 		t.Fatalf("Error modifying user: %s", err.Message)
@@ -111,5 +111,32 @@ func TestDuplicateUser(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatalf("Should return error on duplicate email")
+	}
+}
+
+func TestResetUserPassword(t *testing.T) {
+	username := randomString(6)
+	email := randomString(6)
+
+	user, err := UserStore.NewUser(newUserParameters{
+		Username:           username,
+		Email:              email,
+		Password:           randomString(6),
+		MustChangePassword: true,
+	})
+	if err != nil {
+		t.Fatalf("Error making new user: %s", err.Message)
+	}
+	if user == nil {
+		t.Fatalf("No user returned")
+	}
+
+	user, err = UserStore.ResetPassword(username, []byte(randomString(6)))
+	if err != nil {
+		t.Fatalf("Error changing password: %s", err.Message)
+	}
+
+	if user.MustChangePassword {
+		t.Fatalf("Should not require password change after password change")
 	}
 }

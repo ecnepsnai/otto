@@ -26,9 +26,8 @@ Let's get started using Otto!
 You can run the client with no configuration options and it will listen to `localhost:8080`. See the server
 documentation for more information on starting the server software.
 
-Once the server is running, access the URL and log in using the default credentials of `admin` and `admin`. A warning
-will appear at the top as long as you're logged in using these exact credentials, so we recommend changing that right
-away from the menu in the top right.
+Once the server is running, access the URL and log in using the default credentials of `admin` and `admin`. You will
+have to change your password the first time you log in.
 
 **Warning:** Do not expose the Otto web interface to the internet.
 

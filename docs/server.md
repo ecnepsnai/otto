@@ -18,7 +18,7 @@ podman run -p 8080:8080 -v <data dir>:/otto_data otto:latest
 
 Replace `<data dir>` with a directory where you want Otto to store all server data, or omit the volume parameter entirely if you don't care about persistence
 
-Navigating to `http://localhost:8080` in your web browser and use the default credentials of `admin`:`admin` to log in. As long as you are using the default credentials a warning will appear at the top of the page, so be sure to change the password right away by clicking "admin" in the top right and selecting "Edit User" to change your password.
+Navigating to `http://localhost:8080` in your web browser and use the default credentials of `admin`:`admin` to log in. You will need to change your password the first time you log in.
 
 We recommend using a reverse proxy such as NGINX and configuring TLS.
 
@@ -76,7 +76,7 @@ If you have no way to access the Otto service:
 
 1. Stop the Otto server
 2. Navigate to the data directory for the otto server
-3. Delete the files `user.db` and `session.db`
+3. Delete `user.db`
 4. Start the Otto server
 
 The default account will be recreated and you can log in using `admin`:`admin`.

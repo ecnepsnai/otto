@@ -2,9 +2,11 @@ package server
 
 import (
 	"path"
+	"sync"
 
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/server/environ"
+	"github.com/ecnepsnai/security"
 )
 
 var neededTableVersion = 8
@@ -37,70 +39,138 @@ func migrateIfNeeded() {
 func migrate8() {
 	log.Debug("Start migrate 8")
 
-	type oldScriptType struct {
-		ID               string `ds:"primary"`
-		Name             string `ds:"unique"`
-		Enabled          bool   `ds:"index"`
-		Executable       string
-		Script           string
-		Environment      []environ.Variable
-		UID              uint32
-		GID              uint32
-		WorkingDirectory string
-		AfterExecution   string
-		AttachmentIDs    []string
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 
-	type newScriptType struct {
-		ID               string `ds:"primary"`
-		Name             string `ds:"unique"`
-		Enabled          bool   `ds:"index"`
-		Executable       string
-		Script           string
-		Environment      []environ.Variable
-		RunAs            ScriptRunAs
-		WorkingDirectory string
-		AfterExecution   string
-		AttachmentIDs    []string
-	}
+	go func() {
+		defer wg.Done()
 
-	if !FileExists(path.Join(Directories.Data, "script.db")) {
-		return
-	}
+		type oldScriptType struct {
+			ID               string `ds:"primary"`
+			Name             string `ds:"unique"`
+			Enabled          bool   `ds:"index"`
+			Executable       string
+			Script           string
+			Environment      []environ.Variable
+			UID              uint32
+			GID              uint32
+			WorkingDirectory string
+			AfterExecution   string
+			AttachmentIDs    []string
+		}
 
-	results := ds.Migrate(ds.MigrateParams{
-		TablePath: path.Join(Directories.Data, "script.db"),
-		NewPath:   path.Join(Directories.Data, "script.db"),
-		OldType:   oldScriptType{},
-		NewType:   newScriptType{},
-		MigrateObject: func(old interface{}) (interface{}, error) {
-			oldScript, ok := old.(oldScriptType)
-			if !ok {
-				panic("Invalid type")
-			}
-			newScript := newScriptType{
-				ID:          oldScript.ID,
-				Name:        oldScript.Name,
-				Enabled:     oldScript.Enabled,
-				Executable:  oldScript.Executable,
-				Script:      oldScript.Script,
-				Environment: oldScript.Environment,
-				RunAs: ScriptRunAs{
-					Inherit: false,
-					UID:     oldScript.UID,
-					GID:     oldScript.GID,
-				},
-				WorkingDirectory: oldScript.WorkingDirectory,
-				AfterExecution:   oldScript.AfterExecution,
-				AttachmentIDs:    oldScript.AttachmentIDs,
-			}
-			return newScript, nil
-		},
-	})
+		type newScriptType struct {
+			ID               string `ds:"primary"`
+			Name             string `ds:"unique"`
+			Enabled          bool   `ds:"index"`
+			Executable       string
+			Script           string
+			Environment      []environ.Variable
+			RunAs            ScriptRunAs
+			WorkingDirectory string
+			AfterExecution   string
+			AttachmentIDs    []string
+		}
 
-	if results.Error != nil {
-		log.Fatal("Error migrating script database: %s", results.Error.Error())
-	}
+		if !FileExists(path.Join(Directories.Data, "script.db")) {
+			return
+		}
 
-	log.Debug("Migrated script: %+v", results)
+		results := ds.Migrate(ds.MigrateParams{
+			TablePath: path.Join(Directories.Data, "script.db"),
+			NewPath:   path.Join(Directories.Data, "script.db"),
+			OldType:   oldScriptType{},
+			NewType:   newScriptType{},
+			MigrateObject: func(old interface{}) (interface{}, error) {
+				oldScript, ok := old.(oldScriptType)
+				if !ok {
+					panic("Invalid type")
+				}
+				newScript := newScriptType{
+					ID:          oldScript.ID,
+					Name:        oldScript.Name,
+					Enabled:     oldScript.Enabled,
+					Executable:  oldScript.Executable,
+					Script:      oldScript.Script,
+					Environment: oldScript.Environment,
+					RunAs: ScriptRunAs{
+						Inherit: false,
+						UID:     oldScript.UID,
+						GID:     oldScript.GID,
+					},
+					WorkingDirectory: oldScript.WorkingDirectory,
+					AfterExecution:   oldScript.AfterExecution,
+					AttachmentIDs:    oldScript.AttachmentIDs,
+				}
+				return newScript, nil
+			},
+		})
+
+		if results.Error != nil {
+			log.Fatal("Error migrating script database: %s", results.Error.Error())
+		}
+
+		log.Debug("Migrated script: %+v", results)
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		type oldUserType struct {
+			Username     string `ds:"primary"`
+			Email        string `ds:"unique"`
+			PasswordHash security.HashedPassword
+			Enabled      bool
+		}
+		type newUserType struct {
+			Username           string `ds:"primary"`
+			Email              string `ds:"unique"`
+			PasswordHash       security.HashedPassword
+			CanLogIn           bool
+			MustChangePassword bool
+		}
+
+		if !FileExists(path.Join(Directories.Data, "user.db")) {
+			return
+		}
+
+		delay := security.FailDelay
+		security.FailDelay = 0
+
+		results := ds.Migrate(ds.MigrateParams{
+			TablePath: path.Join(Directories.Data, "user.db"),
+			NewPath:   path.Join(Directories.Data, "user.db"),
+			OldType:   oldUserType{},
+			NewType:   newUserType{},
+			MigrateObject: func(old interface{}) (interface{}, error) {
+				oldUser, ok := old.(oldUserType)
+				if !ok {
+					panic("Invalid type")
+				}
+				newUser := newUserType{
+					Username:           oldUser.Username,
+					Email:              oldUser.Email,
+					PasswordHash:       oldUser.PasswordHash,
+					CanLogIn:           oldUser.Enabled,
+					MustChangePassword: false,
+				}
+
+				if oldUser.PasswordHash.Compare([]byte("")) {
+					newUser.MustChangePassword = true
+				}
+
+				return newUser, nil
+			},
+		})
+
+		security.FailDelay = delay
+
+		if results.Error != nil {
+			log.Fatal("Error migrating user database: %s", results.Error.Error())
+		}
+
+		log.Debug("Migrated user: %+v", results)
+	}()
+
+	wg.Wait()
 }
