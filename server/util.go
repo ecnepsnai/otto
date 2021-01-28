@@ -11,7 +11,7 @@ import (
 )
 
 func generateSessionSecret() string {
-	return security.RandomString(8)
+	return security.RandomString(64)
 }
 
 // stringSliceContains does this slice of strings contain n?

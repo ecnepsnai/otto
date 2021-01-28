@@ -14,16 +14,23 @@ const configFileName = "otto_server.conf"
 
 // OttoOptions describes options for the otto server
 type OttoOptions struct {
-	General  OptionsGeneral
-	Network  OptionsNetwork
-	Register OptionsRegister
-	Security OptionsSecurity
+	General        OptionsGeneral
+	Authentication OptionsAuthentication
+	Network        OptionsNetwork
+	Register       OptionsRegister
+	Security       OptionsSecurity
 }
 
 // OptionsGeneral describes the general options
 type OptionsGeneral struct {
 	ServerURL         string
 	GlobalEnvironment []environ.Variable
+}
+
+// OptionsAuthentication describes the authentication options
+type OptionsAuthentication struct {
+	MaxAgeMinutes int
+	SecureOnly    bool
 }
 
 // OptionsSecurity describes security options
@@ -55,6 +62,10 @@ func LoadOptions() {
 		General: OptionsGeneral{
 			ServerURL:         "http://" + bindAddress + "/",
 			GlobalEnvironment: []environ.Variable{},
+		},
+		Authentication: OptionsAuthentication{
+			MaxAgeMinutes: 60,
+			SecureOnly:    false,
 		},
 		Network: OptionsNetwork{
 			ForceIPVersion:     IPVersionOptionAuto,

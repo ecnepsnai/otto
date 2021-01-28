@@ -9,7 +9,12 @@ import (
 )
 
 func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
-	login := Credentials{}
+	type credentials struct {
+		Username string
+		Password string
+	}
+
+	login := credentials{}
 	if err := request.Decode(&login); err != nil {
 		return nil, err
 	}
@@ -17,20 +22,23 @@ func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Error())
 	}
 
-	result, err := AuthenticateUser(login, request.HTTP)
-	if err != nil {
-		return nil, err
+	sessionKey := authenticateUser(login.Username, login.Password, request.HTTP)
+	login.Password = ""
+	login = credentials{}
+	if sessionKey == nil {
+		return nil, web.CommonErrors.Unauthorized
 	}
 
 	request.AddCookie(&http.Cookie{
 		Name:     ottoSessionCookie,
-		Value:    result.CookieValue,
+		Value:    *sessionKey,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 		Expires:  time.Now().AddDate(0, 0, 1),
+		Secure:   Options.Authentication.SecureOnly,
 	})
 
-	return result.Session, nil
+	return true, nil
 }
 
 func (h *handle) Logout(request web.Request) (interface{}, *web.Error) {
@@ -42,6 +50,7 @@ func (h *handle) Logout(request web.Request) (interface{}, *web.Error) {
 		Value:   "",
 		Path:    "/",
 		Expires: time.Now().AddDate(0, 0, -1),
+		Secure:  Options.Authentication.SecureOnly,
 	})
 
 	EventStore.UserLoggedOut(session.Username)

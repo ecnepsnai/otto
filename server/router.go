@@ -23,7 +23,7 @@ func RouterSetup() {
 
 	authenticatedOptions := web.HandleOptions{
 		AuthenticateMethod: func(request *http.Request) interface{} {
-			return IsAuthenticated(request)
+			return sessionForHTTPRequest(request)
 		},
 		MaxBodyLength:      maxBodyLength,
 		UnauthorizedMethod: unauthorizedHandle,

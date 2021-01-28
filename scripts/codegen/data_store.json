@@ -1,10 +1,5 @@
 [
     {
-        "name": "Session",
-        "object": "Session",
-        "unordered": true
-    },
-    {
         "name": "User",
         "object": "User"
     },
