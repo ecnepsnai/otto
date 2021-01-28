@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Card } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { NumberInput, Radio, RadioChoice } from '../../components/Form';
-import { Options } from '../../types/Options';
+import { Card } from '../../../components/Card';
+import { Icon } from '../../../components/Icon';
+import { NumberInput, Radio, RadioChoice } from '../../../components/Form';
+import { Options } from '../../../types/Options';
 
 export interface OptionsNetworkProps {
     defaultValue: Options.Network;

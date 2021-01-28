@@ -1,85 +1,83 @@
 import * as React from 'react';
-import { Card } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { Checkbox, Input, Select, RadioChoice, Radio } from '../../components/Form';
-import { Options } from '../../types/Options';
-import { CreateButton } from '../../components/Button';
-import { GlobalModalFrame, ModalForm } from '../../components/Modal';
-import { Loading } from '../../components/Loading';
-import { Group } from '../../types/Group';
-import { Style } from '../../components/Style';
-import { Table } from '../../components/Table';
-import { Rand } from '../../services/Rand';
-import { Dropdown, Menu } from '../../components/Menu';
-import { RandomPSK } from '../../components/RandomPSK';
-import { StateManager } from '../../services/StateManager';
-import { EditRegisterRuleParameters, NewRegisterRuleParameters, RegisterRule } from '../../types/RegisterRule';
-import { Notification } from '../../components/Notification';
+import { CreateButton } from '../../../components/Button';
+import { Card } from '../../../components/Card';
+import { Checkbox, Form, Input, Radio, RadioChoice, Select } from '../../../components/Form';
+import { Icon } from '../../../components/Icon';
+import { PageLoading } from '../../../components/Loading';
+import { Dropdown, Menu } from '../../../components/Menu';
+import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
+import { Notification } from '../../../components/Notification';
+import { Page } from '../../../components/Page';
+import { RandomPSK } from '../../../components/RandomPSK';
+import { Style } from '../../../components/Style';
+import { Table } from '../../../components/Table';
+import { Rand } from '../../../services/Rand';
+import { StateManager } from '../../../services/StateManager';
+import { Group } from '../../../types/Group';
+import { Options } from '../../../types/Options';
+import { EditRegisterRuleParameters, NewRegisterRuleParameters, RegisterRule } from '../../../types/RegisterRule';
 
-export interface OptionsRegisterProps {
-    defaultValue: Options.Register;
-    onUpdate: (value: Options.Register) => (void);
-}
-interface OptionsRegisterState {
+export interface SystemRegisterProps {}
+interface SystemRegisterState {
     loading: boolean;
-    value: Options.Register;
-    groups?: Group[];
     rules?: RegisterRule[];
+    groups?: Group[];
+    options?: Options.Register;
 }
-export class OptionsRegister extends React.Component<OptionsRegisterProps, OptionsRegisterState> {
-    constructor(props: OptionsRegisterProps) {
+export class SystemRegister extends React.Component<SystemRegisterProps, SystemRegisterState> {
+    constructor(props: SystemRegisterProps) {
         super(props);
         this.state = {
-            loading: true,
-            value: props.defaultValue,
+            loading: true
         };
-    }
-
-    private loadGroups = () => {
-        return Group.List().then(groups => {
-            this.setState(state => {
-                const value = state.value;
-                if (!state.value.DefaultGroupID) {
-                    value.DefaultGroupID = groups[0].ID;
-                }
-                return { value: value, groups: groups };
-            });
-        });
     }
 
     private loadRules = () => {
         return RegisterRule.List().then(rules => {
-            this.setState({ rules: rules });
+            this.setState({rules: rules});
+        });
+    }
+
+    private loadGroups = () => {
+        return Group.List().then(groups => {
+            this.setState({groups: groups});
+        });
+    }
+
+    private loadOptions = () => {
+        return Options.Options.Get().then(o => {
+            this.setState({options: o.Register});
         });
     }
 
     componentDidMount(): void {
-        Promise.all([this.loadGroups(), this.loadRules()]).then(() => {
-            this.setState({ loading: false });
+        Promise.all([this.loadRules(), this.loadGroups(), this.loadOptions()]).then(() => {
+            this.setState({loading: false});
+        });
+    }
+
+    private onSubmit = () => {
+        return Options.Options.Get().then(options => {
+            options.Register = this.state.options;
+            Options.Options.Save(options).then(() => {
+                Notification.success('Changes Saved');
+            });
         });
     }
 
     private changeEnabled = (Enabled: boolean) => {
         this.setState(state => {
-            const options = state.value;
+            const options = state.options;
             options.Enabled = Enabled;
-            return {
-                value: options,
-            };
-        }, () => {
-            this.props.onUpdate(this.state.value);
+            return { options: options };
         });
     }
 
     private changePSK = (PSK: string) => {
         this.setState(state => {
-            const options = state.value;
+            const options = state.options;
             options.PSK = PSK;
-            return {
-                value: options,
-            };
-        }, () => {
-            this.props.onUpdate(this.state.value);
+            return { options: options };
         });
     }
 
@@ -109,69 +107,58 @@ export class OptionsRegister extends React.Component<OptionsRegisterProps, Optio
 
     private changeDefaultGroupID = (DefaultGroupID: string) => {
         this.setState(state => {
-            const options = state.value;
+            const options = state.options;
             options.DefaultGroupID = DefaultGroupID;
-            return {
-                value: options,
-            };
-        }, () => {
-            this.props.onUpdate(this.state.value);
+            return { options: options };
         });
     }
 
     private enabledContent = () => {
-        if (!this.state.value.Enabled) { return null; }
+        if (!this.state.options.Enabled) { return null; }
 
-        return (
-            <React.Fragment>
-                <Input
-                    type="password"
-                    label="Register PSK"
-                    helpText="Clients that wish to register with this server must specify this PSK to authenticate"
-                    defaultValue={this.state.value.PSK}
-                    onChange={this.changePSK}
-                    required />
-                <RandomPSK newPSK={this.changePSK} />
-                <label className="form-label">Rules</label>
-                <RegisterRules rules={this.state.rules} onAdd={this.addRule} onChange={this.modifyRule} onDelete={this.deleteRule} groups={this.state.groups}/>
-                <Select
-                    label="Default Group"
-                    helpText="If none of the above rules match the client will be added to this group"
-                    defaultValue={this.state.value.DefaultGroupID}
-                    onChange={this.changeDefaultGroupID}>
-                        { this.state.groups.map((group, idx) => {
-                            return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                        }) }
-                    </Select>
-            </React.Fragment>
-        );
-    }
-
-    private content = () => {
-        if (this.state.loading) { return (<Loading />); }
-
-        return (
-            <React.Fragment>
-                <Checkbox
-                    label="Allow Hosts to Register Themselves"
-                    helpText="If checked hosts can automatically register themselves with this Otto server"
-                    defaultValue={this.state.value.Enabled}
-                    onChange={this.changeEnabled} />
-                { this.enabledContent() }
-            </React.Fragment>
-        );
+        return (<React.Fragment>
+            <Input
+                type="password"
+                label="Register PSK"
+                helpText="Clients that wish to register with this server must specify this PSK to authenticate"
+                defaultValue={this.state.options.PSK}
+                onChange={this.changePSK}
+                required />
+            <RandomPSK newPSK={this.changePSK} />
+            <Card.Card className="mb-2">
+                <Card.Header>
+                    Rules
+                </Card.Header>
+                <Card.Body>
+                    <RegisterRules rules={this.state.rules} onAdd={this.addRule} onChange={this.modifyRule} onDelete={this.deleteRule} groups={this.state.groups}/>
+                </Card.Body>
+            </Card.Card>
+            <Select
+                label="Default Group"
+                helpText="If none of the above rules match the client will be added to this group"
+                defaultValue={this.state.options.DefaultGroupID}
+                onChange={this.changeDefaultGroupID}>
+                    { this.state.groups.map((group, idx) => {
+                        return ( <option key={idx} value={group.ID}>{group.Name}</option> );
+                    }) }
+                </Select>
+        </React.Fragment>);
     }
 
     render(): JSX.Element {
+        if (this.state.loading) { return (<PageLoading />); }
+
         return (
-            <Card.Card>
-                <Card.Header>
-                    <Icon.Label icon={<Icon.Magic />} label="Register" />
-                </Card.Header>
-                <Card.Body>
-                    { this.content() }
-                </Card.Body>
-            </Card.Card>
+            <Page title="Host Registration">
+                <Form showSaveButton={true} onSubmit={this.onSubmit}>
+                    <Checkbox
+                        label="Allow Hosts to Register Themselves"
+                        helpText="If checked hosts can automatically register themselves with this Otto server"
+                        defaultValue={this.state.options.Enabled}
+                        onChange={this.changeEnabled} />
+                    { this.enabledContent() }
+                </Form>
+            </Page>
         );
     }
 }
@@ -346,3 +333,4 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
         );
     }
 }
+

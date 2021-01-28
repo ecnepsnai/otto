@@ -174,9 +174,9 @@ func RouterSetup() {
 		"/schedules/schedule",
 		"/schedules/schedule/:id",
 		"/schedules/schedule/:id/edit",
-		"/options",
-		"/options/users/user",
-		"/options/users/user/:username",
+		"/system/options",
+		"/system/users",
+		"/system/register",
 		"/events",
 	}
 	for _, route := range ngRoutes {

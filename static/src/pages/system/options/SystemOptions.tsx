@@ -1,22 +1,21 @@
 import * as React from 'react';
-import { Page } from '../../components/Page';
-import { Options } from '../../types/Options';
-import { StateManager } from '../../services/StateManager';
-import { Form } from '../../components/Form';
+import { Page } from '../../../components/Page';
+import { Options } from '../../../types/Options';
+import { StateManager } from '../../../services/StateManager';
+import { Form } from '../../../components/Form';
 import { OptionsGeneral } from './OptionsGeneral';
+import { OptionsAuthentication } from './OptionsAuthentication';
 import { OptionsNetwork } from './OptionsNetwork';
-import { OptionsRegister } from './OptionsRegister';
-import { OptionsUsers } from './OptionsUsers';
-import { Notification } from '../../components/Notification';
+import { Notification } from '../../../components/Notification';
 import { OptionsSecurity } from './OptionsSecurity';
 
-export interface OptionsMainProps {}
-interface OptionsMainState {
+export interface SystemOptionsProps {}
+interface SystemOptionsState {
     loading?: boolean,
     options: Options.OttoOptions,
 }
-export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainState> {
-    constructor(props: OptionsMainProps) {
+export class SystemOptions extends React.Component<SystemOptionsProps, SystemOptionsState> {
+    constructor(props: SystemOptionsProps) {
         super(props);
         this.state = {
             options: StateManager.Current().Options
@@ -27,6 +26,14 @@ export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainSt
         this.setState(state => {
             const options = state.options;
             options.General = value;
+            return { options: options };
+        });
+    }
+
+    private changeAuthentication = (value: Options.Authentication) => {
+        this.setState(state => {
+            const options = state.options;
+            options.Authentication = value;
             return { options: options };
         });
     }
@@ -47,33 +54,22 @@ export class OptionsMain extends React.Component<OptionsMainProps, OptionsMainSt
         });
     }
 
-    private changeRegister = (value: Options.Register) => {
-        this.setState(state => {
-            const options = state.options;
-            options.Register = value;
-            return { options: options };
-        });
-    }
-
     private onSubmit = () => {
         this.setState({ loading: true });
-        Options.Options.Save(this.state.options).then(() => {
-            StateManager.Refresh().then(() => {
-                Notification.success('Options Saved');
-                this.setState({ loading: false });
-            });
+        return Options.Options.Save(this.state.options).then(() => {
+            Notification.success('Options Saved');
+            this.setState({ loading: false });
         });
     }
 
     render(): JSX.Element {
         return (
             <Page title="Options">
-                <Form className="cards" showSaveButton onSubmit={this.onSubmit} loading={this.state.loading}>
+                <Form className="cards" showSaveButton onSubmit={this.onSubmit}>
                     <OptionsGeneral defaultValue={this.state.options.General} onUpdate={this.changeGeneral}/>
+                    <OptionsAuthentication defaultValue={this.state.options.Authentication} onUpdate={this.changeAuthentication}/>
                     <OptionsNetwork defaultValue={this.state.options.Network} onUpdate={this.changeNetwork}/>
                     <OptionsSecurity defaultValue={this.state.options.Security} onUpdate={this.changeSecurity}/>
-                    <OptionsRegister defaultValue={this.state.options.Register} onUpdate={this.changeRegister}/>
-                    <OptionsUsers />
                     <div className="mb-2"></div>
                 </Form>
             </Page>

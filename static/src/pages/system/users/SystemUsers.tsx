@@ -1,17 +1,17 @@
 import * as React from 'react';
-import { User } from '../../types/User';
-import { Loading } from '../../components/Loading';
-import { Card } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { CreateButton, Button } from '../../components/Button';
-import { Table } from '../../components/Table';
-import { EnabledBadge } from '../../components/Badge';
-import { Style } from '../../components/Style';
-import { Rand } from '../../services/Rand';
-import { Menu } from '../../components/Menu';
-import { StateManager } from '../../services/StateManager';
-import { Modal, GlobalModalFrame, ModalForm } from '../../components/Modal';
-import { Input, Checkbox } from '../../components/Form';
+import { EnabledBadge } from '../../../components/Badge';
+import { CreateButton, Button } from '../../../components/Button';
+import { Input, Checkbox } from '../../../components/Form';
+import { Icon } from '../../../components/Icon';
+import { PageLoading } from '../../../components/Loading';
+import { Menu } from '../../../components/Menu';
+import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
+import { Page } from '../../../components/Page';
+import { Style } from '../../../components/Style';
+import { Table } from '../../../components/Table';
+import { Rand } from '../../../services/Rand';
+import { StateManager } from '../../../services/StateManager';
+import { User } from '../../../types/User';
 
 export class UserManager {
     public static EditCurrentUser(): Promise<User> {
@@ -24,13 +24,13 @@ export class UserManager {
     }
 }
 
-export interface OptionsUsersProps {}
-interface OptionsUsersState {
+export interface SystemUsersProps {}
+interface SystemUsersState {
     loading: boolean;
     users?: User[];
 }
-export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUsersState> {
-    constructor(props: OptionsUsersProps) {
+export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersState> {
+    constructor(props: SystemUsersProps) {
         super(props);
         this.state = {
             loading: true,
@@ -112,10 +112,11 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
         );
     }
 
-    private content = () => {
-        if (this.state.loading) { return (<Loading />); }
+    render(): JSX.Element {
+        if (this.state.loading) { return (<PageLoading />); }
+
         return (
-            <div>
+            <Page title="Users">
                 <CreateButton onClick={this.newUserClick} />
                 <Table.Table>
                     <Table.Head>
@@ -128,20 +129,7 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
                         { this.state.users.map(this.userRow) }
                     </Table.Body>
                 </Table.Table>
-            </div>
-        );
-    }
-
-    render(): JSX.Element {
-        return (
-            <Card.Card>
-                <Card.Header>
-                    <Icon.Label icon={<Icon.Users />} label="Users" />
-                </Card.Header>
-                <Card.Body>
-                    { this.content() }
-                </Card.Body>
-            </Card.Card>
+            </Page>
         );
     }
 }
@@ -262,3 +250,4 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         );
     }
 }
+
