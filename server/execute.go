@@ -34,7 +34,7 @@ type hostConnection struct {
 // connect will open a connection to the Otto client on the host
 func (host *Host) connect() (*hostConnection, error) {
 	address := fmt.Sprintf("%s:%d", host.Address, host.Port)
-	log.Debug("Connecting to %s...", address)
+	log.Debug("Connecting to host %s", address)
 
 	timeout := time.Duration(Options.Network.Timeout) * time.Second
 	network := "tcp"
@@ -46,12 +46,12 @@ func (host *Host) connect() (*hostConnection, error) {
 
 	c, err := net.DialTimeout(network, address, timeout)
 	if err != nil {
-		heartbeatStore.MarkHostUnreachable(host)
+		heartbeatStore.UpdateHostReachability(host, false)
 		log.Error("Error connecting to host '%s': %s", address, err.Error())
 		return nil, err
 	}
 
-	log.Debug("Connected!")
+	log.Debug("Connected to host %s", address)
 	return &hostConnection{
 		Host:    host,
 		Address: fmt.Sprintf("%s:%d", host.Address, host.Port),
@@ -121,7 +121,7 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 		case otto.MessageTypeActionResult:
 			result := message.(otto.MessageActionResult)
 			scriptResult := &result.ScriptResult
-			heartbeatStore.MarkHostReachable(host, result.ClientVersion)
+			heartbeatStore.UpdateHostReachability(host, true)
 			log.Debug("Action completed with result: %+v", *scriptResult)
 			return scriptResult, nil
 		case otto.MessageTypeGeneralFailure:
@@ -159,7 +159,7 @@ func (host *Host) Ping() *Error {
 	switch messageType {
 	case otto.MessageTypeHeartbeatResponse:
 		response := message.(otto.MessageHeartbeatResponse)
-		heartbeatStore.MarkHostReachable(host, response.ClientVersion)
+		heartbeatStore.RegisterHeartbeatReply(host, response)
 		break
 	default:
 		log.Error("Unexpected otto message %d while looking for heartbeat reply", messageType)

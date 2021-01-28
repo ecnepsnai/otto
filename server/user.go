@@ -9,5 +9,5 @@ type User struct {
 	Username     string `ds:"primary" max:"32" min:"1"`
 	Email        string `ds:"unique" max:"128" min:"1"`
 	Enabled      bool
-	PasswordHash security.HashedPassword `json:"-" structs:"-" ts:"-"`
+	PasswordHash security.HashedPassword `json:"-"`
 }

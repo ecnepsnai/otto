@@ -17,6 +17,8 @@ import (
 	"github.com/ecnepsnai/otto"
 )
 
+var registerProperties otto.RegisterRequestProperties
+
 func tryAutoRegister() {
 	env := envMap()
 
@@ -67,7 +69,7 @@ func tryAutoRegister() {
 		Address:    localIP.String(),
 		PSK:        psk,
 		Port:       port,
-		Properties: registerProperties(),
+		Properties: registerProperties,
 	}
 	data, err := json.Marshal(request)
 	if err != nil {
@@ -145,7 +147,7 @@ func tryAutoRegister() {
 	}
 }
 
-func registerProperties() otto.RegisterRequestProperties {
+func loadRegisterProperties() {
 	// Get the hostname
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -157,7 +159,7 @@ func registerProperties() otto.RegisterRequestProperties {
 		panic("Error getting system information: " + err.Error())
 	}
 
-	return otto.RegisterRequestProperties{
+	registerProperties = otto.RegisterRequestProperties{
 		Hostname:            hostname,
 		KernelName:          info.Kernel,
 		KernelVersion:       info.KernelVersion,

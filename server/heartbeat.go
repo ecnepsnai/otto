@@ -3,6 +3,8 @@ package server
 import (
 	"sync"
 	"time"
+
+	"github.com/ecnepsnai/otto"
 )
 
 // Heartbeat describes a heartbeat to a host
@@ -11,7 +13,8 @@ type Heartbeat struct {
 	IsReachable bool
 	LastReply   time.Time
 	LastAttempt time.Time
-	LastVersion string
+	Version     string
+	Properties  map[string]string
 }
 
 type heartbeatStoreType struct {
@@ -65,31 +68,56 @@ func (s *hostStoreObject) PingAll() error {
 	return nil
 }
 
-func (s *heartbeatStoreType) MarkHostReachable(host *Host, clientVersion string) (*Heartbeat, *Error) {
+func (s *heartbeatStoreType) RegisterHeartbeatReply(host *Host, reply otto.MessageHeartbeatResponse) (*Heartbeat, *Error) {
 	heartbeat := Heartbeat{
 		Address:     host.Address,
 		IsReachable: true,
 		LastReply:   time.Now(),
 		LastAttempt: time.Now(),
-		LastVersion: clientVersion,
+		Version:     reply.ClientVersion,
+		Properties:  reply.Properties,
 	}
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	wasUnreachable := true
+	if hb, p := s.Heartbeats[host.Address]; p {
+		if hb.IsReachable {
+			wasUnreachable = false
+		}
+	}
+
 	s.Heartbeats[host.Address] = heartbeat
-	log.Info("Host is reachable: host=%s client_version='%s'", host.ID, clientVersion)
+
+	if wasUnreachable {
+		log.Info("Host became reachable: host_name='%s'", host.Name)
+	}
+
 	return &heartbeat, nil
 }
 
-func (s *heartbeatStoreType) MarkHostUnreachable(host *Host) (*Heartbeat, *Error) {
-	heartbeat := Heartbeat{
-		Address:     host.Address,
-		IsReachable: false,
-		LastAttempt: time.Now(),
-	}
+func (s *heartbeatStoreType) UpdateHostReachability(host *Host, isReachable bool) (*Heartbeat, *Error) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+
+	heartbeat := s.Heartbeats[host.Address]
+
+	becameUnreachable := heartbeat.IsReachable && isReachable
+	becameReachable := !heartbeat.IsReachable && isReachable
+
+	heartbeat.Address = host.Address
+	heartbeat.IsReachable = isReachable
+	heartbeat.LastAttempt = time.Now()
+
 	s.Heartbeats[host.Address] = heartbeat
-	log.Info("Host is not reachable: host=%s", host.ID)
+
+	if becameUnreachable {
+		log.Warn("Host became unreachable: host_name='%s'", host.Name)
+	}
+	if becameReachable {
+		log.Info("Host became reachable: host_name='%s'", host.Name)
+	}
+
 	return &heartbeat, nil
 }
 

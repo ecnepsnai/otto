@@ -62,8 +62,17 @@ func (sc *serverConnection) Start() {
 func handleHeartbeatRequest(c net.Conn, message otto.MessageHeartbeatRequest) {
 	log.Info("Heartbeat from %s (v%s)", c.RemoteAddr().String(), message.ServerVersion)
 
+	properties := map[string]string{
+		"hostname":             registerProperties.Hostname,
+		"kernel_name":          registerProperties.KernelName,
+		"kernel_version":       registerProperties.KernelVersion,
+		"distribution_name":    registerProperties.DistributionName,
+		"distribution_version": registerProperties.DistributionVersion,
+	}
+
 	response := otto.MessageHeartbeatResponse{
 		ClientVersion: MainVersion,
+		Properties:    properties,
 	}
 
 	if err := otto.WriteMessage(otto.MessageTypeHeartbeatResponse, response, c, config.PSK); err != nil {

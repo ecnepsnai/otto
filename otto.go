@@ -55,6 +55,7 @@ type MessageHeartbeatRequest struct {
 // MessageHeartbeatResponse describes a heartbeat response
 type MessageHeartbeatResponse struct {
 	ClientVersion string
+	Properties    map[string]string
 }
 
 // MessageTriggerAction describes an action trigger
