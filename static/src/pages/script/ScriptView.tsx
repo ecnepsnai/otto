@@ -112,6 +112,12 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
         };
     }
 
+    private runAs = () => {
+        if (this.state.script.RunAs.Inherit) { return null; }
+
+        return (<ListGroup.TextItem title="Run As">User: {this.state.script.RunAs.UID} Group: {this.state.script.RunAs.GID}</ListGroup.TextItem>);
+    }
+
     private attachmentList = () => {
         if (!this.state.attachments || this.state.attachments.length == 0) {
             return (<Card.Body><Nothing /></Card.Body>);
@@ -152,7 +158,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                             <Card.Header>Script Details</Card.Header>
                             <ListGroup.List>
                                 <ListGroup.TextItem title="Name">{this.state.script.Name}</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Run As">User: {this.state.script.UID} Group: {this.state.script.GID}</ListGroup.TextItem>
+                                { this.runAs() }
                                 <ListGroup.TextItem title="Working Directory">{this.state.script.WorkingDirectory}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Executable">{this.state.script.Executable}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Status"><EnabledBadge value={this.state.script.Enabled}/></ListGroup.TextItem>

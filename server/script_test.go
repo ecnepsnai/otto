@@ -19,8 +19,10 @@ func TestAddGetScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -50,8 +52,10 @@ func TestEditScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -71,8 +75,10 @@ func TestEditScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error editing script: %s", err.Message)
@@ -100,8 +106,10 @@ func TestDeleteScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -134,8 +142,10 @@ func TestAddDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -154,8 +164,10 @@ func TestAddDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -175,8 +187,10 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -195,8 +209,10 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -216,8 +232,10 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err == nil {
 		t.Fatalf("Should return error")

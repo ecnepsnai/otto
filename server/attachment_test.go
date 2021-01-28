@@ -37,8 +37,6 @@ func TestAddGetAttachment(t *testing.T) {
 		Executable:    "/bin/bash",
 		Script:        "#!/bin/bash\necho hello\n",
 		AttachmentIDs: []string{attachment.ID},
-		UID:           0,
-		GID:           0,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)

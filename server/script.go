@@ -12,11 +12,17 @@ type Script struct {
 	Executable       string `min:"1"`
 	Script           string `min:"1"`
 	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
+	RunAs            ScriptRunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
+}
+
+// ScriptRunAs describes the properties of which user runs a script
+type ScriptRunAs struct {
+	Inherit bool
+	UID     uint32
+	GID     uint32
 }
 
 // Groups all groups with this script enabled

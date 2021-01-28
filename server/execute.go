@@ -188,9 +188,12 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 	}
 
 	scriptRequest := otto.Script{
-		Name:             script.Name,
-		UID:              script.UID,
-		GID:              script.GID,
+		Name: script.Name,
+		RunAs: otto.ScriptRunAs{
+			UID:     script.RunAs.UID,
+			GID:     script.RunAs.GID,
+			Inherit: script.RunAs.Inherit,
+		},
 		Executable:       script.Executable,
 		Data:             []byte(script.Script),
 		WorkingDirectory: script.WorkingDirectory,

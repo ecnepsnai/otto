@@ -17,8 +17,10 @@ func TestAddGetScheduleGroup(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -87,8 +89,10 @@ func TestAddGetScheduleHost(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -145,8 +149,10 @@ func TestEditSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -224,8 +230,10 @@ func TestDeleteSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -294,8 +302,10 @@ func TestAddDuplicateSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -368,8 +378,10 @@ func TestRenameDuplicateSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		UID: 0,
-		GID: 0,
+		RunAs: ScriptRunAs{
+			UID: 0,
+			GID: 0,
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)

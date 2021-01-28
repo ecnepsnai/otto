@@ -199,11 +199,21 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
 	}
-	if getCurrentUID() != script.UID || getCurrentGID() != script.GID {
-		log.Debug("Using UID %d and GID %d\n", script.UID, script.GID)
+	if !script.RunAs.Inherit {
+		if getCurrentUID() != 0 {
+			log.Error("Cannot run script as specific without being root")
+			canCancel = false
+			return otto.ScriptResult{
+				Success:   false,
+				ExecError: "Running a script as a specific user requires the Otto client running as root",
+				Elapsed:   time.Since(start),
+			}
+		}
+
+		log.Debug("Using UID %d and GID %d\n", script.RunAs.UID, script.RunAs.GID)
 		cmd.SysProcAttr.Credential = &syscall.Credential{
-			Uid: script.UID,
-			Gid: script.GID,
+			Uid: script.RunAs.UID,
+			Gid: script.RunAs.GID,
 		}
 	}
 
@@ -218,7 +228,7 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	log.Info("Running '%s' as UID %d GID %d", tmp.Name(), script.UID, script.GID)
+	log.Info("Running '%s'", tmp.Name())
 	if err := cmd.Start(); err != nil {
 		result.Success = false
 		if exitError, ok := err.(*exec.ExitError); ok {

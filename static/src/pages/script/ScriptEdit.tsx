@@ -83,6 +83,23 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
         );
     }
 
+    private changeRunAsInherit = (DontInherit: boolean) => {
+        this.setState(state => {
+            state.script.RunAs.Inherit = !DontInherit;
+            return state;
+        });
+    }
+
+    private runAs = () => {
+        if (this.state.script.RunAs.Inherit) { return null; }
+
+        return (<IDInput
+            label="Run Script As"
+            defaultUID={this.state.script.RunAs.UID}
+            defaultGID={this.state.script.RunAs.GID}
+            onChange={this.changeID} />);
+    }
+
     private changeEnabled = (Enabled: boolean) => {
         this.setState(state => {
             state.script.Enabled = Enabled;
@@ -92,8 +109,8 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
 
     private changeID = (UID: number, GID: number) => {
         this.setState(state => {
-            state.script.UID = UID;
-            state.script.GID = GID;
+            state.script.RunAs.UID = UID;
+            state.script.RunAs.GID = GID;
             return state;
         });
     }
@@ -162,11 +179,8 @@ export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState
                     onChange={this.changeName}
                     required />
                 { this.enabledCheckbox() }
-                <IDInput
-                    label="Run Script As"
-                    defaultUID={this.state.script.UID}
-                    defaultGID={this.state.script.GID}
-                    onChange={this.changeID} />
+                <Checkbox label="Run As Specific User" defaultValue={!this.state.script.RunAs.Inherit} onChange={this.changeRunAsInherit} />
+                { this.runAs() }
                 <Input
                     label="Working Directory"
                     type="text"

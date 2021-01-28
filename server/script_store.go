@@ -67,8 +67,7 @@ type newScriptParameters struct {
 	Executable       string
 	Script           string
 	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
+	RunAs            ScriptRunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
@@ -93,8 +92,7 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		Executable:       params.Executable,
 		Script:           params.Script,
 		Environment:      params.Environment,
-		UID:              params.UID,
-		GID:              params.GID,
+		RunAs:            params.RunAs,
 		Enabled:          true,
 		WorkingDirectory: params.WorkingDirectory,
 		AfterExecution:   params.AfterExecution,
@@ -119,8 +117,7 @@ type editScriptParameters struct {
 	Executable       string
 	Script           string
 	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
+	RunAs            ScriptRunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
@@ -144,8 +141,7 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	script.Executable = params.Executable
 	script.Script = params.Script
 	script.Environment = params.Environment
-	script.UID = params.UID
-	script.GID = params.GID
+	script.RunAs = params.RunAs
 	script.WorkingDirectory = params.WorkingDirectory
 	script.AfterExecution = params.AfterExecution
 	script.AttachmentIDs = params.AttachmentIDs
