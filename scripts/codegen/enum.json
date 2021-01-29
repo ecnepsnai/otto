@@ -133,6 +133,11 @@
                 "value": "\"UserModified\""
             },
             {
+                "key": "UserChangedPassword",
+                "description": "UserChangedPassword event",
+                "value": "\"UserChangedPassword\""
+            },
+            {
                 "key": "UserDeleted",
                 "description": "UserDeleted event",
                 "value": "\"UserDeleted\""

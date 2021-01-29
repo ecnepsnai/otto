@@ -18,10 +18,7 @@ type Host struct {
 func (h Host) Groups() ([]Group, *Error) {
 	groups := make([]Group, len(h.GroupIDs))
 	for i, groupID := range h.GroupIDs {
-		group, err := GroupStore.GroupWithID(groupID)
-		if err != nil {
-			return nil, err
-		}
+		group := GroupStore.GroupWithID(groupID)
 		groups[i] = *group
 	}
 	return groups, nil

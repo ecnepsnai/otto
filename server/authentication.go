@@ -2,132 +2,90 @@ package server
 
 import (
 	"net/http"
-	"strings"
 	"time"
-
-	"github.com/ecnepsnai/security"
-	"github.com/ecnepsnai/web"
 )
-
-// Credentials describes credentiuals
-type Credentials struct {
-	Username string `limits:"32"`
-	Password string `limits:"256"`
-}
-
-// AuthenticationResult describes the result for authentication
-type AuthenticationResult struct {
-	Session     Session
-	CookieValue string
-}
 
 const (
 	ottoSessionCookie = "otto-session"
 )
 
-// IsAuthenticated is there a valid user session for the given HTTP request.
-// Returns a populated session object if valid, nil if invalid
-func IsAuthenticated(r *http.Request) *Session {
+// AuthenticationResult describes an authentication result
+type AuthenticationResult struct {
+	SessionKey         string
+	MustChangePassword bool
+}
+
+func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 	sessionCookie, _ := r.Cookie(ottoSessionCookie)
-	return authenticateUser(sessionCookie)
-}
-
-func authenticateUser(sessionCookie *http.Cookie) *Session {
 	if sessionCookie == nil {
-		log.Warn("Invalid or missing otto session cookie")
 		return nil
 	}
 
-	cookieComponents := strings.Split(sessionCookie.Value, "$")
-	if len(cookieComponents) != 2 {
-		log.Warn("Invalid otto session cookie")
-		return nil
-	}
-
-	sessionID := cookieComponents[0]
-	sessionHash := cookieComponents[1]
-
-	session, err := SessionStore.SessionWithID(sessionID)
-	if err != nil {
-		log.Error("Error fetching session '%s': %s", sessionID, err.Message)
-		return nil
-	}
+	sessionKey := sessionCookie.Value
+	session := SessionStore.SessionWithID(sessionKey)
 	if session == nil {
-		log.Warn("No session with ID '%s' found", sessionID)
+		log.Debug("No session found: session_key='%s'", sessionKey)
 		return nil
 	}
 
-	if time.Now().Unix() >= session.Expires {
-		log.Warn("Session expired: %d >= %d", time.Now().Unix(), session.Expires)
+	if time.Since(session.Expires) > 0 {
+		log.Warn("Session expired: session_id='%s' username='%s' expired_on='%s'", session.ShortID, session.Username, session.Expires)
 		return nil
 	}
 
-	trustedHash := security.HashSHA256String(session.Secret + session.Username)
-	if trustedHash != sessionHash {
-		log.Warn("Invalid otto session hash")
-		log.Debug("'%s' != '%s'", trustedHash, sessionHash)
+	if user := UserStore.UserWithUsername(session.Username); user == nil {
+		log.Warn("Session for nonexistant user: session_id='%s' username='%s'", session.ShortID, session.Username)
 		return nil
 	}
 
-	user, err := UserStore.UserWithUsername(session.Username)
-	if err != nil || user == nil {
-		log.Warn("Session for non-existant user: '%s'", session.Username)
+	if session.Partial && !allowPartial {
 		return nil
 	}
 
-	// Update expires timestamp
-	session.Expires = time.Now().Unix() + 7200
-	SessionStore.SaveSession(session)
-
-	return session
+	log.Info("HTTP request: session_id='%s' method='%s' url='%s' username='%s'", session.ShortID, r.Method, r.URL.String(), session.Username)
+	updatedSession := SessionStore.UpdateSessionExpiry(session.Key)
+	return &updatedSession
 }
 
-// AuthenticateUser authenticate a user
-func AuthenticateUser(credentials Credentials, req *http.Request) (*AuthenticationResult, *web.Error) {
-	user, err := UserStore.UserWithUsername(credentials.Username)
-	if err != nil {
-		return nil, web.CommonErrors.Unauthorized
+func authenticateUser(username, password string, req *http.Request) *AuthenticationResult {
+	usernameLen := len(username)
+	passwordLen := len(password)
+	if usernameLen == 0 || usernameLen > 32 || passwordLen == 0 || passwordLen > 256 {
+		log.Debug("Reject login with illegal parameters")
+		return nil
 	}
+
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
-		return nil, web.CommonErrors.Unauthorized
+		log.Warn("Reject login for unknown user: username='%s'", username)
+		return nil
 	}
 
-	if !user.Enabled {
-		log.Warn("Attempted login from disabled user: '%s'", user.Username)
-		return nil, web.CommonErrors.Unauthorized
+	if !user.CanLogIn {
+		log.Warn("User prohibited from accessing system: username='%s'", user.Username)
+		return nil
 	}
 
-	if !user.PasswordHash.Compare([]byte(credentials.Password)) {
-		EventStore.UserIncorrectPassword(credentials.Username, req.RemoteAddr)
-		log.Warn("Incorrect password provided for user: '%s'", user.Username)
-		return nil, web.CommonErrors.Unauthorized
+	if !user.PasswordHash.Compare([]byte(password)) {
+		EventStore.UserIncorrectPassword(username, req.RemoteAddr)
+		log.Warn("Reject login with incorrect password: username='%s'", user.Username)
+		return nil
 	}
 
-	if upgradedPassword := user.PasswordHash.Upgrade([]byte(credentials.Password)); upgradedPassword != nil {
+	if upgradedPassword := user.PasswordHash.Upgrade([]byte(password)); upgradedPassword != nil {
 		user.PasswordHash = *upgradedPassword
 		if err := UserStore.Table.Update(*user); err != nil {
-			log.Error("Error upgrading user password: %s", err.Error())
+			log.Error("Error upgrading user password: username='%s' error='%s'", user.Username, err.Error())
 		} else {
-			log.Info("Upgraded password for user '%s'", user.Username)
+			log.Info("Upgraded user password: username='%s'", user.Username)
 		}
 	}
+	password = ""
 
-	session, cookieValue, err := SessionStore.NewSessionForUser(user)
-	if err != nil {
-		if err.Server {
-			log.Error("Error starting new session for user '%s': %s", user.Username, err.Message)
-			return nil, web.CommonErrors.ServerError
-		}
-
-		return nil, web.ValidationError(err.Message)
+	session := SessionStore.NewSessionForUser(user)
+	EventStore.UserLoggedIn(username, req.RemoteAddr)
+	return &AuthenticationResult{
+		SessionKey:         session.Key,
+		MustChangePassword: user.MustChangePassword,
 	}
-
-	result := AuthenticationResult{
-		Session:     session,
-		CookieValue: cookieValue,
-	}
-
-	EventStore.UserLoggedIn(credentials.Username, req.RemoteAddr)
-
-	return &result, nil
 }

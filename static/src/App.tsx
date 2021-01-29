@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { GlobalModalFrame } from './components/Modal';
 import { GlobalNotificationFrame } from './components/Notification';
 import { GlobalRedirectFrame } from './components/Redirect';
+import { Loading } from './components/Loading';
 import { Nav } from './components/Nav';
 import { HostEdit } from './pages/host/HostEdit';
 import { HostList } from './pages/host/HostList';
@@ -17,10 +18,11 @@ import { ScriptView } from './pages/script/ScriptView';
 import { ScheduleEdit } from './pages/schedule/ScheduleEdit';
 import { ScheduleView } from './pages/schedule/ScheduleView';
 import { ScheduleList } from './pages/schedule/ScheduleList';
-import { OptionsMain } from './pages/options/OptionsMain';
-import '../css/main.scss';
-import { Loading } from './components/Loading';
 import { EventList } from './pages/event/EventList';
+import { SystemOptions } from './pages/system/options/SystemOptions';
+import '../css/main.scss';
+import { SystemUsers } from './pages/system/users/SystemUsers';
+import { SystemRegister } from './pages/system/register/SystemRegister';
 
 export interface AppProps {}
 interface AppState {
@@ -90,7 +92,9 @@ export class App extends React.Component<AppProps, AppState> {
                     <Route path="/schedules/schedule/:id" component={ScheduleView} />
                     <Route path="/schedules/schedule" component={ScheduleEdit} />
                     <Route path="/schedules" component={ScheduleList} />
-                    <Route path="/options" component={OptionsMain} />
+                    <Route path="/system/options" component={SystemOptions} />
+                    <Route path="/system/users" component={SystemUsers} />
+                    <Route path="/system/register" component={SystemRegister} />
                     <Route path="/events" component={EventList} />
                 </Switch>
                 <GlobalModalFrame />

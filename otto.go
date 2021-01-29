@@ -55,6 +55,7 @@ type MessageHeartbeatRequest struct {
 // MessageHeartbeatResponse describes a heartbeat response
 type MessageHeartbeatResponse struct {
 	ClientVersion string
+	Properties    map[string]string
 }
 
 // MessageTriggerAction describes an action trigger
@@ -100,13 +101,19 @@ const (
 // Script describes a script
 type Script struct {
 	Name             string
-	UID              uint32
-	GID              uint32
+	RunAs            ScriptRunAs
 	Environment      map[string]string
 	WorkingDirectory string
 	Executable       string
 	Files            []File
 	Data             []byte
+}
+
+// ScriptRunAs describes the user to run a script as
+type ScriptRunAs struct {
+	Inherit bool
+	UID     uint32
+	GID     uint32
 }
 
 // ScriptResult describes the result of the script

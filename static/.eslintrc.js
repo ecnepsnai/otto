@@ -40,7 +40,8 @@ module.exports = {
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         'eslint-disable-next-line react/no-unescaped-entities': 'off',
-        'semi': 'error'
+        'semi': 'error',
+        'no-debugger': 'off'
       }
     },
     {

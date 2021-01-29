@@ -66,8 +66,6 @@ func postBootstrapArgs() {
 				Executable:  "/bin/sh",
 				Script:      "#!/bin/sh\n${YUM_CMD} -y update\n",
 				Environment: []environ.Variable{},
-				UID:         0,
-				GID:         0,
 			})
 			if err != nil {
 				panic(err)

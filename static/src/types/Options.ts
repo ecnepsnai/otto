@@ -1,9 +1,11 @@
 import { API } from "../services/API";
+import { StateManager } from "../services/StateManager";
 import { Variable } from "./Variable";
 
 export namespace Options {
     export interface OttoOptions {
         General: General;
+        Authentication: Authentication;
         Network: Network;
         Register: Register;
         Security: Security;
@@ -12,6 +14,11 @@ export namespace Options {
     export interface General {
         ServerURL: string;
         GlobalEnvironment: Variable[];
+    }
+
+    export interface Authentication {
+        MaxAgeMinutes: number;
+        SecureOnly: boolean;
     }
 
     export interface Network {
@@ -38,6 +45,7 @@ export namespace Options {
 
         public static async Save(options: OttoOptions): Promise<OttoOptions> {
             const results = await API.POST('/api/options', options);
+            await StateManager.Refresh();
             return results as OttoOptions;
         }
     }

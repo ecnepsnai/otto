@@ -77,7 +77,7 @@ export class GroupEdit extends React.Component<GroupEditProps, GroupEditState> {
             promise = this.state.group.Save();
         }
 
-        promise.then(group => {
+        return promise.then(group => {
             group.SetHosts(this.state.hostIDs).then(() => {
                 Notification.success('Group Saved');
                 Redirect.To('/groups/group/' + group.ID);

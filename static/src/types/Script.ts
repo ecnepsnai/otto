@@ -13,8 +13,7 @@ export class Script {
     Executable: string;
     Script: string;
     Environment: Variable[];
-    UID: number;
-    GID: number;
+    RunAs: ScriptRunAs;
     WorkingDirectory: string;
     AfterExecution: string;
     AttachmentIDs: string[];
@@ -26,8 +25,7 @@ export class Script {
         this.Executable = json.Executable as string;
         this.Script = json.Script as string;
         this.Environment = (json.Environment || []) as Variable[];
-        this.UID = json.UID as number;
-        this.GID = json.GID as number;
+        this.RunAs = json.RunAs as ScriptRunAs;
         this.WorkingDirectory = json.WorkingDirectory as string;
         this.AfterExecution = json.AfterExecution as string;
         this.AttachmentIDs = (json.AttachmentIDs || []) as string[];
@@ -42,8 +40,11 @@ export class Script {
             Enabled: true,
             Executable: '/bin/bash',
             Script: '',
-            UID: 0,
-            GID: 0,
+            RunAs: {
+                UID: 0,
+                GID: 0,
+                Inherit: true,
+            },
             WorkingDirectory: '',
             AfterExecution: '',
             Environment: [],
@@ -196,6 +197,12 @@ export class Script {
     }
 }
 
+export interface ScriptRunAs {
+    UID: number;
+    GID: number;
+    Inherit: boolean;
+}
+
 export interface ScriptEnabledHost {
     ScriptID: string;
     ScriptName: string;
@@ -210,8 +217,7 @@ export interface NewScriptParameters {
     Executable: string;
     Script: string;
     Environment: Variable[];
-    UID: number;
-    GID: number;
+    RunAs: ScriptRunAs;
     WorkingDirectory: string;
     AfterExecution: string;
     AttachmentIDs: string[];
@@ -223,8 +229,7 @@ export interface EditScriptParameters {
     Executable: string;
     Script: string;
     Environment: Variable[];
-    UID: number;
-    GID: number;
+    RunAs: ScriptRunAs;
     WorkingDirectory: string;
     AfterExecution: string;
     AttachmentIDs: string[];

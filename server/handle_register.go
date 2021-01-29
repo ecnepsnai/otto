@@ -30,10 +30,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		return nil, web.CommonErrors.Unauthorized
 	}
 
-	existing, err := HostStore.HostWithAddress(r.Properties.Hostname)
-	if err != nil {
-		return nil, web.CommonErrors.ServerError
-	}
+	existing := HostStore.HostWithAddress(r.Properties.Hostname)
 	if existing != nil {
 		return nil, web.ValidationError("Host with address '%s' already registered", r.Properties.Hostname)
 	}

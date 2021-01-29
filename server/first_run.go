@@ -1,9 +1,10 @@
 package server
 
 var defaultUser = newUserParameters{
-	Username: "admin",
-	Email:    "admin@localhost",
-	Password: "admin",
+	Username:           "admin",
+	Email:              "admin@localhost",
+	Password:           "admin",
+	MustChangePassword: true,
 }
 
 var defaultGroup = newGroupParameters{
@@ -11,18 +12,12 @@ var defaultGroup = newGroupParameters{
 }
 
 func atLeastOneUser() bool {
-	users, err := UserStore.AllUsers()
-	if err != nil {
-		panic(err)
-	}
+	users := UserStore.AllUsers()
 	return len(users) > 0
 }
 
 func atLeastOneGroup() bool {
-	groups, err := GroupStore.AllGroups()
-	if err != nil {
-		panic(err)
-	}
+	groups := GroupStore.AllGroups()
 	return len(groups) > 0
 }
 

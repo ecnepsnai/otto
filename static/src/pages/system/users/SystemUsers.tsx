@@ -1,17 +1,17 @@
 import * as React from 'react';
-import { User } from '../../types/User';
-import { Loading } from '../../components/Loading';
-import { Card } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { CreateButton, Button } from '../../components/Button';
-import { Table } from '../../components/Table';
-import { EnabledBadge } from '../../components/Badge';
-import { Style } from '../../components/Style';
-import { Rand } from '../../services/Rand';
-import { Menu } from '../../components/Menu';
-import { StateManager } from '../../services/StateManager';
-import { Modal, GlobalModalFrame, ModalForm } from '../../components/Modal';
-import { Input, Checkbox } from '../../components/Form';
+import { EnabledBadge } from '../../../components/Badge';
+import { CreateButton, Button } from '../../../components/Button';
+import { Input, Checkbox } from '../../../components/Form';
+import { Icon } from '../../../components/Icon';
+import { PageLoading } from '../../../components/Loading';
+import { Menu } from '../../../components/Menu';
+import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
+import { Page } from '../../../components/Page';
+import { Style } from '../../../components/Style';
+import { Table } from '../../../components/Table';
+import { Rand } from '../../../services/Rand';
+import { StateManager } from '../../../services/StateManager';
+import { User } from '../../../types/User';
 
 export class UserManager {
     public static EditCurrentUser(): Promise<User> {
@@ -24,13 +24,13 @@ export class UserManager {
     }
 }
 
-export interface OptionsUsersProps {}
-interface OptionsUsersState {
+export interface SystemUsersProps {}
+interface SystemUsersState {
     loading: boolean;
     users?: User[];
 }
-export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUsersState> {
-    constructor(props: OptionsUsersProps) {
+export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersState> {
+    constructor(props: SystemUsersProps) {
         super(props);
         this.state = {
             loading: true,
@@ -56,6 +56,7 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
             Username: user.Username,
             Email: user.Email,
             Password: user.Password,
+            MustChangePassword: user.MustChangePassword,
         }).then(() => {
             this.loadUsers();
         });
@@ -103,7 +104,7 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
             <Table.Row key={Rand.ID()}>
                 <td>{user.Username}</td>
                 <td>{user.Email}</td>
-                <td><EnabledBadge value={user.Enabled} /></td>
+                <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
                 <Table.Menu>
                     <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editUserMenuClick(user)}/>
                     { deleteMenuItem }
@@ -112,36 +113,24 @@ export class OptionsUsers extends React.Component<OptionsUsersProps, OptionsUser
         );
     }
 
-    private content = () => {
-        if (this.state.loading) { return (<Loading />); }
+    render(): JSX.Element {
+        if (this.state.loading) { return (<PageLoading />); }
+
         return (
-            <div>
+            <Page title="Users">
                 <CreateButton onClick={this.newUserClick} />
                 <Table.Table>
                     <Table.Head>
                         <Table.Column>Username</Table.Column>
                         <Table.Column>Email</Table.Column>
-                        <Table.Column>Enabled</Table.Column>
+                        <Table.Column>Can Login</Table.Column>
                         <Table.MenuColumn />
                     </Table.Head>
                     <Table.Body>
                         { this.state.users.map(this.userRow) }
                     </Table.Body>
                 </Table.Table>
-            </div>
-        );
-    }
-
-    render(): JSX.Element {
-        return (
-            <Card.Card>
-                <Card.Header>
-                    <Icon.Label icon={<Icon.Users />} label="Users" />
-                </Card.Header>
-                <Card.Body>
-                    { this.content() }
-                </Card.Body>
-            </Card.Card>
+            </Page>
         );
     }
 }
@@ -190,10 +179,18 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         });
     }
 
-    private changeEnabled = (Enabled: boolean) => {
+    private changeCanLogIn = (CanLogIn: boolean) => {
         this.setState(state => {
             const user = state.value;
-            user.Enabled = Enabled;
+            user.CanLogIn = CanLogIn;
+            return { value: user };
+        });
+    }
+
+    private changeMustChangePassword = (MustChangePassword: boolean) => {
+        this.setState(state => {
+            const user = state.value;
+            user.MustChangePassword = MustChangePassword;
             return { value: user };
         });
     }
@@ -220,14 +217,15 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         );
     }
 
-    private enabledCheckbox = () => {
-        if (this.state.isNew || StateManager.Current().User.Username == this.props.user.Username) { return null; }
+    private canLogInCheckbox = () => {
+        if (this.props.user && StateManager.Current().User.Username == this.props.user.Username) { return null; }
 
         return (
             <Checkbox
-                label="Enabled"
-                defaultValue={this.state.value.Enabled}
-                onChange={this.changeEnabled} />
+                    label="Must Change Password"
+                    defaultValue={this.state.value.MustChangePassword}
+                    onChange={this.changeMustChangePassword}
+                    helpText="If checked this user must change their password the next time they log in" />
         );
     }
 
@@ -257,8 +255,9 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
                     onChange={this.changeEmail}
                     required />
                 { this.passwordField() }
-                { this.enabledCheckbox() }
+                { this.canLogInCheckbox() }
             </ModalForm>
         );
     }
 }
+

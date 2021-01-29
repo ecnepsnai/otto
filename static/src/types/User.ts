@@ -3,20 +3,23 @@ import { API } from "../services/API";
 export class User {
     public Username: string;
     public Email: string;
-    public Enabled: boolean;
     public Password?: string;
+    public CanLogIn: boolean;
+    public MustChangePassword: boolean;
 
     public constructor(json: any) {
         this.Username = json.Username as string;
         this.Email = json.Email as string;
-        this.Enabled = json.Enabled as boolean;
+        this.CanLogIn = json.CanLogIn as boolean;
+        this.MustChangePassword = json.MustChangePassword as boolean;
     }
 
     public static Blank(): User {
         return new User({
             Username: '',
             Email: '',
-            Enabled: true
+            CanLogIn: true,
+            MustChangePassword: false,
         });
     }
 
@@ -46,10 +49,12 @@ export interface NewUserParameters {
     Username: string;
     Email: string;
     Password: string;
+    MustChangePassword: boolean;
 }
 
 export interface EditUserParameters {
     Email: string;
-    Enabled: boolean;
     Password?: string;
+    CanLogIn: boolean;
+    MustChangePassword: boolean;
 }

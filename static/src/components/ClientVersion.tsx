@@ -19,7 +19,7 @@ export class ClientVersion extends React.Component<ClientVersionProps, ClientVer
 
         let versionStr = '';
         if (props.heartbeat) {
-            versionStr = props.heartbeat.LastVersion;
+            versionStr = props.heartbeat.Version;
         }
 
         let version = parseInt(versionStr.replace(/\./g, ''));

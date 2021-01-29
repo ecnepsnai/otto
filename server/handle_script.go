@@ -1,17 +1,16 @@
 package server
 
 import (
+	"sort"
+
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) ScriptList(request web.Request) (interface{}, *web.Error) {
-	scripts, err := ScriptStore.AllScripts()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	scripts := ScriptStore.AllScripts()
+	sort.Slice(scripts, func(i int, j int) bool {
+		return scripts[i].Name < scripts[j].Name
+	})
 
 	return scripts, nil
 }
@@ -19,13 +18,7 @@ func (h *handle) ScriptList(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScriptGet(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
@@ -36,47 +29,40 @@ func (h *handle) ScriptGet(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScriptGetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
+	groups := script.Groups()
+	sort.Slice(groups, func(i int, j int) bool {
+		return groups[i].Name < groups[j].Name
+	})
 
-	return script.Groups(), nil
+	return groups, nil
 }
 
 func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
+	hosts := script.Hosts()
+	sort.Slice(hosts, func(i int, j int) bool {
+		return hosts[i].HostName < hosts[j].HostName
+	})
 
-	return script.Hosts(), nil
+	return hosts, nil
 }
 
 func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedules, err := ScheduleStore.AllSchedulesForScript(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	schedules := ScheduleStore.AllSchedulesForScript(id)
+	sort.Slice(schedules, func(i int, j int) bool {
+		return schedules[i].Name < schedules[j].Name
+	})
 
 	return schedules, nil
 }
@@ -84,13 +70,7 @@ func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Erro
 func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
@@ -102,6 +82,9 @@ func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Er
 		}
 		return nil, web.ValidationError(err.Message)
 	}
+	sort.Slice(files, func(i int, j int) bool {
+		return files[i].Name < files[j].Name
+	})
 
 	return files, nil
 }
@@ -118,13 +101,7 @@ func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) 
 		return nil, err
 	}
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
@@ -165,13 +142,7 @@ func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}
@@ -181,7 +152,7 @@ func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	script, err = ScriptStore.EditScript(script, params)
+	script, err := ScriptStore.EditScript(script, params)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -199,13 +170,7 @@ func (h *handle) ScriptDelete(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	script, err := ScriptStore.ScriptWithID(id)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
 		return nil, web.ValidationError("No script with ID %s", id)
 	}

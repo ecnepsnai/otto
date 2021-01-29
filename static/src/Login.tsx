@@ -4,6 +4,11 @@ import { Alert } from './components/Alert';
 import { Style } from './components/Style';
 import '../css/login.scss';
 
+enum LoginFlowStage {
+    Login = 1,
+    ChangePassword = 2
+}
+
 enum LoginError {
     Unauthorized = 1,
     LoggedOut = 2,
@@ -11,10 +16,137 @@ enum LoginError {
     LoginError = 4,
 }
 
-interface LoginProps {}
-interface LoginState {
+enum LoginStatus {
+    Error = -1,
+    Success = 0,
+    MustChangePassword = 1,
+}
+
+interface LoginFormProps {
+    doLogin: (username: string, password: string) => Promise<unknown>;
+    loading?: boolean;
+    error?: LoginError;
+}
+interface LoginFormState {
     username: string;
     password: string;
+}
+class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
+    constructor(props: LoginFormProps) {
+        super(props);
+        this.state = {
+            username: '',
+            password: '',
+        };
+    }
+
+    private loginError = () => {
+        switch (this.props.error) {
+            case LoginError.Unauthorized:
+                return (<Alert color={Style.Palette.Danger}>You must be logged in to access that page</Alert>);
+            case LoginError.LoggedOut:
+                return (<Alert color={Style.Palette.Info}>You&apos;ve been logged out</Alert>);
+            case LoginError.IncorrectPassword:
+                return (<Alert color={Style.Palette.Danger}>Incorrect username or password</Alert>);
+            case LoginError.LoginError:
+                return (<Alert color={Style.Palette.Danger}>Internal Server Error</Alert>);
+        }
+    }
+
+    private changeUsername = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.setState({ username: target.value });
+    }
+
+    private changePassword = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.setState({ password: target.value });
+    }
+
+    private loginFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        this.props.doLogin(this.state.username, this.state.password).then(() => {
+            this.setState({ password: '' });
+        });
+    }
+
+    render() {
+        return (
+            <form onSubmit={this.loginFormSubmit}>
+                { this.loginError() }
+                <label htmlFor="username" className="visually-hidden">Username</label>
+                <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control input-first" placeholder="Username" required autoFocus disabled={this.props.loading}/>
+                <label htmlFor="password" className="visually-hidden">Password</label>
+                <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control input-second" placeholder="Password" required disabled={this.props.loading}/>
+                <div className="d-grid">
+                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.props.loading}>Sign in</button>
+                </div>
+            </form>
+        );
+    }
+}
+
+interface ChangePasswordFormProps {
+    doChangePassword: (password: string) => void;
+    loading?: boolean;
+    error?: LoginError;
+}
+interface ChangePasswordFormState {
+    password1: string;
+    password2: string;
+}
+class ChangePasswordForm extends React.Component<ChangePasswordFormProps, ChangePasswordFormState> {
+    constructor(props: ChangePasswordFormProps) {
+        super(props);
+        this.state = {
+            password1: '',
+            password2: '',
+        };
+    }
+
+    private changePasswordError = () => {
+        switch (this.props.error) {
+            case LoginError.LoginError:
+                return (<Alert color={Style.Palette.Danger}>Internal Server Error</Alert>);
+        }
+
+        return (<Alert color={Style.Palette.Warning}>You Must Change Your Password</Alert>);
+    }
+
+    private changePassword1 = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.setState({ password1: target.value });
+    }
+
+    private changePassword2 = (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        this.setState({ password2: target.value });
+    }
+
+    private changePasswordFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        this.props.doChangePassword(this.state.password1);
+    }
+
+    render() {
+        return (
+            <form onSubmit={this.changePasswordFormSubmit}>
+                { this.changePasswordError() }
+                <label htmlFor="password" className="visually-hidden">New Password</label>
+                <input type="password" value={this.state.password1} onChange={this.changePassword1} className="form-control input-first" placeholder="New Password" required autoFocus disabled={this.props.loading}/>
+                <label htmlFor="password" className="visually-hidden">Confirm New Password</label>
+                <input type="password" value={this.state.password2} onChange={this.changePassword2} className="form-control input-second" placeholder="Confirm New Password" required disabled={this.props.loading}/>
+                <div className="d-grid">
+                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.props.loading}>Change Password</button>
+                </div>
+            </form>
+        );
+    }
+}
+
+interface LoginProps {}
+interface LoginState {
+    stage: LoginFlowStage;
     loading?: boolean;
     error?: LoginError;
     redirect?: string;
@@ -39,63 +171,44 @@ class Login extends React.Component<LoginProps, LoginState> {
         }
 
         this.state = {
-            username: '',
-            password: '',
+            stage: LoginFlowStage.Login,
             error: initialError,
             redirect: redirect,
         };
     }
 
-    private loginError = () => {
-        switch (this.state.error) {
-            case LoginError.Unauthorized:
-                return (<Alert color={Style.Palette.Danger}>You must be logged in to access that page</Alert>);
-            case LoginError.LoggedOut:
-                return (<Alert color={Style.Palette.Info}>You&apos;ve been logged out</Alert>);
-            case LoginError.IncorrectPassword:
-                return (<Alert color={Style.Palette.Danger}>Incorrect username or password</Alert>);
-            case LoginError.LoginError:
-                return (<Alert color={Style.Palette.Danger}>Internal Server Error</Alert>);
-        }
-    }
-
-    private changeUsername = (event: React.FormEvent<HTMLInputElement>) => {
-        const target = event.target as HTMLInputElement;
-        this.setState({ username: target.value });
-    }
-
-    private changePassword = (event: React.FormEvent<HTMLInputElement>) => {
-        const target = event.target as HTMLInputElement;
-        this.setState({ password: target.value });
-    }
-
-    private doLogin = (username: string, password: string) => {
+    private doLogin = (username: string, password: string): Promise<void> => {
+        this.setState({ loading: true });
         const credentials = {
             Username: username,
             Password: password,
         };
         return fetch('/api/login', { method: 'POST', body: JSON.stringify(credentials) }).then(response => {
-            response.json().then(results => {
+            return response.json().then(results => {
+                console.log(results);
+
                 if (results.code != 200) {
                     this.setState({
                         loading: false,
                         error: LoginError.IncorrectPassword,
-                        username: '',
-                        password: '',
                     });
                     return;
                 }
-                if (this.state.redirect) {
-                    location.href = this.state.redirect;
-                } else {
-                    location.href = '/';
+
+                const status = results.data as LoginStatus;
+                if (status === LoginStatus.Success) {
+                    this.finishLogin();
+                } else if (status === LoginStatus.MustChangePassword) {
+                    this.setState({
+                        loading: false,
+                        stage: LoginFlowStage.ChangePassword
+                    });
                 }
+                return;
             }, () => {
                 this.setState({
                     loading: false,
                     error: LoginError.LoginError,
-                    username: '',
-                    password: '',
                 });
                 return;
             });
@@ -103,42 +216,81 @@ class Login extends React.Component<LoginProps, LoginState> {
             this.setState({
                 loading: false,
                 error: LoginError.LoginError,
-                username: '',
-                password: '',
             });
             return;
         }).catch(() => {
             this.setState({
                 loading: false,
                 error: LoginError.LoginError,
-                username: '',
-                password: '',
             });
             return;
         });
     }
 
-    private formSubmit = () => {
-        event.preventDefault();
-        this.setState({ loading: true }, () => {
-            this.doLogin(this.state.username, this.state.password);
+    private doChangePassword = (password: string): Promise<void> => {
+        const request = {
+            Password: password,
+        };
+        return fetch('/api/users/reset_password', { method: 'POST', body: JSON.stringify(request) }).then(response => {
+            return response.json().then(results => {
+                console.log(results);
+
+                if (results.code != 200) {
+                    this.setState({
+                        loading: false,
+                        error: LoginError.LoginError,
+                    });
+                    return;
+                }
+
+                this.finishLogin();
+                return;
+            }, () => {
+                this.setState({
+                    loading: false,
+                    error: LoginError.LoginError,
+                });
+                return;
+            });
+        }, () => {
+            this.setState({
+                loading: false,
+                error: LoginError.LoginError,
+            });
+            return;
+        }).catch(() => {
+            this.setState({
+                loading: false,
+                error: LoginError.LoginError,
+            });
+            return;
         });
+    }
+
+    private finishLogin = () => {
+        if (this.state.redirect) {
+            location.href = this.state.redirect;
+        } else {
+            location.href = '/';
+        }
+    }
+
+    private content = () => {
+        switch (this.state.stage) {
+            case LoginFlowStage.Login:
+                return (<LoginForm doLogin={this.doLogin} loading={this.state.loading} error={this.state.error}/>);
+            case LoginFlowStage.ChangePassword:
+                return (<ChangePasswordForm doChangePassword={this.doChangePassword} loading={this.state.loading} error={this.state.error}/>);
+        }
+
+        return null;
     }
 
     render(): JSX.Element {
         return (
         <div className="form-signin">
             <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
-            <form onSubmit={this.formSubmit}>
-                { this.loginError() }
-                <label htmlFor="username" className="visually-hidden">Username</label>
-                <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control" placeholder="Username" required autoFocus disabled={this.state.loading}/>
-                <label htmlFor="password" className="visually-hidden">Password</label>
-                <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control" placeholder="Password" required  disabled={this.state.loading}/>
-                <div className="d-grid">
-                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.state.loading}>Sign in</button>
-                </div>
-            </form>
+            { this.content() }
         </div>
         );
     }

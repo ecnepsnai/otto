@@ -1,17 +1,17 @@
 package server
 
 import (
+	"sort"
+
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) UserList(request web.Request) (interface{}, *web.Error) {
-	users, err := UserStore.AllUsers()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	users := UserStore.AllUsers()
+	sort.Slice(users, func(i int, j int) bool {
+		return users[i].Username < users[j].Username
+	})
 
 	return users, nil
 }
@@ -19,13 +19,7 @@ func (h *handle) UserList(request web.Request) (interface{}, *web.Error) {
 func (h *handle) UserGet(request web.Request) (interface{}, *web.Error) {
 	username := request.Params.ByName("username")
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}
@@ -63,13 +57,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 
 	username := request.Params.ByName("username")
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}
@@ -79,7 +67,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	user, err = UserStore.EditUser(user, params)
+	user, err := UserStore.EditUser(user, params)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError
@@ -102,6 +90,36 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 	return user, nil
 }
 
+func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+	user := session.User()
+
+	type changePasswordParameters struct {
+		Password string `min:"1"`
+	}
+
+	params := changePasswordParameters{}
+	if err := request.Decode(&params); err != nil {
+		return nil, err
+	}
+
+	if err := limits.Check(params); err != nil {
+		return nil, web.ValidationError(err.Error())
+	}
+
+	user, err := UserStore.ResetPassword(session.Username, []byte(params.Password))
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	EventStore.UserChangedPassword(session.Username)
+	SessionStore.CompletePartialSession(session.Key)
+	return user, nil
+}
+
 func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
 	username := request.Params.ByName("username")
 	session := request.UserData.(*Session)
@@ -109,13 +127,7 @@ func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError("Cannot delete own user")
 	}
 
-	user, err := UserStore.UserWithUsername(username)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	user := UserStore.UserWithUsername(username)
 	if user == nil {
 		return nil, web.ValidationError("No user with Username %s", username)
 	}

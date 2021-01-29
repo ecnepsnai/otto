@@ -91,6 +91,14 @@ func (s *eventStoreObject) UserModified(modifiedUsername string, currentUser str
 	event.Save()
 }
 
+func (s *eventStoreObject) UserChangedPassword(username string) {
+	event := newEvent(EventTypeUserChangedPassword, map[string]string{
+		"username": username,
+	})
+
+	event.Save()
+}
+
 func (s *eventStoreObject) UserDeleted(deletedUsername string, currentUser string) {
 	event := newEvent(EventTypeUserDeleted, map[string]string{
 		"username":   deletedUsername,

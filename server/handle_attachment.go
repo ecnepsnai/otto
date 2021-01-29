@@ -2,24 +2,14 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/ecnepsnai/web"
 )
 
 func (h *handle) AttachmentList(request web.Request) (interface{}, *web.Error) {
-	attachments, err := AttachmentStore.AllAttachments()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
-	return attachments, nil
+	return AttachmentStore.AllAttachments(), nil
 }
 
 func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error) {
@@ -49,68 +39,38 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	attachment := Attachment{
-		ID:       newPlainID(),
+	req := newAttachmentParameters{
+		Data:     fileUpload,
 		Path:     pathStr,
 		Name:     info.Filename,
 		MimeType: info.Header.Get("Content-Type"),
 		UID:      uid,
 		GID:      gid,
 		Mode:     uint32(mode),
-		Created:  time.Now(),
-		Modified: time.Now(),
 		Size:     uint64(info.Size),
 	}
 
-	f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
-		return nil, web.CommonErrors.ServerError
+	attachment, erro := AttachmentStore.NewAttachment(req)
+	if erro != nil {
+		if erro.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(erro.Message)
 	}
-	defer f.Close()
-
-	if _, err := io.Copy(f, fileUpload); err != nil {
-		log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
-		return nil, web.CommonErrors.ServerError
-	}
-
-	if err := AttachmentStore.Table.Add(attachment); err != nil {
-		log.Error("Error saving script attachment '%s': %s", attachment.ID, err.Error())
-		return nil, web.CommonErrors.ServerError
-	}
-
-	EventStore.AttachmentAdded(&attachment, session.Username)
+	EventStore.AttachmentAdded(attachment, session.Username)
 
 	return attachment, nil
 }
 
 func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
 	attachmentID := request.Params.ByName("id")
-
-	attachment, err := AttachmentStore.AttachmentWithID(attachmentID)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
-	return attachment, nil
+	return AttachmentStore.AttachmentWithID(attachmentID), nil
 }
 
 func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.Response) {
 	attachmentID := request.Params.ByName("id")
 
-	attachment, erro := AttachmentStore.AttachmentWithID(attachmentID)
-	if erro != nil {
-		if erro.Server {
-			response.Status = 500
-			return
-		}
-		response.Status = 400
-		return
-	}
-
+	attachment := AttachmentStore.AttachmentWithID(attachmentID)
 	f, err := os.OpenFile(attachment.FilePath(), os.O_RDONLY, 0644)
 	if err != nil {
 		response.Status = 500
@@ -128,21 +88,14 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	attachmentID := request.Params.ByName("id")
-
-	attachment, err := AttachmentStore.AttachmentWithID(attachmentID)
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
+	attachment := AttachmentStore.AttachmentWithID(attachmentID)
 
 	req := editAttachmentParams{}
 	if err := request.Decode(&req); err != nil {
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	attachment, err = AttachmentStore.EditAttachment(attachmentID, req)
+	attachment, err := AttachmentStore.EditAttachment(attachmentID, req)
 	if err != nil {
 		if err.Server {
 			return nil, web.CommonErrors.ServerError

@@ -14,6 +14,7 @@ import (
 var log *logtic.Source
 
 func main() {
+	loadRegisterProperties()
 	parseArgs()
 	tryAutoRegister()
 	mustLoadConfig()
@@ -70,8 +71,6 @@ func parseArgs() {
 }
 
 func printOSInfo() {
-	properties := registerProperties()
-
 	fmt.Printf("\nHost properties:\n")
-	fmt.Printf("    Hostname: %s\n    Kernel Name: %s\n    Kernel Version: %s\n    Distribution Name: %s\n    Distribution Version: %s\n", properties.Hostname, properties.KernelName, properties.KernelVersion, properties.DistributionName, properties.DistributionVersion)
+	fmt.Printf("    Hostname: %s\n    Kernel Name: %s\n    Kernel Version: %s\n    Distribution Name: %s\n    Distribution Version: %s\n", registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
 }

@@ -9,7 +9,7 @@ import (
 
 func (v *view) Login(request web.Request, writer web.Writer) (response web.Response) {
 	// Redirect users to index if they're already logged in
-	session := IsAuthenticated(request.HTTP)
+	session := sessionForHTTPRequest(request.HTTP, false)
 	if session != nil {
 		response.Headers = map[string]string{
 			"Location": "/hosts/",
@@ -60,8 +60,8 @@ func (v *view) Favicon(request web.Request, writer web.Writer) web.Response {
 func (v *view) Redirect(request web.Request, writer web.Writer) (response web.Response) {
 	redirectLocation := ""
 
-	session := IsAuthenticated(request.HTTP)
-	if session != nil {
+	session := sessionForHTTPRequest(request.HTTP, false)
+	if session != nil && !session.Partial {
 		redirectLocation = "/hosts/"
 	} else {
 		redirectLocation = "/login"

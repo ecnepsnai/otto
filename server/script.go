@@ -1,8 +1,6 @@
 package server
 
 import (
-	"github.com/ecnepsnai/ds"
-	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
@@ -14,205 +12,24 @@ type Script struct {
 	Executable       string `min:"1"`
 	Script           string `min:"1"`
 	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
+	RunAs            ScriptRunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
 }
 
-func (s *scriptStoreObject) ScriptWithID(id string) (*Script, *Error) {
-	obj, err := s.Table.Get(id)
-	if err != nil {
-		log.Error("Error getting script with ID '%s': %s", id, err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if obj == nil {
-		return nil, nil
-	}
-	script, k := obj.(Script)
-	if !k {
-		log.Error("Object is not of type 'Script'")
-		return nil, ErrorServer("incorrect type")
-	}
-
-	return &script, nil
-}
-
-func (s *scriptStoreObject) ScriptWithName(name string) (*Script, *Error) {
-	obj, err := s.Table.GetUnique("Name", name)
-	if err != nil {
-		log.Error("Error getting script with name '%s': %s", name, err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if obj == nil {
-		return nil, nil
-	}
-	script, k := obj.(Script)
-	if !k {
-		log.Error("Object is not of type 'Script'")
-		return nil, ErrorServer("incorrect type")
-	}
-
-	return &script, nil
-}
-
-func (s *scriptStoreObject) AllScripts() ([]Script, *Error) {
-	objs, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
-	if err != nil {
-		log.Error("Error getting all scripts: %s", err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if objs == nil || len(objs) == 0 {
-		return []Script{}, nil
-	}
-
-	scripts := make([]Script, len(objs))
-	for i, obj := range objs {
-		script, k := obj.(Script)
-		if !k {
-			log.Error("Object is not of type 'Script'")
-			return []Script{}, ErrorServer("incorrect type")
-		}
-		scripts[i] = script
-	}
-
-	return scripts, nil
-}
-
-type newScriptParameters struct {
-	Name             string
-	Executable       string
-	Script           string
-	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
-	WorkingDirectory string
-	AfterExecution   string
-	AttachmentIDs    []string
-}
-
-func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Error) {
-	existingScript, err := s.ScriptWithName(params.Name)
-	if err != nil {
-		return nil, err
-	}
-	if existingScript != nil {
-		log.Warn("Script with name '%s' already exists", params.Name)
-		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
-	}
-	if params.AfterExecution != "" && !IsClientAction(params.AfterExecution) {
-		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
-	}
-
-	if err := environ.Validate(params.Environment); err != nil {
-		return nil, ErrorUser(err.Error())
-	}
-
-	script := Script{
-		ID:               newID(),
-		Name:             params.Name,
-		Executable:       params.Executable,
-		Script:           params.Script,
-		Environment:      params.Environment,
-		UID:              params.UID,
-		GID:              params.GID,
-		Enabled:          true,
-		WorkingDirectory: params.WorkingDirectory,
-		AfterExecution:   params.AfterExecution,
-		AttachmentIDs:    params.AttachmentIDs,
-	}
-	if err := limits.Check(script); err != nil {
-		return nil, ErrorUser(err.Error())
-	}
-
-	if err := s.Table.Add(script); err != nil {
-		log.Error("Error adding new script '%s': %s", params.Name, err.Error())
-		return nil, ErrorFrom(err)
-	}
-
-	log.Info("Added new script '%s'", params.Name)
-	return &script, nil
-}
-
-type editScriptParameters struct {
-	Name             string
-	Enabled          bool
-	Executable       string
-	Script           string
-	Environment      []environ.Variable
-	UID              uint32
-	GID              uint32
-	WorkingDirectory string
-	AfterExecution   string
-	AttachmentIDs    []string
-}
-
-func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (*Script, *Error) {
-	existingScript, err := s.ScriptWithName(params.Name)
-	if err != nil {
-		return nil, err
-	}
-	if existingScript != nil && existingScript.ID != script.ID {
-		log.Warn("Script with name '%s' already exists", params.Name)
-		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
-	}
-	if params.AfterExecution != "" && !IsClientAction(params.AfterExecution) {
-		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
-	}
-
-	if err := environ.Validate(params.Environment); err != nil {
-		return nil, ErrorUser(err.Error())
-	}
-
-	script.Name = params.Name
-	script.Enabled = params.Enabled
-	script.Executable = params.Executable
-	script.Script = params.Script
-	script.Environment = params.Environment
-	script.UID = params.UID
-	script.GID = params.GID
-	script.WorkingDirectory = params.WorkingDirectory
-	script.AfterExecution = params.AfterExecution
-	script.AttachmentIDs = params.AttachmentIDs
-	if err := limits.Check(script); err != nil {
-		return nil, ErrorUser(err.Error())
-	}
-
-	if err := s.Table.Update(*script); err != nil {
-		log.Error("Error updating script '%s': %s", params.Name, err.Error())
-		return nil, ErrorFrom(err)
-	}
-
-	log.Info("Updating script '%s'", params.Name)
-	return script, nil
-}
-
-func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
-	if err := s.Table.Delete(*script); err != nil {
-		log.Error("Error deleting script '%s': %s", script.Name, err.Error())
-		return ErrorFrom(err)
-	}
-
-	for _, id := range script.AttachmentIDs {
-		if err := AttachmentStore.DeleteAttachment(id); err != nil {
-			log.Error("Error deleting attachment '%s': %s", id, err.Message)
-		}
-	}
-
-	GroupStore.CleanupDeadScripts()
-	log.Info("Deleting script '%s'", script.Name)
-	return nil
+// ScriptRunAs describes the properties of which user runs a script
+type ScriptRunAs struct {
+	Inherit bool
+	UID     uint32
+	GID     uint32
 }
 
 // Groups all groups with this script enabled
 func (s *Script) Groups() []Group {
 	enabledGroups := []Group{}
 
-	groups, err := GroupStore.AllGroups()
-	if err != nil {
-		return []Group{}
-	}
+	groups := GroupStore.AllGroups()
 	for _, group := range groups {
 		hasScript := false
 		for _, scriptID := range group.ScriptIDs {
@@ -268,10 +85,7 @@ func (s *Script) Hosts() []ScriptEnabledHost {
 
 func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error {
 	groups := map[string]bool{}
-	allGroups, err := GroupStore.AllGroups()
-	if err != nil {
-		return err
-	}
+	allGroups := GroupStore.AllGroups()
 	for _, group := range allGroups {
 		var i = -1
 		for y, groupID := range groupIDs {
@@ -284,10 +98,7 @@ func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error 
 	}
 
 	for groupID, enable := range groups {
-		group, err := GroupStore.GroupWithID(groupID)
-		if err != nil {
-			return err
-		}
+		group := GroupStore.GroupWithID(groupID)
 		if group == nil {
 			return ErrorUser("No group with ID %s", groupID)
 		}
@@ -325,18 +136,15 @@ func (s *Script) Attachments() ([]Attachment, *Error) {
 		return []Attachment{}, nil
 	}
 
-	files := make([]Attachment, len(s.AttachmentIDs))
+	attachments := make([]Attachment, len(s.AttachmentIDs))
 	for i, id := range s.AttachmentIDs {
-		file, err := AttachmentStore.AttachmentWithID(id)
-		if err != nil {
-			return nil, err
-		}
-		if file == nil {
+		attachment := AttachmentStore.AttachmentWithID(id)
+		if attachment == nil {
 			log.Error("Attachment '%s' does not exist, found on script '%s'", id, s.ID)
-			return nil, ErrorServer("missing file")
+			return nil, ErrorServer("missing attachment")
 		}
-		files[i] = *file
+		attachments[i] = *attachment
 	}
 
-	return files, nil
+	return attachments, nil
 }

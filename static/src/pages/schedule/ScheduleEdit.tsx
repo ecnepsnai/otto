@@ -230,7 +230,7 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
             promise = this.state.schedule.Save();
         }
 
-        promise.then(schedule => {
+        return promise.then(schedule => {
             Notification.success('Schedule Saved');
             Redirect.To('/schedules/schedule/' + schedule.ID);
         });

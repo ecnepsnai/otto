@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Card } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { Input } from '../../components/Form';
-import { Options } from '../../types/Options';
-import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdit';
-import { Variable } from '../../types/Variable';
-import { Alert } from '../../components/Alert';
-import { Style } from '../../components/Style';
+import { Card } from '../../../components/Card';
+import { Icon } from '../../../components/Icon';
+import { Input } from '../../../components/Form';
+import { Options } from '../../../types/Options';
+import { EnvironmentVariableEdit } from '../../../components/EnvironmentVariableEdit';
+import { Variable } from '../../../types/Variable';
+import { Alert } from '../../../components/Alert';
+import { Style } from '../../../components/Style';
 
 export interface OptionsGeneralProps {
     defaultValue: Options.General;

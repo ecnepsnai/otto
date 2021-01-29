@@ -5,14 +5,16 @@ export class Heartbeat {
     IsReachable: boolean;
     LastReply?: string;
     LastAttempt?: string;
-    LastVersion?: string;
+    Version?: string;
+    Properties?: { [key: string]: string};
 
     constructor(json: any) {
         this.Address = json.Address as string;
         this.IsReachable = json.IsReachable as boolean;
         this.LastReply = json.LastReply as string;
         this.LastAttempt = json.LastAttempt as string;
-        this.LastVersion = json.LastVersion as string;
+        this.Version = json.Version as string;
+        this.Properties = json.Properties as { [key: string]: string};
     }
 
     public static List(): Promise<Map<string, Heartbeat>> {

@@ -16,6 +16,7 @@ import {
     faExclamationTriangle,
     faEye,
     faInfoCircle,
+    faKey,
     faLayerGroup,
     faLevelDownAlt,
     faListAlt,
@@ -78,6 +79,7 @@ export namespace Icon {
     export class ExclamationTriangle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faExclamationTriangle} options={this.props}/> );}}
     export class Eye extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faEye} options={this.props}/> );}}
     export class InfoCircle extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faInfoCircle} options={this.props}/> );}}
+    export class Key extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faKey} options={this.props}/> );}}
     export class LayerGroup extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faLayerGroup} options={this.props}/> );}}
     export class ListAlt extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faListAlt} options={this.props}/> );}}
     export class Magic extends React.Component<IconProps, {}> {render(): JSX.Element { return ( <EIcon icon={faMagic} options={this.props}/> );}}

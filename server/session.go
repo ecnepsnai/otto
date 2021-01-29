@@ -1,135 +1,147 @@
 package server
 
 import (
+	"sync"
 	"time"
-
-	"github.com/ecnepsnai/security"
 )
 
 // Session describes a user session
 type Session struct {
-	// ID the session ID
-	ID string `ds:"primary"`
-	// Secret the salt used when hashing the users email for the session auth cookie value
-	Secret string `json:"-" structs:"-" ds:"unique"`
-	// Username the username of the user for this session
-	Username string `ds:"index"`
-	// Expires when this session expires (unix timestamp)
-	Expires int64
+	Key      string
+	ShortID  string
+	Username string
+	Partial  bool
+	Expires  time.Time
+}
+
+type sessionStoreObject struct {
+	m map[string]Session
+	l *sync.RWMutex
+}
+
+// SessionStore describes the session store
+var SessionStore = &sessionStoreObject{
+	m: map[string]Session{},
+	l: &sync.RWMutex{},
 }
 
 // NewSessionForUser start a new session for the given user
-func (s sessionStoreObject) NewSessionForUser(user *User) (Session, string, *Error) {
+func (s *sessionStoreObject) NewSessionForUser(user *User) Session {
 	session := Session{
-		ID:       newID(),
-		Secret:   generateSessionSecret(),
+		Key:      generateSessionSecret(),
+		ShortID:  newPlainID(),
 		Username: user.Username,
-		Expires:  time.Now().AddDate(0, 0, 1).Unix(),
+		Expires:  time.Now().AddDate(0, 0, 1),
+		Partial:  user.MustChangePassword,
 	}
-	sessionHash := security.HashSHA256String(session.Secret + session.Username)
-	sessionCookie := session.ID + "$" + sessionHash
-	log.Info("Started new session for user: '%s' with session ID: '%s'", user.Username, session.ID)
-
-	if err := s.Table.Add(session); err != nil {
-		log.Error("Error adding new session for user '%s': %s", user.Username, err.Error())
-		return session, sessionCookie, ErrorFrom(err)
-	}
-
-	return session, sessionCookie, nil
+	log.Info("Started new session: username='%s' session_id='%s'", user.Username, session.ShortID)
+	s.l.Lock()
+	s.m[session.Key] = session
+	log.Debug("Sessions: %+v", s.m)
+	s.l.Unlock()
+	return session
 }
 
 // SessionWithID locate a session with the given ID
-func (s sessionStoreObject) SessionWithID(ID string) (*Session, *Error) {
-	object, err := s.Table.Get(ID)
-	if err != nil {
-		log.Error("Error getting session '%s': %s", ID, err.Error())
-		return nil, ErrorFrom(err)
-	}
-	if object == nil {
-		log.Warn("Session with ID: '%s' not found", ID)
-		return nil, nil
+func (s *sessionStoreObject) SessionWithID(ID string) *Session {
+	s.l.RLock()
+	session, present := s.m[ID]
+	s.l.RUnlock()
+	if !present {
+		return nil
 	}
 
-	session := object.(Session)
-	return &session, nil
+	return &session
 }
 
 // DeleteSession delete a session with the given ID
-func (s sessionStoreObject) DeleteSession(session *Session) {
-	log.Info("Ending session for user: '%s' with session ID: '%s'", session.Username, session.ID)
-	s.Table.Delete(*session)
+func (s *sessionStoreObject) DeleteSession(session *Session) {
+	s.l.Lock()
+	delete(s.m, session.Key)
+	log.Debug("Sessions: %+v", s.m)
+	s.l.Unlock()
+	log.Info("Ending session: username='%s' session_id='%s'", session.Username, session.ShortID)
 }
 
 // SessionForUser locate all sessions for the given user
-func (s sessionStoreObject) SessionForUser(username string) ([]Session, *Error) {
-	objects, err := s.Table.GetIndex("Username", username, nil)
-	if err != nil {
-		log.Error("Error getting sessions for user '%s': %s", username, err.Error())
-		return nil, ErrorFrom(err)
+func (s *sessionStoreObject) SessionForUser(username string) []Session {
+	s.l.RLock()
+	defer s.l.RUnlock()
+	sessions := []Session{}
+	for _, session := range s.m {
+		if session.Username == username {
+			sessions = append(sessions, session)
+		}
 	}
-	sessions := make([]Session, len(objects))
-	for i, object := range objects {
-		sessions[i] = object.(Session)
-	}
-	return sessions, nil
+	return sessions
 }
 
 // EndAllForUser end all sessions for user
-func (s sessionStoreObject) EndAllForUser(username string) {
-	s.Table.DeleteAllIndex("Username", username)
+func (s *sessionStoreObject) EndAllForUser(username string) {
+	sessions := s.SessionForUser(username)
+	s.l.Lock()
+	defer s.l.Unlock()
+	for _, session := range sessions {
+		delete(s.m, session.Key)
+		log.Debug("Sessions: %+v", s.m)
+	}
 }
 
 // EndAllOtherForUser end all sessions for the user except the current session
-func (s sessionStoreObject) EndAllOtherForUser(username string, current *Session) {
-	sessions, _ := s.SessionForUser(username)
+func (s *sessionStoreObject) EndAllOtherForUser(username string, current *Session) {
+	sessions := s.SessionForUser(username)
+	s.l.Lock()
+	defer s.l.Unlock()
 	for _, session := range sessions {
-		if session.ID == current.ID {
+		if current.Key == session.Key {
 			continue
 		}
-		s.DeleteSession(&session)
+
+		delete(s.m, session.Key)
+		log.Debug("Sessions: %+v", s.m)
 	}
 }
 
-// SaveSession save the given session (new or current)
-func (s sessionStoreObject) SaveSession(session *Session) *Error {
-	if err := s.Table.Update(*session); err != nil {
-		log.Error("Error updating session: %s", err.Error())
-		return ErrorFrom(err)
-	}
-	return nil
+func (s *sessionStoreObject) UpdateSessionExpiry(sessionKey string) Session {
+	s.l.Lock()
+	session := s.m[sessionKey]
+	session.Expires = time.Now().Add(time.Duration(Options.Authentication.MaxAgeMinutes) * time.Minute)
+	s.m[sessionKey] = session
+	log.Debug("Sessions: %+v", s.m)
+	s.l.Unlock()
+	return session
+}
+
+func (s *sessionStoreObject) CompletePartialSession(sessionKey string) Session {
+	s.l.Lock()
+	session := s.m[sessionKey]
+	session.Partial = false
+	s.m[sessionKey] = session
+	log.Debug("Sessions: %+v", s.m)
+	s.l.Unlock()
+	return session
 }
 
 // User get the user object for this session
 func (s Session) User() *User {
-	user, _ := UserStore.UserWithUsername(s.Username)
-	return user
+	return UserStore.UserWithUsername(s.Username)
 }
 
-func (s sessionStoreObject) CleanupSessions() *Error {
-	objects, err := s.Table.GetAll(nil)
-	if err != nil {
-		log.Error("Error getting all sessions: %s", err.Error())
-		return ErrorFrom(err)
-	}
-	count := len(objects)
-	if count == 0 {
-		log.Debug("No sessions in table")
-		return nil
-	}
-	sessions := make([]Session, count)
-	for i, object := range objects {
-		session, k := object.(Session)
-		if !k {
-			log.Error("Object is not of type Session")
-			return ErrorServer("invalid type")
-		}
+func (s *sessionStoreObject) CleanupSessions() *Error {
+	s.l.Lock()
+	defer s.l.Unlock()
+
+	sessions := make([]Session, len(s.m))
+	i := 0
+	for _, session := range s.m {
 		sessions[i] = session
+		i++
 	}
 
 	sessionsCleared := 0
 	for _, session := range sessions {
-		if time.Now().Unix() >= session.Expires {
-			s.DeleteSession(&session)
+		if time.Since(session.Expires) > 0 {
+			delete(s.m, session.Key)
 			sessionsCleared++
 		}
 	}

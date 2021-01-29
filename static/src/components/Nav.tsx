@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Icon } from './Icon';
 import { StateManager } from '../services/StateManager';
 import { Style } from './Style';
-import { UserManager } from '../pages/options/OptionsUsers';
 import { API } from '../services/API';
 import '../../css/nav.scss';
+import { UserManager } from '../pages/system/users/SystemUsers';
 
 export class Nav extends React.Component<{}, {}> {
     render(): JSX.Element {
@@ -26,9 +26,11 @@ export class Nav extends React.Component<{}, {}> {
                                 <NavItem link="/scripts" icon={<Icon.Scroll />} label="Scripts" />
                                 <NavItem link="/schedules" icon={<Icon.Calendar />} label="Schedules" />
                                 <NavItem link="/events" icon={<Icon.ListAlt />} label="Audit Log" />
-                                <NavItem link="/options" icon={<Icon.Cog />} label="Options" />
                             </ul>
-                            <UserMenu />
+                            <div className="d-flex">
+                                <SystemMenu />
+                                <UserMenu />
+                            </div>
                         </div>
                     </div>
                 </nav>
@@ -60,14 +62,34 @@ class NavItem extends React.Component<NavItemProps, {}> {
     }
 }
 
-interface UserMenuProps {
-
-}
-class UserMenu extends React.Component<UserMenuProps, {}> {
-    constructor(props: UserMenuProps) {
-        super(props);
+class SystemMenu extends React.Component<{}, {}> {
+    render(): JSX.Element {
+        return (
+            <ul className="navbar-nav navbar-links">
+                <li className="nav-item dropdown">
+                    <a className="nav-link dropdown-toggle" id="navSystemDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <Icon.Label icon={<Icon.Cog />} label="System" />
+                    </a>
+                    <div className="dropdown-menu dropdown-menu-end" aria-labelledby="navSystemDropdown">
+                        <Link to="/system/options" className="dropdown-item"><Icon.Label icon={<Icon.Wrench />} label="Options" /></Link>
+                        <Link to="/system/users" className="dropdown-item"><Icon.Label icon={<Icon.User />} label="Users" /></Link>
+                        <Link to="/system/register" className="dropdown-item"><Icon.Label icon={<Icon.Magic />} label="Host Registration" /></Link>
+                        <div className="dropdown-divider"></div>
+                        <h6 className="dropdown-header">Otto {StateManager.Current().Runtime.Version}</h6>
+                        <a className="dropdown-item" href={'https://github.com/ecnepsnai/otto/tree/' + StateManager.Current().Runtime.Version + '/docs'} target="_blank" rel="noreferrer">
+                            <Icon.Label icon={<Icon.InfoCircle color={Style.Palette.Primary} />} label="Documentation" />
+                        </a>
+                        <a className="dropdown-item" href="https://github.com/ecnepsnai/otto/issues/new" target="_blank" rel="noreferrer">
+                            <Icon.Label icon={<Icon.ExclamationCircle color={Style.Palette.Danger} />} label="Report an Issue" />
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        );
     }
+}
 
+class UserMenu extends React.Component<{}, {}> {
     private editUserClick = () => {
         UserManager.EditCurrentUser().then(() => { StateManager.Refresh(); });
     }
@@ -92,14 +114,6 @@ class UserMenu extends React.Component<UserMenuProps, {}> {
                     <div className="dropdown-menu dropdown-menu-end" aria-labelledby="navUserDropdown">
                         <a className="dropdown-item" onClick={this.editUserClick}><Icon.Label icon={<Icon.UserEdit />} label="Edit User" /></a>
                         <a className="dropdown-item" onClick={this.logoutClick}><Icon.Label icon={<Icon.SignOut />} label="Log Out" /></a>
-                        <div className="dropdown-divider"></div>
-                        <h6 className="dropdown-header">Otto {StateManager.Current().Runtime.Version}</h6>
-                        <a className="dropdown-item" href={'https://github.com/ecnepsnai/otto/tree/' + StateManager.Current().Runtime.Version + '/docs'} target="_blank" rel="noreferrer">
-                            <Icon.Label icon={<Icon.InfoCircle color={Style.Palette.Primary} />} label="Documentation" />
-                        </a>
-                        <a className="dropdown-item" href="https://github.com/ecnepsnai/otto/issues/new" target="_blank" rel="noreferrer">
-                            <Icon.Label icon={<Icon.ExclamationCircle color={Style.Palette.Danger} />} label="Report an Issue" />
-                        </a>
                     </div>
                 </li>
             </ul>

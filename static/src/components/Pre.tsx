@@ -4,7 +4,7 @@ import '../../css/pre.scss';
 export class Pre extends React.Component<{}, {}> {
     render(): JSX.Element {
         return (
-            <pre>{ this.props.children }</pre>
+            <div className="pre-wrapper"><pre>{ this.props.children }</pre></div>
         );
     }
 }

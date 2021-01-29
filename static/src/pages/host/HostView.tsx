@@ -110,6 +110,20 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
         return (<ListGroup.TextItem title="Client Version"><ClientVersion heartbeat={this.state.heartbeat} /></ListGroup.TextItem>);
     }
 
+    private hostProperties = (): JSX.Element => {
+        if (!this.state.heartbeat || !this.state.heartbeat.Properties) { return null; }
+
+        return (
+            <React.Fragment>
+                { Object.keys(this.state.heartbeat.Properties).map((key, idx) => {
+                    return (
+                        <ListGroup.TextItem title={key} key={idx}><code>{ this.state.heartbeat.Properties[key] }</code></ListGroup.TextItem>
+                    );
+                })}
+            </React.Fragment>
+        );
+    }
+
     render(): JSX.Element {
         if (this.state.loading) { return (<PageLoading />); }
 
@@ -137,6 +151,7 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
                                     <ListGroup.TextItem title="Status"><HeartbeatBadge heartbeat={this.state.heartbeat} /></ListGroup.TextItem>
                                     { this.lastReply() }
                                     { this.clientVersion() }
+                                    { this.hostProperties() }
                                 </ListGroup.List>
                             </Card.Card>
                             <EnvironmentVariableCard className="mb-3" variables={this.state.host.Environment} />

@@ -19,19 +19,16 @@ export interface FormProps {
     /**
      * Event fired when the form is submitted
      */
-    onSubmit?: () => void;
+    onSubmit?: () => Promise<unknown>;
     /**
      * Optional class to add
      */
     className?: string;
-    /**
-     * If true the submit button is disabled
-     */
-    loading?: boolean;
 }
 
 interface FormState {
     invalid?: boolean;
+    loading?: boolean;
 }
 
 /**
@@ -75,7 +72,10 @@ export class Form extends React.Component<FormProps, FormState> {
         }
 
         if (this.props.onSubmit) {
-            this.props.onSubmit();
+            this.setState({ loading: true });
+            this.props.onSubmit().then(() => {
+                this.setState({ loading: false });
+            });
         }
     }
 
@@ -85,13 +85,13 @@ export class Form extends React.Component<FormProps, FormState> {
         }
 
         let content = (<Icon.Label icon={<Icon.CheckCircle/>} label="Apply"/>);
-        if (this.props.loading) {
+        if (this.state.loading) {
             content = (<Icon.Label icon={<Icon.Spinner pulse/>} label="Loading..."/>);
         }
 
         return (
             <div className="mt-3">
-                <Button color={Style.Palette.Primary} size={Style.Size.M} onClick={this.onClick} disabled={this.props.loading}>
+                <Button color={Style.Palette.Primary} size={Style.Size.M} onClick={this.onClick} disabled={this.state.loading}>
                     { content }
                 </Button>
             </div>
