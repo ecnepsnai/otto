@@ -1,9 +1,9 @@
 module github.com/ecnepsnai/otto
 
-go 1.14
+go 1.15
 
 require (
-	github.com/ecnepsnai/cron v1.0.0
+	github.com/ecnepsnai/cron v1.2.0
 	github.com/ecnepsnai/ds v1.4.0
 	github.com/ecnepsnai/limits v1.0.1
 	github.com/ecnepsnai/logtic v1.4.0

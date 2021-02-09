@@ -9,7 +9,7 @@ var cronDisabled = false
 
 // CronSetup start the cron
 func CronSetup() {
-	schedule := cron.New([]cron.Job{
+	schedule, err := cron.New([]cron.Job{
 		{
 			Pattern: "0 * * * *",
 			Name:    "CleanupSessions",
@@ -39,6 +39,9 @@ func CronSetup() {
 			},
 		},
 	})
+	if err != nil {
+		log.Fatal("Error starting up scheduled tasks: %s", err.Error())
+	}
 	if !cronDisabled {
 		go schedule.Start()
 	}
