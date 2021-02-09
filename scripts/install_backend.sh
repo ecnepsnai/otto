@@ -20,4 +20,8 @@ cd ${OTTO_PATH}/cmd/client
 cbgen -n main -v ${OTTO_VERSION}
 cd ${OTTO_PATH}/
 go build
+go test -v >> ${LOG} 2>&1
+cd ${OTTO_PATH}/server
+go test -v >> ${LOG} 2>&1
+cd ${OTTO_PATH}/
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
