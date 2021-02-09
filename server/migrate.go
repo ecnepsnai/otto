@@ -6,7 +6,7 @@ import (
 
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/server/environ"
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 )
 
 var neededTableVersion = 8
@@ -119,13 +119,13 @@ func migrate8() {
 		type oldUserType struct {
 			Username     string `ds:"primary"`
 			Email        string `ds:"unique"`
-			PasswordHash security.HashedPassword
+			PasswordHash secutil.HashedPassword
 			Enabled      bool
 		}
 		type newUserType struct {
 			Username           string `ds:"primary"`
 			Email              string `ds:"unique"`
-			PasswordHash       security.HashedPassword
+			PasswordHash       secutil.HashedPassword
 			CanLogIn           bool
 			MustChangePassword bool
 		}
@@ -133,9 +133,6 @@ func migrate8() {
 		if !FileExists(path.Join(Directories.Data, "user.db")) {
 			return
 		}
-
-		delay := security.FailDelay
-		security.FailDelay = 0
 
 		results := ds.Migrate(ds.MigrateParams{
 			TablePath: path.Join(Directories.Data, "user.db"),
@@ -162,8 +159,6 @@ func migrate8() {
 				return newUser, nil
 			},
 		})
-
-		security.FailDelay = delay
 
 		if results.Error != nil {
 			log.Fatal("Error migrating user database: %s", results.Error.Error())

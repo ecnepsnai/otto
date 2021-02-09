@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 )
 
 var tmpDir *string
@@ -76,5 +76,5 @@ func TestMain(m *testing.M) {
 }
 
 func randomString(length uint16) string {
-	return security.RandomString(length)
+	return secutil.RandomString(length)
 }

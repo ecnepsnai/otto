@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 )
 
 func TestAddGetAttachment(t *testing.T) {
-	data := bytes.NewReader(security.RandomBytes(16))
+	data := bytes.NewReader(secutil.RandomBytes(16))
 
 	attachment, err := AttachmentStore.NewAttachment(newAttachmentParameters{
 		Data:     data,
@@ -51,7 +51,7 @@ func TestAddGetAttachment(t *testing.T) {
 }
 
 func TestEditAttachment(t *testing.T) {
-	data := bytes.NewReader(security.RandomBytes(16))
+	data := bytes.NewReader(secutil.RandomBytes(16))
 
 	attachment, err := AttachmentStore.NewAttachment(newAttachmentParameters{
 		Data:     data,
@@ -86,7 +86,7 @@ func TestEditAttachment(t *testing.T) {
 }
 
 func TestDeleteAttachment(t *testing.T) {
-	data := bytes.NewReader(security.RandomBytes(16))
+	data := bytes.NewReader(secutil.RandomBytes(16))
 
 	attachment, err := AttachmentStore.NewAttachment(newAttachmentParameters{
 		Data:     data,

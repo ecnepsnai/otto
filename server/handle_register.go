@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"github.com/ecnepsnai/otto"
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
 )
 
@@ -83,7 +83,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		}
 	}
 
-	psk := security.RandomString(32)
+	psk := secutil.RandomString(32)
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:     r.Properties.Hostname,
 		Address:  r.Address,

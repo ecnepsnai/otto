@@ -6,12 +6,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 	nanoid "github.com/matoous/go-nanoid"
 )
 
 func generateSessionSecret() string {
-	return security.RandomString(64)
+	return secutil.RandomString(64)
 }
 
 // stringSliceContains does this slice of strings contain n?

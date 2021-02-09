@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 )
 
 var log = logtic.Connect("libotto")
@@ -192,7 +192,7 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 	}
 	log.Debug("Read frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, readLength)
 
-	data, err := security.Decrypt(encryptedData, psk)
+	data, err := secutil.Decrypt(encryptedData, psk)
 	if err != nil {
 		log.Error("Error decrypting data: %s", err.Error())
 		return nil, err
@@ -252,7 +252,7 @@ func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk stri
 }
 
 func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
-	encryptedData, err := security.Encrypt(data, psk)
+	encryptedData, err := secutil.Encrypt(data, psk)
 	if err != nil {
 		log.Error("Error encrypting data: %s", err.Error())
 		return nil

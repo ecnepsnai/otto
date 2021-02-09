@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"testing"
 	"time"
-
-	"github.com/ecnepsnai/security"
 )
 
 func mockHTTPRequest(urlString string, sessionCookieValue string) *http.Request {
@@ -54,8 +52,6 @@ func TestAuthenticationIncorrectPassword(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
-
-	security.FailDelay = 0 // Disable the fail delay because it's just a test
 
 	sessionKey := authenticateUser(username, randomString(6), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {

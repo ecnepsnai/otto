@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
-	"github.com/ecnepsnai/security"
+	"github.com/ecnepsnai/secutil"
 )
 
 func (s *userStoreObject) UserWithUsername(username string) *User {
@@ -69,7 +69,7 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 		return nil, ErrorUser("User with email '%s' already exists", params.Email)
 	}
 
-	hashedPassword, err := security.HashPassword([]byte(params.Password))
+	hashedPassword, err := secutil.HashPassword([]byte(params.Password))
 	if err != nil {
 		log.Error("Error hasing user password: %s", err.Error())
 		return nil, ErrorFrom(err)
@@ -115,7 +115,7 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 	user.CanLogIn = params.CanLogIn
 	user.MustChangePassword = params.MustChangePassword
 	if params.Password != "" {
-		hashedPassword, err := security.HashPassword([]byte(params.Password))
+		hashedPassword, err := secutil.HashPassword([]byte(params.Password))
 		if err != nil {
 			log.Error("Error hasing user password: %s", err.Error())
 			return nil, ErrorFrom(err)
@@ -140,7 +140,7 @@ func (s *userStoreObject) ResetPassword(username string, newPassword []byte) (*U
 		return nil, ErrorUser("no user with username %s", username)
 	}
 
-	passwordHash, err := security.HashPassword(newPassword)
+	passwordHash, err := secutil.HashPassword(newPassword)
 	if err != nil {
 		log.Error("Error hasing password for user: username='%s' error='%s'", username, err.Error())
 		return nil, ErrorFrom(err)

@@ -4,7 +4,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/ecnepsnai/security"
 	"github.com/ecnepsnai/web"
 )
 
@@ -38,12 +37,9 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 	}
 
 	if user.Username == defaultUser.Username {
-		delay := security.FailDelay
-		security.FailDelay = 0
 		if user.PasswordHash.Compare([]byte(defaultUser.Password)) {
 			s.Warnings = append(s.Warnings, "default_user_password")
 		}
-		security.FailDelay = delay
 	}
 
 	return s, nil
