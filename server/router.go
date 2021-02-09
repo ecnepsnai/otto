@@ -18,6 +18,7 @@ var bindAddress = "localhost:8080"
 // RouterSetup set up the HTTP router
 func RouterSetup() {
 	server := web.New(bindAddress)
+	server.MaxRequestsPerSecond = 15
 
 	maxBodyLength := uint64(104857600)
 
