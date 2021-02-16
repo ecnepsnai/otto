@@ -1,7 +1,6 @@
 package server
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -17,7 +16,7 @@ var offline bool
 // Perform all startup actions that are typically done during Start(), except don't start
 // the http router.
 func testSetup() {
-	tmp, err := ioutil.TempDir("", "otto")
+	tmp, err := os.MkdirTemp("", "otto")
 	if err != nil {
 		panic(err)
 	}

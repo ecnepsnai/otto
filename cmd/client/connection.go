@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -164,7 +163,7 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 		}
 	}
 
-	tmp, err := ioutil.TempFile("", "otto")
+	tmp, err := os.CreateTemp("", "otto")
 	if err != nil {
 		panic(err)
 	}
