@@ -1,9 +1,9 @@
-import { API } from "../services/API";
-import { Modal } from "../components/Modal";
-import { Notification } from "../components/Notification";
-import { GroupType } from "./Group";
-import { Variable } from "./Variable";
-import { ScheduleType } from "./Schedule";
+import { API } from '../services/API';
+import { Modal } from '../components/Modal';
+import { Notification } from '../components/Notification';
+import { GroupType } from './Group';
+import { Variable } from './Variable';
+import { ScheduleType } from './Schedule';
 
 export interface HostType {
     ID?: string;

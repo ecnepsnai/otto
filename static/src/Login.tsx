@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Alert } from './components/Alert';
-import { Style } from './components/Style';
 import '../css/login.scss';
 
 enum LoginFlowStage {
@@ -42,14 +41,14 @@ class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
 
     private loginError = () => {
         switch (this.props.error) {
-            case LoginError.Unauthorized:
-                return (<Alert color={Style.Palette.Danger}>You must be logged in to access that page</Alert>);
-            case LoginError.LoggedOut:
-                return (<Alert color={Style.Palette.Info}>You&apos;ve been logged out</Alert>);
-            case LoginError.IncorrectPassword:
-                return (<Alert color={Style.Palette.Danger}>Incorrect username or password</Alert>);
-            case LoginError.LoginError:
-                return (<Alert color={Style.Palette.Danger}>Internal Server Error</Alert>);
+        case LoginError.Unauthorized:
+            return (<Alert.Danger>You must be logged in to access that page</Alert.Danger>);
+        case LoginError.LoggedOut:
+            return (<Alert.Info>You&apos;ve been logged out</Alert.Info>);
+        case LoginError.IncorrectPassword:
+            return (<Alert.Danger>Incorrect username or password</Alert.Danger>);
+        case LoginError.LoginError:
+            return (<Alert.Danger>Internal Server Error</Alert.Danger>);
         }
     }
 
@@ -106,11 +105,11 @@ class ChangePasswordForm extends React.Component<ChangePasswordFormProps, Change
 
     private changePasswordError = () => {
         switch (this.props.error) {
-            case LoginError.LoginError:
-                return (<Alert color={Style.Palette.Danger}>Internal Server Error</Alert>);
+        case LoginError.LoginError:
+            return (<Alert.Danger>Internal Server Error</Alert.Danger>);
         }
 
-        return (<Alert color={Style.Palette.Warning}>You Must Change Your Password</Alert>);
+        return (<Alert.Warning>You Must Change Your Password</Alert.Warning>);
     }
 
     private changePassword1 = (event: React.FormEvent<HTMLInputElement>) => {
@@ -144,15 +143,14 @@ class ChangePasswordForm extends React.Component<ChangePasswordFormProps, Change
     }
 }
 
-interface LoginProps {}
 interface LoginState {
     stage: LoginFlowStage;
     loading?: boolean;
     error?: LoginError;
     redirect?: string;
 }
-class Login extends React.Component<LoginProps, LoginState> {
-    constructor(props: LoginProps) {
+class Login extends React.Component<unknown, LoginState> {
+    constructor(props: unknown) {
         super(props);
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -277,10 +275,10 @@ class Login extends React.Component<LoginProps, LoginState> {
 
     private content = () => {
         switch (this.state.stage) {
-            case LoginFlowStage.Login:
-                return (<LoginForm doLogin={this.doLogin} loading={this.state.loading} error={this.state.error}/>);
-            case LoginFlowStage.ChangePassword:
-                return (<ChangePasswordForm doChangePassword={this.doChangePassword} loading={this.state.loading} error={this.state.error}/>);
+        case LoginFlowStage.Login:
+            return (<LoginForm doLogin={this.doLogin} loading={this.state.loading} error={this.state.error}/>);
+        case LoginFlowStage.ChangePassword:
+            return (<ChangePasswordForm doChangePassword={this.doChangePassword} loading={this.state.loading} error={this.state.error}/>);
         }
 
         return null;
@@ -288,10 +286,10 @@ class Login extends React.Component<LoginProps, LoginState> {
 
     render(): JSX.Element {
         return (
-        <div className="form-signin">
-            <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
-            { this.content() }
-        </div>
+            <div className="form-signin">
+                <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
+                { this.content() }
+            </div>
         );
     }
 }

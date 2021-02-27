@@ -7,37 +7,27 @@ import { Style } from './Style';
 export interface CopyButtonProps {
     text: string;
 }
-interface CopyButtonState {
-    didCopy: boolean;
-}
-export class CopyButton extends React.Component<CopyButtonProps, CopyButtonState> {
-    constructor(props: CopyButtonProps) {
-        super(props);
-        this.state = {
-            didCopy: false,
-        };
-    }
+export const CopyButton: React.FC<CopyButtonProps> = (props: CopyButtonProps) => {
+    const [didCopy, setDidCopy] = React.useState(false);
 
-    private onClick = () => {
-        Clipboard.setText(this.props.text).then(() => {
-            this.setState({ didCopy: true });
+    const onClick = () => {
+        Clipboard.setText(props.text).then(() => {
+            setDidCopy(true);
         });
-    }
+    };
 
-    private content = () => {
-        if (this.state.didCopy) {
+    const content = () => {
+        if (didCopy) {
             return (<Icon.CheckCircle />);
         }
 
         return (<Icon.Clipboard />);
-    }
+    };
 
-    render(): JSX.Element {
-        const color = this.state.didCopy ? Style.Palette.Success : Style.Palette.Primary;
-        return (
-            <Button color={color} outline size={Style.Size.XS} onClick={this.onClick} disabled={this.state.didCopy}>
-                { this.content() }
-            </Button>
-        );
-    }
-}
+    const color = didCopy ? Style.Palette.Success : Style.Palette.Primary;
+    return (
+        <Button color={color} outline size={Style.Size.XS} onClick={onClick} disabled={didCopy}>
+            { content() }
+        </Button>
+    );
+};

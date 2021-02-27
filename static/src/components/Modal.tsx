@@ -28,7 +28,7 @@ export interface ModalButton {
     disabled?: boolean;
 }
 
-export interface ModalProps {
+interface ModalProps {
     /**
      * The title of the modal
      */
@@ -46,10 +46,6 @@ export interface ModalProps {
      */
     dismissed?: () => void;
     /**
-     * Optional ID for the modal. If none is specified then the modal DOM is not removed after the modal is shown
-     */
-    id?: string;
-    /**
      * Optional size for the modal
      */
     size?: Style.Size;
@@ -65,20 +61,19 @@ interface ModalState {
 }
 
 export class Modal extends React.Component<ModalProps, ModalState> {
-    private static modals: { [id: string]: BSModal; } = {};
+    private static currentModal: BSModal = undefined;
     constructor(props: ModalProps) {
         super(props);
-        this.state = { id: props.id ?? Rand.ID() };
+        this.state = { id: Rand.ID() };
     }
     componentDidMount(): void {
         const element = document.getElementById(this.state.id);
-        const id = this.state.id;
         element.addEventListener('hidden.bs.modal', () => {
             if (this.props.dismissed) {
                 this.props.dismissed();
             }
             GlobalModalFrame.removeModal();
-            delete Modal.modals[id];
+            Modal.currentModal = undefined;
         });
         let backdrop: 'static' | boolean = true;
         if (this.props.static) {
@@ -87,21 +82,27 @@ export class Modal extends React.Component<ModalProps, ModalState> {
         const bsm = new BSModal(element, { backdrop: backdrop });
         bsm.show();
         this.setState({ bsModal: bsm });
-        Modal.modals[id] = bsm;
+        Modal.currentModal = bsm;
     }
-    private buttonClick = (button: ModalButton): Function => {
+    private buttonClick = (button: ModalButton) => {
         return () => {
-            if (button.onClick) { button.onClick(); }
-            if (!button.dontDismiss) { this.state.bsModal.hide(); }
+            if (button.onClick) {
+                button.onClick();
+            }
+            if (!button.dontDismiss) {
+                this.state.bsModal.hide();
+            }
         };
     };
     private closeButtonClick = () => {
         this.state.bsModal.hide();
     }
     private closeButton = () => {
-        if (this.props.static) { return null; }
+        if (this.props.static) {
+            return null;
+        }
         return (
-        <button type="button" onClick={this.closeButtonClick} className="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            <button type="button" onClick={this.closeButtonClick} className="btn-close" data-dismiss="modal" aria-label="Close"></button>
         );
     }
     private header = () => {
@@ -154,8 +155,12 @@ export class Modal extends React.Component<ModalProps, ModalState> {
         );
     }
 
-    public static dismiss(id: string): void {
-        Modal.modals[id].hide();
+    public static dismiss(): void {
+        if (!Modal.currentModal) {
+            console.warn('Cannot dismiss modal when none present');
+            return;
+        }
+        Modal.currentModal.hide();
     }
 
     /**
@@ -186,9 +191,8 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                     onClick: buttonClick(true),
                 }
             ];
-            const id = Rand.ID();
             GlobalModalFrame.showModal(
-                <Modal title={title} buttons={buttons} dismissed={dismissed} key={id} id={id}>
+                <Modal title={title} buttons={buttons} dismissed={dismissed}>
                     <p>{ body }</p>
                 </Modal>
             );
@@ -223,9 +227,8 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                     onClick: buttonClick(true),
                 }
             ];
-            const id = Rand.ID();
             GlobalModalFrame.showModal(
-                <Modal title={title} buttons={buttons} dismissed={dismissed} key={id} id={id}>
+                <Modal title={title} buttons={buttons} dismissed={dismissed}>
                     <p>{ body }</p>
                 </Modal>
             );
@@ -233,24 +236,29 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     }
 }
 
-export class ModalHeader extends React.Component<{}, {}> {
-    render(): JSX.Element {
-        return (
-            <div className="modal-header">
-                { this.props.children }
-                <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close"></button>
-            </div>
-        );
-    }
+interface ModalHeaderProps {
+    children?: React.ReactNode
 }
+export const ModalHeader: React.FC<ModalHeaderProps> = (props: ModalHeaderProps) => {
+    const closeButtonClicked = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        Modal.dismiss();
+    };
 
-interface GlobalModalFrameProps {}
+    return (
+        <div className="modal-header">
+            { props.children }
+            <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={closeButtonClicked}></button>
+        </div>
+    );
+};
+
 interface GlobalModalFrameState {
     modal?: JSX.Element;
 }
 
-export class GlobalModalFrame extends React.Component<GlobalModalFrameProps, GlobalModalFrameState> {
-    constructor(props: GlobalModalFrameProps) {
+export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {};
         GlobalModalFrame.instance = this;
@@ -288,7 +296,7 @@ export class GlobalModalFrame extends React.Component<GlobalModalFrameProps, Glo
     }
 }
 
-export interface ModalFormProps {
+interface ModalFormProps {
     /**
      * The title of the modal
      */
@@ -302,57 +310,50 @@ export interface ModalFormProps {
      * Called when the modal is dismissed without saving
      */
     onDismissed?: () => void;
-}
-interface ModalFormState {
-    loading?: boolean;
+
+    children?: React.ReactNode;
 }
 /**
  * A modal with a form element. Buttons in the footer of the modal are used for the form element.
  */
-export class ModalForm extends React.Component<ModalFormProps, ModalFormState> {
-    constructor(props: ModalFormProps) {
-        super(props);
-        this.state = {};
-        this.formRef = React.createRef();
-    }
-    private formRef: React.RefObject<Form>;
+export const ModalForm: React.FC<ModalFormProps> = (props: ModalFormProps) => {
+    const [loading, setLoading] = React.useState(false);
+    const formRef: React.RefObject<Form> = React.createRef();
 
-    private saveClick = () => {
-        if (!this.formRef.current.validateForm()) {
+    const saveClick = () => {
+        if (!formRef.current.validateForm()) {
             return;
         }
 
-        this.setState({ loading: true });
-        this.props.onSubmit().then(() => {
+        setLoading(true);
+        props.onSubmit().then(() => {
             GlobalModalFrame.removeModal();
         }, () => {
-            this.setState({ loading: false });
+            setLoading(false);
         });
-    }
+    };
 
-    render(): JSX.Element {
-        const buttons: ModalButton[] = [
-            {
-                label: 'Discard',
-                color: Style.Palette.Secondary,
-                disabled: this.state.loading,
-                onClick: this.props.onDismissed,
-            },
-            {
-                label: 'Save',
-                color: Style.Palette.Primary,
-                onClick: this.saveClick,
-                dontDismiss: true,
-                disabled: this.state.loading,
-            }
-        ];
+    const buttons: ModalButton[] = [
+        {
+            label: 'Discard',
+            color: Style.Palette.Secondary,
+            disabled: loading,
+            onClick: props.onDismissed,
+        },
+        {
+            label: 'Save',
+            color: Style.Palette.Primary,
+            onClick: saveClick,
+            dontDismiss: true,
+            disabled: loading,
+        }
+    ];
 
-        return (
-            <Modal title={this.props.title} buttons={buttons} static>
-                <Form ref={this.formRef}>
-                    { this.props.children }
-                </Form>
-            </Modal>
-        );
-    }
-}
+    return (
+        <Modal title={props.title} buttons={buttons} static>
+            <Form ref={formRef}>
+                { props.children }
+            </Form>
+        </Modal>
+    );
+};

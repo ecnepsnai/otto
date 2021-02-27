@@ -1,4 +1,4 @@
-import { API } from "../services/API";
+import { API } from '../services/API';
 
 export interface HeartbeatType {
     Address?: string;

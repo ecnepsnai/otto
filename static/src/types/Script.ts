@@ -1,10 +1,10 @@
-import { API } from "../services/API";
-import { Modal } from "../components/Modal";
-import { Notification } from "../components/Notification";
-import { GroupType } from "./Group";
-import { Variable } from "./Variable";
-import { Schedule } from "./Schedule";
-import { AttachmentType } from "./Attachment";
+import { API } from '../services/API';
+import { Modal } from '../components/Modal';
+import { Notification } from '../components/Notification';
+import { GroupType } from './Group';
+import { Variable } from './Variable';
+import { ScheduleType } from './Schedule';
+import { AttachmentType } from './Attachment';
 
 export interface ScriptType {
     ID?: string;
@@ -136,11 +136,9 @@ export class Script {
     /**
      * List all schedules for a script
      */
-    public static async Schedules(id: string): Promise<Schedule[]> {
+    public static async Schedules(id: string): Promise<ScheduleType[]> {
         const data = await API.GET('/api/scripts/script/' + id + '/schedules');
-        return (data as any[]).map(obj => {
-            return new Schedule(obj);
-        });
+        return data as ScheduleType[];
     }
 
     /**

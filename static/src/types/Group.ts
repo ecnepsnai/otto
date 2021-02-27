@@ -1,10 +1,10 @@
-import { API } from "../services/API";
-import { Modal } from "../components/Modal";
-import { Notification } from "../components/Notification";
-import { HostType } from "./Host";
-import { ScriptType } from "./Script";
-import { Variable } from "./Variable";
-import { ScheduleType } from "./Schedule";
+import { API } from '../services/API';
+import { Modal } from '../components/Modal';
+import { Notification } from '../components/Notification';
+import { HostType } from './Host';
+import { ScriptType } from './Script';
+import { Variable } from './Variable';
+import { ScheduleType } from './Schedule';
 
 export interface GroupType {
     ID?: string;

@@ -5,19 +5,17 @@ import { Icon } from './Icon';
 export interface RandomPSKProps {
     newPSK: (psk: string) => (void);
 }
-export class RandomPSK extends React.Component<RandomPSKProps, {}> {
-    private randomPSK = (event: React.MouseEvent<HTMLAnchorElement>) => {
+export const RandomPSK: React.FC<RandomPSKProps> = (props: RandomPSKProps) => {
+    const randomPSK = (event: React.MouseEvent<HTMLAnchorElement>) => {
         event.preventDefault();
-        this.props.newPSK(Rand.PSK());
-    }
+        props.newPSK(Rand.PSK());
+    };
 
-    render(): JSX.Element {
-        return (
-            <div className="mb-3">
-                <a href="#" onClick={this.randomPSK} className="mb-3">
-                    <Icon.Label icon={<Icon.Random />} label="Generate Random PSK" />
-                </a>
-            </div>
-        );
-    }
-}
+    return (
+        <div className="mb-3">
+            <a href="#" onClick={randomPSK} className="mb-3">
+                <Icon.Label icon={<Icon.Random />} label="Generate Random PSK" />
+            </a>
+        </div>
+    );
+};

@@ -1,38 +1,29 @@
 import * as React from 'react';
-import '../../css/title.scss';
+import '../../css/page.scss';
 
-export interface PageProps {
+interface PageProps {
     title?: string;
     header?: JSX.Element;
+    children?: React.ReactNode;
 }
-
-export class Page extends React.Component<PageProps, {}> {
-    componentDidMount(): void {
-        if (this.props.title) {
-            document.title = this.props.title + ' — Otto';
-        } else {
-            document.title = 'Otto';
-        }
+export const Page: React.FC<PageProps> = (props: PageProps) => {
+    let content: JSX.Element;
+    if (props.header) {
+        content = props.header;
+    } else {
+        content = (<p>{ props.title }</p>);
     }
-    render(): JSX.Element {
-        let content: JSX.Element;
-        if (this.props.header) {
-            content = this.props.header;
-        } else {
-            content = (<p>{ this.props.title }</p>);
-        }
 
-        return (
-            <div className="page">
-                <div className="page-title">
-                    <div className="container">
-                        { content }
-                    </div>
-                </div>
+    return (
+        <div className="page">
+            <div className="page-title">
                 <div className="container">
-                    { this.props.children }
+                    { content }
                 </div>
             </div>
-        );
-    }
-}
+            <div className="container">
+                { props.children }
+            </div>
+        </div>
+    );
+};

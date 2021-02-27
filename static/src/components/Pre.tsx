@@ -1,10 +1,11 @@
 import * as React from 'react';
 import '../../css/pre.scss';
 
-export class Pre extends React.Component<{}, {}> {
-    render(): JSX.Element {
-        return (
-            <div className="pre-wrapper"><pre>{ this.props.children }</pre></div>
-        );
-    }
+interface PreProps {
+    children?: React.ReactNode;
 }
+export const Pre: React.FC<PreProps> = (props: PreProps) => {
+    return (
+        <div className="pre-wrapper"><pre>{ props.children }</pre></div>
+    );
+};

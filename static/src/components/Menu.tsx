@@ -1,102 +1,79 @@
 import * as React from 'react';
 import { Link as ReactLink } from 'react-router-dom';
 import { Rand } from '../services/Rand';
-import { ButtonProps, Button } from './Button';
 import { Icon } from './Icon';
 
-export interface DropdownProps {
+interface DropdownProps {
     label: JSX.Element;
-    button: ButtonProps;
+    children?: React.ReactNode;
 }
-
-export class Dropdown extends React.Component<DropdownProps> {
-    private id = Rand.ID();
-    constructor(props: DropdownProps) {
-        super(props);
-    }
-    render(): JSX.Element {
-        return (
-            <div className="dropdown">
-                <button className={Button.className(this.props.button)} type="button" role="button" id={this.id} data-bs-toggle="dropdown" aria-expanded="false">
-                    { this.props.label }
-                </button>
-                <Menu.Menu name={this.id}>
-                    { this.props.children }
-                </Menu.Menu>
-            </div>
-        );
-    }
-}
+export const Dropdown: React.FC<DropdownProps> = (props: DropdownProps) => {
+    const id = Rand.ID();
+    return (
+        <div className="dropdown">
+            <button className="btn btn-outline-secondary btn-xs" type="button" role="button" id={id} data-bs-toggle="dropdown" aria-expanded="false">
+                { props.label }
+            </button>
+            <Menu.Menu name={id}>
+                { props.children }
+            </Menu.Menu>
+        </div>
+    );
+};
 
 export namespace Menu {
-    export interface MenuProps {
+    interface MenuProps {
         name: string;
+        children?: React.ReactNode;
     }
+    export const Menu: React.FC<MenuProps> = (props: MenuProps) => {
+        return (
+            <ul className="dropdown-menu" aria-labelledby={props.name}>{ props.children }</ul>
+        );
+    };
 
-    export class Menu extends React.Component<MenuProps> {
-        constructor(props: MenuProps) {
-            super(props);
-        }
-        render(): JSX.Element {
-            return (
-                <ul className="dropdown-menu" aria-labelledby={this.props.name}>{ this.props.children }</ul>
-            );
-        }
-    }
-
-    export interface ItemProps {
+    interface ItemProps {
         icon?: JSX.Element;
         label: string;
         onClick: () => (void);
     }
-
-    export class Item extends React.Component<ItemProps, {}> {
-        private onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    export const Item: React.FC<ItemProps> = (props: ItemProps) => {
+        const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
             event.preventDefault();
-            this.props.onClick();
-        }
-        render(): JSX.Element {
-            return (
-                <li><a className="dropdown-item" href="#" onClick={this.onClick}>{ this.props.icon }<span className="ms-1">{ this.props.label }</span></a></li>
-            );
-        }
-    }
+            props.onClick();
+        };
+        return (
+            <li><a className="dropdown-item" href="#" onClick={onClick}>{ props.icon }<span className="ms-1">{ props.label }</span></a></li>
+        );
+    };
 
-    export interface LinkProps {
+    interface LinkProps {
         icon?: JSX.Element;
         label: string;
         to: string;
     }
+    export const Link: React.FC<LinkProps> = (props: LinkProps) => {
+        return (
+            <li>
+                <ReactLink to={props.to} className="dropdown-item">
+                    <Icon.Label icon={props.icon} label={props.label} />
+                </ReactLink>
+            </li>
+        );
+    };
 
-    export class Link extends React.Component<LinkProps, {}> {
-        render(): JSX.Element {
-            return (
-                <li>
-                    <ReactLink to={this.props.to} className="dropdown-item">
-                        <Icon.Label icon={this.props.icon} label={this.props.label} />
-                    </ReactLink>
-                </li>
-            );
-        }
-    }
-
-    export interface AnchorProps {
+    interface AnchorProps {
         icon?: JSX.Element;
         label: string;
         href: string;
     }
+    export const Anchor: React.FC<AnchorProps> = (props: AnchorProps) => {
+        return (
+            <li><a className="dropdown-item" href={props.href}>{ props.icon }<span className="ms-1">{ props.label }</span></a></li>
+        );
+    };
 
-    export class Anchor extends React.Component<AnchorProps, {}> {
-        render(): JSX.Element {
-            return (
-                <li><a className="dropdown-item" href={this.props.href}>{ this.props.icon }<span className="ms-1">{ this.props.label }</span></a></li>
-            );
-        }
-    }
-
-    export class Divider extends React.Component<{}, {}> {
-        render(): JSX.Element {
-            return (<li><hr className="dropdown-divider" /></li>);
-        }
-    }
+    export const Divider: React.FC = () => {
+        return (<li><hr className="dropdown-divider" /></li>);
+    };
 }

@@ -2,32 +2,21 @@ import * as React from 'react';
 import { Popover as BSPopover } from 'bootstrap';
 import '../../css/popover.scss';
 
-export interface PopoverProps {
+interface PopoverProps {
     content: string;
+    children?: React.ReactNode;
 }
+export const Popover: React.FC<PopoverProps> = (props: PopoverProps) => {
+    const spanRef: React.RefObject<HTMLSpanElement> = React.createRef();
 
-export class Popover extends React.Component<PopoverProps, {}> {
-    private spanRef: React.RefObject<HTMLSpanElement>;
-
-    constructor(props: PopoverProps) {
-        super(props);
-        this.spanRef = React.createRef();
-    }
-
-    componentDidMount(): void {
+    React.useEffect(() => {
         // Popovers must be initialized as they are opt-in
-        new BSPopover(this.spanRef.current, {
+        new BSPopover(spanRef.current, {
             trigger: 'hover',
             placement: 'top',
-            content: this.props.content,
+            content: props.content,
         });
-    }
+    }, []);
 
-    render(): JSX.Element {
-        return (
-            <span ref={this.spanRef} className="popover-hover" data-toggle="popover">
-                { this.props.children }
-            </span>
-        );
-    }
-}
+    return (<span ref={spanRef} className="popover-hover" data-toggle="popover">{ props.children }</span>);
+};

@@ -1,6 +1,6 @@
-import { API } from "../services/API";
-import { StateManager } from "../services/StateManager";
-import { Variable } from "./Variable";
+import { API } from '../services/API';
+import { StateManager } from '../services/StateManager';
+import { Variable } from './Variable';
 
 export namespace Options {
     export interface OttoOptions {

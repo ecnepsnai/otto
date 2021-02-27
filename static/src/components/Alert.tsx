@@ -1,55 +1,43 @@
 import * as React from 'react';
 import { Style } from './Style';
 
-export interface AlertProps {
-    color: Style.Palette;
-    onClose?: () => (void);
-}
-export class Alert extends React.Component<AlertProps, {}> {
-    private closeButton = () => {
-        if (!this.props.onClose) {
-            return null;
-        }
-
-        return (
-        <button type="button" className="btn-close" data-dismiss="alert" aria-label="Close" onClick={this.props.onClose}></button>
-        );
+export namespace Alert {
+    interface AlertProps {
+        color: Style.Palette;
+        onClose?: () => (void);
+        children?: React.ReactNode;
     }
-    render(): JSX.Element {
-        let className = 'alert fade show alert-' + this.props.color.toString();
-        if (this.props.onClose) {
+    export const Alert: React.FC<AlertProps> = (props: AlertProps) => {
+        const closeButton = () => {
+            if (!props.onClose) {
+                return null;
+            }
+
+            return (<button type="button" className="btn-close" data-dismiss="alert" aria-label="Close" onClick={props.onClose}></button>);
+        };
+
+        let className = 'alert fade show alert-' + props.color.toString();
+        if (props.onClose) {
             className += ' alert-dismissible';
         }
         return (
             <div className={className} role="alert">
-                { this.closeButton() }
-                { this.props.children }
+                { closeButton() }
+                { props.children }
             </div>
         );
-    }
+    };
 
-    public static primary(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Primary}>{ content }</Alert>;
+    interface CommonAlertProps {
+        onClose?: () => (void);
+        children?: React.ReactNode;
     }
-    public static secondary(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Secondary}>{ content }</Alert>;
-    }
-    public static success(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Success}>{ content }</Alert>;
-    }
-    public static danger(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Danger}>{ content }</Alert>;
-    }
-    public static warning(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Warning}>{ content }</Alert>;
-    }
-    public static info(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Info}>{ content }</Alert>;
-    }
-    public static light(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Light}>{ content }</Alert>;
-    }
-    public static dark(content: string): JSX.Element {
-        return <Alert color={Style.Palette.Dark}>{ content }</Alert>;
-    }
+    export const Primary: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Primary, onClose: props.onClose, children: props.children });
+    export const Secondary: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Secondary, onClose: props.onClose, children: props.children });
+    export const Success: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Success, onClose: props.onClose, children: props.children });
+    export const Danger: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Danger, onClose: props.onClose, children: props.children });
+    export const Warning: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Warning, onClose: props.onClose, children: props.children });
+    export const Info: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Info, onClose: props.onClose, children: props.children });
+    export const Light: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Light, onClose: props.onClose, children: props.children });
+    export const Dark: React.FC<CommonAlertProps> = (props: CommonAlertProps) => Alert({ color: Style.Palette.Dark, onClose: props.onClose, children: props.children });
 }

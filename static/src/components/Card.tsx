@@ -3,82 +3,78 @@ import { Style } from './Style';
 import '../../css/card.scss';
 
 export namespace Card {
-    export interface CardProps {
+    interface CardProps {
         color?: Style.Palette;
         className?: string;
+        onClick?: () => (void);
+        children?: React.ReactNode;
     }
-
-    export class Card extends React.Component<CardProps, {}> {
-        render(): JSX.Element {
-            let className = 'card';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
-            if (this.props.color) {
-                className += ' card-' + this.props.color.toString();
-            }
-
-            return (
-                <div className={className}>
-                    { this.props.children }
-                </div>
-            );
+    export const Card: React.FC<CardProps> = (props: CardProps) => {
+        let className = 'card';
+        if (props.className) {
+            className += ' ' + props.className;
         }
-    }
+        if (props.color) {
+            className += ' card-' + props.color.toString();
+        }
 
-    export interface HeaderProps {
+        return (
+            <div className={className} onClick={props.onClick}>
+                { props.children }
+            </div>
+        );
+    };
+
+    interface HeaderProps {
         className?: string;
+        children?: React.ReactNode;
     }
-    export class Header extends React.Component<HeaderProps, {}> {
-        render(): JSX.Element {
-            let className = 'card-header';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
-            return (
-                <div className={className}>
-                    { this.props.children }
-                </div>
-            );
+    export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
+        let className = 'card-header';
+        if (props.className) {
+            className += ' ' + props.className;
         }
-    }
+        return (
+            <div className={className}>
+                { props.children }
+            </div>
+        );
+    };
 
-    export interface BodyProps {
+    interface BodyProps {
         className?: string;
+        children?: React.ReactNode;
     }
-    export class Body extends React.Component<BodyProps, {}> {
-        render(): JSX.Element {
-            let className = 'card-body';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
-            return (
-                <div className={className}>
-                    { this.props.children }
-                </div>
-            );
+    export const Body: React.FC<BodyProps> = (props: BodyProps) => {
+        let className = 'card-body';
+        if (props.className) {
+            className += ' ' + props.className;
         }
-    }
+        return (
+            <div className={className}>
+                { props.children }
+            </div>
+        );
+    };
 
-    export interface ImageProps {
+    interface ImageProps {
         src: string;
+        children?: React.ReactNode;
     }
+    export const Image: React.FC<ImageProps> = (props: ImageProps) => {
+        return (
+            <img className="card-img-top" src={props.src} />
+        );
+    };
 
-    export class Image extends React.Component<ImageProps, {}> {
-        render(): JSX.Element {
-            return (
-                <img className="card-img-top" src={this.props.src} />
-            );
-        }
+    interface FooterProps {
+        children?: React.ReactNode;
     }
-
-    export class Footer extends React.Component<{}, {}> {
-        render(): JSX.Element {
-            return (
-                <div className="card-footer">
-                    { this.props.children }
-                </div>
-            );
-        }
-    }
+    export const Footer: React.FC<FooterProps> = (props: FooterProps) => {
+        return (
+            <div className="card-footer">
+                { props.children }
+            </div>
+        );
+    };
 }
