@@ -26,21 +26,12 @@ interface LoginFormProps {
     loading?: boolean;
     error?: LoginError;
 }
-interface LoginFormState {
-    username: string;
-    password: string;
-}
-class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
-    constructor(props: LoginFormProps) {
-        super(props);
-        this.state = {
-            username: '',
-            password: '',
-        };
-    }
+const LoginForm: React.FC<LoginFormProps> = (props: LoginFormProps) => {
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
 
-    private loginError = () => {
-        switch (this.props.error) {
+    const loginError = () => {
+        switch (props.error) {
         case LoginError.Unauthorized:
             return (<Alert.Danger>You must be logged in to access that page</Alert.Danger>);
         case LoginError.LoggedOut:
@@ -50,249 +41,183 @@ class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
         case LoginError.LoginError:
             return (<Alert.Danger>Internal Server Error</Alert.Danger>);
         }
-    }
+    };
 
-    private changeUsername = (event: React.FormEvent<HTMLInputElement>) => {
+    const changeUsername = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        this.setState({ username: target.value });
-    }
+        setUsername(target.value);
+    };
 
-    private changePassword = (event: React.FormEvent<HTMLInputElement>) => {
+    const changePassword = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        this.setState({ password: target.value });
-    }
+        setUsername(target.value);
+    };
 
-    private loginFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const loginFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        this.props.doLogin(this.state.username, this.state.password).then(() => {
-            this.setState({ password: '' });
+        props.doLogin(username, password).then(() => {
+            setPassword('');
         });
-    }
+    };
 
-    render() {
-        return (
-            <form onSubmit={this.loginFormSubmit}>
-                { this.loginError() }
-                <label htmlFor="username" className="visually-hidden">Username</label>
-                <input type="text" value={this.state.username} onChange={this.changeUsername} className="form-control input-first" placeholder="Username" required autoFocus disabled={this.props.loading}/>
-                <label htmlFor="password" className="visually-hidden">Password</label>
-                <input type="password" value={this.state.password} onChange={this.changePassword} className="form-control input-second" placeholder="Password" required disabled={this.props.loading}/>
-                <div className="d-grid">
-                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.props.loading}>Sign in</button>
-                </div>
-            </form>
-        );
-    }
-}
+    return (
+        <form onSubmit={loginFormSubmit}>
+            { loginError() }
+            <label htmlFor="username" className="visually-hidden">Username</label>
+            <input type="text" value={username} onChange={changeUsername} className="form-control input-first" placeholder="Username" required autoFocus disabled={props.loading}/>
+            <label htmlFor="password" className="visually-hidden">Password</label>
+            <input type="password" value={password} onChange={changePassword} className="form-control input-second" placeholder="Password" required disabled={props.loading}/>
+            <div className="d-grid">
+                <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={props.loading}>Sign in</button>
+            </div>
+        </form>
+    );
+};
 
 interface ChangePasswordFormProps {
     doChangePassword: (password: string) => void;
     loading?: boolean;
     error?: LoginError;
 }
-interface ChangePasswordFormState {
-    password1: string;
-    password2: string;
-}
-class ChangePasswordForm extends React.Component<ChangePasswordFormProps, ChangePasswordFormState> {
-    constructor(props: ChangePasswordFormProps) {
-        super(props);
-        this.state = {
-            password1: '',
-            password2: '',
-        };
-    }
+const ChangePasswordForm: React.FC<ChangePasswordFormProps> = (props: ChangePasswordFormProps) => {
+    const [password1, setPassword1] = React.useState('');
+    const [password2, setPassword2] = React.useState('');
 
-    private changePasswordError = () => {
-        switch (this.props.error) {
+    const changePasswordError = () => {
+        switch (props.error) {
         case LoginError.LoginError:
             return (<Alert.Danger>Internal Server Error</Alert.Danger>);
         }
 
         return (<Alert.Warning>You Must Change Your Password</Alert.Warning>);
-    }
+    };
 
-    private changePassword1 = (event: React.FormEvent<HTMLInputElement>) => {
+    const changePassword1 = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        this.setState({ password1: target.value });
-    }
+        setPassword1(target.value);
+    };
 
-    private changePassword2 = (event: React.FormEvent<HTMLInputElement>) => {
+    const changePassword2 = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        this.setState({ password2: target.value });
-    }
+        setPassword2(target.value);
+    };
 
-    private changePasswordFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const changePasswordFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        this.props.doChangePassword(this.state.password1);
+        props.doChangePassword(password1);
+    };
+
+    return (
+        <form onSubmit={changePasswordFormSubmit}>
+            { changePasswordError() }
+            <label htmlFor="password" className="visually-hidden">New Password</label>
+            <input type="password" value={password1} onChange={changePassword1} className="form-control input-first" placeholder="New Password" required autoFocus disabled={props.loading}/>
+            <label htmlFor="password" className="visually-hidden">Confirm New Password</label>
+            <input type="password" value={password2} onChange={changePassword2} className="form-control input-second" placeholder="Confirm New Password" required disabled={props.loading}/>
+            <div className="d-grid">
+                <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={props.loading}>Change Password</button>
+            </div>
+        </form>
+    );
+};
+
+export const Login: React.FC = () => {
+    const [stage, setStage] = React.useState<LoginFlowStage>(LoginFlowStage.Login);
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const urlParams = new URLSearchParams(window.location.search);
+    let initialError: LoginError;
+    if (urlParams.has('unauthorized')) {
+        initialError = LoginError.Unauthorized;
+    } else if (urlParams.has('logged_out')) {
+        initialError = LoginError.LoggedOut;
     }
-
-    render() {
-        return (
-            <form onSubmit={this.changePasswordFormSubmit}>
-                { this.changePasswordError() }
-                <label htmlFor="password" className="visually-hidden">New Password</label>
-                <input type="password" value={this.state.password1} onChange={this.changePassword1} className="form-control input-first" placeholder="New Password" required autoFocus disabled={this.props.loading}/>
-                <label htmlFor="password" className="visually-hidden">Confirm New Password</label>
-                <input type="password" value={this.state.password2} onChange={this.changePassword2} className="form-control input-second" placeholder="Confirm New Password" required disabled={this.props.loading}/>
-                <div className="d-grid">
-                    <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={this.props.loading}>Change Password</button>
-                </div>
-            </form>
-        );
-    }
-}
-
-interface LoginState {
-    stage: LoginFlowStage;
-    loading?: boolean;
-    error?: LoginError;
-    redirect?: string;
-}
-class Login extends React.Component<unknown, LoginState> {
-    constructor(props: unknown) {
-        super(props);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        let initialError: LoginError;
-        if (urlParams.has('unauthorized')) {
-            initialError = LoginError.Unauthorized;
-        } else if (urlParams.has('logged_out')) {
-            initialError = LoginError.LoggedOut;
+    let redirect: string;
+    if (urlParams.has('redirect')) {
+        redirect = urlParams.get('redirect');
+        if (!redirect.startsWith('/')) {
+            redirect = '/' + redirect;
         }
-        let redirect: string;
-        if (urlParams.has('redirect')) {
-            redirect = urlParams.get('redirect');
-            if (!redirect.startsWith('/')) {
-                redirect = '/' + redirect;
-            }
-        }
-
-        this.state = {
-            stage: LoginFlowStage.Login,
-            error: initialError,
-            redirect: redirect,
-        };
     }
+    const [error, setError] = React.useState<LoginError>(initialError);
 
-    private doLogin = (username: string, password: string): Promise<void> => {
-        this.setState({ loading: true });
+    const doLogin = async (username: string, password: string): Promise<void> => {
+        setLoading(true);
         const credentials = {
             Username: username,
             Password: password,
         };
-        return fetch('/api/login', { method: 'POST', body: JSON.stringify(credentials) }).then(response => {
-            return response.json().then(results => {
-                console.log(results);
 
-                if (results.code != 200) {
-                    this.setState({
-                        loading: false,
-                        error: LoginError.IncorrectPassword,
-                    });
-                    return;
-                }
-
-                const status = results.data as LoginStatus;
-                if (status === LoginStatus.Success) {
-                    this.finishLogin();
-                } else if (status === LoginStatus.MustChangePassword) {
-                    this.setState({
-                        loading: false,
-                        stage: LoginFlowStage.ChangePassword
-                    });
-                }
+        try {
+            const response = await fetch('/api/login', { method: 'POST', body: JSON.stringify(credentials) });
+            const results = await response.json();
+            if (results.code != 200) {
+                setLoading(false);
+                setError(LoginError.IncorrectPassword);
                 return;
-            }, () => {
-                this.setState({
-                    loading: false,
-                    error: LoginError.LoginError,
-                });
-                return;
-            });
-        }, () => {
-            this.setState({
-                loading: false,
-                error: LoginError.LoginError,
-            });
-            return;
-        }).catch(() => {
-            this.setState({
-                loading: false,
-                error: LoginError.LoginError,
-            });
-            return;
-        });
-    }
+            }
 
-    private doChangePassword = (password: string): Promise<void> => {
+            const status = results.data as LoginStatus;
+            if (status === LoginStatus.Success) {
+                finishLogin();
+            } else if (status === LoginStatus.MustChangePassword) {
+                setLoading(false);
+                setStage(LoginFlowStage.ChangePassword);
+            }
+        } catch (err) {
+            console.error('Login error', err);
+            setLoading(false);
+            setError(LoginError.LoginError);
+        }
+    };
+
+    const doChangePassword = async (password: string): Promise<void> => {
         const request = {
             Password: password,
         };
-        return fetch('/api/users/reset_password', { method: 'POST', body: JSON.stringify(request) }).then(response => {
-            return response.json().then(results => {
-                console.log(results);
 
-                if (results.code != 200) {
-                    this.setState({
-                        loading: false,
-                        error: LoginError.LoginError,
-                    });
-                    return;
-                }
-
-                this.finishLogin();
+        try {
+            const response = await fetch('/api/users/reset_password', { method: 'POST', body: JSON.stringify(request) });
+            const results = await response.json();
+            if (results.code != 200) {
+                setLoading(false);
+                setError(LoginError.LoginError);
                 return;
-            }, () => {
-                this.setState({
-                    loading: false,
-                    error: LoginError.LoginError,
-                });
-                return;
-            });
-        }, () => {
-            this.setState({
-                loading: false,
-                error: LoginError.LoginError,
-            });
-            return;
-        }).catch(() => {
-            this.setState({
-                loading: false,
-                error: LoginError.LoginError,
-            });
-            return;
-        });
-    }
+            }
 
-    private finishLogin = () => {
-        if (this.state.redirect) {
-            location.href = this.state.redirect;
+            finishLogin();
+        } catch (err) {
+            console.error('Error changing password', err);
+            setLoading(false);
+            setError(LoginError.LoginError);
+        }
+    };
+
+    const finishLogin = () => {
+        if (redirect) {
+            location.href = redirect;
         } else {
             location.href = '/';
         }
-    }
+    };
 
-    private content = () => {
-        switch (this.state.stage) {
+    const content = () => {
+        switch (stage) {
         case LoginFlowStage.Login:
-            return (<LoginForm doLogin={this.doLogin} loading={this.state.loading} error={this.state.error}/>);
+            return (<LoginForm doLogin={doLogin} loading={loading} error={error}/>);
         case LoginFlowStage.ChangePassword:
-            return (<ChangePasswordForm doChangePassword={this.doChangePassword} loading={this.state.loading} error={this.state.error}/>);
+            return (<ChangePasswordForm doChangePassword={doChangePassword} loading={loading} error={error}/>);
         }
 
         return null;
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <div className="form-signin">
-                <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
-                { this.content() }
-            </div>
-        );
-    }
-}
+    return (
+        <div className="form-signin">
+            <img className="mb-4" src="assets/img/logo_light.svg" alt="otto logo" width="72" height="72" />
+            { content() }
+        </div>
+    );
+};
 
 ReactDOM.render(
     <Login />,
