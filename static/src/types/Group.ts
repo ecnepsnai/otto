@@ -1,72 +1,66 @@
 import { API } from "../services/API";
 import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
-import { Host } from "./Host";
-import { Script } from "./Script";
+import { HostType } from "./Host";
+import { ScriptType } from "./Script";
 import { Variable } from "./Variable";
-import { Schedule } from "./Schedule";
+import { ScheduleType } from "./Schedule";
+
+export interface GroupType {
+    ID?: string;
+    Name?: string;
+    ScriptIDs?: string[];
+    Environment?: Variable[];
+}
 
 export class Group {
-    ID: string;
-    Name: string;
-    ScriptIDs: string[];
-    Environment: Variable[];
-
-    constructor(json: any) {
-        this.ID = json.ID as string;
-        this.Name = json.Name as string;
-        this.ScriptIDs = (json.ScriptIDs || []) as string[];
-        this.Environment = (json.Environment || []) as Variable[];
-    }
-
-
     /**
      * Return a blank group
      */
-    public static Blank(): Group {
-        return new Group({
+    public static Blank(): GroupType {
+        return {
             Name: '',
             ScriptIDs: [],
             Environment: [],
-        });
+        };
     }
 
     /**
      * Create a new Group
      */
-    public static async New(parameters: NewGroupParameters): Promise<Group> {
+    public static async New(parameters: GroupType|NewGroupParameters): Promise<GroupType> {
         const data = await API.PUT('/api/groups/group', parameters);
-        return new Group(data);
+        return data as GroupType;
     }
 
     /**
      * Save this group
      */
-    public async Save(): Promise<Group> {
-        const data = await API.POST('/api/groups/group/' + this.ID, this as EditGroupParameters);
-        return new Group(data);
+    public static async Save(group: GroupType): Promise<GroupType> {
+        const data = await API.POST('/api/groups/group/' + group.ID, group);
+        return data as GroupType;
     }
 
     /**
      * Delete this group
      */
-    public async Delete(): Promise<any> {
-        return await API.DELETE('/api/groups/group/' + this.ID);
+    public static async Delete(group: GroupType): Promise<any> {
+        return await API.DELETE('/api/groups/group/' + group.ID);
     }
 
     /**
      * Modify the group changing the properties specified
      * @param properties properties to change
      */
-    public async Update(properties: {[key:string]: any}): Promise<Group> {
-        const data = await API.PATCH('/api/groups/group/' + this.ID, properties);
-        return new Group(data);
+    public static async Update(group: GroupType, properties: {[key:string]: any}): Promise<GroupType> {
+        const data = await API.PATCH('/api/groups/group/' + group.ID, properties);
+        return data as GroupType;
     }
 
     /**
      * Show a modal to delete this group
      */
-    public async DeleteModal(): Promise<boolean> {
+    public static async DeleteModal(group: GroupType): Promise<boolean> {
         return new Promise(resolve => {
             Modal.delete('Delete Group?', 'Are you sure you want to delete this group? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
@@ -74,7 +68,7 @@ export class Group {
                     return;
                 }
 
-                API.DELETE('/api/groups/group/' + this.ID).then(() => {
+                API.DELETE('/api/groups/group/' + group.ID).then(() => {
                     Notification.success('Group Deleted');
                     resolve(true);
                 });
@@ -85,19 +79,17 @@ export class Group {
     /**
      * Get the specified group by its id
      */
-    public static async Get(id: string): Promise<Group> {
+    public static async Get(id: string): Promise<GroupType> {
         const data = await API.GET('/api/groups/group/' + id);
-        return new Group(data);
+        return data as GroupType;
     }
 
     /**
      * List all groups
      */
-    public static async List(): Promise<Group[]> {
+    public static async List(): Promise<GroupType[]> {
         const data = await API.GET('/api/groups');
-        return (data as any[]).map(obj => {
-            return new Group(obj);
-        });
+        return data as GroupType[];
     }
 
     /**
@@ -109,65 +101,36 @@ export class Group {
     }
 
     /**
-     * List all hosts for this group
-     */
-    public async Hosts(): Promise<Host[]> {
-        return Group.Hosts(this.ID);
-    }
-
-    /**
      * List all hosts for a group
      */
-    public static async Hosts(groupID: string): Promise<Host[]> {
+    public static async Hosts(groupID: string): Promise<HostType[]> {
         const data = await API.GET('/api/groups/group/' + groupID + '/hosts');
-        return (data as any[]).map(obj => {
-            return new Host(obj);
-        });
-    }
-
-    /**
-     * List all scripts for this group
-     */
-    public async Scripts(): Promise<Script[]> {
-        return Group.Scripts(this.ID);
+        return data as HostType[];
     }
 
     /**
      * List all scripts for a group
      */
-    public static async Scripts(groupID: string): Promise<Script[]> {
+    public static async Scripts(groupID: string): Promise<ScriptType[]> {
         const data = await API.GET('/api/groups/group/' + groupID + '/scripts');
-        return (data as any[]).map(obj => {
-            return new Script(obj);
-        });
+        return data as ScriptType[];
     }
 
     /**
      * Set the hosts for this group
      * @param hostIDs array of host IDs
      */
-    public async SetHosts(hostIDs: string[]): Promise<Host[]> {
-        const data = await API.POST('/api/groups/group/' + this.ID + '/hosts', { Hosts: hostIDs });
-        return (data as any[]).map(obj => {
-            return new Host(obj);
-        });
-    }
-
-    /**
-     * List all schedules for this group
-     */
-    public async Schedules(): Promise<Schedule[]> {
-        return Group.Schedules(this.ID);
+    public static async SetHosts(groupID: string, hostIDs: string[]): Promise<HostType[]> {
+        const data = await API.POST('/api/groups/group/' + groupID + '/hosts', { Hosts: hostIDs });
+        return data as HostType[];
     }
 
     /**
      * List all schedules for a group
      */
-    public static async Schedules(groupID: string): Promise<Schedule[]> {
+    public static async Schedules(groupID: string): Promise<ScheduleType[]> {
         const data = await API.GET('/api/groups/group/' + groupID + '/schedules');
-        return (data as any[]).map(obj => {
-            return new Schedule(obj);
-        });
+        return data as ScheduleType[];
     }
 }
 

@@ -1,8 +1,8 @@
 import { Options } from "./Options";
-import { User } from "./User";
+import { UserType } from "./User";
 
 export class State {
-    public readonly User: User;
+    public readonly User: UserType;
     public readonly Runtime: Runtime;
     public readonly StartDate: string;
     public readonly Hostname: string;
@@ -11,7 +11,7 @@ export class State {
     public readonly Enums: { [name: string]: { [key: string] : string; }[]; };
 
     public constructor(json: any) {
-        this.User = new User(json.User);
+        this.User = json.User as UserType;
         this.Runtime = json.Runtime as Runtime;
         this.StartDate = json.StartDate as string;
         this.Hostname = json.Hostname as string;

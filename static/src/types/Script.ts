@@ -1,41 +1,30 @@
 import { API } from "../services/API";
 import { Modal } from "../components/Modal";
 import { Notification } from "../components/Notification";
-import { Group } from "./Group";
+import { GroupType } from "./Group";
 import { Variable } from "./Variable";
 import { Schedule } from "./Schedule";
-import { Attachment } from "./Attachment";
+import { AttachmentType } from "./Attachment";
+
+export interface ScriptType {
+    ID?: string;
+    Name?: string;
+    Enabled?: boolean;
+    Executable?: string;
+    Script?: string;
+    Environment?: Variable[];
+    RunAs?: ScriptRunAs;
+    WorkingDirectory?: string;
+    AfterExecution?: string;
+    AttachmentIDs?: string[];
+}
 
 export class Script {
-    ID: string;
-    Name: string;
-    Enabled: boolean;
-    Executable: string;
-    Script: string;
-    Environment: Variable[];
-    RunAs: ScriptRunAs;
-    WorkingDirectory: string;
-    AfterExecution: string;
-    AttachmentIDs: string[];
-
-    constructor(json: any) {
-        this.ID = json.ID as string;
-        this.Name = json.Name as string;
-        this.Enabled = json.Enabled as boolean;
-        this.Executable = json.Executable as string;
-        this.Script = json.Script as string;
-        this.Environment = (json.Environment || []) as Variable[];
-        this.RunAs = json.RunAs as ScriptRunAs;
-        this.WorkingDirectory = json.WorkingDirectory as string;
-        this.AfterExecution = json.AfterExecution as string;
-        this.AttachmentIDs = (json.AttachmentIDs || []) as string[];
-    }
-
     /**
      * Return a blank script
      */
-    public static Blank(): Script {
-        return new Script({
+    public static Blank(): ScriptType {
+        return {
             Name: '',
             Enabled: true,
             Executable: '/bin/bash',
@@ -49,45 +38,45 @@ export class Script {
             AfterExecution: '',
             Environment: [],
             AttachmentIDs: [],
-        });
+        };
     }
 
     /**
      * Create a new Script
      */
-    public static async New(parameters: NewScriptParameters): Promise<Script> {
+    public static async New(parameters: ScriptType|NewScriptParameters): Promise<ScriptType> {
         const data = await API.PUT('/api/scripts/script', parameters);
-        return new Script(data);
+        return data as ScriptType;
     }
 
     /**
      * Save this script
      */
-    public async Save(): Promise<Script> {
-        const data = await API.POST('/api/scripts/script/' + this.ID, this as EditScriptParameters);
-        return new Script(data);
+    public static async Save(script: ScriptType): Promise<ScriptType> {
+        const data = await API.POST('/api/scripts/script/' + script.ID, script);
+        return data as ScriptType;
     }
 
     /**
      * Delete this script
      */
-    public async Delete(): Promise<any> {
-        return await API.DELETE('/api/scripts/script/' + this.ID);
+    public static async Delete(script: ScriptType): Promise<unknown> {
+        return await API.DELETE('/api/scripts/script/' + script.ID);
     }
 
     /**
      * Modify the script changing the properties specified
      * @param properties properties to change
      */
-    public async Update(properties: {[key:string]: any}): Promise<Script> {
-        const data = await API.PATCH('/api/scripts/script/' + this.ID, properties);
-        return new Script(data);
+    public static async Update(script: ScriptType, properties: {[key:string]: unknown}): Promise<ScriptType> {
+        const data = await API.PATCH('/api/scripts/script/' + script.ID, properties);
+        return data as ScriptType;
     }
 
     /**
      * Show a modal to delete this script
      */
-    public async DeleteModal(): Promise<boolean> {
+    public static async DeleteModal(script: ScriptType): Promise<boolean> {
         return new Promise(resolve => {
             Modal.delete('Delete Script?', 'Are you sure you want to delete this script? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
@@ -95,7 +84,7 @@ export class Script {
                     return;
                 }
 
-                API.DELETE('/api/scripts/script/' + this.ID).then(() => {
+                API.DELETE('/api/scripts/script/' + script.ID).then(() => {
                     Notification.success('Script Deleted');
                     resolve(true);
                 });
@@ -106,33 +95,17 @@ export class Script {
     /**
      * Get the specified script by its id
      */
-    public static async Get(id: string): Promise<Script> {
+    public static async Get(id: string): Promise<ScriptType> {
         const data = await API.GET('/api/scripts/script/' + id);
-        return new Script(data);
+        return data as ScriptType;
     }
 
     /**
      * List all scripts
      */
-    public static async List(): Promise<Script[]> {
+    public static async List(): Promise<ScriptType[]> {
         const data = await API.GET('/api/scripts');
-        return (data as any[]).map(obj => {
-            return new Script(obj);
-        });
-    }
-
-    /**
-     * List all hosts for this script
-     */
-    public async Hosts(): Promise<ScriptEnabledHost[]> {
-        return Script.Hosts(this.ID);
-    }
-
-    /**
-     * List all group for this script
-     */
-    public async Groups(): Promise<Group[]> {
-        return Script.Groups(this.ID);
+        return data as ScriptType[];
     }
 
     /**
@@ -146,27 +119,18 @@ export class Script {
     /**
      * List all group for a script
      */
-    public static async Groups(scriptID: string): Promise<Group[]> {
+    public static async Groups(scriptID: string): Promise<GroupType[]> {
         const data = await API.GET('/api/scripts/script/' + scriptID + '/groups');
-        return (data as any[]).map(obj => {
-            return new Group(obj);
-        });
+        return data as GroupType[];
     }
 
     /**
      * Set the groups for this script
      * @param groupIDs array of group IDs
      */
-    public async SetGroups(groupIDs: string[]): Promise<ScriptEnabledHost[]> {
-        const data = await API.POST('/api/scripts/script/' + this.ID + '/groups', { Groups: groupIDs });
+    public static async SetGroups(scriptID: string, groupIDs: string[]): Promise<ScriptEnabledHost[]> {
+        const data = await API.POST('/api/scripts/script/' + scriptID + '/groups', { Groups: groupIDs });
         return data as ScriptEnabledHost[];
-    }
-
-    /**
-     * List all schedules for this script
-     */
-    public async Schedules(): Promise<Schedule[]> {
-        return Script.Schedules(this.ID);
     }
 
     /**
@@ -180,20 +144,11 @@ export class Script {
     }
 
     /**
-     * List all attachments for this script
-     */
-    public async Attachments(): Promise<Attachment[]> {
-        return Script.Attachments(this.ID);
-    }
-
-    /**
      * List all attachments for a script
      */
-    public static async Attachments(id: string): Promise<Attachment[]> {
+    public static async Attachments(id: string): Promise<AttachmentType[]> {
         const data = await API.GET('/api/scripts/script/' + id + '/attachments');
-        return (data as any[]).map(obj => {
-            return new Attachment(obj);
-        });
+        return data as AttachmentType[];
     }
 }
 
