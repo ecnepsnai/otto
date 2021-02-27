@@ -6,73 +6,57 @@ import { Buttons, CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { GroupListItem } from './GroupListItem';
 
-interface GroupListState {
-    loading: boolean;
-    groups: GroupType[];
-    membership: {[id: string]: string[]};
-}
-export class GroupList extends React.Component<unknown, GroupListState> {
-    constructor(props: unknown) {
-        super(props);
-        this.state = {
-            loading: true,
-            groups: [],
-            membership: {},
-        };
-    }
+export const GroupList: React.FC = () => {
+    const [loading, setLoading] = React.useState(true);
+    const [groups, setGroups] = React.useState<GroupType[]>();
+    const [membership, setMembership] = React.useState<{[id: string]: string[]}>({});
 
-    componentDidMount(): void {
-        this.loadData();
-    }
+    React.useEffect(() => {
+        loadData();
+    }, []);
 
-    private loadGroups = () => {
+    const loadGroups = () => {
         return Group.List().then(groups => {
-            this.setState({
-                groups: groups,
-            });
+            setGroups(groups);
         });
-    }
+    };
 
-    private loadMembership = () => {
+    const loadMembership = () => {
         return Group.Membership().then(membership => {
-            this.setState({
-                membership: membership,
-            });
+            setMembership(membership);
         });
-    }
+    };
 
-    private loadData = () => {
-        Promise.all([this.loadGroups(), this.loadMembership()]).then(() => {
-            this.setState({ loading: false });
+    const loadData = () => {
+        Promise.all([loadGroups(), loadMembership()]).then(() => {
+            setLoading(false);
         });
+    };
+
+    if (loading) {
+        return ( <PageLoading /> );
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return ( <PageLoading /> );
-        }
-
-        return (
-            <Page title="Groups">
-                <Buttons>
-                    <CreateButton to="/groups/group/" />
-                </Buttons>
-                <Table.Table>
-                    <Table.Head>
-                        <Table.Column>Name</Table.Column>
-                        <Table.Column>Hosts</Table.Column>
-                        <Table.Column>Scripts</Table.Column>
-                        <Table.MenuColumn />
-                    </Table.Head>
-                    <Table.Body>
-                        {
-                            this.state.groups.map(group => {
-                                return <GroupListItem group={group} hosts={this.state.membership[group.ID]} key={group.ID} onReload={this.loadData} numGroups={this.state.groups.length}></GroupListItem>;
-                            })
-                        }
-                    </Table.Body>
-                </Table.Table>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title="Groups">
+            <Buttons>
+                <CreateButton to="/groups/group/" />
+            </Buttons>
+            <Table.Table>
+                <Table.Head>
+                    <Table.Column>Name</Table.Column>
+                    <Table.Column>Hosts</Table.Column>
+                    <Table.Column>Scripts</Table.Column>
+                    <Table.MenuColumn />
+                </Table.Head>
+                <Table.Body>
+                    {
+                        groups.map(group => {
+                            return <GroupListItem group={group} hosts={membership[group.ID]} key={group.ID} onReload={loadData} numGroups={groups.length}></GroupListItem>;
+                        })
+                    }
+                </Table.Body>
+            </Table.Table>
+        </Page>
+    );
+};

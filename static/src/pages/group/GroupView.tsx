@@ -21,136 +21,115 @@ import { ScheduleListCard } from '../../components/ScheduleListCard';
 interface GroupViewProps {
     match: match;
 }
-interface GroupViewState {
-    loading: boolean;
-    group?: GroupType;
-    hosts?: HostType[];
-    scripts?: ScriptType[];
-    schedules?: ScheduleType[];
-}
-export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
-    private groupID: string;
+export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
+    const [loading, setLoading] = React.useState(true);
+    const [group, setGroup] = React.useState<GroupType>();
+    const [hosts, setHosts] = React.useState<HostType[]>();
+    const [scripts, setScripts] = React.useState<ScriptType[]>();
+    const [schedules, setSchedules] = React.useState<ScheduleType[]>();
 
-    constructor(props: GroupViewProps) {
-        super(props);
-        this.groupID = (this.props.match.params as URLParams).id;
-        this.state = {
-            loading: true,
-        };
-    }
+    React.useEffect(() => {
+        loadData();
+    }, []);
 
-    private loadGroup = async () => {
-        const group = await Group.Get(this.groupID);
-        this.setState({
-            group: group,
+    const loadGroup = async () => {
+        const groupID = (props.match.params as URLParams).id;
+        const group = await Group.Get(groupID);
+        setGroup(group);
+    };
+
+    const loadHosts = async () => {
+        const groupID = (props.match.params as URLParams).id;
+        const hosts = await Group.Hosts(groupID);
+        setHosts(hosts);
+    };
+
+    const loadScripts = async () => {
+        const groupID = (props.match.params as URLParams).id;
+        const scripts = await Group.Scripts(groupID);
+        setScripts(scripts);
+    };
+
+    const loadSchedules = async () => {
+        const groupID = (props.match.params as URLParams).id;
+        const schedules = await Group.Schedules(groupID);
+        setSchedules(schedules);
+    };
+
+    const loadData = () => {
+        Promise.all([loadGroup(), loadHosts(), loadScripts(), loadSchedules()]).then(() => {
+            setLoading(false);
         });
-    }
+    };
 
-    private loadHosts = async () => {
-        const hosts = await Group.Hosts(this.groupID);
-        this.setState({
-            hosts: hosts,
-        });
-    }
-
-    private loadScripts = async () => {
-        const scripts = await Group.Scripts(this.groupID);
-        this.setState({
-            scripts: scripts,
-        });
-    }
-
-    private loadSchedules = async () => {
-        const schedules = await Group.Schedules(this.groupID);
-        this.setState({
-            schedules: schedules,
-        });
-    }
-
-    private loadData = () => {
-        Promise.all([this.loadGroup(), this.loadHosts(), this.loadScripts(), this.loadSchedules()]).then(() => {
-            this.setState({
-                loading: false,
-            });
-        });
-    }
-
-    componentDidMount(): void {
-        this.loadData();
-    }
-
-    private deleteClick = () => {
-        Group.DeleteModal(this.state.group).then(deleted => {
+    const deleteClick = () => {
+        Group.DeleteModal(group).then(deleted => {
             if (!deleted) {
                 return;
             }
 
             Redirect.To('/groups');
         });
+    };
+
+    if (loading) {
+        return (<PageLoading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return (<PageLoading />);
-        }
-
-        return (
-            <Page title="View Group">
-                <Layout.Container>
-                    <Buttons>
-                        <EditButton to={'/groups/group/' + this.state.group.ID + '/edit'} />
-                        <DeleteButton onClick={this.deleteClick} />
-                    </Buttons>
-                    <Layout.Row>
-                        <Layout.Column>
-                            <Card.Card className="mb-3">
-                                <Card.Header>Host Information</Card.Header>
-                                <ListGroup.List>
-                                    <ListGroup.TextItem title="Name">{ this.state.group.Name }</ListGroup.TextItem>
-                                </ListGroup.List>
-                            </Card.Card>
-                            <EnvironmentVariableCard variables={this.state.group.Environment} className="mb-3" />
-                            <ScheduleListCard schedules={this.state.schedules} className="mb-3" />
-                        </Layout.Column>
-                        <Layout.Column>
-                            <Card.Card className="mb-3">
-                                <Card.Header>Hosts</Card.Header>
-                                <HostListCard hosts={this.state.hosts} />
-                            </Card.Card>
-                            <ScriptListCard scripts={this.state.scripts} hostIDs={this.state.hosts.map(h => h.ID)} className="mb-3" />
-                        </Layout.Column>
-                    </Layout.Row>
-                </Layout.Container>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title="View Group">
+            <Layout.Container>
+                <Buttons>
+                    <EditButton to={'/groups/group/' + group.ID + '/edit'} />
+                    <DeleteButton onClick={deleteClick} />
+                </Buttons>
+                <Layout.Row>
+                    <Layout.Column>
+                        <Card.Card className="mb-3">
+                            <Card.Header>Host Information</Card.Header>
+                            <ListGroup.List>
+                                <ListGroup.TextItem title="Name">{ group.Name }</ListGroup.TextItem>
+                            </ListGroup.List>
+                        </Card.Card>
+                        <EnvironmentVariableCard variables={group.Environment} className="mb-3" />
+                        <ScheduleListCard schedules={schedules} className="mb-3" />
+                    </Layout.Column>
+                    <Layout.Column>
+                        <Card.Card className="mb-3">
+                            <Card.Header>Hosts</Card.Header>
+                            <HostListCard hosts={hosts} />
+                        </Card.Card>
+                        <ScriptListCard scripts={scripts} hostIDs={hosts.map(h => h.ID)} className="mb-3" />
+                    </Layout.Column>
+                </Layout.Row>
+            </Layout.Container>
+        </Page>
+    );
+};
 
 interface HostListCardProps {
     hosts: HostType[];
 }
-class HostListCard extends React.Component<HostListCardProps, unknown> {
-    render(): JSX.Element {
-        if (!this.props.hosts || this.props.hosts.length < 1) {
-            return (
-                <Card.Body>
-                    <Nothing />
-                </Card.Body>
-            );
-        }
+export const HostListCard: React.FC<HostListCardProps> = (props: HostListCardProps) => {
+    if (!props.hosts || props.hosts.length < 1) {
         return (
-            <ListGroup.List>
-                {
-                    this.props.hosts.map((host, index) => {
-                        return (
-                            <ListGroup.Item key={index}>
-                                <Icon.Desktop />
-                                <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
-                            </ListGroup.Item>
-                        );
-                    })
-                }
-            </ListGroup.List>
+            <Card.Body>
+                <Nothing />
+            </Card.Body>
         );
     }
-}
+    return (
+        <ListGroup.List>
+            {
+                props.hosts.map((host, index) => {
+                    return (
+                        <ListGroup.Item key={index}>
+                            <Icon.Desktop />
+                            <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
+                        </ListGroup.Item>
+                    );
+                })
+            }
+        </ListGroup.List>
+    );
+};
