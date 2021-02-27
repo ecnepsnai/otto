@@ -11,9 +11,9 @@ import { Formatter } from '../../services/Formatter';
 interface RunResultsProps {
     results: ScriptRun;
 }
-export class RunResults extends React.Component<RunResultsProps, unknown> {
-    private error = () => {
-        const errorMessage = this.props.results.RunError || this.props.results.Result.ExecError || 'Unknown Error';
+export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) => {
+    const error = () => {
+        const errorMessage = props.results.RunError || props.results.Result.ExecError || 'Unknown Error';
 
         return (
             <Card.Body>
@@ -22,65 +22,61 @@ export class RunResults extends React.Component<RunResultsProps, unknown> {
                 <Pre>{errorMessage}</Pre>
             </Card.Body>
         );
+    };
+
+    if (props.results.RunError || props.results.Result.ExecError) {
+        return error();
     }
 
-    render(): JSX.Element {
-        if (this.props.results.RunError || this.props.results.Result.ExecError) {
-            return this.error();
-        }
-
-        let returnCodeIcon = (<Icon.CheckCircle color={Style.Palette.Success} />);
-        if (this.props.results.Result.Code !== 0) {
-            returnCodeIcon = (<Icon.ExclamationCircle color={Style.Palette.Danger} />);
-        }
-
-        return (
-            <Card.Body>
-                <Card.Card>
-                    <Card.Header>Details</Card.Header>
-                    <ListGroup.List>
-                        <ListGroup.TextItem title="Return Code">{this.props.results.Result.Code} {returnCodeIcon}</ListGroup.TextItem>
-                        <ListGroup.TextItem title="Duration">{Formatter.Duration(this.props.results.Duration)}</ListGroup.TextItem>
-                    </ListGroup.List>
-                </Card.Card>
-                <EnvironmentVariableCard variables={this.props.results.Environment} />
-                <RunOutput stdout={this.props.results.Result.Stdout} stderr={this.props.results.Result.Stderr} />
-            </Card.Body>
-        );
+    let returnCodeIcon = (<Icon.CheckCircle color={Style.Palette.Success} />);
+    if (props.results.Result.Code !== 0) {
+        returnCodeIcon = (<Icon.ExclamationCircle color={Style.Palette.Danger} />);
     }
-}
+
+    return (
+        <Card.Body>
+            <Card.Card>
+                <Card.Header>Details</Card.Header>
+                <ListGroup.List>
+                    <ListGroup.TextItem title="Return Code">{props.results.Result.Code} {returnCodeIcon}</ListGroup.TextItem>
+                    <ListGroup.TextItem title="Duration">{Formatter.Duration(props.results.Duration)}</ListGroup.TextItem>
+                </ListGroup.List>
+            </Card.Card>
+            <EnvironmentVariableCard variables={props.results.Environment} />
+            <RunOutput stdout={props.results.Result.Stdout} stderr={props.results.Result.Stderr} />
+        </Card.Body>
+    );
+};
 
 interface RunOutputProps {
     stdout: string;
     stderr: string;
 }
-export class RunOutput extends React.Component<RunOutputProps, unknown> {
-    private content = () => {
-        if (!this.props.stdout && !this.props.stderr) {
+export const RunOutput: React.FC<RunOutputProps> = (props: RunOutputProps) => {
+    const content = () => {
+        if (!props.stdout && !props.stderr) {
             return (<Card.Body><em className="text-muted">Script produced no output</em></Card.Body>);
         }
 
         let stdout: JSX.Element;
-        if (this.props.stdout) {
-            stdout = (<ListGroup.TextItem title="stdout"><Pre>{this.props.stdout}</Pre></ListGroup.TextItem>);
+        if (props.stdout) {
+            stdout = (<ListGroup.TextItem title="stdout"><Pre>{props.stdout}</Pre></ListGroup.TextItem>);
         }
         let stderr: JSX.Element;
-        if (this.props.stderr) {
-            stderr = (<ListGroup.TextItem title="stderr"><Pre>{this.props.stderr}</Pre></ListGroup.TextItem>);
+        if (props.stderr) {
+            stderr = (<ListGroup.TextItem title="stderr"><Pre>{props.stderr}</Pre></ListGroup.TextItem>);
         }
 
         return (<ListGroup.List>
             {stdout}
             {stderr}
         </ListGroup.List>);
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <Card.Card>
-                <Card.Header>Output</Card.Header>
-                { this.content() }
-            </Card.Card>
-        );
-    }
-}
+    return (
+        <Card.Card>
+            <Card.Header>Output</Card.Header>
+            { content() }
+        </Card.Card>
+    );
+};
