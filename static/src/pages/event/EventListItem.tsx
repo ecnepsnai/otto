@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Event } from '../../types/Event';
+import { EventType } from '../../types/Event';
 import { Table } from '../../components/Table';
 import { DateLabel } from '../../components/DateLabel';
 import { Button } from '../../components/Button';
@@ -8,23 +8,21 @@ import { Icon } from '../../components/Icon';
 import { GlobalModalFrame } from '../../components/Modal';
 import { EventDialog } from './EventDialog';
 
-export interface EventListItemProps { event: Event }
-export class EventListItem extends React.Component<EventListItemProps, {}> {
-    private viewClick = () => {
-        GlobalModalFrame.showModal(<EventDialog event={this.props.event} />);
-    }
+export interface EventListItemProps { event: EventType }
+export const EventListItem: React.FC<EventListItemProps> = (props: EventListItemProps) => {
+    const viewClick = () => {
+        GlobalModalFrame.showModal(<EventDialog event={props.event} />);
+    };
 
-    render(): JSX.Element {
-        return (
-            <Table.Row>
-                <td>{ this.props.event.Event }</td>
-                <td><DateLabel date={this.props.event.Time} /></td>
-                <td>
-                    <Button color={Style.Palette.Secondary} outline size={Style.Size.XS} onClick={this.viewClick}>
-                        <Icon.Label icon={<Icon.Eye />} label="View" />
-                    </Button>
-                </td>
-            </Table.Row>
-        );
-    }
-}
+    return (
+        <Table.Row>
+            <td>{ props.event.Event }</td>
+            <td><DateLabel date={props.event.Time} /></td>
+            <td>
+                <Button color={Style.Palette.Secondary} outline size={Style.Size.XS} onClick={viewClick}>
+                    <Icon.Label icon={<Icon.Eye />} label="View" />
+                </Button>
+            </td>
+        </Table.Row>
+    );
+};
