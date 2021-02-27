@@ -14,50 +14,48 @@ interface ScheduleListItemProps {
     script: ScriptType;
     onReload: () => (void);
 }
-export class ScheduleListItem extends React.Component<ScheduleListItemProps, unknown> {
-    private deleteMenuClick = () => {
-        Schedule.DeleteModal(this.props.schedule).then(confirmed => {
+export const ScheduleListItem: React.FC<ScheduleListItemProps> = (props: ScheduleListItemProps) => {
+    const deleteMenuClick = () => {
+        Schedule.DeleteModal(props.schedule).then(confirmed => {
             if (confirmed) {
-                this.props.onReload();
+                props.onReload();
             }
         });
-    }
+    };
 
-    private enabledOnColumn = () => {
-        if (this.props.schedule.Scope.GroupIDs && this.props.schedule.Scope.GroupIDs.length > 0) {
+    const enabledOnColumn = () => {
+        if (props.schedule.Scope.GroupIDs && props.schedule.Scope.GroupIDs.length > 0) {
             let unit = 'groups';
-            if (this.props.schedule.Scope.GroupIDs.length  == 1) {
+            if (props.schedule.Scope.GroupIDs.length  == 1) {
                 unit = 'group';
             }
-            return (<td>{this.props.schedule.Scope.GroupIDs.length} {unit}</td>);
-        } else if (this.props.schedule.Scope.HostIDs && this.props.schedule.Scope.HostIDs.length > 0) {
+            return (<td>{props.schedule.Scope.GroupIDs.length} {unit}</td>);
+        } else if (props.schedule.Scope.HostIDs && props.schedule.Scope.HostIDs.length > 0) {
             let unit = 'hosts';
-            if (this.props.schedule.Scope.HostIDs.length == 1) {
+            if (props.schedule.Scope.HostIDs.length == 1) {
                 unit = 'host';
             }
-            return (<td>{this.props.schedule.Scope.HostIDs.length} {unit}</td>);
+            return (<td>{props.schedule.Scope.HostIDs.length} {unit}</td>);
         }
 
         return (<td></td>);
-    }
+    };
 
-    render(): JSX.Element {
-        const link = <Link to={'/schedules/schedule/' + this.props.schedule.ID}>{ this.props.schedule.Name }</Link>;
+    const link = <Link to={'/schedules/schedule/' + props.schedule.ID}>{ props.schedule.Name }</Link>;
 
-        return (
-            <Table.Row>
-                <td>{ link }</td>
-                <td>{ this.props.script.Name }</td>
-                <td><SchedulePattern pattern={this.props.schedule.Pattern} /></td>
-                {this.enabledOnColumn()}
-                <td><DateLabel date={this.props.schedule.LastRunTime} /></td>
-                <td><EnabledBadge value={this.props.schedule.Enabled} /></td>
-                <Table.Menu>
-                    <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + this.props.schedule.ID + '/edit'}/>
-                    <Menu.Divider />
-                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
-                </Table.Menu>
-            </Table.Row>
-        );
-    }
-}
+    return (
+        <Table.Row>
+            <td>{ link }</td>
+            <td>{ props.script.Name }</td>
+            <td><SchedulePattern pattern={props.schedule.Pattern} /></td>
+            {enabledOnColumn()}
+            <td><DateLabel date={props.schedule.LastRunTime} /></td>
+            <td><EnabledBadge value={props.schedule.Enabled} /></td>
+            <Table.Menu>
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + props.schedule.ID + '/edit'}/>
+                <Menu.Divider />
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+            </Table.Menu>
+        </Table.Row>
+    );
+};
