@@ -1,15 +1,20 @@
 import * as React from 'react';
-import { Group } from '../../types/Group';
+import { Group, GroupType } from '../../types/Group';
 import { Link } from 'react-router-dom';
 import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { Formatter } from '../../services/Formatter';
 
-export interface GroupListItemProps { group: Group, hosts: string[], onReload: () => (void), numGroups: number }
-export class GroupListItem extends React.Component<GroupListItemProps, {}> {
+interface GroupListItemProps {
+    group: GroupType;
+    hosts: string[];
+    onReload: () => (void);
+    numGroups: number;
+}
+export class GroupListItem extends React.Component<GroupListItemProps, unknown> {
     private deleteMenuClick = () => {
-        this.props.group.DeleteModal().then(confirmed => {
+        Group.DeleteModal(this.props.group).then(confirmed => {
             if (confirmed) {
                 this.props.onReload();
             }

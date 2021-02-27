@@ -1,32 +1,36 @@
 import * as React from 'react';
-import { Schedule } from '../../types/Schedule';
+import { Schedule, ScheduleType } from '../../types/Schedule';
 import { Link, match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Form, Select, Input, Radio, RadioChoice, Checkbox } from '../../components/Form';
+import { Input } from '../../components/input/Input';
+import { Form } from '../../components/Form';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
-import { Script } from '../../types/Script';
-import { Group } from '../../types/Group';
-import { Host } from '../../types/Host';
+import { Script, ScriptType } from '../../types/Script';
+import { Group, GroupType } from '../../types/Group';
+import { Host, HostType } from '../../types/Host';
 import { GroupCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Alert } from '../../components/Alert';
-import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
+import { Checkbox } from '../../components/input/Checkbox';
+import { RadioChoice } from '../../components/input/Radio';
 
-export interface ScheduleEditProps { match: match }
+interface ScheduleEditProps {
+    match: match
+}
 interface ScheduleEditState {
     noData?: boolean;
     loading: boolean;
-    schedule?: Schedule;
+    schedule?: ScheduleType;
     isNew?: boolean;
     RunOn: string;
     patternTemplate?: string;
-    scripts?: Script[];
-    groups?: Group[];
-    hosts?: Host[];
+    scripts?: ScriptType[];
+    groups?: GroupType[];
+    hosts?: HostType[];
 }
 export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEditState> {
     constructor(props: ScheduleEditProps) {
@@ -71,15 +75,15 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
                 patternTemplate = '0 * * * *';
             } else {
                 switch (schedule.Pattern) {
-                    case '0 * * * *':
-                    case '0 */4 * * *':
-                    case '0 0 * * *':
-                    case '0 0 * * 1':
-                        patternTemplate = schedule.Pattern;
-                        break;
-                    default:
-                        patternTemplate = 'custom';
-                        break;
+                case '0 * * * *':
+                case '0 */4 * * *':
+                case '0 0 * * *':
+                case '0 0 * * 1':
+                    patternTemplate = schedule.Pattern;
+                    break;
+                default:
+                    patternTemplate = 'custom';
+                    break;
                 }
 
                 if (hosts && hosts.length > 0) {
@@ -137,7 +141,9 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
     }
 
     private enabledCheckbox = () => {
-        if (this.state.isNew) { return null; }
+        if (this.state.isNew) {
+            return null;
+        }
 
         return (
             <Checkbox
@@ -153,7 +159,7 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
         }
 
         return (
-            <Input
+            <Input.Text
                 label="Frequency Expression"
                 type="text"
                 helpText="Cron expression"
@@ -197,7 +203,9 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
     }
 
     private hostList = () => {
-        if (this.state.RunOn !== 'hosts') { return null; }
+        if (this.state.RunOn !== 'hosts') {
+            return null;
+        }
 
         return (
             <Card.Card>
@@ -210,7 +218,9 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
     }
 
     private groupList = () => {
-        if (this.state.RunOn !== 'groups') { return null; }
+        if (this.state.RunOn !== 'groups') {
+            return null;
+        }
 
         return (
             <Card.Card>
@@ -223,11 +233,11 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
     }
 
     private formSave = () => {
-        let promise: Promise<Schedule>;
+        let promise: Promise<ScheduleType>;
         if (this.state.isNew) {
             promise = Schedule.New(this.state.schedule);
         } else {
-            promise = this.state.schedule.Save();
+            promise = Schedule.Save(this.state.schedule);
         }
 
         return promise.then(schedule => {
@@ -238,12 +248,14 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
 
     render(): JSX.Element {
         if (this.state.noData) return (<Page title="New Schedule">
-            <Alert color={Style.Palette.Danger}>
+            <Alert.Danger>
                 <p>At least one script and host is required before you can create a schedule</p>
                 <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
-            </Alert>
+            </Alert.Danger>
         </Page>);
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         const runOnChoices: RadioChoice[] = [
             {
@@ -257,45 +269,45 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
         ];
 
         return (
-        <Page title={ this.state.isNew ? 'New Schedule' : 'Edit Schedule' }>
-            <Form showSaveButton onSubmit={this.formSave}>
-                <Input
-                    label="Name"
-                    type="text"
-                    defaultValue={this.state.schedule.Name}
-                    onChange={this.changeName}
-                    required />
-                <Select
-                    label="Script"
-                    defaultValue={this.state.schedule.ScriptID}
-                    onChange={this.changeScriptID}
-                    required>
-                    { this.state.scripts.map((script, idx) => {
-                        return (<option value={script.ID} key={idx}>{script.Name}</option>);
-                    })}
-                </Select>
-                <Select
-                    label="Run Frequency"
-                    defaultValue={this.state.patternTemplate}
-                    onChange={this.changePatternTemplate}
-                    required>
+            <Page title={ this.state.isNew ? 'New Schedule' : 'Edit Schedule' }>
+                <Form showSaveButton onSubmit={this.formSave}>
+                    <Input.Text
+                        label="Name"
+                        type="text"
+                        defaultValue={this.state.schedule.Name}
+                        onChange={this.changeName}
+                        required />
+                    <Input.Select
+                        label="Script"
+                        defaultValue={this.state.schedule.ScriptID}
+                        onChange={this.changeScriptID}
+                        required>
+                        { this.state.scripts.map((script, idx) => {
+                            return (<option value={script.ID} key={idx}>{script.Name}</option>);
+                        })}
+                    </Input.Select>
+                    <Input.Select
+                        label="Run Frequency"
+                        defaultValue={this.state.patternTemplate}
+                        onChange={this.changePatternTemplate}
+                        required>
                         <option value="0 * * * *">Every Hour</option>
                         <option value="0 */4 * * *">Every 4 Hours</option>
                         <option value="0 0 * * *">Every Day at Midnight</option>
                         <option value="0 0 * * 1">Every Monday at Midnight</option>
                         <option value="custom">Custom</option>
-                </Select>
-                { this.enabledCheckbox() }
-                { this.cronPatternInput() }
-                <Radio
-                    label="Run On"
-                    onChange={this.changeRunOn}
-                    choices={runOnChoices}
-                    defaultValue={this.state.RunOn} />
-                { this.hostList() }
-                { this.groupList() }
-            </Form>
-        </Page>
+                    </Input.Select>
+                    { this.enabledCheckbox() }
+                    { this.cronPatternInput() }
+                    <Input.Radio
+                        label="Run On"
+                        onChange={this.changeRunOn}
+                        choices={runOnChoices}
+                        defaultValue={this.state.RunOn} />
+                    { this.hostList() }
+                    { this.groupList() }
+                </Form>
+            </Page>
         );
     }
 }

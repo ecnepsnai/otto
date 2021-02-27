@@ -8,7 +8,7 @@ import { Input } from './input/Input';
 import { ValidationResult } from './Form';
 import { Variable } from '../types/Variable';
 
-export interface EnvironmentVariableEditProps {
+interface EnvironmentVariableEditProps {
     variables: Variable[];
     onChange: (variables: Variable[]) => (void);
 }

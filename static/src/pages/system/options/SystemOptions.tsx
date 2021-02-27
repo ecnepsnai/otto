@@ -9,13 +9,12 @@ import { OptionsNetwork } from './OptionsNetwork';
 import { Notification } from '../../../components/Notification';
 import { OptionsSecurity } from './OptionsSecurity';
 
-export interface SystemOptionsProps {}
 interface SystemOptionsState {
     loading?: boolean,
     options: Options.OttoOptions,
 }
-export class SystemOptions extends React.Component<SystemOptionsProps, SystemOptionsState> {
-    constructor(props: SystemOptionsProps) {
+export class SystemOptions extends React.Component<unknown, SystemOptionsState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             options: StateManager.Current().Options

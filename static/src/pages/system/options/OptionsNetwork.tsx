@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Card } from '../../../components/Card';
 import { Icon } from '../../../components/Icon';
-import { NumberInput, Radio, RadioChoice } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 
-export interface OptionsNetworkProps {
+interface OptionsNetworkProps {
     defaultValue: Options.Network;
     onUpdate: (value: Options.Network) => (void);
 }
@@ -56,7 +56,7 @@ export class OptionsNetwork extends React.Component<OptionsNetworkProps, Options
     }
 
     render(): JSX.Element {
-        const radioChoices: RadioChoice[] = [
+        const radioChoices = [
             {
                 value: 'auto',
                 label: 'Automatic'
@@ -77,18 +77,18 @@ export class OptionsNetwork extends React.Component<OptionsNetworkProps, Options
                     <Icon.Label icon={<Icon.NetworkWired />} label="Network" />
                 </Card.Header>
                 <Card.Body>
-                    <Radio
+                    <Input.Radio
                         label="IP Version"
                         choices={radioChoices}
                         defaultValue={this.state.value.ForceIPVersion}
                         onChange={this.changeForceIPVersion}/>
-                    <NumberInput
+                    <Input.Number
                         label="Timeout"
                         append="Seconds"
                         helpText="The maximum number of seconds Otto will wait while trying to connect to a client"
                         defaultValue={this.state.value.Timeout}
                         onChange={this.changeTimeout} />
-                    <NumberInput
+                    <Input.Number
                         label="Heartbeat Interval"
                         append="Minutes"
                         helpText="The frequency (in minutes) to check the reachability of all Otto hosts"

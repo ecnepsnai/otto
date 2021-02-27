@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Rand } from '../services/Rand';
 import { Icon } from './Icon';
 
-export interface RandomPSKProps {
+interface RandomPSKProps {
     newPSK: (psk: string) => (void);
 }
 export const RandomPSK: React.FC<RandomPSKProps> = (props: RandomPSKProps) => {

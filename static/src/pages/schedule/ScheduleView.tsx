@@ -1,16 +1,16 @@
 import * as React from 'react';
-import { Schedule, ScheduleReport } from '../../types/Schedule';
+import { Schedule, ScheduleReport, ScheduleType } from '../../types/Schedule';
 import { match, Link } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
-import { Host } from '../../types/Host';
-import { Script } from '../../types/Script';
+import { HostType } from '../../types/Host';
+import { ScriptType } from '../../types/Script';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
 import { Buttons, EditButton, DeleteButton } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Redirect } from '../../components/Redirect';
-import { Group } from '../../types/Group';
+import { GroupType } from '../../types/Group';
 import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge } from '../../components/Badge';
 import { DateLabel } from '../../components/DateLabel';
@@ -19,16 +19,16 @@ import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
 import { Nothing } from '../../components/Nothing';
 
-export interface ScheduleViewProps {
+interface ScheduleViewProps {
     match: match;
 }
 interface ScheduleViewState {
     loading: boolean;
-    schedule?: Schedule;
+    schedule?: ScheduleType;
     reports?: ScheduleReport[];
-    script?: Script;
-    hosts?: Host[];
-    groups?: Group[];
+    script?: ScriptType;
+    hosts?: HostType[];
+    groups?: GroupType[];
 }
 export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleViewState> {
     private scheduleID: string;
@@ -95,7 +95,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
     }
 
     private deleteClick = () => {
-        this.state.schedule.DeleteModal().then(deleted => {
+        Schedule.DeleteModal(this.state.schedule).then(deleted => {
             if (!deleted) {
                 return;
             }
@@ -105,7 +105,9 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
     }
 
     private groupsList = () => {
-        if (!this.state.groups) { return null; }
+        if (!this.state.groups) {
+            return null;
+        }
 
         return (
             <ListGroup.TextItem title="Groups">
@@ -149,7 +151,9 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="View Schedule">
@@ -187,7 +191,7 @@ export class ScheduleView extends React.Component<ScheduleViewProps, ScheduleVie
 }
 
 interface ScheduleReportItemProps { report: ScheduleReport; }
-class ScheduleReportItem extends React.Component<ScheduleReportItemProps, {}> {
+class ScheduleReportItem extends React.Component<ScheduleReportItemProps, unknown> {
     render(): JSX.Element {
         let icon = (<Icon.QuestionCircle color={Style.Palette.Primary} />);
         if (this.props.report.Result == 0) {

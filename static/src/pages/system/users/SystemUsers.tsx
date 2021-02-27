@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { EnabledBadge } from '../../../components/Badge';
-import { CreateButton, Button } from '../../../components/Button';
-import { Input, Checkbox } from '../../../components/Form';
+import { AddButton, Button } from '../../../components/Button';
+import { Input } from '../../../components/input/Input';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
 import { Menu } from '../../../components/Menu';
@@ -11,26 +11,25 @@ import { Style } from '../../../components/Style';
 import { Table } from '../../../components/Table';
 import { Rand } from '../../../services/Rand';
 import { StateManager } from '../../../services/StateManager';
-import { User } from '../../../types/User';
+import { User, UserType } from '../../../types/User';
 
 export class UserManager {
-    public static EditCurrentUser(): Promise<User> {
+    public static EditCurrentUser(): Promise<UserType> {
         return new Promise(resolve => {
-            const editUser = (user: User) => {
-                user.Save().then(resolve);
+            const editUser = (user: UserType) => {
+                User.Save(user).then(resolve);
             };
             GlobalModalFrame.showModal(<OptionsUsersModal user={StateManager.Current().User} onUpdate={editUser} />);
         });
     }
 }
 
-export interface SystemUsersProps {}
 interface SystemUsersState {
     loading: boolean;
-    users?: User[];
+    users?: UserType[];
 }
-export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersState> {
-    constructor(props: SystemUsersProps) {
+export class SystemUsers extends React.Component<unknown, SystemUsersState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true,
@@ -51,7 +50,7 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
         this.loadUsers();
     }
 
-    private newUser = (user: User) => {
+    private newUser = (user: UserType) => {
         User.New({
             Username: user.Username,
             Email: user.Email,
@@ -62,8 +61,8 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
         });
     }
 
-    private updateUser = (user: User) => {
-        user.Save().then(() => {
+    private updateUser = (user: UserType) => {
+        User.Save(user).then(() => {
             this.loadUsers();
         });
     }
@@ -72,26 +71,26 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
         GlobalModalFrame.showModal(<OptionsUsersModal onUpdate={this.newUser} />);
     }
 
-    private editUserMenuClick = (user: User) => {
+    private editUserMenuClick = (user: UserType) => {
         return () => {
             GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={this.updateUser} />);
         };
     }
-    private deleteUserMenuClick = (user: User) => {
+    private deleteUserMenuClick = (user: UserType) => {
         return () => {
             Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
                     return;
                 }
 
-                user.Delete().then(() => {
+                User.Delete(user).then(() => {
                     this.loadUsers();
                 });
             });
         };
     }
 
-    private userRow = (user: User) => {
+    private userRow = (user: UserType) => {
         let deleteMenuItem: JSX.Element;
         if (StateManager.Current().User.Username != user.Username) {
             deleteMenuItem = (<React.Fragment>
@@ -114,11 +113,13 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="Users">
-                <CreateButton onClick={this.newUserClick} />
+                <AddButton onClick={this.newUserClick} />
                 <Table.Table>
                     <Table.Head>
                         <Table.Column>Username</Table.Column>
@@ -136,11 +137,11 @@ export class SystemUsers extends React.Component<SystemUsersProps, SystemUsersSt
 }
 
 interface OptionsUsersModalProps {
-    user?: User;
-    onUpdate: (user: User) => (void);
+    user?: UserType;
+    onUpdate: (user: UserType) => (void);
 }
 interface OptionsUsersModalState {
-    value: User;
+    value: UserType;
     showPasswordField: boolean;
     isNew: boolean;
 }
@@ -209,7 +210,7 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
         }
 
         return (
-            <Input
+            <Input.Text
                 type="password"
                 label="Password"
                 onChange={this.changePassword}
@@ -218,14 +219,16 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
     }
 
     private canLogInCheckbox = () => {
-        if (this.props.user && StateManager.Current().User.Username == this.props.user.Username) { return null; }
+        if (this.props.user && StateManager.Current().User.Username == this.props.user.Username) {
+            return null;
+        }
 
         return (
-            <Checkbox
-                    label="Must Change Password"
-                    defaultValue={this.state.value.MustChangePassword}
-                    onChange={this.changeMustChangePassword}
-                    helpText="If checked this user must change their password the next time they log in" />
+            <Input.Checkbox
+                label="Must Change Password"
+                defaultValue={this.state.value.MustChangePassword}
+                onChange={this.changeMustChangePassword}
+                helpText="If checked this user must change their password the next time they log in" />
         );
     }
 
@@ -241,14 +244,14 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
 
         return (
             <ModalForm title={title} onSubmit={this.onSubmit}>
-                <Input
+                <Input.Text
                     type="text"
                     label="Username"
                     defaultValue={this.state.value.Username}
                     onChange={this.changeUsername}
                     disabled={this.props.user != undefined}
                     required />
-                <Input
+                <Input.Text
                     type="email"
                     label="Email"
                     defaultValue={this.state.value.Email}

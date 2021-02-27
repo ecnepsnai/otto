@@ -8,7 +8,7 @@ import { Icon } from '../../components/Icon';
 import { GlobalModalFrame } from '../../components/Modal';
 import { EventDialog } from './EventDialog';
 
-export interface EventListItemProps { event: EventType }
+interface EventListItemProps { event: EventType }
 export const EventListItem: React.FC<EventListItemProps> = (props: EventListItemProps) => {
     const viewClick = () => {
         GlobalModalFrame.showModal(<EventDialog event={props.event} />);

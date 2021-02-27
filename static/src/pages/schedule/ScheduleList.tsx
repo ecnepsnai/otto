@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Schedule } from '../../types/Schedule';
+import { Schedule, ScheduleType } from '../../types/Schedule';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Buttons, CreateButton } from '../../components/Button';
@@ -7,14 +7,13 @@ import { Table } from '../../components/Table';
 import { ScheduleListItem } from './ScheduleListItem';
 import { Script } from '../../types/Script';
 
-export interface ScheduleListProps {}
 interface ScheduleListState {
     loading: boolean;
-    schedules?: Schedule[];
+    schedules?: ScheduleType[];
     scripts?: Map<string, Script>;
 }
-export class ScheduleList extends React.Component<ScheduleListProps, ScheduleListState> {
-    constructor(props: ScheduleListProps) {
+export class ScheduleList extends React.Component<unknown, ScheduleListState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true,
@@ -52,7 +51,9 @@ export class ScheduleList extends React.Component<ScheduleListProps, ScheduleLis
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return ( <PageLoading /> ); }
+        if (this.state.loading) {
+            return ( <PageLoading /> );
+        }
 
         return (
             <Page title="Schedules">

@@ -4,7 +4,7 @@ import { Button } from './Button';
 import { Icon } from './Icon';
 import { Style } from './Style';
 
-export interface CopyButtonProps {
+interface CopyButtonProps {
     text: string;
 }
 export const CopyButton: React.FC<CopyButtonProps> = (props: CopyButtonProps) => {

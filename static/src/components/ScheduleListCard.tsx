@@ -6,7 +6,7 @@ import { Icon } from './Icon';
 import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
 
-export interface ScheduleListCardProps {
+interface ScheduleListCardProps {
     schedules: ScheduleType[];
     className?: string;
 }

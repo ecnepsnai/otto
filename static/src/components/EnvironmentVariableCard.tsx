@@ -4,7 +4,7 @@ import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
 import { Variable } from '../types/Variable';
 
-export interface EnvironmentVariableCardProps {
+interface EnvironmentVariableCardProps {
     variables: Variable[];
     className?: string;
 }

@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { CreateButton } from '../../../components/Button';
+import { AddButton } from '../../../components/Button';
 import { Card } from '../../../components/Card';
-import { Checkbox, Form, Input, Radio, RadioChoice, Select } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
+import { Form } from '../../../components/Form';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
 import { Dropdown, Menu } from '../../../components/Menu';
@@ -9,23 +10,21 @@ import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Notification } from '../../../components/Notification';
 import { Page } from '../../../components/Page';
 import { RandomPSK } from '../../../components/RandomPSK';
-import { Style } from '../../../components/Style';
 import { Table } from '../../../components/Table';
 import { Rand } from '../../../services/Rand';
 import { StateManager } from '../../../services/StateManager';
-import { Group } from '../../../types/Group';
+import { Group, GroupType } from '../../../types/Group';
 import { Options } from '../../../types/Options';
-import { EditRegisterRuleParameters, NewRegisterRuleParameters, RegisterRule } from '../../../types/RegisterRule';
+import { RegisterRuleType, RegisterRule } from '../../../types/RegisterRule';
 
-export interface SystemRegisterProps {}
 interface SystemRegisterState {
     loading: boolean;
-    rules?: RegisterRule[];
-    groups?: Group[];
+    rules?: RegisterRuleType[];
+    groups?: GroupType[];
     options?: Options.Register;
 }
-export class SystemRegister extends React.Component<SystemRegisterProps, SystemRegisterState> {
-    constructor(props: SystemRegisterProps) {
+export class SystemRegister extends React.Component<unknown, SystemRegisterState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true
@@ -81,23 +80,29 @@ export class SystemRegister extends React.Component<SystemRegisterProps, SystemR
         });
     }
 
-    private addRule = (rule: NewRegisterRuleParameters) => {
+    private addRule = (rule: RegisterRuleType) => {
         RegisterRule.New(rule).then(() => {
             Notification.success('Rule Added');
-            this.loadRules().then(() => { this.setState({ loading: false }); });
+            this.loadRules().then(() => {
+                this.setState({ loading: false });
+            });
         });
     }
 
-    private modifyRule = (id: string, rule: EditRegisterRuleParameters) => {
+    private modifyRule = (id: string, rule: RegisterRuleType) => {
         RegisterRule.Save(id, rule).then(() => {
             Notification.success('Rule Modified');
-            this.loadRules().then(() => { this.setState({ loading: false }); });
+            this.loadRules().then(() => {
+                this.setState({ loading: false });
+            });
         });
     }
 
-    private deleteRule = (rule: RegisterRule) => {
-        rule.DeleteModal().then(confirmed => {
-            if (!confirmed) { return; }
+    private deleteRule = (rule: RegisterRuleType) => {
+        RegisterRule.DeleteModal(rule).then(confirmed => {
+            if (!confirmed) {
+                return;
+            }
 
             this.loadRules().then(() => {
                 this.setState({ loading: false });
@@ -114,10 +119,12 @@ export class SystemRegister extends React.Component<SystemRegisterProps, SystemR
     }
 
     private enabledContent = () => {
-        if (!this.state.options.Enabled) { return null; }
+        if (!this.state.options.Enabled) {
+            return null;
+        }
 
         return (<React.Fragment>
-            <Input
+            <Input.Text
                 type="password"
                 label="Register PSK"
                 helpText="Clients that wish to register with this server must specify this PSK to authenticate"
@@ -133,25 +140,27 @@ export class SystemRegister extends React.Component<SystemRegisterProps, SystemR
                     <RegisterRules rules={this.state.rules} onAdd={this.addRule} onChange={this.modifyRule} onDelete={this.deleteRule} groups={this.state.groups}/>
                 </Card.Body>
             </Card.Card>
-            <Select
+            <Input.Select
                 label="Default Group"
                 helpText="If none of the above rules match the client will be added to this group"
                 defaultValue={this.state.options.DefaultGroupID}
                 onChange={this.changeDefaultGroupID}>
-                    { this.state.groups.map((group, idx) => {
-                        return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                    }) }
-                </Select>
+                { this.state.groups.map((group, idx) => {
+                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
+                }) }
+            </Input.Select>
         </React.Fragment>);
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="Host Registration">
                 <Form showSaveButton={true} onSubmit={this.onSubmit}>
-                    <Checkbox
+                    <Input.Checkbox
                         label="Allow Hosts to Register Themselves"
                         helpText="If checked hosts can automatically register themselves with this Otto server"
                         defaultValue={this.state.options.Enabled}
@@ -164,36 +173,36 @@ export class SystemRegister extends React.Component<SystemRegisterProps, SystemR
 }
 
 interface RegisterRulesProps {
-    rules: RegisterRule[];
-    onAdd: (rule: NewRegisterRuleParameters) => (void);
-    onChange: (id: string, rule: EditRegisterRuleParameters) => (void);
-    onDelete: (rule: RegisterRule) => (void);
-    groups: Group[];
+    rules: RegisterRuleType[];
+    onAdd: (rule: RegisterRuleType) => (void);
+    onChange: (id: string, rule: RegisterRuleType) => (void);
+    onDelete: (rule: RegisterRuleType) => (void);
+    groups: GroupType[];
 }
-class RegisterRules extends React.Component<RegisterRulesProps, {}> {
+class RegisterRules extends React.Component<RegisterRulesProps, unknown> {
     private createNew = () => {
         GlobalModalFrame.showModal(<RuleModal onSave={this.props.onAdd} groups={this.props.groups}/>);
     }
 
-    private modifyRule = (rule: RegisterRule) => {
-        return (params: EditRegisterRuleParameters) => {
+    private modifyRule = (rule: RegisterRuleType) => {
+        return (params: RegisterRuleType) => {
             this.props.onChange(rule.ID, params);
         };
     }
 
-    private deleteRuleMenuClick = (rule: RegisterRule) => {
+    private deleteRuleMenuClick = (rule: RegisterRuleType) => {
         return () => {
             this.props.onDelete(rule);
         };
     }
 
-    private editRuleMenuClick = (rule: RegisterRule) => {
+    private editRuleMenuClick = (rule: RegisterRuleType) => {
         return () => {
             GlobalModalFrame.showModal(<RuleModal defaultValue={rule} onSave={this.modifyRule(rule)} groups={this.props.groups}/>);
         };
     }
 
-    private ruleRow = (rule: RegisterRule) => {
+    private ruleRow = (rule: RegisterRuleType) => {
         let groupName = '';
         this.props.groups.forEach(group => {
             if (group.ID === rule.GroupID) {
@@ -201,20 +210,13 @@ class RegisterRules extends React.Component<RegisterRulesProps, {}> {
             }
         });
 
-        const dropdownLabel = <Icon.Bars />;
-        const buttonProps = {
-            color: Style.Palette.Secondary,
-            outline: true,
-            size: Style.Size.XS,
-        };
-
         return (
             <Table.Row key={Rand.ID()}>
                 <td>{rule.Property}</td>
                 <td>{rule.Pattern}</td>
                 <td>{groupName}</td>
                 <td>
-                    <Dropdown label={dropdownLabel} button={buttonProps}>
+                    <Dropdown label={<Icon.Bars />}>
                         <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editRuleMenuClick(rule)}/>
                         <Menu.Divider />
                         <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteRuleMenuClick(rule)}/>
@@ -227,7 +229,7 @@ class RegisterRules extends React.Component<RegisterRulesProps, {}> {
     render(): JSX.Element {
         return (
             <div>
-                <CreateButton onClick={this.createNew} />
+                <AddButton onClick={this.createNew} />
                 <Table.Table>
                     <Table.Head>
                         <Table.Column>Property</Table.Column>
@@ -236,7 +238,9 @@ class RegisterRules extends React.Component<RegisterRulesProps, {}> {
                         <Table.MenuColumn />
                     </Table.Head>
                     <Table.Body>
-                        { this.props.rules.map(rule => { return this.ruleRow(rule); }) }
+                        { this.props.rules.map(rule => {
+                            return this.ruleRow(rule);
+                        }) }
                     </Table.Body>
                 </Table.Table>
             </div>
@@ -245,12 +249,12 @@ class RegisterRules extends React.Component<RegisterRulesProps, {}> {
 }
 
 interface RuleModalProps {
-    defaultValue?: EditRegisterRuleParameters;
-    onSave: (rule: EditRegisterRuleParameters) => (void);
-    groups: Group[];
+    defaultValue?: RegisterRuleType;
+    onSave: (rule: RegisterRuleType) => (void);
+    groups: GroupType[];
 }
 interface RuleModalState {
-    value: EditRegisterRuleParameters;
+    value: RegisterRuleType;
 }
 class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
     constructor(props: RuleModalProps) {
@@ -300,7 +304,7 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
 
         const state = StateManager.Current();
         const properties = state.Enums['RegisterRuleProperty'];
-        const radioChoices: RadioChoice[] = properties.map(property => {
+        const radioChoices = properties.map(property => {
             return {
                 value: property['value'],
                 label: property['description'],
@@ -309,26 +313,26 @@ class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
 
         return (
             <ModalForm title={title} onSubmit={this.onSubmit}>
-                <Radio
+                <Input.Radio
                     label="Property"
                     choices={radioChoices}
                     defaultValue={this.state.value.Property}
                     onChange={this.changePropType} />
-                <Input
+                <Input.Text
                     label="Regex Pattern"
                     type="text"
                     placeholder="Regular Expression"
                     defaultValue={this.state.value.Pattern}
                     onChange={this.changePattern}
                     required />
-                <Select
+                <Input.Select
                     label="Add To Group"
                     defaultValue={this.state.value.GroupID}
                     onChange={this.changeGroupID}>
-                        { this.props.groups.map((group, idx) => {
-                            return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                        }) }
-                </Select>
+                    { this.props.groups.map((group, idx) => {
+                        return ( <option key={idx} value={group.ID}>{group.Name}</option> );
+                    }) }
+                </Input.Select>
             </ModalForm>
         );
     }

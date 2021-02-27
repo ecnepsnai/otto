@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Group } from '../../types/Group';
+import { Group, GroupType } from '../../types/Group';
 import { match, Link } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
-import { Host } from '../../types/Host';
-import { Script } from '../../types/Script';
+import { HostType } from '../../types/Host';
+import { ScriptType } from '../../types/Script';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
 import { Buttons, EditButton, DeleteButton } from '../../components/Button';
@@ -15,18 +15,18 @@ import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCar
 import { Nothing } from '../../components/Nothing';
 import { Redirect } from '../../components/Redirect';
 import { ScriptListCard } from '../../components/ScriptListCard';
-import { Schedule } from '../../types/Schedule';
+import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 
-export interface GroupViewProps {
+interface GroupViewProps {
     match: match;
 }
 interface GroupViewState {
     loading: boolean;
-    group?: Group;
-    hosts?: Host[];
-    scripts?: Script[];
-    schedules?: Schedule[];
+    group?: GroupType;
+    hosts?: HostType[];
+    scripts?: ScriptType[];
+    schedules?: ScheduleType[];
 }
 export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
     private groupID: string;
@@ -80,7 +80,7 @@ export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
     }
 
     private deleteClick = () => {
-        this.state.group.DeleteModal().then(deleted => {
+        Group.DeleteModal(this.state.group).then(deleted => {
             if (!deleted) {
                 return;
             }
@@ -90,7 +90,9 @@ export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="View Group">
@@ -125,9 +127,9 @@ export class GroupView extends React.Component<GroupViewProps, GroupViewState> {
 }
 
 interface HostListCardProps {
-    hosts: Host[];
+    hosts: HostType[];
 }
-class HostListCard extends React.Component<HostListCardProps, {}> {
+class HostListCard extends React.Component<HostListCardProps, unknown> {
     render(): JSX.Element {
         if (!this.props.hosts || this.props.hosts.length < 1) {
             return (
@@ -141,10 +143,10 @@ class HostListCard extends React.Component<HostListCardProps, {}> {
                 {
                     this.props.hosts.map((host, index) => {
                         return (
-                        <ListGroup.Item key={index}>
-                            <Icon.Desktop />
-                            <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
-                        </ListGroup.Item>
+                            <ListGroup.Item key={index}>
+                                <Icon.Desktop />
+                                <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
+                            </ListGroup.Item>
                         );
                     })
                 }

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Script, ScriptEnabledHost } from '../../types/Script';
+import { Script, ScriptType, ScriptEnabledHost } from '../../types/Script';
 import { match, Link } from 'react-router-dom';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { URLParams } from '../../services/Params';
-import { Buttons, EditButton, DeleteButton, Button, SmallPlayButton } from '../../components/Button';
+import { Buttons, EditButton, DeleteButton, Button, SmallPlayButton, ButtonAnchor } from '../../components/Button';
 import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge } from '../../components/Badge';
 import { Icon } from '../../components/Icon';
@@ -18,19 +18,19 @@ import { RunModal } from '../run/RunModal';
 import { Rand } from '../../services/Rand';
 import { Group } from '../../types/Group';
 import { Pre } from '../../components/Pre';
-import { Attachment } from '../../types/Attachment';
+import { AttachmentType } from '../../types/Attachment';
 import { Formatter } from '../../services/Formatter';
 import { Nothing } from '../../components/Nothing';
-import { Schedule } from '../../types/Schedule';
+import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 
-export interface ScriptViewProps { match: match; }
+interface ScriptViewProps { match: match; }
 interface ScriptViewState {
     loading: boolean;
-    script?: Script;
+    script?: ScriptType;
     hosts?: ScriptEnabledHost[];
-    attachments?: Attachment[];
-    schedules?: Schedule[];
+    attachments?: AttachmentType[];
+    schedules?: ScheduleType[];
 }
 export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState> {
     private scriptID: string;
@@ -84,7 +84,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
     }
 
     private deleteClick = () => {
-        this.state.script.DeleteModal().then(deleted => {
+        Script.DeleteModal(this.state.script).then(deleted => {
             if (!deleted) {
                 return;
             }
@@ -100,7 +100,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
     private runScriptGroupClick = (groupID: string) => {
         return () => {
             Group.Hosts(groupID).then(hosts => {
-                const hostIDs = hosts.map(host => { return host.ID; });
+                const hostIDs = hosts.map(host => host.ID);
                 GlobalModalFrame.showModal(<RunModal scriptID={this.state.script.ID} hostIDs={hostIDs} key={Rand.ID()}/>);
             });
         };
@@ -113,7 +113,9 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
     }
 
     private runAs = () => {
-        if (this.state.script.RunAs.Inherit) { return null; }
+        if (this.state.script.RunAs.Inherit) {
+            return null;
+        }
 
         return (<ListGroup.TextItem title="Run As">User: {this.state.script.RunAs.UID} Group: {this.state.script.RunAs.GID}</ListGroup.TextItem>);
     }
@@ -133,9 +135,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                 {Formatter.Bytes(attachment.Size)}
                             </span>
                         </span>
-                        <a href={'/api/attachments/attachment/' + attachment.ID + '/download'} className={Button.className({ color: Style.Palette.Secondary, outline: true, size: Style.Size.XS })} download>
-                            <Icon.Download />
-                        </a>
+                        <ButtonAnchor href={'/api/attachments/attachment/' + attachment.ID + '/download'} color={Style.Palette.Secondary} outline size={Style.Size.XS} download><Icon.Download /></ButtonAnchor>
                     </div>
                 </ListGroup.Item>);
             })
@@ -143,7 +143,9 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="View Script">
@@ -177,8 +179,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                             <ListGroup.List>
                                 {
                                     this.state.hosts.map((host, index) => {
-                                        return (
-                                        <ListGroup.Item key={index}>
+                                        return (<ListGroup.Item key={index}>
                                             <div className="d-flex justify-content-between">
                                                 <div>
                                                     <Icon.LayerGroup />
@@ -198,8 +199,7 @@ export class ScriptView extends React.Component<ScriptViewProps, ScriptViewState
                                                     <SmallPlayButton onClick={this.runScriptHostClick(host.HostID)} />
                                                 </div>
                                             </div>
-                                        </ListGroup.Item>
-                                        );
+                                        </ListGroup.Item>);
                                     })
                                 }
                             </ListGroup.List>

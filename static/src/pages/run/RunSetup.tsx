@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Script } from '../../types/Script';
+import { Script, ScriptType } from '../../types/Script';
 import { Loading } from '../../components/Loading';
-import { Form, Checkbox } from '../../components/Form';
+import { Input } from '../../components/input/Input';
+import { Form } from '../../components/Form';
 import { Card } from '../../components/Card';
 import { Rand } from '../../services/Rand';
 
@@ -15,13 +16,13 @@ interface SHost {
     Name: string;
 }
 
-export interface RunSetupProps {
+interface RunSetupProps {
     scriptID: string;
     onSelectedHosts: (hostIDs: string[]) => (void);
 }
 interface RunSetupState {
     loading: boolean;
-    script?: Script;
+    script?: ScriptType;
     groups?: SGroup[];
     hosts?: SHost[];
     selectedGroups?: {[id: string]: number};
@@ -36,7 +37,7 @@ export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
 
     private loadData = () => {
         Script.Get(this.props.scriptID).then(script => {
-            script.Hosts().then(hosts => {
+            Script.Hosts(script.ID).then(hosts => {
                 const groupMap: {[id: string]: string} = {};
                 const groupMembership: {[id: string]: string[]} = {};
                 const selectedGroups: {[id: string]: number} = {};
@@ -132,7 +133,9 @@ export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<Loading />); }
+        if (this.state.loading) {
+            return (<Loading />);
+        }
 
         return (
             <Form>
@@ -142,7 +145,7 @@ export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
                         {
                             this.state.groups.map(group => {
                                 return (
-                                    <Checkbox label={group.Name} onChange={this.selectGroup(group.ID)} defaultValue={this.state.selectedGroups[group.ID]>0} key={Rand.ID()}/>
+                                    <Input.Checkbox label={group.Name} onChange={this.selectGroup(group.ID)} defaultValue={this.state.selectedGroups[group.ID]>0} key={Rand.ID()}/>
                                 );
                             })
                         }
@@ -154,7 +157,7 @@ export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
                         {
                             this.state.hosts.map(host => {
                                 return (
-                                    <Checkbox label={host.Name} onChange={this.selectHost(host.ID)} defaultValue={this.state.selectedHosts[host.ID]>0} key={Rand.ID()}/>
+                                    <Input.Checkbox label={host.Name} onChange={this.selectHost(host.ID)} defaultValue={this.state.selectedHosts[host.ID]>0} key={Rand.ID()}/>
                                 );
                             })
                         }

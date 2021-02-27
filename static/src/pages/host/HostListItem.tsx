@@ -1,19 +1,22 @@
 import * as React from 'react';
-
-import { Host } from '../../types/Host';
+import { Host, HostType } from '../../types/Host';
 import { Link } from 'react-router-dom';
 import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { HeartbeatBadge } from '../../components/Badge';
-import { Heartbeat } from '../../types/Heartbeat';
+import { HeartbeatType } from '../../types/Heartbeat';
 import { Formatter } from '../../services/Formatter';
 import { ClientVersion } from '../../components/ClientVersion';
 
-export interface HostListItemProps { host: Host, heartbeat: Heartbeat, onReload: () => (void); }
-export class HostListItem extends React.Component<HostListItemProps, {}> {
+interface HostListItemProps {
+    host: HostType;
+    heartbeat: HeartbeatType;
+    onReload: () => (void);
+}
+export class HostListItem extends React.Component<HostListItemProps, unknown> {
     private deleteMenuClick = () => {
-        this.props.host.DeleteModal().then(confirmed => {
+        Host.DeleteModal(this.props.host).then(confirmed => {
             if (confirmed) {
                 this.props.onReload();
             }

@@ -5,7 +5,7 @@ import { Icon } from './Icon';
 import { Popover } from './Popover';
 import { Style } from './Style';
 
-export interface ClientVersionProps {
+interface ClientVersionProps {
     heartbeat: HeartbeatType;
 }
 export const ClientVersion: React.FC<ClientVersionProps> = (props: ClientVersionProps) => {

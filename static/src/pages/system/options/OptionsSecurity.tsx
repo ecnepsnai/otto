@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Card } from '../../../components/Card';
 import { Icon } from '../../../components/Icon';
-import { Checkbox } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 
-export interface OptionsSecurityProps {
+interface OptionsSecurityProps {
     defaultValue: Options.Security;
     onUpdate: (value: Options.Security) => (void);
 }
@@ -35,10 +35,10 @@ export class OptionsSecurity extends React.Component<OptionsSecurityProps, Optio
         return (
             <Card.Card>
                 <Card.Header>
-                    <Icon.Label icon={<Icon.ShieldAlt />} label="Security" />
+                    <Icon.Label icon={<Icon.Shield />} label="Security" />
                 </Card.Header>
                 <Card.Body>
-                    <Checkbox
+                    <Input.Checkbox
                         label="Include Client PSK Environment Variable"
                         defaultValue={this.state.value.IncludePSKEnv}
                         helpText="If checked the OTTO_CLIENT_PSK environment variable is included when scripts are run."

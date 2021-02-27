@@ -11,7 +11,7 @@ import { ListGroup } from './ListGroup';
 import { GlobalModalFrame } from './Modal';
 import { Nothing } from './Nothing';
 
-export interface ScriptListCardProps {
+interface ScriptListCardProps {
     scripts: ScriptEnabledGroup[] | ScriptType[];
     hostIDs: string[];
     className?: string;

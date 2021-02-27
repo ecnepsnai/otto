@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Script } from '../../types/Script';
+import { Script, ScriptType } from '../../types/Script';
 import { Link } from 'react-router-dom';
 import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
@@ -9,10 +9,13 @@ import { Rand } from '../../services/Rand';
 import { RunModal } from '../run/RunModal';
 import { Formatter } from '../../services/Formatter';
 
-export interface ScriptListItemProps { script: Script, onReload: () => (void); }
-export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
+interface ScriptListItemProps {
+    script: ScriptType;
+    onReload: () => (void);
+}
+export class ScriptListItem extends React.Component<ScriptListItemProps, unknown> {
     private deleteMenuClick = () => {
-        this.props.script.DeleteModal().then(confirmed => {
+        Script.DeleteModal(this.props.script).then(confirmed => {
             if (confirmed) {
                 this.props.onReload();
             }
@@ -20,7 +23,7 @@ export class ScriptListItem extends React.Component<ScriptListItemProps, {}> {
     }
 
     private toggleMenuClick = () => {
-        this.props.script.Update({
+        Script.Update(this.props.script, {
             Enabled: !this.props.script.Enabled
         }).then(() => {
             this.props.onReload();

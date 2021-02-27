@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Loading } from '../../components/Loading';
 import { Card } from '../../components/Card';
-import { Host } from '../../types/Host';
+import { Host, HostType } from '../../types/Host';
 import { ProgressBar } from '../../components/ProgressBar';
 import { ScriptRequest, ScriptRun } from '../../types/Result';
 import { RunOutput, RunResults } from './RunResults';
 import { Style } from '../../components/Style';
 
-export interface RunScriptProps {
+interface RunScriptProps {
     hostID: string;
     scriptID: string;
     onFinished: (results?: ScriptRun) => (void);
@@ -15,7 +15,7 @@ export interface RunScriptProps {
 interface RunScriptState {
     loadingHost: boolean;
     runningScript: boolean;
-    host?: Host;
+    host?: HostType;
     results?: ScriptRun;
     stdout?: string;
     stderr?: string;
@@ -102,7 +102,9 @@ export class RunScript extends React.Component<RunScriptProps, RunScriptState> {
     };
 
     render(): JSX.Element {
-        if (this.state.loadingHost) { return (<Loading />); }
+        if (this.state.loadingHost) {
+            return (<Loading />);
+        }
 
         let color: Style.Palette;
         if (this.state.results && this.state.results.Result && !this.state.results.Result.Success) {

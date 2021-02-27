@@ -1,20 +1,20 @@
 import * as React from 'react';
-import { Buttons, CreateButton } from '../../../components/Button';
+import { Buttons, AddButton } from '../../../components/Button';
 import { Loading } from '../../../components/Loading';
 import { GlobalModalFrame } from '../../../components/Modal';
 import { Table } from '../../../components/Table';
-import { Attachment } from '../../../types/Attachment';
+import { Attachment, AttachmentType } from '../../../types/Attachment';
 import { Script } from '../../../types/Script';
 import { AttachmentEdit } from './AttachmentEdit';
 import { AttachmentListItem } from './AttachmentListItem';
 
-export interface AttachmentListProps {
+interface AttachmentListProps {
     scriptID?: string;
     didUpdateAttachments: (fileIDs: string[]) => void;
 }
 interface AttachmentListState {
     loading?: boolean;
-    attachments?: Attachment[];
+    attachments?: AttachmentType[];
 }
 export class AttachmentList extends React.Component<AttachmentListProps, AttachmentListState> {
     constructor(props: AttachmentListProps) {
@@ -77,11 +77,13 @@ export class AttachmentList extends React.Component<AttachmentListProps, Attachm
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<Loading />); }
+        if (this.state.loading) {
+            return (<Loading />);
+        }
 
         return (<div>
             <Buttons>
-                <CreateButton onClick={this.createButtonClick} />
+                <AddButton onClick={this.createButtonClick} />
             </Buttons>
             <Table.Table>
                 <Table.Head>

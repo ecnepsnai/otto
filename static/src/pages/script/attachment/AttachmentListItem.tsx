@@ -4,22 +4,16 @@ import { Menu } from '../../../components/Menu';
 import { GlobalModalFrame } from '../../../components/Modal';
 import { Table } from '../../../components/Table';
 import { Formatter } from '../../../services/Formatter';
-import { Attachment } from '../../../types/Attachment';
+import { Attachment, AttachmentType } from '../../../types/Attachment';
 import { AttachmentEdit } from './AttachmentEdit';
 
-export interface AttachmentListItemProps {
-    attachment: Attachment;
-    didEdit: (attachment: Attachment) => (void);
+interface AttachmentListItemProps {
+    attachment: AttachmentType;
+    didEdit: (attachment: AttachmentType) => (void);
     didDelete: () => (void);
 }
-interface AttachmentListItemState {}
-export class AttachmentListItem extends React.Component<AttachmentListItemProps, AttachmentListItemState> {
-    constructor(props: AttachmentListItemProps) {
-        super(props);
-        this.state = {};
-    }
-
-    private didEditAttachment = (attachment: Attachment) => {
+export class AttachmentListItem extends React.Component<AttachmentListItemProps, unknown> {
+    private didEditAttachment = (attachment: AttachmentType) => {
         this.props.didEdit(attachment);
     }
 
@@ -28,7 +22,7 @@ export class AttachmentListItem extends React.Component<AttachmentListItemProps,
     }
 
     private deleteClick = () => {
-        this.props.attachment.DeleteModal().then(deleted => {
+        Attachment.DeleteModal(this.props.attachment).then(deleted => {
             if (deleted) {
                 this.props.didDelete();
             }

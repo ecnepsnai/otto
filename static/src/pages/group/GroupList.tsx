@@ -1,19 +1,18 @@
 import * as React from 'react';
-import { Group } from '../../types/Group';
+import { Group, GroupType } from '../../types/Group';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Buttons, CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { GroupListItem } from './GroupListItem';
 
-export interface GroupListProps {}
 interface GroupListState {
     loading: boolean;
-    groups: Group[];
+    groups: GroupType[];
     membership: {[id: string]: string[]};
 }
-export class GroupList extends React.Component<GroupListProps, GroupListState> {
-    constructor(props: GroupListProps) {
+export class GroupList extends React.Component<unknown, GroupListState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true,
@@ -49,7 +48,9 @@ export class GroupList extends React.Component<GroupListProps, GroupListState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return ( <PageLoading /> ); }
+        if (this.state.loading) {
+            return ( <PageLoading /> );
+        }
 
         return (
             <Page title="Groups">

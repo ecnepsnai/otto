@@ -1,20 +1,19 @@
 import * as React from 'react';
-import { Host } from '../../types/Host';
+import { Host, HostType } from '../../types/Host';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Buttons, CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { HostListItem } from './HostListItem';
-import { Heartbeat } from '../../types/Heartbeat';
+import { Heartbeat, HeartbeatType } from '../../types/Heartbeat';
 
-export interface HostListProps {}
 interface HostListState {
     loading: boolean;
-    hosts: Host[];
-    heartbeats?: Map<string, Heartbeat>;
+    hosts: HostType[];
+    heartbeats?: Map<string, HeartbeatType>;
 }
-export class HostList extends React.Component<HostListProps, HostListState> {
-    constructor(props: HostListProps) {
+export class HostList extends React.Component<unknown, HostListState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true,
@@ -49,7 +48,9 @@ export class HostList extends React.Component<HostListProps, HostListState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return ( <PageLoading /> ); }
+        if (this.state.loading) {
+            return ( <PageLoading /> );
+        }
 
         return (
             <Page title="Hosts">

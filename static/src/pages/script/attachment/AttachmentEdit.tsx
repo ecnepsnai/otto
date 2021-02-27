@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { FileBrowser, IDInput, Input, NumberInput } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
 import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
-import { Attachment } from '../../../types/Attachment';
+import { Attachment, AttachmentType } from '../../../types/Attachment';
 
-export interface AttachmentEditProps {
-    attachment?: Attachment;
-    didUpdate: (attachment: Attachment) => (void);
+interface AttachmentEditProps {
+    attachment?: AttachmentType;
+    didUpdate: (attachment: AttachmentType) => (void);
 }
 interface AttachmentEditState {
-    attachment: Attachment;
+    attachment: AttachmentType;
     file?: File;
     loading: boolean;
 }
@@ -42,7 +42,7 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
 
     private editAttachment = () => {
         this.setState({ loading: false });
-        return this.props.attachment.Save().then(attachment => {
+        return Attachment.Save(this.props.attachment).then(attachment => {
             this.props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
         }, () => {
@@ -77,8 +77,10 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
     }
 
     private fileInput = () => {
-        if (this.props.attachment) { return null; }
-        return (<FileBrowser label="Upload File" onChange={this.changeFile}/>);
+        if (this.props.attachment) {
+            return null;
+        }
+        return (<Input.FileChooser label="Upload File" onChange={this.changeFile}/>);
     }
 
     render(): JSX.Element {
@@ -86,9 +88,9 @@ export class AttachmentEdit extends React.Component<AttachmentEditProps, Attachm
         return (
             <ModalForm title={title} onSubmit={this.saveAttachment}>
                 { this.fileInput() }
-                <Input type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
-                <IDInput label="Owned By" defaultUID={this.state.attachment.UID} defaultGID={this.state.attachment.GID} onChange={this.changeOwner} />
-                <NumberInput label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
+                <Input.Text type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
+                <Input.IDInput label="Owned By" defaultUID={this.state.attachment.UID} defaultGID={this.state.attachment.GID} onChange={this.changeOwner} />
+                <Input.Number label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
             </ModalForm>
         );
     }

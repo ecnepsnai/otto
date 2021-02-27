@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Host } from '../../types/Host';
+import { Host, HostType } from '../../types/Host';
 import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Form, Input, NumberInput, Checkbox } from '../../components/Form';
+import { Input } from '../../components/input/Input';
+import { Form } from '../../components/Form';
 import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdit';
 import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
@@ -13,10 +14,10 @@ import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 import { RandomPSK } from '../../components/RandomPSK';
 
-export interface HostEditProps { match: match }
+interface HostEditProps { match: match }
 interface HostEditState {
     loading: boolean;
-    host?: Host;
+    host?: HostType;
     isNew?: boolean;
     useHostName?: boolean;
 }
@@ -84,10 +85,12 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     }
 
     private enabledCheckbox = () => {
-        if (this.state.isNew) { return null; }
+        if (this.state.isNew) {
+            return null;
+        }
 
         return (
-            <Checkbox
+            <Input.Checkbox
                 label="Enabled"
                 helpText=""
                 defaultValue={this.state.host.Enabled}
@@ -117,11 +120,11 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     }
 
     private formSave = () => {
-        let promise: Promise<Host>;
+        let promise: Promise<HostType>;
         if (this.state.isNew) {
             promise = Host.New(this.state.host);
         } else {
-            promise = this.state.host.Save();
+            promise = Host.Save(this.state.host);
         }
 
         return promise.then(host => {
@@ -135,10 +138,12 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     }
 
     private addressInput = () => {
-        if (this.state.useHostName) { return null; }
+        if (this.state.useHostName) {
+            return null;
+        }
 
         return (
-            <Input
+            <Input.Text
                 label="Address"
                 type="text"
                 defaultValue={this.state.host.Address}
@@ -148,49 +153,50 @@ export class HostEdit extends React.Component<HostEditProps, HostEditState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
-        <Page title={ this.state.isNew ? 'New Host' : 'Edit Host' }>
-            <Form showSaveButton onSubmit={this.formSave}>
-                <Input
-                    label="Name"
-                    type="text"
-                    defaultValue={this.state.host.Name}
-                    onChange={this.changeName}
-                    required />
-                <Checkbox label="Connect to host using this name" defaultValue={this.state.useHostName} onChange={this.changeUseHostName} />
-                { this.addressInput() }
-                <NumberInput
-                    label="Port"
-                    defaultValue={this.state.host.Port}
-                    onChange={this.changePort}
-                    required />
-                <Input
-                    label="Pre-Shared Key"
-                    type="password"
-                    defaultValue={this.state.host.PSK}
-                    onChange={this.changePSK}
-                    className=""
-                    required />
-                <RandomPSK newPSK={this.changePSK} />
-                { this.enabledCheckbox() }
-                <Card.Card className="mt-3">
-                    <Card.Header>Environment Variables</Card.Header>
-                    <Card.Body>
-                        <EnvironmentVariableEdit
-                            variables={this.state.host.Environment}
-                            onChange={this.changeEnvironment} />
-                    </Card.Body>
-                </Card.Card>
-                <Card.Card className="mt-3">
-                    <Card.Header>Groups</Card.Header>
-                    <Card.Body>
-                        <GroupCheckList selectedGroups={this.state.host.GroupIDs} onChange={this.changeGroupIDs}/>
-                    </Card.Body>
-                </Card.Card>
-            </Form>
-        </Page>
+            <Page title={ this.state.isNew ? 'New Host' : 'Edit Host' }>
+                <Form showSaveButton onSubmit={this.formSave}>
+                    <Input.Text
+                        label="Name"
+                        type="text"
+                        defaultValue={this.state.host.Name}
+                        onChange={this.changeName}
+                        required />
+                    <Input.Checkbox label="Connect to host using this name" defaultValue={this.state.useHostName} onChange={this.changeUseHostName} />
+                    { this.addressInput() }
+                    <Input.Number
+                        label="Port"
+                        defaultValue={this.state.host.Port}
+                        onChange={this.changePort}
+                        required />
+                    <Input.Text
+                        label="Pre-Shared Key"
+                        type="password"
+                        defaultValue={this.state.host.PSK}
+                        onChange={this.changePSK}
+                        required />
+                    <RandomPSK newPSK={this.changePSK} />
+                    { this.enabledCheckbox() }
+                    <Card.Card className="mt-3">
+                        <Card.Header>Environment Variables</Card.Header>
+                        <Card.Body>
+                            <EnvironmentVariableEdit
+                                variables={this.state.host.Environment}
+                                onChange={this.changeEnvironment} />
+                        </Card.Body>
+                    </Card.Card>
+                    <Card.Card className="mt-3">
+                        <Card.Header>Groups</Card.Header>
+                        <Card.Body>
+                            <GroupCheckList selectedGroups={this.state.host.GroupIDs} onChange={this.changeGroupIDs}/>
+                        </Card.Body>
+                    </Card.Card>
+                </Form>
+            </Page>
         );
     }
 }

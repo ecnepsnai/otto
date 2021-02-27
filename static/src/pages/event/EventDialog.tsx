@@ -8,7 +8,7 @@ import { Modal } from '../../components/Modal';
 import { Style } from '../../components/Style';
 import { EventType } from '../../types/Event';
 
-export interface EventDialogProps { event: EventType; }
+interface EventDialogProps { event: EventType; }
 export const EventDialog: React.FC<EventDialogProps> = (props: EventDialogProps) => {
     const details = Object.keys(props.event.Details).sort().map(key => {
         return {

@@ -1,18 +1,22 @@
 import * as React from 'react';
-import { Schedule } from '../../types/Schedule';
+import { Schedule, ScheduleType } from '../../types/Schedule';
 import { Link } from 'react-router-dom';
 import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
-import { Script } from '../../types/Script';
+import { ScriptType } from '../../types/Script';
 import { EnabledBadge } from '../../components/Badge';
 import { SchedulePattern } from './SchedulePattern';
 import { DateLabel } from '../../components/DateLabel';
 
-export interface ScheduleListItemProps { schedule: Schedule, script: Script, onReload: () => (void); }
-export class ScheduleListItem extends React.Component<ScheduleListItemProps, {}> {
+interface ScheduleListItemProps {
+    schedule: ScheduleType;
+    script: ScriptType;
+    onReload: () => (void);
+}
+export class ScheduleListItem extends React.Component<ScheduleListItemProps, unknown> {
     private deleteMenuClick = () => {
-        this.props.schedule.DeleteModal().then(confirmed => {
+        Schedule.DeleteModal(this.props.schedule).then(confirmed => {
             if (confirmed) {
                 this.props.onReload();
             }

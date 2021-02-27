@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Heartbeat } from '../../types/Heartbeat';
-import { Host, ScriptEnabledGroup } from '../../types/Host';
-import { Group } from '../../types/Group';
+import { Heartbeat, HeartbeatType } from '../../types/Heartbeat';
+import { Host, HostType, ScriptEnabledGroup } from '../../types/Host';
+import { GroupType } from '../../types/Group';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Buttons, EditButton, DeleteButton } from '../../components/Button';
@@ -13,7 +13,7 @@ import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge, HeartbeatBadge } from '../../components/Badge';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Redirect } from '../../components/Redirect';
-import { Schedule } from '../../types/Schedule';
+import { ScheduleType } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
@@ -21,14 +21,14 @@ import { CopyButton } from '../../components/CopyButton';
 import { DateLabel } from '../../components/DateLabel';
 import { ClientVersion } from '../../components/ClientVersion';
 
-export interface HostViewProps { match: match }
+interface HostViewProps { match: match }
 interface HostViewState {
     loading: boolean;
-    host?: Host;
-    heartbeat?: Heartbeat;
-    groups?: Group[];
+    host?: HostType;
+    heartbeat?: HeartbeatType;
+    groups?: GroupType[];
     scripts?: ScriptEnabledGroup[];
-    schedules?: Schedule[];
+    schedules?: ScheduleType[];
 }
 export class HostView extends React.Component<HostViewProps, HostViewState> {
     private hostID: string;
@@ -91,7 +91,7 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
     }
 
     private deleteClick = () => {
-        this.state.host.DeleteModal().then(deleted => {
+        Host.DeleteModal(this.state.host).then(deleted => {
             if (deleted) {
                 Redirect.To('/hosts');
             }
@@ -99,19 +99,25 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
     }
 
     private lastReply = (): JSX.Element => {
-        if (!this.state.heartbeat) { return null; }
+        if (!this.state.heartbeat) {
+            return null;
+        }
 
         return (<ListGroup.TextItem title="Last Heartbeat"><DateLabel date={this.state.heartbeat.LastReply} /></ListGroup.TextItem>);
     }
 
     private clientVersion = (): JSX.Element => {
-        if (!this.state.heartbeat) { return null; }
+        if (!this.state.heartbeat) {
+            return null;
+        }
 
         return (<ListGroup.TextItem title="Client Version"><ClientVersion heartbeat={this.state.heartbeat} /></ListGroup.TextItem>);
     }
 
     private hostProperties = (): JSX.Element => {
-        if (!this.state.heartbeat || !this.state.heartbeat.Properties) { return null; }
+        if (!this.state.heartbeat || !this.state.heartbeat.Properties) {
+            return null;
+        }
 
         return (
             <React.Fragment>
@@ -125,7 +131,9 @@ export class HostView extends React.Component<HostViewProps, HostViewState> {
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return (<PageLoading />); }
+        if (this.state.loading) {
+            return (<PageLoading />);
+        }
 
         return (
             <Page title="View Host">

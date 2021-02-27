@@ -6,7 +6,7 @@ import { Icon } from './Icon';
 import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
 
-export interface GroupListCardProps {
+interface GroupListCardProps {
     groups: GroupType[];
     className?: string;
 }

@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { Card } from '../../../components/Card';
 import { Icon } from '../../../components/Icon';
-import { Input } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 import { EnvironmentVariableEdit } from '../../../components/EnvironmentVariableEdit';
 import { Variable } from '../../../types/Variable';
 import { Alert } from '../../../components/Alert';
-import { Style } from '../../../components/Style';
 
-export interface OptionsGeneralProps {
+interface OptionsGeneralProps {
     defaultValue: Options.General;
     onUpdate: (value: Options.General) => (void);
 }
@@ -37,11 +36,9 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
             return null;
         }
 
-        return (
-        <Alert color={Style.Palette.Warning}>
+        return (<Alert.Danger>
             The configured server URL is different than the URL you are using to access this page.
-        </Alert>
-        );
+        </Alert.Danger>);
     }
 
     private changeServerURL = (ServerURL: string) => {
@@ -75,7 +72,7 @@ export class OptionsGeneral extends React.Component<OptionsGeneralProps, Options
                     <Icon.Label icon={<Icon.Wrench />} label="General" />
                 </Card.Header>
                 <Card.Body>
-                    <Input
+                    <Input.Text
                         type="text"
                         label="Otto Server URL"
                         placeholder="https://otto.example.com/"

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Card } from '../../../components/Card';
 import { Icon } from '../../../components/Icon';
-import { Checkbox, NumberInput } from '../../../components/Form';
+import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 
-export interface OptionsAuthenticationProps {
+interface OptionsAuthenticationProps {
     defaultValue: Options.Authentication;
     onUpdate: (value: Options.Authentication) => (void);
 }
@@ -50,13 +50,13 @@ export class OptionsAuthentication extends React.Component<OptionsAuthentication
                     <Icon.Label icon={<Icon.Key />} label="Authentication" />
                 </Card.Header>
                 <Card.Body>
-                    <NumberInput
+                    <Input.Number
                         label="Session Timeout"
                         append="Minutes"
                         helpText="The number of minutes of inactivity before a session is automatically ended"
                         defaultValue={this.state.value.MaxAgeMinutes}
                         onChange={this.changeMaxAgeMinutes} />
-                    <Checkbox
+                    <Input.Checkbox
                         label="Require HTTPS"
                         helpText="If checked users must access the Otto web UI using HTTPS."
                         defaultValue={this.state.value.SecureOnly}

@@ -10,7 +10,7 @@ enum RunStage {
     Finished,
 }
 
-export interface RunModalProps {
+interface RunModalProps {
     scriptID: string;
     hostIDs?: string[];
 }

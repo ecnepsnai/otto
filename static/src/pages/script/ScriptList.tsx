@@ -1,18 +1,17 @@
 import * as React from 'react';
-import { Script } from '../../types/Script';
+import { Script, ScriptType } from '../../types/Script';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Buttons, CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { ScriptListItem } from './ScriptListItem';
 
-export interface ScriptListProps {}
 interface ScriptListState {
     loading: boolean;
-    scripts: Script[];
+    scripts: ScriptType[];
 }
-export class ScriptList extends React.Component<ScriptListProps, ScriptListState> {
-    constructor(props: ScriptListProps) {
+export class ScriptList extends React.Component<unknown, ScriptListState> {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             loading: true,
@@ -34,7 +33,9 @@ export class ScriptList extends React.Component<ScriptListProps, ScriptListState
     }
 
     render(): JSX.Element {
-        if (this.state.loading) { return ( <PageLoading /> ); }
+        if (this.state.loading) {
+            return ( <PageLoading /> );
+        }
 
         return (
             <Page title="Scripts">

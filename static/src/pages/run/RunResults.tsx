@@ -8,10 +8,10 @@ import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
 import { Formatter } from '../../services/Formatter';
 
-export interface RunResultsProps {
+interface RunResultsProps {
     results: ScriptRun;
 }
-export class RunResults extends React.Component<RunResultsProps, {}> {
+export class RunResults extends React.Component<RunResultsProps, unknown> {
     private error = () => {
         const errorMessage = this.props.results.RunError || this.props.results.Result.ExecError || 'Unknown Error';
 
@@ -50,11 +50,11 @@ export class RunResults extends React.Component<RunResultsProps, {}> {
     }
 }
 
-export interface RunOutputProps {
+interface RunOutputProps {
     stdout: string;
     stderr: string;
 }
-export class RunOutput extends React.Component<RunOutputProps, {}> {
+export class RunOutput extends React.Component<RunOutputProps, unknown> {
     private content = () => {
         if (!this.props.stdout && !this.props.stderr) {
             return (<Card.Body><em className="text-muted">Script produced no output</em></Card.Body>);
