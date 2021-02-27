@@ -12,38 +12,36 @@ interface AttachmentListItemProps {
     didEdit: (attachment: AttachmentType) => (void);
     didDelete: () => (void);
 }
-export class AttachmentListItem extends React.Component<AttachmentListItemProps, unknown> {
-    private didEditAttachment = (attachment: AttachmentType) => {
-        this.props.didEdit(attachment);
-    }
+export const AttachmentListItem: React.FC<AttachmentListItemProps> = (props: AttachmentListItemProps) => {
+    const didEditAttachment = (attachment: AttachmentType) => {
+        props.didEdit(attachment);
+    };
 
-    private editClick = () => {
-        GlobalModalFrame.showModal(<AttachmentEdit attachment={this.props.attachment} didUpdate={this.didEditAttachment}/>);
-    }
+    const editClick = () => {
+        GlobalModalFrame.showModal(<AttachmentEdit attachment={props.attachment} didUpdate={didEditAttachment}/>);
+    };
 
-    private deleteClick = () => {
-        Attachment.DeleteModal(this.props.attachment).then(deleted => {
+    const deleteClick = () => {
+        Attachment.DeleteModal(props.attachment).then(deleted => {
             if (deleted) {
-                this.props.didDelete();
+                props.didDelete();
             }
         });
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <Table.Row>
-                <td>{ this.props.attachment.Path }</td>
-                <td>{ this.props.attachment.MimeType }</td>
-                <td>{ this.props.attachment.UID + ':' + this.props.attachment.GID }</td>
-                <td>{ this.props.attachment.Mode }</td>
-                <td>{ Formatter.Bytes(this.props.attachment.Size) }</td>
-                <Table.Menu>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editClick}/>
-                    <Menu.Anchor label="Download" icon={<Icon.Download />} href={'/api/attachments/attachment/' + this.props.attachment.ID + '/download'} />
-                    <Menu.Divider />
-                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteClick}/>
-                </Table.Menu>
-            </Table.Row>
-        );
-    }
-}
+    return (
+        <Table.Row>
+            <td>{ props.attachment.Path }</td>
+            <td>{ props.attachment.MimeType }</td>
+            <td>{ props.attachment.UID + ':' + props.attachment.GID }</td>
+            <td>{ props.attachment.Mode }</td>
+            <td>{ Formatter.Bytes(props.attachment.Size) }</td>
+            <Table.Menu>
+                <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editClick}/>
+                <Menu.Anchor label="Download" icon={<Icon.Download />} href={'/api/attachments/attachment/' + props.attachment.ID + '/download'} />
+                <Menu.Divider />
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteClick}/>
+            </Table.Menu>
+        </Table.Row>
+    );
+};

@@ -7,91 +7,72 @@ interface AttachmentEditProps {
     attachment?: AttachmentType;
     didUpdate: (attachment: AttachmentType) => (void);
 }
-interface AttachmentEditState {
-    attachment: AttachmentType;
-    file?: File;
-    loading: boolean;
-}
-export class AttachmentEdit extends React.Component<AttachmentEditProps, AttachmentEditState> {
-    constructor(props: AttachmentEditProps) {
-        super(props);
-        const attachment = this.props.attachment ?? Attachment.Blank();
-        this.state = {
-            attachment: attachment,
-            loading: false,
-        };
-    }
+export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentEditProps) => {
+    const [attachment, setAttachment] = React.useState<AttachmentType>(props.attachment || Attachment.Blank());
+    const [file, setFile] = React.useState<File>();
 
-    private saveAttachment = () => {
-        if (this.props.attachment) {
-            return this.editAttachment();
+    const saveAttachment = () => {
+        if (props.attachment) {
+            return editAttachment();
         } else {
-            return this.uploadAttachment();
+            return uploadAttachment();
         }
-    }
+    };
 
-    private uploadAttachment = () => {
-        this.setState({ loading: true });
-        return Attachment.New(this.state.file, this.state.attachment).then(attachment => {
-            this.props.didUpdate(attachment);
+    const uploadAttachment = () => {
+        return Attachment.New(file, attachment).then(attachment => {
+            props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
-        }, () => {
-            this.setState({ loading: false });
         });
-    }
+    };
 
-    private editAttachment = () => {
-        this.setState({ loading: false });
-        return Attachment.Save(this.props.attachment).then(attachment => {
-            this.props.didUpdate(attachment);
+    const editAttachment = () => {
+        return Attachment.Save(props.attachment).then(attachment => {
+            props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
-        }, () => {
-            this.setState({ loading: false });
         });
-    }
+    };
 
-    private changePath = (Path: string) => {
-        this.setState(state => {
-            state.attachment.Path = Path;
-            return state;
+    const changePath = (Path: string) => {
+        setAttachment(attachment => {
+            attachment.Path = Path;
+            return {...attachment};
         });
-    }
+    };
 
-    private changeFile = (file: File) => {
-        this.setState({ file: file });
-    }
+    const changeFile = (file: File) => {
+        setFile(file);
+    };
 
-    private changeOwner = (UID: number, GID: number) => {
-        this.setState(state => {
-            state.attachment.UID = UID;
-            state.attachment.GID = GID;
-            return state;
+    const changeOwner = (UID: number, GID: number) => {
+        setAttachment(attachment => {
+            attachment.UID = UID;
+            attachment.GID = GID;
+            return {...attachment};
         });
-    }
+    };
 
-    private changeMode = (Mode: number) => {
-        this.setState(state => {
-            state.attachment.Mode = Mode;
-            return state;
+    const changeMode = (Mode: number) => {
+        setAttachment(attachment => {
+            attachment.Mode = Mode;
+            return {...attachment};
         });
-    }
+    };
 
-    private fileInput = () => {
-        if (this.props.attachment) {
+    const fileInput = () => {
+        if (props.attachment) {
             return null;
         }
-        return (<Input.FileChooser label="Upload File" onChange={this.changeFile}/>);
-    }
+        return (<Input.FileChooser label="Upload File" onChange={changeFile}/>);
+    };
 
-    render(): JSX.Element {
-        const title = this.props.attachment ? 'Edit Attachment' : 'New Attachment';
-        return (
-            <ModalForm title={title} onSubmit={this.saveAttachment}>
-                { this.fileInput() }
-                <Input.Text type="text" label="File Path" defaultValue={this.state.attachment.Path} required onChange={this.changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
-                <Input.IDInput label="Owned By" defaultUID={this.state.attachment.UID} defaultGID={this.state.attachment.GID} onChange={this.changeOwner} />
-                <Input.Number label="Permission / Mode" defaultValue={this.state.attachment.Mode} required onChange={this.changeMode} helpText="The permission value (Mode) for the file" />
-            </ModalForm>
-        );
-    }
-}
+    const title = props.attachment ? 'Edit Attachment' : 'New Attachment';
+    return (
+        <ModalForm title={title} onSubmit={saveAttachment}>
+            { fileInput() }
+            <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
+            <Input.IDInput label="Owned By" defaultUID={attachment.UID} defaultGID={attachment.GID} onChange={changeOwner} />
+            <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (Mode) for the file" />
+        </ModalForm>
+    );
+};

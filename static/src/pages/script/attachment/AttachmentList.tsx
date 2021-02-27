@@ -12,96 +12,86 @@ interface AttachmentListProps {
     scriptID?: string;
     didUpdateAttachments: (fileIDs: string[]) => void;
 }
-interface AttachmentListState {
-    loading?: boolean;
-    attachments?: AttachmentType[];
-}
-export class AttachmentList extends React.Component<AttachmentListProps, AttachmentListState> {
-    constructor(props: AttachmentListProps) {
-        super(props);
-        this.state = { loading: true };
-    }
+export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentListProps) => {
+    const [loading, setLoading] = React.useState(true);
+    const [attachments, setAttachments] = React.useState<AttachmentType[]>();
 
-    private loadData = () => {
-        if (this.props.scriptID) {
-            Script.Attachments(this.props.scriptID).then(attachments => {
-                this.setState({ loading: false, attachments: attachments });
+    React.useEffect(() => {
+        loadData();
+    }, []);
+
+    React.useEffect(() => {
+        if (attachments == undefined) {
+            return;
+        }
+
+        props.didUpdateAttachments(attachments.map(attachment => attachment.ID));
+    }, [attachments]);
+
+    const loadData = () => {
+        if (props.scriptID) {
+            Script.Attachments(props.scriptID).then(attachments => {
+                setLoading(false);
+                setAttachments(attachments);
             });
         } else {
-            this.setState({ loading: false, attachments: [] });
+            setLoading(false);
+            setAttachments([]);
         }
-    }
+    };
 
-    componentDidMount(): void {
-        this.loadData();
-    }
-
-    private didUpdateAttachments = () => {
-        const ids = this.state.attachments.map(attachment => {
-            return attachment.ID;
+    const didAddAttachment = (attachment: Attachment) => {
+        setAttachments(attachments => {
+            return [...attachments, attachment];
         });
-        this.props.didUpdateAttachments(ids);
-    }
+    };
 
-    private didAddAttachment = (attachment: Attachment) => {
-        this.setState(state => {
-            state.attachments.push(attachment);
-            return state;
-        }, () => {
-            this.didUpdateAttachments();
-        });
-    }
-
-    private didEditAttachment = (idx: number) => {
+    const didEditAttachment = (idx: number) => {
         return (attachment: Attachment) => {
-            this.setState(state => {
-                state.attachments[idx] = attachment;
-                return state;
+            setAttachments(attachments => {
+                attachments[idx] = attachment;
+                return [...attachments];
             });
         };
-    }
+    };
 
-    private didDeleteAttachment = (idx: number) => {
+    const didDeleteAttachment = (idx: number) => {
         return () => {
-            this.setState(state => {
-                state.attachments.splice(idx, 1);
-                return state;
-            }, () => {
-                this.didUpdateAttachments();
+            setAttachments(attachments => {
+                attachments.splice(idx, 1);
+                return [...attachments];
             });
         };
+    };
+
+    const createButtonClick = () => {
+        GlobalModalFrame.showModal(<AttachmentEdit didUpdate={didAddAttachment} />);
+    };
+
+    if (loading) {
+        return (<Loading />);
     }
 
-    private createButtonClick = () => {
-        GlobalModalFrame.showModal(<AttachmentEdit didUpdate={this.didAddAttachment} />);
-    }
-
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return (<Loading />);
-        }
-
-        return (<div>
-            <Buttons>
-                <AddButton onClick={this.createButtonClick} />
-            </Buttons>
-            <Table.Table>
-                <Table.Head>
-                    <Table.Column>Path</Table.Column>
-                    <Table.Column>Type</Table.Column>
-                    <Table.Column>Owner</Table.Column>
-                    <Table.Column>Permission</Table.Column>
-                    <Table.Column>Size</Table.Column>
-                    <Table.MenuColumn />
-                </Table.Head>
-                <Table.Body>
-                    {
-                        this.state.attachments.map((attachment, idx) => {
-                            return (<AttachmentListItem attachment={attachment} key={idx} didEdit={this.didEditAttachment(idx)} didDelete={this.didDeleteAttachment(idx)}/>);
-                        })
-                    }
-                </Table.Body>
-            </Table.Table>
-        </div>);
-    }
-}
+    return (<div>
+        <Buttons>
+            <AddButton onClick={createButtonClick} />
+        </Buttons>
+        <Table.Table>
+            <Table.Head>
+                <Table.Column>Path</Table.Column>
+                <Table.Column>Type</Table.Column>
+                <Table.Column>Owner</Table.Column>
+                <Table.Column>Permission</Table.Column>
+                <Table.Column>Size</Table.Column>
+                <Table.MenuColumn />
+            </Table.Head>
+            <Table.Body>
+                {
+                    attachments.map((attachment, idx) => {
+                        return (<AttachmentListItem attachment={attachment} key={idx} didEdit={didEditAttachment(idx)} didDelete={didDeleteAttachment(idx)}/>);
+                    })
+                }
+            </Table.Body>
+        </Table.Table>
+    </div>);
+};

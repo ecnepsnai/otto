@@ -17,232 +17,219 @@ import { AttachmentList } from './attachment/AttachmentList';
 interface ScriptEditProps {
     match: match
 }
-interface ScriptEditState {
-    loading: boolean;
-    script?: ScriptType;
-    isNew?: boolean;
-    groupIDs?: string[];
-}
-export class ScriptEdit extends React.Component<ScriptEditProps, ScriptEditState> {
-    constructor(props: ScriptEditProps) {
-        super(props);
-        this.state = {
-            loading: true,
-        };
-    }
+export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) => {
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [script, setScript] = React.useState<ScriptType>();
+    const [isNew, setIsNew] = React.useState<boolean>();
+    const [groupIDs, setGroupIDs] = React.useState<string[]>();
 
-    componentDidMount(): void {
-        this.loadScript();
-    }
+    React.useEffect(() => {
+        loadScript();
+    }, []);
 
-    loadScript(): void {
-        const id = (this.props.match.params as URLParams).id;
+    const loadScript = () => {
+        const id = (props.match.params as URLParams).id;
         if (id == null) {
-            this.setState({
-                isNew: true,
-                script: Script.Blank(),
-                loading: false,
-                groupIDs: [],
-            });
+            setLoading(true);
+            setScript(Script.Blank());
+            setIsNew(true);
+            setGroupIDs([]);
         } else {
             Script.Get(id).then(script => {
                 Script.Groups(script.ID).then(selectedGroups => {
-                    this.setState({
-                        loading: false,
-                        script: script,
-                        groupIDs: selectedGroups.map(group => group.ID)
-                    });
+                    setLoading(false);
+                    setScript(script);
+                    setIsNew(false);
+                    setGroupIDs(selectedGroups.map(group => group.ID));
                 });
             });
         }
-    }
+    };
 
-    private changeName = (Name: string) => {
-        this.setState(state => {
-            state.script.Name = Name;
-            return state;
+    const changeName = (Name: string) => {
+        setScript(script => {
+            script.Name = Name;
+            return {...script};
         });
-    }
+    };
 
-    private changeEnvironment = (Environment: Variable[]) => {
-        this.setState(state => {
-            state.script.Environment = Environment;
-            return state;
+    const changeEnvironment = (Environment: Variable[]) => {
+        setScript(script => {
+            script.Environment = Environment;
+            return {...script};
         });
-    }
+    };
 
-    private changeGroupIDs = (groupIDs: string[]) => {
-        this.setState({ groupIDs: groupIDs });
-    }
+    const changeGroupIDs = (GroupIDs: string[]) => {
+        setGroupIDs(GroupIDs);
+    };
 
-    private enabledCheckbox = () => {
-        if (this.state.isNew) {
+    const enabledCheckbox = () => {
+        if (isNew) {
             return null;
         }
 
         return (
             <Input.Checkbox
                 label="Enabled"
-                defaultValue={this.state.script.Enabled}
-                onChange={this.changeEnabled} />
+                defaultValue={script.Enabled}
+                onChange={changeEnabled} />
         );
-    }
+    };
 
-    private changeRunAsInherit = (DontInherit: boolean) => {
-        this.setState(state => {
-            state.script.RunAs.Inherit = !DontInherit;
-            return state;
+    const changeRunAsInherit = (DontInherit: boolean) => {
+        setScript(script => {
+            script.RunAs.Inherit = !DontInherit;
+            return {...script};
         });
-    }
+    };
 
-    private runAs = () => {
-        if (this.state.script.RunAs.Inherit) {
+    const runAs = () => {
+        if (script.RunAs.Inherit) {
             return null;
         }
 
         return (<Input.IDInput
             label="Run Script As"
-            defaultUID={this.state.script.RunAs.UID}
-            defaultGID={this.state.script.RunAs.GID}
-            onChange={this.changeID} />);
-    }
+            defaultUID={script.RunAs.UID}
+            defaultGID={script.RunAs.GID}
+            onChange={changeID} />);
+    };
 
-    private changeEnabled = (Enabled: boolean) => {
-        this.setState(state => {
-            state.script.Enabled = Enabled;
-            return state;
+    const changeEnabled = (Enabled: boolean) => {
+        setScript(script => {
+            script.Enabled = Enabled;
+            return {...script};
         });
-    }
+    };
 
-    private changeID = (UID: number, GID: number) => {
-        this.setState(state => {
-            state.script.RunAs.UID = UID;
-            state.script.RunAs.GID = GID;
-            return state;
+    const changeID = (UID: number, GID: number) => {
+        setScript(script => {
+            script.RunAs.UID = UID;
+            script.RunAs.GID = GID;
+            return {...script};
         });
-    }
+    };
 
-    private changeWorkingDirectory = (WorkingDirectory: string) => {
-        this.setState(state => {
-            state.script.WorkingDirectory = WorkingDirectory;
-            return state;
+    const changeWorkingDirectory = (WorkingDirectory: string) => {
+        setScript(script => {
+            script.WorkingDirectory = WorkingDirectory;
+            return {...script};
         });
-    }
+    };
 
-    private changeAfterExecution = (AfterExecution: string) => {
-        this.setState(state => {
-            state.script.AfterExecution = AfterExecution;
-            return state;
+    const changeAfterExecution = (AfterExecution: string) => {
+        setScript(script => {
+            script.AfterExecution = AfterExecution;
+            return {...script};
         });
-    }
+    };
 
-    private changeExecutable = (Executable: string) => {
-        this.setState(state => {
-            state.script.Executable = Executable;
-            return state;
+    const changeExecutable = (Executable: string) => {
+        setScript(script => {
+            script.Executable = Executable;
+            return {...script};
         });
-    }
+    };
 
-    private changeScript = (Script: string) => {
-        this.setState(state => {
-            state.script.Script = Script;
-            return state;
+    const changeScript = (Script: string) => {
+        setScript(script => {
+            script.Script = Script;
+            return {...script};
         });
-    }
+    };
 
-    private changeAttachments = (AttachmentIDs: string[]) => {
-        this.setState(state => {
-            state.script.AttachmentIDs = AttachmentIDs;
-            return state;
+    const changeAttachments = (AttachmentIDs: string[]) => {
+        setScript(script => {
+            script.AttachmentIDs = AttachmentIDs;
+            return {...script};
         });
-    }
+    };
 
-    private formSave = () => {
+    const formSave = () => {
         let promise: Promise<ScriptType>;
-        if (this.state.isNew) {
-            promise = Script.New(this.state.script);
+        if (isNew) {
+            promise = Script.New(script);
         } else {
-            promise = Script.Save(this.state.script);
+            promise = Script.Save(script);
         }
 
         return promise.then(script => {
-            Script.SetGroups(this.state.script.ID, this.state.groupIDs).then(() => {
+            Script.SetGroups(script.ID, groupIDs).then(() => {
                 Notification.success('Script Saved');
                 Redirect.To('/scripts/script/' + script.ID);
             });
         });
+    };
+
+    if (loading) {
+        return (<PageLoading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return (<PageLoading />);
-        }
-
-        return (
-            <Page title={ this.state.isNew ? 'New Script' : 'Edit Script' }>
-                <Form showSaveButton onSubmit={this.formSave}>
-                    <Input.Text
-                        label="Name"
-                        type="text"
-                        defaultValue={this.state.script.Name}
-                        onChange={this.changeName}
-                        required />
-                    { this.enabledCheckbox() }
-                    <Input.Checkbox label="Run As Specific User" defaultValue={!this.state.script.RunAs.Inherit} onChange={this.changeRunAsInherit} />
-                    { this.runAs() }
-                    <Input.Text
-                        label="Working Directory"
-                        type="text"
-                        defaultValue={this.state.script.WorkingDirectory}
-                        onChange={this.changeWorkingDirectory}
-                        helpText="Optional directory that the script should run in."
-                        fixedWidth />
-                    <Input.Select
-                        label="After Script Execution"
-                        defaultValue={this.state.script.AfterExecution}
-                        onChange={this.changeAfterExecution}>
-                        <option value="">Do Nothing</option>
-                        <option value="exit_client">Stop the Otto Client</option>
-                        <option value="reboot">Reboot the Host</option>
-                        <option value="shutdown">Shutdown the Host</option>
-                    </Input.Select>
-                    <Input.Text
-                        label="Executable"
-                        type="text"
-                        defaultValue={this.state.script.Executable}
-                        onChange={this.changeExecutable}
-                        fixedWidth
-                        required />
-                    <Card.Card className="mt-3">
-                        <Card.Header>Environment Variables</Card.Header>
-                        <Card.Body>
-                            <EnvironmentVariableEdit
-                                variables={this.state.script.Environment}
-                                onChange={this.changeEnvironment} />
-                        </Card.Body>
-                    </Card.Card>
-                    <Card.Card className="mt-3">
-                        <Card.Header>Groups</Card.Header>
-                        <Card.Body>
-                            <GroupCheckList selectedGroups={this.state.groupIDs} onChange={this.changeGroupIDs}/>
-                        </Card.Body>
-                    </Card.Card>
-                    <Card.Card className="mt-3">
-                        <Card.Header>Attachments</Card.Header>
-                        <Card.Body>
-                            <AttachmentList scriptID={this.state.script.ID} didUpdateAttachments={this.changeAttachments}/>
-                        </Card.Body>
-                    </Card.Card>
-                    <hr/>
-                    <Input.Textarea
-                        label="Script"
-                        defaultValue={this.state.script.Script}
-                        onChange={this.changeScript}
-                        rows={10}
-                        fixedWidth
-                        required />
-                </Form>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title={ isNew ? 'New Script' : 'Edit Script' }>
+            <Form showSaveButton onSubmit={formSave}>
+                <Input.Text
+                    label="Name"
+                    type="text"
+                    defaultValue={script.Name}
+                    onChange={changeName}
+                    required />
+                { enabledCheckbox() }
+                <Input.Checkbox label="Run As Specific User" defaultValue={!script.RunAs.Inherit} onChange={changeRunAsInherit} />
+                { runAs() }
+                <Input.Text
+                    label="Working Directory"
+                    type="text"
+                    defaultValue={script.WorkingDirectory}
+                    onChange={changeWorkingDirectory}
+                    helpText="Optional directory that the script should run in."
+                    fixedWidth />
+                <Input.Select
+                    label="After Script Execution"
+                    defaultValue={script.AfterExecution}
+                    onChange={changeAfterExecution}>
+                    <option value="">Do Nothing</option>
+                    <option value="exit_client">Stop the Otto Client</option>
+                    <option value="reboot">Reboot the Host</option>
+                    <option value="shutdown">Shutdown the Host</option>
+                </Input.Select>
+                <Input.Text
+                    label="Executable"
+                    type="text"
+                    defaultValue={script.Executable}
+                    onChange={changeExecutable}
+                    fixedWidth
+                    required />
+                <Card.Card className="mt-3">
+                    <Card.Header>Environment Variables</Card.Header>
+                    <Card.Body>
+                        <EnvironmentVariableEdit
+                            variables={script.Environment}
+                            onChange={changeEnvironment} />
+                    </Card.Body>
+                </Card.Card>
+                <Card.Card className="mt-3">
+                    <Card.Header>Groups</Card.Header>
+                    <Card.Body>
+                        <GroupCheckList selectedGroups={groupIDs} onChange={changeGroupIDs}/>
+                    </Card.Body>
+                </Card.Card>
+                <Card.Card className="mt-3">
+                    <Card.Header>Attachments</Card.Header>
+                    <Card.Body>
+                        <AttachmentList scriptID={script.ID} didUpdateAttachments={changeAttachments}/>
+                    </Card.Body>
+                </Card.Card>
+                <hr/>
+                <Input.Textarea
+                    label="Script"
+                    defaultValue={script.Script}
+                    onChange={changeScript}
+                    rows={10}
+                    fixedWidth
+                    required />
+            </Form>
+        </Page>
+    );
+};

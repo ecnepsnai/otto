@@ -13,50 +13,48 @@ interface ScriptListItemProps {
     script: ScriptType;
     onReload: () => (void);
 }
-export class ScriptListItem extends React.Component<ScriptListItemProps, unknown> {
-    private deleteMenuClick = () => {
-        Script.DeleteModal(this.props.script).then(confirmed => {
+export const ScriptListItem: React.FC<ScriptListItemProps> = (props: ScriptListItemProps) => {
+    const deleteMenuClick = () => {
+        Script.DeleteModal(props.script).then(confirmed => {
             if (confirmed) {
-                this.props.onReload();
+                props.onReload();
             }
         });
-    }
+    };
 
-    private toggleMenuClick = () => {
-        Script.Update(this.props.script, {
-            Enabled: !this.props.script.Enabled
+    const toggleMenuClick = () => {
+        Script.Update(props.script, {
+            Enabled: !props.script.Enabled
         }).then(() => {
-            this.props.onReload();
+            props.onReload();
         });
-    }
+    };
 
-    private enableDisableMenu = () => {
-        if (this.props.script.Enabled) {
-            return ( <Menu.Item icon={<Icon.TimesCircle />} onClick={this.toggleMenuClick} label="Disable" /> );
+    const enableDisableMenu = () => {
+        if (props.script.Enabled) {
+            return ( <Menu.Item icon={<Icon.TimesCircle />} onClick={toggleMenuClick} label="Disable" /> );
         }
-        return ( <Menu.Item icon={<Icon.CheckCircle />} onClick={this.toggleMenuClick} label="Enable" /> );
-    }
+        return ( <Menu.Item icon={<Icon.CheckCircle />} onClick={toggleMenuClick} label="Enable" /> );
+    };
 
-    private executeScriptMenuClick = () => {
-        GlobalModalFrame.showModal(<RunModal scriptID={this.props.script.ID} key={Rand.ID()}/>);
-    }
+    const executeScriptMenuClick = () => {
+        GlobalModalFrame.showModal(<RunModal scriptID={props.script.ID} key={Rand.ID()}/>);
+    };
 
-    render(): JSX.Element {
-        const link = <Link to={'/scripts/script/' + this.props.script.ID}>{ this.props.script.Name }</Link>;
+    const link = <Link to={'/scripts/script/' + props.script.ID}>{ props.script.Name }</Link>;
 
-        return (
-            <Table.Row disabled={!this.props.script.Enabled}>
-                <td>{ link }</td>
-                <td>{ this.props.script.Executable }</td>
-                <td>{ Formatter.ValueOrNothing(this.props.script.AttachmentIDs.length) }</td>
-                <Table.Menu>
-                    <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={this.executeScriptMenuClick}/>
-                    <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + this.props.script.ID + '/edit'}/>
-                    { this.enableDisableMenu() }
-                    <Menu.Divider />
-                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteMenuClick}/>
-                </Table.Menu>
-            </Table.Row>
-        );
-    }
-}
+    return (
+        <Table.Row disabled={!props.script.Enabled}>
+            <td>{ link }</td>
+            <td>{ props.script.Executable }</td>
+            <td>{ Formatter.ValueOrNothing(props.script.AttachmentIDs.length) }</td>
+            <Table.Menu>
+                <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={executeScriptMenuClick}/>
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + props.script.ID + '/edit'}/>
+                { enableDisableMenu() }
+                <Menu.Divider />
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+            </Table.Menu>
+        </Table.Row>
+    );
+};
