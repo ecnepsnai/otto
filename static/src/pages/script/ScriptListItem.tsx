@@ -47,7 +47,7 @@ export const ScriptListItem: React.FC<ScriptListItemProps> = (props: ScriptListI
         <Table.Row disabled={!props.script.Enabled}>
             <td>{ link }</td>
             <td>{ props.script.Executable }</td>
-            <td>{ Formatter.ValueOrNothing(props.script.AttachmentIDs.length) }</td>
+            <td>{ Formatter.ValueOrNothing((props.script.AttachmentIDs || []).length) }</td>
             <Table.Menu>
                 <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={executeScriptMenuClick}/>
                 <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + props.script.ID + '/edit'}/>

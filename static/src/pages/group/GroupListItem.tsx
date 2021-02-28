@@ -37,7 +37,7 @@ export const GroupListItem: React.FC<GroupListItemProps> = (props: GroupListItem
         <Table.Row>
             <td>{ link }</td>
             <td>{ Formatter.ValueOrNothing(props.hosts.length) }</td>
-            <td>{ Formatter.ValueOrNothing(props.group.ScriptIDs.length) }</td>
+            <td>{ Formatter.ValueOrNothing((props.group.ScriptIDs || []).length) }</td>
             <Table.Menu>
                 <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + props.group.ID + '/edit'}/>
                 {deleteMenuItem}

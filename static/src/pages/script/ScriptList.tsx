@@ -8,7 +8,7 @@ import { ScriptListItem } from './ScriptListItem';
 
 export const ScriptList: React.FC = () => {
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [scripts, setScripts] = React.useState<ScriptType[]>();
+    const [scripts, setScripts] = React.useState<ScriptType[]>([]);
 
     React.useEffect(() => {
         loadScripts();

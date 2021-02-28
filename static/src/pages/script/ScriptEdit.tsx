@@ -30,7 +30,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     const loadScript = () => {
         const id = (props.match.params as URLParams).id;
         if (id == null) {
-            setLoading(true);
+            setLoading(false);
             setScript(Script.Blank());
             setIsNew(true);
             setGroupIDs([]);

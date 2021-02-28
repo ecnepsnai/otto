@@ -26,7 +26,7 @@ export class UserManager {
 
 export const SystemUsers: React.FC = () => {
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [users, setUsers] = React.useState<UserType[]>();
+    const [users, setUsers] = React.useState<UserType[]>([]);
 
     React.useEffect(() => {
         loadUsers();
@@ -128,7 +128,7 @@ interface OptionsUsersModalProps {
     onUpdate: (user: UserType) => (void);
 }
 export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: OptionsUsersModalProps) => {
-    const [user, setUser] = React.useState<UserType>();
+    const [user, setUser] = React.useState<UserType>(props.user || User.Blank());
     const isNew = props.user == undefined;
     const [shouldShowPasswordField, setShouldShowPasswordField] = React.useState(isNew);
 

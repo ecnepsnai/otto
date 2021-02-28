@@ -23,6 +23,7 @@ import { SystemOptions } from './pages/system/options/SystemOptions';
 import { SystemUsers } from './pages/system/users/SystemUsers';
 import { SystemRegister } from './pages/system/register/SystemRegister';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import '../css/main.scss';
 
 export const App: React.FC = () => {
     const [loading, setLoading] = React.useState(true);

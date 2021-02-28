@@ -25,7 +25,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
 
     React.useEffect(() => {
         loadHost();
-    });
+    }, []);
 
     const loadHost = () => {
         const id = (props.match.params as URLParams).id;

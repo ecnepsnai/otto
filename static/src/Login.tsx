@@ -50,7 +50,7 @@ const LoginForm: React.FC<LoginFormProps> = (props: LoginFormProps) => {
 
     const changePassword = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        setUsername(target.value);
+        setPassword(target.value);
     };
 
     const loginFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {

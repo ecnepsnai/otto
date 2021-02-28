@@ -13,7 +13,7 @@ export const EnvironmentVariableCard: React.FC<EnvironmentVariableCardProps> = (
         return (
             <ListGroup.List>
                 {
-                    props.variables.map((variable, index) => {
+                    (props.variables || []).map((variable, index) => {
                         const content = variable.Secret ? '******' : variable.Value;
                         return (
                             <ListGroup.TextItem title={variable.Key} key={index}>
@@ -35,7 +35,7 @@ export const EnvironmentVariableCard: React.FC<EnvironmentVariableCardProps> = (
     };
 
     const content = () => {
-        if (Object.keys(props.variables).length == 0) {
+        if (Object.keys((props.variables || [])).length == 0) {
             return nothing();
         }
         return list();

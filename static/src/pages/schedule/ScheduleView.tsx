@@ -34,43 +34,45 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
         loadData();
     }, []);
 
-    const loadSchedule = async () => {
+    const loadSchedule = () => {
         const scheduleID = (props.match.params as URLParams).id;
-        const schedule = await Schedule.Get(scheduleID);
-        setSchedule(schedule);
+        return Schedule.Get(scheduleID);
     };
 
-    const loadReports = async () => {
+    const loadReports = () => {
         const scheduleID = (props.match.params as URLParams).id;
-        const reports = await Schedule.Reports(scheduleID);
-        setReports(reports);
+        return Schedule.Reports(scheduleID);
     };
 
-    const loadScript = async () => {
+    const loadScript = () => {
         const scheduleID = (props.match.params as URLParams).id;
-        const script = await Schedule.Script(scheduleID);
-        setScript(script);
+        return Schedule.Script(scheduleID);
     };
 
-    const loadGroups = async () => {
+    const loadGroups = () => {
         const scheduleID = (props.match.params as URLParams).id;
-        const groups = await Schedule.Groups(scheduleID);
-        setGroups(groups);
+        return Schedule.Groups(scheduleID);
     };
 
-    const loadHosts = async () => {
+    const loadHosts = () => {
         const scheduleID = (props.match.params as URLParams).id;
-        const hosts = await Schedule.Hosts(scheduleID);
-        setHosts(hosts);
+        return Schedule.Hosts(scheduleID);
     };
 
     const loadData = () => {
-        Promise.all([loadSchedule(), loadHosts(), loadReports(), loadScript()]).then(() => {
-            let scopePromise: Promise<void> = Promise.resolve();
+        Promise.all([loadSchedule(), loadHosts(), loadReports(), loadScript()]).then(results => {
+            const schedule = results[0];
+            setSchedule(schedule);
+            setHosts(results[1]);
+            setReports(results[2]);
+            setScript(results[3]);
+
+            let scopePromise: Promise<GroupType[]> = Promise.resolve([]);
             if (schedule.Scope.GroupIDs && schedule.Scope.GroupIDs.length > 0) {
                 scopePromise = loadGroups();
             }
-            scopePromise.then(() => {
+            scopePromise.then(groups => {
+                setGroups(groups);
                 setLoading(false);
             });
         });

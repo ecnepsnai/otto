@@ -78,12 +78,12 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                 }
             }
 
-            setLoading(false);
             setSchedule(schedule);
             setIsNew(isNew);
             setScripts(scripts);
             setRunOn(runOn);
             setPatternTemplate(patternTemplate);
+            setLoading(false);
         });
     };
 
@@ -229,6 +229,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
             <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
         </Alert.Danger>
     </Page>);
+
     if (loading) {
         return (<PageLoading />);
     }
