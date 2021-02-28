@@ -24,59 +24,48 @@ export class UserManager {
     }
 }
 
-interface SystemUsersState {
-    loading: boolean;
-    users?: UserType[];
-}
-export class SystemUsers extends React.Component<unknown, SystemUsersState> {
-    constructor(props: unknown) {
-        super(props);
-        this.state = {
-            loading: true,
-        };
-    }
+export const SystemUsers: React.FC = () => {
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [users, setUsers] = React.useState<UserType[]>();
 
-    private loadUsers = () => {
-        this.setState({ loading: true });
+    React.useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const loadUsers = () => {
         User.List().then(users => {
-            this.setState({
-                users: users,
-                loading: false,
-            });
+            setLoading(false);
+            setUsers(users);
         });
-    }
+    };
 
-    componentDidMount(): void {
-        this.loadUsers();
-    }
-
-    private newUser = (user: UserType) => {
+    const newUser = (user: UserType) => {
         User.New({
             Username: user.Username,
             Email: user.Email,
             Password: user.Password,
             MustChangePassword: user.MustChangePassword,
         }).then(() => {
-            this.loadUsers();
+            loadUsers();
         });
-    }
+    };
 
-    private updateUser = (user: UserType) => {
+    const updateUser = (user: UserType) => {
         User.Save(user).then(() => {
-            this.loadUsers();
+            loadUsers();
         });
-    }
+    };
 
-    private newUserClick = () => {
-        GlobalModalFrame.showModal(<OptionsUsersModal onUpdate={this.newUser} />);
-    }
+    const newUserClick = () => {
+        GlobalModalFrame.showModal(<OptionsUsersModal onUpdate={newUser} />);
+    };
 
-    private editUserMenuClick = (user: UserType) => {
+    const editUserMenuClick = (user: UserType) => {
         return () => {
-            GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={this.updateUser} />);
+            GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={updateUser} />);
         };
-    }
-    private deleteUserMenuClick = (user: UserType) => {
+    };
+    const deleteUserMenuClick = (user: UserType) => {
         return () => {
             Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
@@ -84,18 +73,18 @@ export class SystemUsers extends React.Component<unknown, SystemUsersState> {
                 }
 
                 User.Delete(user).then(() => {
-                    this.loadUsers();
+                    loadUsers();
                 });
             });
         };
-    }
+    };
 
-    private userRow = (user: UserType) => {
+    const userRow = (user: UserType) => {
         let deleteMenuItem: JSX.Element;
         if (StateManager.Current().User.Username != user.Username) {
             deleteMenuItem = (<React.Fragment>
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteUserMenuClick(user)}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteUserMenuClick(user)}/>
             </React.Fragment>);
         }
 
@@ -105,106 +94,88 @@ export class SystemUsers extends React.Component<unknown, SystemUsersState> {
                 <td>{user.Email}</td>
                 <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
                 <Table.Menu>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editUserMenuClick(user)}/>
+                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editUserMenuClick(user)}/>
                     { deleteMenuItem }
                 </Table.Menu>
             </Table.Row>
         );
+    };
+
+    if (loading) {
+        return (<PageLoading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return (<PageLoading />);
-        }
-
-        return (
-            <Page title="Users">
-                <AddButton onClick={this.newUserClick} />
-                <Table.Table>
-                    <Table.Head>
-                        <Table.Column>Username</Table.Column>
-                        <Table.Column>Email</Table.Column>
-                        <Table.Column>Can Login</Table.Column>
-                        <Table.MenuColumn />
-                    </Table.Head>
-                    <Table.Body>
-                        { this.state.users.map(this.userRow) }
-                    </Table.Body>
-                </Table.Table>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title="Users">
+            <AddButton onClick={newUserClick} />
+            <Table.Table>
+                <Table.Head>
+                    <Table.Column>Username</Table.Column>
+                    <Table.Column>Email</Table.Column>
+                    <Table.Column>Can Login</Table.Column>
+                    <Table.MenuColumn />
+                </Table.Head>
+                <Table.Body>
+                    { users.map(userRow) }
+                </Table.Body>
+            </Table.Table>
+        </Page>
+    );
+};
 
 interface OptionsUsersModalProps {
     user?: UserType;
     onUpdate: (user: UserType) => (void);
 }
-interface OptionsUsersModalState {
-    value: UserType;
-    showPasswordField: boolean;
-    isNew: boolean;
-}
-class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsUsersModalState> {
-    constructor(props: OptionsUsersModalProps) {
-        super(props);
-        const isNew = props.user == undefined;
-        this.state = {
-            value: props.user || User.Blank(),
-            showPasswordField: isNew,
-            isNew: isNew,
-        };
-    }
+export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: OptionsUsersModalProps) => {
+    const [user, setUser] = React.useState<UserType>();
+    const isNew = props.user == undefined;
+    const [shouldShowPasswordField, setShouldShowPasswordField] = React.useState(isNew);
 
-    private changeUsername = (Username: string) => {
-        this.setState(state => {
-            const user = state.value;
+    const changeUsername = (Username: string) => {
+        setUser(user => {
             user.Username = Username;
-            return { value: user };
+            return {...user};
         });
-    }
+    };
 
-    private changeEmail = (Email: string) => {
-        this.setState(state => {
-            const user = state.value;
+    const changeEmail = (Email: string) => {
+        setUser(user => {
             user.Email = Email;
-            return { value: user };
+            return {...user};
         });
-    }
+    };
 
-    private changePassword = (Password: string) => {
-        this.setState(state => {
-            const user = state.value;
+    const changePassword = (Password: string) => {
+        setUser(user => {
             user.Password = Password;
-            return { value: user };
+            return {...user};
         });
-    }
+    };
 
-    private changeCanLogIn = (CanLogIn: boolean) => {
-        this.setState(state => {
-            const user = state.value;
+    const changeCanLogIn = (CanLogIn: boolean) => {
+        setUser(user => {
             user.CanLogIn = CanLogIn;
-            return { value: user };
+            return {...user};
         });
-    }
+    };
 
-    private changeMustChangePassword = (MustChangePassword: boolean) => {
-        this.setState(state => {
-            const user = state.value;
+    const changeMustChangePassword = (MustChangePassword: boolean) => {
+        setUser(user => {
             user.MustChangePassword = MustChangePassword;
-            return { value: user };
+            return {...user};
         });
-    }
+    };
 
-    private showPasswordField = () => {
-        this.setState({ showPasswordField: true });
-    }
+    const showPasswordField = () => {
+        setShouldShowPasswordField(true);
+    };
 
-    private passwordField = () => {
-        if (!this.state.showPasswordField) {
+    const passwordField = () => {
+        if (!shouldShowPasswordField) {
             return (
                 <div className="mb-3">
-                    <Button color={Style.Palette.Primary} outline onClick={this.showPasswordField}><Icon.Label icon={<Icon.Edit />} label="Change Password" /></Button>
+                    <Button color={Style.Palette.Primary} outline onClick={showPasswordField}><Icon.Label icon={<Icon.Edit />} label="Change Password" /></Button>
                 </div>
             );
         }
@@ -213,54 +184,66 @@ class OptionsUsersModal extends React.Component<OptionsUsersModalProps, OptionsU
             <Input.Text
                 type="password"
                 label="Password"
-                onChange={this.changePassword}
+                onChange={changePassword}
                 required />
         );
-    }
+    };
 
-    private canLogInCheckbox = () => {
-        if (this.props.user && StateManager.Current().User.Username == this.props.user.Username) {
+    const mustChangePasswordCheckbox = () => {
+        if (props.user && StateManager.Current().User.Username == props.user.Username) {
             return null;
         }
 
         return (
             <Input.Checkbox
                 label="Must Change Password"
-                defaultValue={this.state.value.MustChangePassword}
-                onChange={this.changeMustChangePassword}
+                defaultValue={user.MustChangePassword}
+                onChange={changeMustChangePassword}
                 helpText="If checked this user must change their password the next time they log in" />
         );
-    }
+    };
 
-    private onSubmit = (): Promise<void> => {
-        return new Promise(resolve => {
-            this.props.onUpdate(this.state.value);
-            resolve();
-        });
-    }
-
-    render(): JSX.Element {
-        const title = this.state.value.Username != '' ? 'Edit User' : 'New User';
+    const canLogInCheckbox = () => {
+        if (props.user && StateManager.Current().User.Username == props.user.Username) {
+            return null;
+        }
 
         return (
-            <ModalForm title={title} onSubmit={this.onSubmit}>
-                <Input.Text
-                    type="text"
-                    label="Username"
-                    defaultValue={this.state.value.Username}
-                    onChange={this.changeUsername}
-                    disabled={this.props.user != undefined}
-                    required />
-                <Input.Text
-                    type="email"
-                    label="Email"
-                    defaultValue={this.state.value.Email}
-                    onChange={this.changeEmail}
-                    required />
-                { this.passwordField() }
-                { this.canLogInCheckbox() }
-            </ModalForm>
+            <Input.Checkbox
+                label="User Can Log In"
+                defaultValue={user.CanLogIn}
+                onChange={changeCanLogIn}
+                helpText="If unchecked this user cannot log in" />
         );
-    }
-}
+    };
 
+    const onSubmit = (): Promise<void> => {
+        return new Promise(resolve => {
+            props.onUpdate(user);
+            resolve();
+        });
+    };
+
+    const title = user.Username != '' ? 'Edit User' : 'New User';
+
+    return (
+        <ModalForm title={title} onSubmit={onSubmit}>
+            <Input.Text
+                type="text"
+                label="Username"
+                defaultValue={user.Username}
+                onChange={changeUsername}
+                disabled={props.user != undefined}
+                required />
+            <Input.Text
+                type="email"
+                label="Email"
+                defaultValue={user.Email}
+                onChange={changeEmail}
+                required />
+            { passwordField() }
+            { canLogInCheckbox() }
+            { mustChangePasswordCheckbox() }
+        </ModalForm>
+    );
+};

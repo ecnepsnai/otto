@@ -17,109 +17,102 @@ import { Group, GroupType } from '../../../types/Group';
 import { Options } from '../../../types/Options';
 import { RegisterRuleType, RegisterRule } from '../../../types/RegisterRule';
 
-interface SystemRegisterState {
-    loading: boolean;
-    rules?: RegisterRuleType[];
-    groups?: GroupType[];
-    options?: Options.Register;
-}
-export class SystemRegister extends React.Component<unknown, SystemRegisterState> {
-    constructor(props: unknown) {
-        super(props);
-        this.state = {
-            loading: true
-        };
-    }
+export const SystemRegister: React.FC = () => {
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [rules, setRules] = React.useState<RegisterRuleType[]>();
+    const [groups, setGroups] = React.useState<GroupType[]>();
+    const [options, setOptions] = React.useState<Options.Register>();
 
-    private loadRules = () => {
+    React.useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadRules = () => {
         return RegisterRule.List().then(rules => {
-            this.setState({rules: rules});
+            setRules(rules);
         });
-    }
+    };
 
-    private loadGroups = () => {
+    const loadGroups = () => {
         return Group.List().then(groups => {
-            this.setState({groups: groups});
+            setGroups(groups);
         });
-    }
+    };
 
-    private loadOptions = () => {
+    const loadOptions = () => {
         return Options.Options.Get().then(o => {
-            this.setState({options: o.Register});
+            setOptions(o.Register);
         });
-    }
+    };
 
-    componentDidMount(): void {
-        Promise.all([this.loadRules(), this.loadGroups(), this.loadOptions()]).then(() => {
-            this.setState({loading: false});
+    const loadData = () => {
+        Promise.all([loadRules(), loadGroups(), loadOptions()]).then(() => {
+            setLoading(false);
         });
-    }
+    };
 
-    private onSubmit = () => {
-        return Options.Options.Get().then(options => {
-            options.Register = this.state.options;
-            Options.Options.Save(options).then(() => {
+    const onSubmit = () => {
+        return Options.Options.Get().then(o => {
+            o.Register = options;
+            Options.Options.Save(o).then(() => {
                 Notification.success('Changes Saved');
             });
         });
-    }
+    };
 
-    private changeEnabled = (Enabled: boolean) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeEnabled = (Enabled: boolean) => {
+        setOptions(options => {
             options.Enabled = Enabled;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private changePSK = (PSK: string) => {
-        this.setState(state => {
-            const options = state.options;
+    const changePSK = (PSK: string) => {
+        setOptions(options => {
             options.PSK = PSK;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private addRule = (rule: RegisterRuleType) => {
+    const addRule = (rule: RegisterRuleType) => {
         RegisterRule.New(rule).then(() => {
             Notification.success('Rule Added');
-            this.loadRules().then(() => {
-                this.setState({ loading: false });
+            loadRules().then(() => {
+                setLoading(false);
             });
         });
-    }
+    };
 
-    private modifyRule = (id: string, rule: RegisterRuleType) => {
+    const modifyRule = (id: string, rule: RegisterRuleType) => {
         RegisterRule.Save(id, rule).then(() => {
             Notification.success('Rule Modified');
-            this.loadRules().then(() => {
-                this.setState({ loading: false });
+            loadRules().then(() => {
+                setLoading(false);
             });
         });
-    }
+    };
 
-    private deleteRule = (rule: RegisterRuleType) => {
+    const deleteRule = (rule: RegisterRuleType) => {
         RegisterRule.DeleteModal(rule).then(confirmed => {
             if (!confirmed) {
                 return;
             }
 
-            this.loadRules().then(() => {
-                this.setState({ loading: false });
+            loadRules().then(() => {
+                setLoading(false);
             });
         });
-    }
+    };
 
-    private changeDefaultGroupID = (DefaultGroupID: string) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeDefaultGroupID = (DefaultGroupID: string) => {
+        setOptions(options => {
             options.DefaultGroupID = DefaultGroupID;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private enabledContent = () => {
-        if (!this.state.options.Enabled) {
+    const enabledContent = () => {
+        if (!options.Enabled) {
             return null;
         }
 
@@ -128,49 +121,47 @@ export class SystemRegister extends React.Component<unknown, SystemRegisterState
                 type="password"
                 label="Register PSK"
                 helpText="Clients that wish to register with this server must specify this PSK to authenticate"
-                defaultValue={this.state.options.PSK}
-                onChange={this.changePSK}
+                defaultValue={options.PSK}
+                onChange={changePSK}
                 required />
-            <RandomPSK newPSK={this.changePSK} />
+            <RandomPSK newPSK={changePSK} />
             <Card.Card className="mb-2">
                 <Card.Header>
                     Rules
                 </Card.Header>
                 <Card.Body>
-                    <RegisterRules rules={this.state.rules} onAdd={this.addRule} onChange={this.modifyRule} onDelete={this.deleteRule} groups={this.state.groups}/>
+                    <RegisterRules rules={rules} onAdd={addRule} onChange={modifyRule} onDelete={deleteRule} groups={groups}/>
                 </Card.Body>
             </Card.Card>
             <Input.Select
                 label="Default Group"
                 helpText="If none of the above rules match the client will be added to this group"
-                defaultValue={this.state.options.DefaultGroupID}
-                onChange={this.changeDefaultGroupID}>
-                { this.state.groups.map((group, idx) => {
+                defaultValue={options.DefaultGroupID}
+                onChange={changeDefaultGroupID}>
+                { groups.map((group, idx) => {
                     return ( <option key={idx} value={group.ID}>{group.Name}</option> );
                 }) }
             </Input.Select>
         </React.Fragment>);
+    };
+
+    if (loading) {
+        return (<PageLoading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) {
-            return (<PageLoading />);
-        }
-
-        return (
-            <Page title="Host Registration">
-                <Form showSaveButton={true} onSubmit={this.onSubmit}>
-                    <Input.Checkbox
-                        label="Allow Hosts to Register Themselves"
-                        helpText="If checked hosts can automatically register themselves with this Otto server"
-                        defaultValue={this.state.options.Enabled}
-                        onChange={this.changeEnabled} />
-                    { this.enabledContent() }
-                </Form>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title="Host Registration">
+            <Form showSaveButton={true} onSubmit={onSubmit}>
+                <Input.Checkbox
+                    label="Allow Hosts to Register Themselves"
+                    helpText="If checked hosts can automatically register themselves with this Otto server"
+                    defaultValue={options.Enabled}
+                    onChange={changeEnabled} />
+                { enabledContent() }
+            </Form>
+        </Page>
+    );
+};
 
 interface RegisterRulesProps {
     rules: RegisterRuleType[];
@@ -179,32 +170,32 @@ interface RegisterRulesProps {
     onDelete: (rule: RegisterRuleType) => (void);
     groups: GroupType[];
 }
-class RegisterRules extends React.Component<RegisterRulesProps, unknown> {
-    private createNew = () => {
-        GlobalModalFrame.showModal(<RuleModal onSave={this.props.onAdd} groups={this.props.groups}/>);
-    }
+export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRulesProps) => {
+    const createNew = () => {
+        GlobalModalFrame.showModal(<RuleModal onSave={props.onAdd} groups={props.groups}/>);
+    };
 
-    private modifyRule = (rule: RegisterRuleType) => {
+    const modifyRule = (rule: RegisterRuleType) => {
         return (params: RegisterRuleType) => {
-            this.props.onChange(rule.ID, params);
+            props.onChange(rule.ID, params);
         };
-    }
+    };
 
-    private deleteRuleMenuClick = (rule: RegisterRuleType) => {
+    const deleteRuleMenuClick = (rule: RegisterRuleType) => {
         return () => {
-            this.props.onDelete(rule);
+            props.onDelete(rule);
         };
-    }
+    };
 
-    private editRuleMenuClick = (rule: RegisterRuleType) => {
+    const editRuleMenuClick = (rule: RegisterRuleType) => {
         return () => {
-            GlobalModalFrame.showModal(<RuleModal defaultValue={rule} onSave={this.modifyRule(rule)} groups={this.props.groups}/>);
+            GlobalModalFrame.showModal(<RuleModal defaultValue={rule} onSave={modifyRule(rule)} groups={props.groups}/>);
         };
-    }
+    };
 
-    private ruleRow = (rule: RegisterRuleType) => {
+    const ruleRow = (rule: RegisterRuleType) => {
         let groupName = '';
-        this.props.groups.forEach(group => {
+        props.groups.forEach(group => {
             if (group.ID === rule.GroupID) {
                 groupName = group.Name;
             }
@@ -217,124 +208,108 @@ class RegisterRules extends React.Component<RegisterRulesProps, unknown> {
                 <td>{groupName}</td>
                 <td>
                     <Dropdown label={<Icon.Bars />}>
-                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={this.editRuleMenuClick(rule)}/>
+                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editRuleMenuClick(rule)}/>
                         <Menu.Divider />
-                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={this.deleteRuleMenuClick(rule)}/>
+                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteRuleMenuClick(rule)}/>
                     </Dropdown>
                 </td>
             </Table.Row>
         );
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <div>
-                <AddButton onClick={this.createNew} />
-                <Table.Table>
-                    <Table.Head>
-                        <Table.Column>Property</Table.Column>
-                        <Table.Column>Matches</Table.Column>
-                        <Table.Column>Add To Group</Table.Column>
-                        <Table.MenuColumn />
-                    </Table.Head>
-                    <Table.Body>
-                        { this.props.rules.map(rule => {
-                            return this.ruleRow(rule);
-                        }) }
-                    </Table.Body>
-                </Table.Table>
-            </div>
-        );
-    }
-}
+    return (
+        <div>
+            <AddButton onClick={createNew} />
+            <Table.Table>
+                <Table.Head>
+                    <Table.Column>Property</Table.Column>
+                    <Table.Column>Matches</Table.Column>
+                    <Table.Column>Add To Group</Table.Column>
+                    <Table.MenuColumn />
+                </Table.Head>
+                <Table.Body>
+                    { props.rules.map(rule => {
+                        return ruleRow(rule);
+                    }) }
+                </Table.Body>
+            </Table.Table>
+        </div>
+    );
+};
 
 interface RuleModalProps {
     defaultValue?: RegisterRuleType;
     onSave: (rule: RegisterRuleType) => (void);
     groups: GroupType[];
 }
-interface RuleModalState {
-    value: RegisterRuleType;
-}
-class RuleModal extends React.Component<RuleModalProps, RuleModalState> {
-    constructor(props: RuleModalProps) {
-        super(props);
-        this.state = {
-            value: props.defaultValue || {
-                Property: 'hostname',
-                Pattern: '',
-                GroupID: props.groups[0].ID,
-            },
-        };
-    }
+const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
+    const [rule, setRule] = React.useState<RegisterRuleType>(props.defaultValue || {
+        Property: 'hostname',
+        Pattern: '',
+        GroupID: props.groups[0].ID,
+    });
 
-    private changePropType = (propType: string) => {
-        this.setState(state => {
-            const rule = state.value;
-            rule.Property = propType;
-            return { value: rule };
+    const changeProperty = (Property: string) => {
+        setRule(rule => {
+            rule.Property = Property;
+            return {...rule};
         });
-    }
+    };
 
-    private changePattern = (Pattern: string) => {
-        this.setState(state => {
-            const rule = state.value;
+    const changePattern = (Pattern: string) => {
+        setRule(rule => {
             rule.Pattern = Pattern;
-            return { value: rule };
+            return {...rule};
         });
-    }
+    };
 
-    private changeGroupID = (GroupID: string) => {
-        this.setState(state => {
-            const rule = state.value;
+    const changeGroupID = (GroupID: string) => {
+        setRule(rule => {
             rule.GroupID = GroupID;
-            return { value: rule };
+            return {...rule};
         });
-    }
+    };
 
-    private onSubmit = (): Promise<void> => {
+    const onSubmit = (): Promise<void> => {
         return new Promise(resolve => {
-            this.props.onSave(this.state.value);
+            props.onSave(rule);
             resolve();
         });
-    }
+    };
 
-    render(): JSX.Element {
-        const title = this.props.defaultValue ? 'Edit Rule' : 'New Rule';
+    const title = props.defaultValue ? 'Edit Rule' : 'New Rule';
 
-        const state = StateManager.Current();
-        const properties = state.Enums['RegisterRuleProperty'];
-        const radioChoices = properties.map(property => {
-            return {
-                value: property['value'],
-                label: property['description'],
-            };
-        });
+    const state = StateManager.Current();
+    const properties = state.Enums['RegisterRuleProperty'];
+    const radioChoices = properties.map(property => {
+        return {
+            value: property['value'],
+            label: property['description'],
+        };
+    });
 
-        return (
-            <ModalForm title={title} onSubmit={this.onSubmit}>
-                <Input.Radio
-                    label="Property"
-                    choices={radioChoices}
-                    defaultValue={this.state.value.Property}
-                    onChange={this.changePropType} />
-                <Input.Text
-                    label="Regex Pattern"
-                    type="text"
-                    placeholder="Regular Expression"
-                    defaultValue={this.state.value.Pattern}
-                    onChange={this.changePattern}
-                    required />
-                <Input.Select
-                    label="Add To Group"
-                    defaultValue={this.state.value.GroupID}
-                    onChange={this.changeGroupID}>
-                    { this.props.groups.map((group, idx) => {
-                        return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                    }) }
-                </Input.Select>
-            </ModalForm>
-        );
-    }
-}
-
+    return (
+        <ModalForm title={title} onSubmit={onSubmit}>
+            <Input.Radio
+                label="Property"
+                choices={radioChoices}
+                defaultValue={rule.Property}
+                onChange={changeProperty} />
+            <Input.Text
+                label="Regex Pattern"
+                type="text"
+                placeholder="Regular Expression"
+                defaultValue={rule.Pattern}
+                onChange={changePattern}
+                required />
+            <Input.Select
+                label="Add To Group"
+                defaultValue={rule.GroupID}
+                onChange={changeGroupID}>
+                { props.groups.map((group, idx) => {
+                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
+                }) }
+            </Input.Select>
+        </ModalForm>
+    );
+};
