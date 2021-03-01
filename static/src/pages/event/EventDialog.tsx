@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { ButtonLink } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { DateLabel } from '../../components/DateLabel';
 import { Icon } from '../../components/Icon';
 import { ListGroup } from '../../components/ListGroup';
 import { Modal } from '../../components/Modal';
-import { Style } from '../../components/Style';
 import { EventType } from '../../types/Event';
+import { Group } from '../../types/Group';
+import { Host } from '../../types/Host';
+import { Schedule } from '../../types/Schedule';
+import { Script } from '../../types/Script';
 
 interface EventDialogProps { event: EventType; }
 export const EventDialog: React.FC<EventDialogProps> = (props: EventDialogProps) => {
@@ -38,27 +40,96 @@ export const EventDialog: React.FC<EventDialogProps> = (props: EventDialogProps)
     );
 };
 
-interface EventDetailProps { prop: string; value: string; }
+interface EventDetailProps {
+    prop: string;
+    value: string;
+}
 export const EventDetail: React.FC<EventDetailProps> = (props: EventDetailProps) => {
-    const linkButton = (): JSX.Element => {
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [itemLabel, setItemLabel] = React.useState<string>();
+    const [itemValue, setItemValue] = React.useState<string>();
+
+    React.useEffect(() => {
         switch (props.prop) {
         case 'group_id':
-            return (<ButtonLink to={'/groups/group/' + props.value} outline color={Style.Palette.Primary} size={Style.Size.XS}><Icon.Label icon={<Icon.Eye />} label="View" /></ButtonLink>);
+            setLoading(true);
+            Group.Get(props.value).then(group => {
+                setLoading(false);
+                setItemLabel('Group');
+                setItemValue(group.Name);
+            }, () => {
+                setLoading(false);
+            });
+            break;
         case 'host_id':
-            return (<ButtonLink to={'/hosts/host/' + props.value} outline color={Style.Palette.Primary} size={Style.Size.XS}><Icon.Label icon={<Icon.Eye />} label="View" /></ButtonLink>);
+            setLoading(true);
+            Host.Get(props.value).then(host => {
+                setLoading(false);
+                setItemLabel('Host');
+                setItemValue(host.Name);
+            }, () => {
+                setLoading(false);
+            });
+            break;
         case 'schedule_id':
-            return (<ButtonLink to={'/schedules/schedule/' + props.value} outline color={Style.Palette.Primary} size={Style.Size.XS}><Icon.Label icon={<Icon.Eye />} label="View" /></ButtonLink>);
+            setLoading(true);
+            Schedule.Get(props.value).then(schedule => {
+                setLoading(false);
+                setItemLabel('Schedule');
+                setItemValue(schedule.Name);
+            }, () => {
+                setLoading(false);
+            });
+            break;
         case 'script_id':
-            return (<ButtonLink to={'/scripts/script/' + props.value} outline color={Style.Palette.Primary} size={Style.Size.XS}><Icon.Label icon={<Icon.Eye />} label="View" /></ButtonLink>);
+            setLoading(true);
+            Script.Get(props.value).then(script => {
+                setLoading(false);
+                setItemLabel('Script');
+                setItemValue(script.Name);
+            }, () => {
+                setLoading(false);
+            });
+            break;
+        }
+    }, []);
+
+    const linkButton = (): JSX.Element => {
+        let link: string;
+
+        switch (props.prop) {
+        case 'group_id':
+            link = '/groups/group/' + props.value;
+            break;
+        case 'host_id':
+            link = '/hosts/host/' + props.value;
+            break;
+        case 'schedule_id':
+            link = '/schedules/schedule/' + props.value;
+            break;
+        case 'script_id':
+            link = '/scripts/script/' + props.value;
+            break;
         }
 
-        return null;
+        if (!link) {
+            return null;
+        }
+
+        return (<span className="ms-1"><a href={link} rel="noreferrer" target="_blank"><Icon.ExternalLinkAlt /></a></span>);
     };
 
-    return (
-        <ListGroup.TextItem title={props.prop}>
-            <code>{props.value}</code>
+    if (itemLabel && itemValue) {
+        return (<ListGroup.TextItem title={itemLabel}>
+            <span>{itemValue}</span>
             { linkButton() }
-        </ListGroup.TextItem>
-    );
+        </ListGroup.TextItem>);
+    }
+
+    const spinner = loading ? (<Icon.Spinner pulse />) : null;
+    return (<ListGroup.TextItem title={props.prop}>
+        <code>{props.value}</code>
+        { spinner }
+        { linkButton() }
+    </ListGroup.TextItem>);
 };

@@ -14,6 +14,7 @@ import {
     faEdit,
     faExclamationCircle,
     faExclamationTriangle,
+    faExternalLinkAlt,
     faEye,
     faInfoCircle,
     faKey,
@@ -82,6 +83,7 @@ export namespace Icon {
     export const Edit: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faEdit, options: props });
     export const ExclamationCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faExclamationCircle, options: props });
     export const ExclamationTriangle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faExclamationTriangle, options: props });
+    export const ExternalLinkAlt: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faExternalLinkAlt, options: props });
     export const Eye: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faEye, options: props });
     export const InfoCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faInfoCircle, options: props });
     export const Key: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faKey, options: props });
