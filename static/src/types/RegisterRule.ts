@@ -2,10 +2,15 @@ import { API } from '../services/API';
 import { Modal } from '../components/Modal';
 import { Notification } from '../components/Notification';
 
-export interface RegisterRuleType {
-    ID?: string;
+export interface RegisterRuleClauseType {
     Property?: string;
     Pattern?: string;
+}
+
+export interface RegisterRuleType {
+    ID?: string;
+    Name?: string;
+    Clauses?: RegisterRuleClauseType[];
     GroupID?: string;
 }
 
@@ -15,8 +20,13 @@ export class RegisterRule {
      */
     public static Blank(): RegisterRuleType {
         return {
-            Property: '',
-            Pattern: '',
+            Name: '',
+            Clauses: [
+                {
+                    Property: '',
+                    Pattern: ''
+                }
+            ],
             GroupID: '',
         };
     }
@@ -90,13 +100,13 @@ export class RegisterRule {
 }
 
 export interface NewRegisterRuleParameters {
-    Property?: string;
-    Pattern?: string;
+    Name?: string;
+    Clauses?: RegisterRuleClauseType[];
     GroupID?: string;
 }
 
 export interface EditRegisterRuleParameters {
-    Property?: string;
-    Pattern?: string;
+    Name?: string;
+    Clauses?: RegisterRuleClauseType[];
     GroupID?: string;
 }

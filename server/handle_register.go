@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/secutil"
@@ -38,49 +37,13 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	groupID := Options.Register.DefaultGroupID
 	var matchedRule *RegisterRule
 	for _, rule := range RegisterRuleStore.AllRules() {
-		pattern, err := regexp.Compile(rule.Pattern)
-		if err != nil {
-			log.Error("Invalid registration rule regex: %s: %s", rule.Pattern, err.Error())
+		if !rule.Matches(r.Properties) {
 			continue
 		}
 
-		switch rule.Property {
-		case RegisterRulePropertyHostname:
-			if pattern.MatchString(r.Properties.Hostname) {
-				log.Debug("Property %s matches client value '%s'", RegisterRulePropertyHostname, r.Properties.Hostname)
-				groupID = rule.GroupID
-				matchedRule = &rule
-			}
-			break
-		case RegisterRulePropertyKernelName:
-			if pattern.MatchString(r.Properties.KernelName) {
-				log.Debug("Property %s matches client value '%s'", RegisterRulePropertyKernelName, r.Properties.KernelName)
-				groupID = rule.GroupID
-				matchedRule = &rule
-			}
-			break
-		case RegisterRulePropertyKernelVersion:
-			if pattern.MatchString(r.Properties.KernelVersion) {
-				log.Debug("Property %s matches client value '%s'", RegisterRulePropertyKernelVersion, r.Properties.KernelVersion)
-				groupID = rule.GroupID
-				matchedRule = &rule
-			}
-			break
-		case RegisterRulePropertyDistributionName:
-			if pattern.MatchString(r.Properties.DistributionName) {
-				log.Debug("Property %s matches client value '%s'", RegisterRulePropertyDistributionName, r.Properties.DistributionName)
-				groupID = rule.GroupID
-				matchedRule = &rule
-			}
-			break
-		case RegisterRulePropertyDistributionVersion:
-			if pattern.MatchString(r.Properties.DistributionVersion) {
-				log.Debug("Property %s matches client value '%s'", RegisterRulePropertyDistributionVersion, r.Properties.DistributionVersion)
-				groupID = rule.GroupID
-				matchedRule = &rule
-			}
-			break
-		}
+		groupID = rule.GroupID
+		matchedRule = &rule
+		break
 	}
 
 	psk := secutil.RandomString(32)

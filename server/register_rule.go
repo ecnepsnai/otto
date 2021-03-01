@@ -4,14 +4,80 @@ import (
 	"regexp"
 
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto"
 )
+
+// RegisterRuleClause describes a single clause for a register rule
+type RegisterRuleClause struct {
+	Property string
+	Pattern  string
+}
+
+func (clause RegisterRuleClause) validate() *Error {
+	if !IsRegisterRuleProperty(clause.Property) {
+		return ErrorUser("Invalid rule property")
+	}
+
+	if _, err := regexp.Compile(clause.Pattern); err != nil {
+		return ErrorUser("Invalid pattern regex")
+	}
+
+	return nil
+}
 
 // RegisterRule describes a register rule
 type RegisterRule struct {
-	ID       string `ds:"primary"`
-	Property string `ds:"index"`
-	Pattern  string
-	GroupID  string `ds:"index"`
+	ID      string `ds:"primary"`
+	Name    string `ds:"unique"`
+	Clauses []RegisterRuleClause
+	GroupID string `ds:"index"`
+}
+
+// Matches does this rule match the given set of host properties
+func (rule RegisterRule) Matches(properties otto.RegisterRequestProperties) bool {
+	allClausesMatched := true
+	for _, clause := range rule.Clauses {
+		pattern, err := regexp.Compile(clause.Pattern)
+		if err != nil {
+			log.Error("Invalid registration rule regex: %s: %s", clause.Pattern, err.Error())
+			allClausesMatched = false
+			continue
+		}
+
+		switch clause.Property {
+		case RegisterRulePropertyHostname:
+			if !pattern.MatchString(properties.Hostname) {
+				allClausesMatched = false
+			}
+			break
+		case RegisterRulePropertyKernelName:
+			if !pattern.MatchString(properties.KernelName) {
+				allClausesMatched = false
+			}
+			break
+		case RegisterRulePropertyKernelVersion:
+			if !pattern.MatchString(properties.KernelVersion) {
+				allClausesMatched = false
+			}
+			break
+		case RegisterRulePropertyDistributionName:
+			if !pattern.MatchString(properties.DistributionName) {
+				allClausesMatched = false
+			}
+			break
+		case RegisterRulePropertyDistributionVersion:
+			if !pattern.MatchString(properties.DistributionVersion) {
+				allClausesMatched = false
+			}
+			break
+		}
+
+		if !allClausesMatched {
+			break
+		}
+	}
+
+	return allClausesMatched
 }
 
 func (s *registerruleStoreObject) AllRules() []RegisterRule {
@@ -56,6 +122,25 @@ func (s *registerruleStoreObject) RuleWithID(id string) *RegisterRule {
 	return &rule
 }
 
+func (s *registerruleStoreObject) RuleWithName(name string) *RegisterRule {
+	object, err := s.Table.GetUnique("Name", name)
+	if err != nil {
+		log.Error("Error getting registration rule: %s", err.Error())
+		return nil
+	}
+	if object == nil {
+		return nil
+	}
+
+	rule, ok := object.(RegisterRule)
+	if !ok {
+		log.Error("Invalid object type for RegisterRule")
+		return nil
+	}
+
+	return &rule
+}
+
 func (s *registerruleStoreObject) RulesForGroup(groupID string) []RegisterRule {
 	objects, err := s.Table.GetIndex("GroupID", groupID, &ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
@@ -79,18 +164,24 @@ func (s *registerruleStoreObject) RulesForGroup(groupID string) []RegisterRule {
 }
 
 type newRegisterRuleParams struct {
-	Property string
-	Pattern  string
-	GroupID  string
+	Name    string
+	Clauses []RegisterRuleClause
+	GroupID string
 }
 
 func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*RegisterRule, *Error) {
-	if !IsRegisterRuleProperty(params.Property) {
-		return nil, ErrorUser("Invalid rule property")
+	if len(params.Clauses) <= 0 {
+		return nil, ErrorUser("Must include at least one clause")
 	}
 
-	if _, err := regexp.Compile(params.Pattern); err != nil {
-		return nil, ErrorUser("Invalid pattern regex")
+	for _, clause := range params.Clauses {
+		if err := clause.validate(); err != nil {
+			return nil, err
+		}
+	}
+
+	if s.RuleWithName(params.Name) != nil {
+		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
 	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
@@ -98,10 +189,10 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 	}
 
 	rule := RegisterRule{
-		ID:       newID(),
-		Property: params.Property,
-		Pattern:  params.Pattern,
-		GroupID:  params.GroupID,
+		ID:      newID(),
+		Name:    params.Name,
+		Clauses: params.Clauses,
+		GroupID: params.GroupID,
 	}
 
 	if err := s.Table.Add(rule); err != nil {
@@ -113,9 +204,9 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 }
 
 type editRegisterRuleParams struct {
-	Property string
-	Pattern  string
-	GroupID  string
+	Name    string
+	Clauses []RegisterRuleClause
+	GroupID string
 }
 
 func (s *registerruleStoreObject) EditRule(id string, params editRegisterRuleParams) (*RegisterRule, *Error) {
@@ -124,20 +215,26 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 		return nil, ErrorUser("No rule with ID %s", id)
 	}
 
-	if !IsRegisterRuleProperty(params.Property) {
-		return nil, ErrorUser("Invalid rule property")
+	if len(params.Clauses) <= 0 {
+		return nil, ErrorUser("Must include at least one clause")
 	}
 
-	if _, err := regexp.Compile(params.Pattern); err != nil {
-		return nil, ErrorUser("Invalid pattern regex")
+	for _, clause := range params.Clauses {
+		if err := clause.validate(); err != nil {
+			return nil, err
+		}
+	}
+
+	if existing := s.RuleWithName(params.Name); existing != nil && existing.ID != id {
+		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
 	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
 		return nil, ErrorUser("Unknown group ID")
 	}
 
-	rule.Property = params.Property
-	rule.Pattern = params.Pattern
+	rule.Name = params.Name
+	rule.Clauses = params.Clauses
 	rule.GroupID = params.GroupID
 	if err := s.Table.Update(*rule); err != nil {
 		log.Error("Error updating rule '%s': %s", rule.ID, err.Error())

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AddButton } from '../../../components/Button';
+import { AddButton, Button } from '../../../components/Button';
 import { Card } from '../../../components/Card';
 import { Input } from '../../../components/input/Input';
 import { Form } from '../../../components/Form';
@@ -15,7 +15,10 @@ import { Rand } from '../../../services/Rand';
 import { StateManager } from '../../../services/StateManager';
 import { Group, GroupType } from '../../../types/Group';
 import { Options } from '../../../types/Options';
-import { RegisterRuleType, RegisterRule } from '../../../types/RegisterRule';
+import { RegisterRuleType, RegisterRuleClauseType, RegisterRule } from '../../../types/RegisterRule';
+import { Formatter } from '../../../services/Formatter';
+import { Style } from '../../../components/Style';
+import '../../../../css/registerrules.scss';
 
 export const SystemRegister: React.FC = () => {
     const [loading, setLoading] = React.useState<boolean>(true);
@@ -203,8 +206,8 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
 
         return (
             <Table.Row key={Rand.ID()}>
-                <td>{rule.Property}</td>
-                <td>{rule.Pattern}</td>
+                <td>{rule.Name}</td>
+                <td>{ Formatter.ValueOrNothing(rule.Clauses.length) }</td>
                 <td>{groupName}</td>
                 <td>
                     <Dropdown label={<Icon.Bars />}>
@@ -222,8 +225,8 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
             <AddButton onClick={createNew} />
             <Table.Table>
                 <Table.Head>
-                    <Table.Column>Property</Table.Column>
-                    <Table.Column>Matches</Table.Column>
+                    <Table.Column>Name</Table.Column>
+                    <Table.Column>Clauses</Table.Column>
                     <Table.Column>Add To Group</Table.Column>
                     <Table.MenuColumn />
                 </Table.Head>
@@ -244,21 +247,24 @@ interface RuleModalProps {
 }
 const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
     const [rule, setRule] = React.useState<RegisterRuleType>(props.defaultValue || {
-        Property: 'hostname',
-        Pattern: '',
+        Name: '',
+        Clauses: [{
+            Property: 'hostname',
+            Pattern: '',
+        }],
         GroupID: props.groups[0].ID,
     });
 
-    const changeProperty = (Property: string) => {
+    const changeName = (Name: string) => {
         setRule(rule => {
-            rule.Property = Property;
+            rule.Name = Name;
             return {...rule};
         });
     };
 
-    const changePattern = (Pattern: string) => {
+    const changeClauses = (Clauses: RegisterRuleClauseType[]) => {
         setRule(rule => {
-            rule.Pattern = Pattern;
+            rule.Clauses = Clauses;
             return {...rule};
         });
     };
@@ -278,6 +284,105 @@ const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
     };
 
     const title = props.defaultValue ? 'Edit Rule' : 'New Rule';
+    return (
+        <ModalForm title={title} onSubmit={onSubmit}>
+            <Input.Text
+                label="Name"
+                type="text"
+                defaultValue={rule.Name}
+                onChange={changeName}
+                required />
+            <RuleClauseListEdit defaultValue={rule.Clauses} onChange={changeClauses} />
+            <Input.Select
+                label="Add To Group"
+                defaultValue={rule.GroupID}
+                onChange={changeGroupID}>
+                { props.groups.map((group, idx) => {
+                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
+                }) }
+            </Input.Select>
+        </ModalForm>
+    );
+};
+
+interface RuleClauseListEditProps {
+    defaultValue: RegisterRuleClauseType[];
+    onChange: (clauses: RegisterRuleClauseType[]) => (void);
+}
+const RuleClauseListEdit: React.FC<RuleClauseListEditProps> = (props: RuleClauseListEditProps) => {
+    const [clauses, setClauses] = React.useState(props.defaultValue);
+
+    React.useEffect(() => {
+        props.onChange(clauses);
+    }, [clauses]);
+
+    const changeClause = (idx: number) => {
+        return (Clause: RegisterRuleClauseType) => {
+            setClauses(clauses => {
+                clauses[idx] = Clause;
+                return [...clauses];
+            });
+        };
+    };
+
+    const removeButtonDisabled = () => {
+        return clauses.length <= 1;
+    };
+
+    const addClauseClick = () => {
+        setClauses(clauses => {
+            return [...clauses, {
+                Property: 'hostname',
+                Pattern: ''
+            }];
+        });
+    };
+
+    const removeClauseClick = () => {
+        setClauses(clauses => {
+            clauses.splice(clauses.length-1, 1);
+            return [...clauses];
+        });
+    };
+
+    return (
+        <React.Fragment>
+            <strong>Clauses (All must match)</strong>
+            {
+                clauses.map((clause, idx) => {
+                    return (<RuleClauseEdit key={idx} defaultValue={clause} onChange={changeClause(idx)} />);
+                })
+            }
+            <Button color={Style.Palette.Secondary} size={Style.Size.XS} outline onClick={removeClauseClick} disabled={removeButtonDisabled()}>-</Button>
+            <Button color={Style.Palette.Secondary} size={Style.Size.XS} outline onClick={addClauseClick}>+</Button>
+        </React.Fragment>
+    );
+};
+
+interface RuleClauseEditProps {
+    defaultValue: RegisterRuleClauseType;
+    onChange: (clauses: RegisterRuleClauseType) => (void);
+}
+const RuleClauseEdit: React.FC<RuleClauseEditProps> = (props: RuleClauseEditProps) => {
+    const [clause, setClause] = React.useState(props.defaultValue);
+
+    React.useEffect(() => {
+        props.onChange(clause);
+    }, [clause]);
+
+    const changeProperty = (Property: string) => {
+        setClause(clause => {
+            clause.Property = Property;
+            return {...clause};
+        });
+    };
+
+    const changePattern = (Pattern: string) => {
+        setClause(clause => {
+            clause.Pattern = Pattern;
+            return {...clause};
+        });
+    };
 
     const state = StateManager.Current();
     const properties = state.Enums['RegisterRuleProperty'];
@@ -289,27 +394,24 @@ const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
     });
 
     return (
-        <ModalForm title={title} onSubmit={onSubmit}>
-            <Input.Radio
+        <div className="horizontal-inputs">
+            <Input.Select
                 label="Property"
-                choices={radioChoices}
-                defaultValue={rule.Property}
-                onChange={changeProperty} />
+                defaultValue={clause.Property}
+                onChange={changeProperty}>
+                {
+                    radioChoices.map((choice, idx) => {
+                        return (<option key={idx} value={choice.value}>{choice.value}</option>);
+                    })
+                }
+            </Input.Select>
             <Input.Text
                 label="Regex Pattern"
                 type="text"
                 placeholder="Regular Expression"
-                defaultValue={rule.Pattern}
+                defaultValue={clause.Pattern}
                 onChange={changePattern}
                 required />
-            <Input.Select
-                label="Add To Group"
-                defaultValue={rule.GroupID}
-                onChange={changeGroupID}>
-                { props.groups.map((group, idx) => {
-                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                }) }
-            </Input.Select>
-        </ModalForm>
+        </div>
     );
 };
