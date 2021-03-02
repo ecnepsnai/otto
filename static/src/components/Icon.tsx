@@ -36,6 +36,7 @@ import {
     faStarOfLife,
     faTimesCircle,
     faTrashAlt,
+    faUndo,
     faUser,
     faUserEdit,
     faUsers,
@@ -106,6 +107,7 @@ export namespace Icon {
     export const StarOfLife: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faStarOfLife, options: props });
     export const TimesCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTimesCircle, options: props });
     export const Delete: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTrashAlt, options: props });
+    export const Undo: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUndo, options: props });
     export const User: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUser, options: props });
     export const UserEdit: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUserEdit, options: props });
     export const Users: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUsers, options: props });

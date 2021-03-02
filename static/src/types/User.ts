@@ -36,6 +36,11 @@ export class User {
     public static async Delete(user: UserType): Promise<unknown> {
         return await API.DELETE('/api/users/user/' + user.Username);
     }
+
+    public static async ResetAPIKey(user: UserType): Promise<string> {
+        const data = await API.POST('/api/users/user/' + user.Username + '/apikey', user);
+        return data as string;
+    }
 }
 
 export interface NewUserParameters {

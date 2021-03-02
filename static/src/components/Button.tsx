@@ -190,3 +190,49 @@ export const ButtonAnchor: React.FC<ButtonAnchorProps> = (props: ButtonAnchorPro
     className += ' btn-' + size.toString();
     return (<a href={props.href} download={props.download} className={className} target={props.target}>{props.children}</a>);
 };
+
+/**
+ * A button where the user must click twice within 5 seconds before the action is performed.
+ */
+export const ConfirmButton: React.FC<ButtonProps> = (props: ButtonProps) => {
+    const [didClick, setDidClick] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!didClick) {
+            return;
+        }
+
+        setTimeout(() => {
+            if (didClick) {
+                setDidClick(false);
+            }
+        }, 5000);
+    }, [didClick]);
+
+    const onClick = () => {
+        if (didClick) {
+            setDidClick(false);
+            props.onClick();
+        } else {
+            setDidClick(true);
+        }
+    };
+
+    if (didClick) {
+        return (<Button
+            color={props.color}
+            outline={props.outline}
+            size={props.size}
+            onClick={onClick}
+            disabled={props.disabled}
+            className={props.className}>Confirm?</Button>);
+    }
+
+    return (<Button
+        color={props.color}
+        outline={props.outline}
+        size={props.size}
+        onClick={onClick}
+        disabled={props.disabled}
+        className={props.className}>{ props.children }</Button>);
+};

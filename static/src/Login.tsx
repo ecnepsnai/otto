@@ -64,9 +64,9 @@ const LoginForm: React.FC<LoginFormProps> = (props: LoginFormProps) => {
         <form onSubmit={loginFormSubmit}>
             { loginError() }
             <label htmlFor="username" className="visually-hidden">Username</label>
-            <input type="text" value={username} onChange={changeUsername} className="form-control input-first" placeholder="Username" required autoFocus disabled={props.loading}/>
+            <input type="text" id="username" value={username} onChange={changeUsername} className="form-control input-first" placeholder="Username" required autoFocus disabled={props.loading}/>
             <label htmlFor="password" className="visually-hidden">Password</label>
-            <input type="password" value={password} onChange={changePassword} className="form-control input-second" placeholder="Password" required disabled={props.loading}/>
+            <input type="password" id="password" value={password} onChange={changePassword} className="form-control input-second" placeholder="Password" required disabled={props.loading}/>
             <div className="d-grid">
                 <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={props.loading}>Sign in</button>
             </div>
@@ -110,12 +110,12 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = (props: ChangePass
     return (
         <form onSubmit={changePasswordFormSubmit}>
             { changePasswordError() }
-            <label htmlFor="password" className="visually-hidden">New Password</label>
-            <input type="password" value={password1} onChange={changePassword1} className="form-control input-first" placeholder="New Password" required autoFocus disabled={props.loading}/>
-            <label htmlFor="password" className="visually-hidden">Confirm New Password</label>
-            <input type="password" value={password2} onChange={changePassword2} className="form-control input-second" placeholder="Confirm New Password" required disabled={props.loading}/>
+            <label htmlFor="password1" className="visually-hidden">New Password</label>
+            <input type="password" id="password1" value={password1} onChange={changePassword1} className="form-control input-first" placeholder="New Password" required autoFocus disabled={props.loading}/>
+            <label htmlFor="password2" className="visually-hidden">Confirm New Password</label>
+            <input type="password" id="password2" value={password2} onChange={changePassword2} className="form-control input-second" placeholder="Confirm New Password" required disabled={props.loading}/>
             <div className="d-grid">
-                <button className="btn btn-lg login-button" id="login_button" type="submit" disabled={props.loading}>Change Password</button>
+                <button className="btn btn-lg login-button" id="change_password_button" type="submit" disabled={props.loading}>Change Password</button>
             </div>
         </form>
     );

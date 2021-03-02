@@ -127,6 +127,7 @@ func RouterSetup() {
 	server.API.PUT("/api/users/user", h.UserNew, authenticatedOptions(false))
 	server.API.GET("/api/users/user/:username", h.UserGet, authenticatedOptions(false))
 	server.API.POST("/api/users/user/:username", h.UserEdit, authenticatedOptions(false))
+	server.API.POST("/api/users/user/:username/apikey", h.UserResetAPIKey, authenticatedOptions(false))
 	server.API.POST("/api/users/reset_password", h.UserResetPassword, authenticatedOptions(true))
 	server.API.DELETE("/api/users/user/:username", h.UserDelete, authenticatedOptions(false))
 

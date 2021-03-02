@@ -90,6 +90,23 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 	return user, nil
 }
 
+func (h *handle) UserResetAPIKey(request web.Request) (interface{}, *web.Error) {
+	session := request.UserData.(*Session)
+
+	username := request.Params.ByName("username")
+
+	apiKey, err := UserStore.ResetAPIKey(username)
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	EventStore.UserModified(username, session.Username)
+	return *apiKey, nil
+}
+
 func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 	user := session.User()

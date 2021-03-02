@@ -4,16 +4,24 @@ The Otto server is controlled via a REST API. This document details how you may 
 
 ## Using the API
 
-All API exports, excluding the login endpoint, require you to provide a session cookie. The cookie is returned when
-you log in to the Otto server.
+All API endpoints, excluding the login endpoint, require that you provide a username and API key. API keys are
+associated with a user and must be generated before it can be used. Generate an API key by clicking the "Reset API Key"
+button when editing a user.
 
-The session expires 1 hour after the last request.
+Each HTTP request must provide the following headers:
+
+- `X-OTTO-USERNAME`: The username of the user
+- `X-OTTO-API-KEY`: The API key for the user
+
+Only URLs that start with `/api` can be accessed using these headers.
 
 # Endpoints
 
 ## Authentication
 
 **POST /api/login**
+
+**Note:** This should only be used if you cannot use the API key authentication method.
 
 This is the only request that can be performed without an session cookie, or with an expired cookie. Upon successful
 authentication, a valid session cookie is required.
@@ -299,6 +307,10 @@ Expected body:
 
 To change a users password, include the variable `Password` with a string value containing the new password in the
 request. The password will not be changed if the `Password` variable is not present, or is an empty string.
+
+**POST /api/users/user/:username/apikey**
+
+
 
 **DELETE /api/users/user/:username**
 

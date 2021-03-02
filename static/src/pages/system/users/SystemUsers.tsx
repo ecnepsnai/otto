@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { EnabledBadge } from '../../../components/Badge';
-import { AddButton, Button } from '../../../components/Button';
+import { AddButton, Button, ConfirmButton } from '../../../components/Button';
 import { Input } from '../../../components/input/Input';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
@@ -189,6 +189,14 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
         );
     };
 
+    const resetAPIKey = () => {
+        if (isNew) {
+            return null;
+        }
+
+        return (<UserAPIKeyEdit user={props.user} />);
+    };
+
     const mustChangePasswordCheckbox = () => {
         if (props.user && StateManager.Current().User.Username == props.user.Username) {
             return null;
@@ -242,8 +250,38 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
                 onChange={changeEmail}
                 required />
             { passwordField() }
+            { resetAPIKey() }
             { canLogInCheckbox() }
             { mustChangePasswordCheckbox() }
         </ModalForm>
     );
 };
+
+interface UserAPIKeyEditProps {
+    user: UserType;
+}
+const UserAPIKeyEdit: React.FC<UserAPIKeyEditProps> = (props: UserAPIKeyEditProps) => {
+    const [loading, setLoading] = React.useState(false);
+    const [newAPIKey, setNewAPIKey] = React.useState<string>();
+
+    const resetAPIKey = () => {
+        setLoading(true);
+        User.ResetAPIKey(props.user).then(key => {
+            setNewAPIKey(key);
+            setLoading(false);
+        });
+    };
+
+    if (newAPIKey) {
+        return (<Input.Text
+            type="text"
+            label="API Key"
+            helpText="This key is only shown here once and cannot be retrieved after closing this dialog."
+            defaultValue={newAPIKey}
+            onChange={() => { /* */ }}
+            disabled />);
+    }
+
+    return (<ConfirmButton color={Style.Palette.Warning} size={Style.Size.S} outline onClick={resetAPIKey} disabled={loading}><Icon.Label icon={<Icon.Undo />} label="Reset API Key" /></ConfirmButton>);
+};
+
