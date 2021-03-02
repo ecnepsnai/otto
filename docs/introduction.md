@@ -23,6 +23,8 @@ Let's get started using Otto!
 
 ## Starting the Otto Service
 
+*Further reading: [The Otto Server](server.md)*
+
 You can run the client with no configuration options and it will listen to `localhost:8080`. See the server
 documentation for more information on starting the server software.
 
@@ -32,6 +34,8 @@ have to change your password the first time you log in.
 **Warning:** Do not expose the Otto web interface to the internet.
 
 ## Starting the Otto Client
+
+*Further reading: [The Otto Client](client.md)*
 
 Before you can add an host to the server it must first be configured. See the client documentation for instructions on
 how to configure a client.
@@ -47,6 +51,8 @@ Input the friendly-name and the address of the server, the PSK, and check the "O
 
 ## Add a Group (Optional)
 
+*Further reading: [Groups](groups.md)*
+
 Groups are the primary component for both Scripts and Hosts. Hosts belong to groups, and scripts are assigned to groups.
 
 ```
@@ -60,6 +66,8 @@ later if you wish.
 
 ## Add a Script
 
+*Further reading: [Scripts](script.md)*
+
 Scripts are the actual executed code that is run on the clients. For more detailed information into scripts, see the
 script documentation.
 
@@ -72,3 +80,19 @@ Give the script a name, and add commands to the script body. Assign the script t
 Now that we have a script assigned to a group, and a host that belongs to that group, you will now see that the script
 you created can now be executed on your host. Wherever you see a green "Play" button you can execute the script and see
 the results in the web interface.
+
+## Automate Scripts
+
+*Further reading: [Schedules](schedule.md)*
+
+While triggering scripts on-demand is great, Otto provides the ability to have scripts run on a defined schedule
+automatically.
+
+Schedules can be defined that specifies the groups or individual hosts to run a script on. Frequencies are defined
+using a cron-like pattern.
+
+To create a schedule: navigate to the Schedules list and click "Create New".
+
+Give the schedule a name and select the script to run. Select a frequency preset, or define your own.
+
+Choose between running the scripts on groups, or individual hosts. Select the groups or hosts to run the script on.

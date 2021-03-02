@@ -2,8 +2,6 @@
 
 The Otto server is controlled via a REST API. This document details how you may use that API.
 
-**⚠️ Otto is still in active development and there are frequently breaking changes between releases.**
-
 ## Using the API
 
 All API exports, excluding the login endpoint, require you to provide a session cookie. The cookie is returned when

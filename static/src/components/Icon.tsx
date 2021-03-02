@@ -41,6 +41,7 @@ import {
     faUsers,
     faWrench,
 } from '@fortawesome/free-solid-svg-icons';
+import '../../css/icon.scss';
 
 export namespace Icon {
     interface IconProps {
