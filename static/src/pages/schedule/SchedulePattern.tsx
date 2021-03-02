@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Popover } from '../../components/Popover';
 
 interface SchedulePatternProps { pattern: string; }
 export const SchedulePattern: React.FC<SchedulePatternProps> = (props: SchedulePatternProps) => {
@@ -17,9 +18,10 @@ export const SchedulePattern: React.FC<SchedulePatternProps> = (props: ScheduleP
     case '0 0 * * 1':
         value = 'Every Monday at Midnight';
         break;
-    default:
-        value = 'Custom';
-        break;
+    }
+
+    if (!value) {
+        return (<Popover content={props.pattern}>Custom</Popover>);
     }
 
     return (

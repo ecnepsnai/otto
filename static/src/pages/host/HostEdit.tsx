@@ -12,7 +12,6 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
-import { RandomPSK } from '../../components/RandomPSK';
 
 interface HostEditProps {
     match: match;
@@ -163,13 +162,11 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                     defaultValue={host.Port}
                     onChange={changePort}
                     required />
-                <Input.Text
+                <Input.Password
                     label="Pre-Shared Key"
-                    type="password"
                     defaultValue={host.PSK}
                     onChange={changePSK}
                     required />
-                <RandomPSK newPSK={changePSK} />
                 { enabledCheckbox() }
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>

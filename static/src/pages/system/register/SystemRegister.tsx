@@ -9,7 +9,6 @@ import { Dropdown, Menu } from '../../../components/Menu';
 import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Notification } from '../../../components/Notification';
 import { Page } from '../../../components/Page';
-import { RandomPSK } from '../../../components/RandomPSK';
 import { Table } from '../../../components/Table';
 import { Rand } from '../../../services/Rand';
 import { StateManager } from '../../../services/StateManager';
@@ -120,14 +119,12 @@ export const SystemRegister: React.FC = () => {
         }
 
         return (<React.Fragment>
-            <Input.Text
-                type="password"
+            <Input.Password
                 label="Register PSK"
                 helpText="Clients that wish to register with this server must specify this PSK to authenticate"
                 defaultValue={options.PSK}
                 onChange={changePSK}
                 required />
-            <RandomPSK newPSK={changePSK} />
             <Card.Card className="mb-2">
                 <Card.Header>
                     Rules

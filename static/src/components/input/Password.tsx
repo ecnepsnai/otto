@@ -2,17 +2,17 @@ import * as React from 'react';
 import debounce = require('debounce-promise');
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
+import { Icon } from '../Icon';
+import { Style } from '../Style';
+import { Button } from '../Button';
 import '../../../css/form.scss';
+import { Clipboard } from '../../services/Clipboard';
 
-interface TextProps {
+interface PasswordProps {
     /**
      * The label that appears above the input
      */
     label: string;
-    /**
-     * The value used in the type attribute on the input node
-     */
-    type: 'text'|'password'|'email';
     /**
      * Optional placeholder text for the input
      */
@@ -38,18 +38,6 @@ interface TextProps {
      */
     disabled?: boolean;
     /**
-     * Text label to appear before the input
-     */
-    prepend?: string;
-    /**
-     * Text label to appear after the input
-     */
-    append?: string;
-    /**
-     * If true then a fixed width font is used
-     */
-    fixedWidth?: boolean;
-    /**
      * Optional method to invoke for validating the value of this input.
      * Return a promise that resolves with a validation result.
      *
@@ -57,8 +45,10 @@ interface TextProps {
      */
     validate?: (value: string) => Promise<ValidationResult>;
 }
-export const Text: React.FC<TextProps> = (props: TextProps) => {
+export const Password: React.FC<PasswordProps> = (props: PasswordProps) => {
     const [value, setValue] = React.useState<string>(props.defaultValue);
+    const [didGenerate, setDidGenerate] = React.useState(false);
+
     const initialValidState: ValidationResult = {
         valid: true
     };
@@ -100,10 +90,14 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
 
     const onChange = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        validate(target.value).then(valid => {
+        changeValue(target.value);
+    };
+
+    const changeValue = (newValue: string) => {
+        validate(newValue).then(valid => {
             setValid(valid);
         });
-        setValue(target.value);
+        setValue(newValue);
     };
 
     const helpText = () => {
@@ -126,12 +120,9 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
         if (touched && !valid.valid) {
             className += ' is-invalid';
         }
-        if (props.fixedWidth) {
-            className += ' fixed-width';
-        }
         return (
             <input
-                type={props.type}
+                type="password"
                 className={className}
                 id={labelID}
                 placeholder={props.placeholder}
@@ -145,31 +136,11 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
     };
 
     const content = () => {
-        if (!props.prepend && !props.append) {
-            return (
-                <React.Fragment>
-                    { input() }
-                    { validationError() }
-                </React.Fragment>
-            );
-        }
-
-        let prepend: JSX.Element = null;
-        if (props.prepend) {
-            prepend = ( <span className="input-group-text">{props.prepend}</span> );
-        }
-        let append: JSX.Element = null;
-        if (props.append) {
-            append = ( <span className="input-group-text">{props.append}</span> );
-        }
-
         return (
-            <div className="input-group">
-                {prepend}
+            <React.Fragment>
                 { input() }
-                {append}
                 { validationError() }
-            </div>
+            </React.Fragment>
         );
     };
 
@@ -180,11 +151,34 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
         return (<span className="form-required">*</span>);
     };
 
+    const generateRandomPassword = () => {
+        const psk = Rand.PSK();
+        Clipboard.setText(psk).then(() => {
+            setDidGenerate(true);
+        });
+        changeValue(psk);
+    };
+
+    const randomButton = () => {
+        if (didGenerate) {
+            return (<Button color={Style.Palette.Success} size={Style.Size.XS} outline disabled>
+                <Icon.Label icon={<Icon.CheckCircle />} label="Copied to Clipboard" />
+            </Button>);
+        }
+
+        return (<Button color={Style.Palette.Secondary} size={Style.Size.XS} outline onClick={generateRandomPassword}>
+            <Icon.Label icon={<Icon.Random />} label="Generate Random Password" />
+        </Button>);
+    };
+
     return (
         <FormGroup>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
             { content() }
             { helpText() }
+            <div className="mt-1">
+                { randomButton() }
+            </div>
         </FormGroup>
     );
 };

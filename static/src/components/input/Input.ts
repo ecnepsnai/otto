@@ -2,6 +2,7 @@ import { Checkbox } from './Checkbox';
 import { FileChooser } from './FileChooser';
 import { IDInput } from './IDInput';
 import { Number } from './Number';
+import { Password } from './Password';
 import { Radio } from './Radio';
 import { Select } from './Select';
 import { Text } from './Text';
@@ -41,4 +42,8 @@ export class Input {
      * An input for specifying a UID and GID pair
      */
     public static IDInput = IDInput
+    /**
+     * An input for a password with a generate random button
+     */
+    public static Password = Password
 }

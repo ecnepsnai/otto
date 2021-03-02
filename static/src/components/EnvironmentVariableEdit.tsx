@@ -61,7 +61,7 @@ export const EnvironmentVariableEdit: React.FC<EnvironmentVariableEditProps> = (
                 </Table.Head>
                 <Table.Body>
                     {
-                        props.variables.map((variable, idx) => {
+                        (props.variables || []).map((variable, idx) => {
                             return (
                                 <EnvironmentVariableEditListItem
                                     variable={variable}
