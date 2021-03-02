@@ -9,7 +9,7 @@ import (
 // Schedule describes a recurring task
 type Schedule struct {
 	ID          string `ds:"primary"`
-	Name        string `ds:"unique"`
+	Name        string `ds:"unique" min:"1" max:"140"`
 	ScriptID    string `ds:"index"`
 	Scope       ScheduleScope
 	Pattern     string

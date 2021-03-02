@@ -322,6 +322,26 @@ Returns the current state of the system. This endpoint is used by the web interf
 **POST /api/options**
 
 
+## Registration Rules
+
+**GET /api/register/rules**
+
+
+
+**PUT /api/register/rules/rule**
+
+
+
+**GET /api/register/rules/rule/:id**
+
+
+
+**POST /api/register/rules/rule/:id**
+
+
+
+**DELETE /api/register/rules/rule/:id**
+
 
 
 ## Events

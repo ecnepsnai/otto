@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto"
 )
 
@@ -27,10 +28,10 @@ func (clause RegisterRuleClause) validate() *Error {
 
 // RegisterRule describes a register rule
 type RegisterRule struct {
-	ID      string `ds:"primary"`
-	Name    string `ds:"unique"`
-	Clauses []RegisterRuleClause
-	GroupID string `ds:"index"`
+	ID      string               `ds:"primary"`
+	Name    string               `ds:"unique" min:"1" max:"140"`
+	Clauses []RegisterRuleClause `min:"1"`
+	GroupID string               `ds:"index"`
 }
 
 // Matches does this rule match the given set of host properties
@@ -194,6 +195,9 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 		Clauses: params.Clauses,
 		GroupID: params.GroupID,
 	}
+	if err := limits.Check(rule); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Add(rule); err != nil {
 		log.Error("Error adding new rule: %s", err.Error())
@@ -236,6 +240,10 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 	rule.Name = params.Name
 	rule.Clauses = params.Clauses
 	rule.GroupID = params.GroupID
+	if err := limits.Check(rule); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
+
 	if err := s.Table.Update(*rule); err != nil {
 		log.Error("Error updating rule '%s': %s", rule.ID, err.Error())
 		return nil, ErrorFrom(err)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/ecnepsnai/cron"
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/limits"
 )
 
 func (s scheduleStoreObject) AllSchedules() []Schedule {
@@ -183,6 +184,9 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 		Pattern: params.Pattern,
 		Enabled: true,
 	}
+	if err := limits.Check(schedule); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Add(schedule); err != nil {
 		log.Error("Error adding new schedule '%s': %s", schedule.ID, err.Error())
@@ -228,6 +232,9 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 	schedule.Scope.GroupIDs = params.Scope.GroupIDs
 	schedule.Pattern = params.Pattern
 	schedule.Enabled = params.Enabled
+	if err := limits.Check(schedule); err != nil {
+		return nil, ErrorUser(err.Error())
+	}
 
 	if err := s.Table.Update(*schedule); err != nil {
 		log.Error("Error updating schedule '%s': %s", schedule.ID, err.Error())
