@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { GlobalModalFrame } from './components/Modal';
 import { GlobalNotificationFrame } from './components/Notification';
 import { GlobalRedirectFrame } from './components/Redirect';
-import { Icon } from './components/Icon';
+import { Loading } from './components/Loading';
 import { Nav } from './components/Nav';
 import { HostEdit } from './pages/host/HostEdit';
 import { HostList } from './pages/host/HostList';
@@ -29,13 +29,17 @@ export const App: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        StateManager.Refresh().then(() => {
+        StateManager.Initialize().then(() => {
             setLoading(false);
         });
     }, []);
 
     if (loading) {
-        return (<Icon.Spinner pulse />);
+        return (
+            <div className="container mt-2">
+                <Loading />
+            </div>
+        );
     }
 
     return (<ErrorBoundary>

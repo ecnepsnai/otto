@@ -20,7 +20,7 @@ export const ClientVersion: React.FC<ClientVersionProps> = (props: ClientVersion
     }
     const clientVersion = versionStr;
     const clientVersionNumber = version;
-    const serverVersionNumber = StateManager.Current().VersionNumber();
+    const serverVersionNumber = StateManager.VersionNumber();
 
 
     const isOutOfDate = () => {
