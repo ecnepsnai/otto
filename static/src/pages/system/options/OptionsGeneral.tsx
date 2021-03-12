@@ -68,7 +68,7 @@ export const OptionsGeneral: React.FC<OptionsGeneralProps> = (props: OptionsGene
                 <label className="form-label">Global Environment Variables</label>
                 <div>
                     <EnvironmentVariableEdit
-                        variables={value.GlobalEnvironment}
+                        variables={value.GlobalEnvironment || []}
                         onChange={changeGlobalEnvironment} />
                 </div>
             </Card.Body>

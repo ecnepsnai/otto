@@ -328,7 +328,8 @@ export const ModalForm: React.FC<ModalFormProps> = (props: ModalFormProps) => {
         setLoading(true);
         props.onSubmit().then(() => {
             GlobalModalFrame.removeModal();
-        }, () => {
+        }, err => {
+            console.error('Error while executing modal form save promise', err);
             setLoading(false);
         });
     };

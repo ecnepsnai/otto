@@ -205,7 +205,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
                     <Card.Header>Environment Variables</Card.Header>
                     <Card.Body>
                         <EnvironmentVariableEdit
-                            variables={script.Environment}
+                            variables={script.Environment || []}
                             onChange={changeEnvironment} />
                     </Card.Body>
                 </Card.Card>

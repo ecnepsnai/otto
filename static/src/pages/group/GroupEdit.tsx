@@ -103,7 +103,7 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
                     <Card.Header>Environment Variables</Card.Header>
                     <Card.Body>
                         <EnvironmentVariableEdit
-                            variables={group.Environment}
+                            variables={group.Environment || []}
                             onChange={changeEnvironment} />
                     </Card.Body>
                 </Card.Card>

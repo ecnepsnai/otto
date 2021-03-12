@@ -81,8 +81,8 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
 
         return (
             <Input.Checkbox
-                label="Enabled"
-                helpText=""
+                label="Include Host in Scripts"
+                helpText="If unchecked this host will not be included in scripts or schedules that target this host"
                 defaultValue={host.Enabled}
                 onChange={changeEnabled} />
         );
@@ -172,7 +172,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                     <Card.Header>Environment Variables</Card.Header>
                     <Card.Body>
                         <EnvironmentVariableEdit
-                            variables={host.Environment}
+                            variables={host.Environment || []}
                             onChange={changeEnvironment} />
                     </Card.Body>
                 </Card.Card>
