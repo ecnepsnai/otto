@@ -28,7 +28,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
     }, [finishedHosts]);
 
     const checkFinished = () => {
-        if (finishedHosts.length <= selectedHostIDs.length) {
+        if (selectedHostIDs && finishedHosts.length <= selectedHostIDs.length) {
             setStage(RunStage.Finished);
         }
     };
@@ -76,7 +76,9 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
             {
                 label: 'Start',
                 onClick: () => {
-                    setStage(RunStage.Running);
+                    if (selectedHostIDs && selectedHostIDs.length > 0) {
+                        setStage(RunStage.Running);
+                    }
                 },
                 dontDismiss: true,
             }
@@ -93,7 +95,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
     };
 
     return (
-        <Modal title="Run Script" size={Style.Size.L} buttons={buttons()} static={stage === RunStage.Running}>
+        <Modal title="Run Script" size={Style.Size.L} buttons={buttons()} static>
             { content() }
         </Modal>
     );

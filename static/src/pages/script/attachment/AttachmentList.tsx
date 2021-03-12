@@ -31,12 +31,12 @@ export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentL
     const loadData = () => {
         if (props.scriptID) {
             Script.Attachments(props.scriptID).then(attachments => {
-                setLoading(false);
                 setAttachments(attachments);
+                setLoading(false);
             });
         } else {
-            setLoading(false);
             setAttachments([]);
+            setLoading(false);
         }
     };
 

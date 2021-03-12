@@ -32,11 +32,17 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
         }
     }, [runningScript]);
 
+    React.useEffect(() => {
+        if (results) {
+            props.onFinished(results);
+        }
+    }, [results]);
+
     const loadHost = () => {
         Host.Get(props.hostID).then(host => {
+            setHost(host);
             setLoadingHost(false);
             setRunningScript(true);
-            setHost(host);
         });
     };
 
@@ -45,9 +51,8 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
             setStdout(stdout);
             setStderr(stderr);
         }).then(results => {
-            props.onFinished(results);
-            setRunningScript(false);
             setResults(results);
+            setRunningScript(false);
             setStdout(undefined);
             setStderr(undefined);
         }, error => {
@@ -67,7 +72,7 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
     };
 
     const content = () => {
-        if (!runningScript) {
+        if (!runningScript && results != undefined) {
             return ( <RunResults results={results} /> );
         }
 

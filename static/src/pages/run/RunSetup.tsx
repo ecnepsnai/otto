@@ -4,7 +4,6 @@ import { Loading } from '../../components/Loading';
 import { Input } from '../../components/input/Input';
 import { Form } from '../../components/Form';
 import { Card } from '../../components/Card';
-import { Rand } from '../../services/Rand';
 
 interface SGroup {
     ID: string;
@@ -53,12 +52,12 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                     groups.push({ ID: id, Name: groupMap[id] });
                 });
 
-                setLoading(false);
                 setGroups(groups);
                 setHosts(shosts);
                 setSelectedGroups(selectedGroups);
                 setSelectedHosts(selectedHosts);
                 setGroupMembers(groupMembership);
+                setLoading(false);
             });
         });
     };
@@ -68,6 +67,10 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
     }, []);
 
     React.useEffect(() => {
+        if (selectedHosts == undefined || selectedGroups == undefined) {
+            return;
+        }
+
         props.onSelectedHosts(selectedHostIDs());
     }, [selectedHosts, selectedGroups]);
 
@@ -75,18 +78,18 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
         return (checked: boolean) => {
             setSelectedGroups(selectedGroups => {
                 if (checked) {
-                    selectedGroups[groupID]++;
+                    selectedGroups[groupID] = 1;
                 } else {
-                    selectedGroups[groupID]--;
+                    selectedGroups[groupID] = 0;
                 }
                 return {...selectedGroups};
             });
             setSelectedHosts(selectedHosts => {
                 groupMembers[groupID].forEach(host => {
                     if (checked) {
-                        selectedHosts[host]++;
+                        selectedHosts[host] = 1;
                     } else {
-                        selectedHosts[host]--;
+                        selectedHosts[host] = 0;
                     }
                 });
                 return {...selectedHosts};
@@ -99,9 +102,9 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
             setSelectedHosts(selectedHosts => {
                 const selected: {[id: string]: number} = selectedHosts;
                 if (checked) {
-                    selected[hostID]++;
+                    selected[hostID] = 1;
                 } else {
-                    selected[hostID]--;
+                    selected[hostID] = 0;
                 }
                 return {...selectedHosts};
             });
@@ -128,9 +131,9 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                 <Card.Header>Groups</Card.Header>
                 <Card.Body>
                     {
-                        groups.map(group => {
+                        groups.map((group, idx) => {
                             return (
-                                <Input.Checkbox label={group.Name} onChange={selectGroup(group.ID)} defaultValue={selectedGroups[group.ID]>0} key={Rand.ID()}/>
+                                <Input.Checkbox label={group.Name} onChange={selectGroup(group.ID)} defaultValue={selectedGroups[group.ID]>0} key={idx}/>
                             );
                         })
                     }
@@ -140,9 +143,9 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                 <Card.Header>Hosts</Card.Header>
                 <Card.Body>
                     {
-                        hosts.map(host => {
+                        hosts.map((host, idx) => {
                             return (
-                                <Input.Checkbox label={host.Name} onChange={selectHost(host.ID)} defaultValue={selectedHosts[host.ID]>0} key={Rand.ID()}/>
+                                <Input.Checkbox label={host.Name} onChange={selectHost(host.ID)} defaultValue={selectedHosts[host.ID]>0} key={idx}/>
                             );
                         })
                     }
