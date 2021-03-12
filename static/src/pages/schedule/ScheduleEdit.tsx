@@ -73,7 +73,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                     break;
                 }
 
-                if (hosts && hosts.length > 0) {
+                if (schedule.Scope.HostIDs && schedule.Scope.HostIDs.length > 0) {
                     runOn = 'hosts';
                 }
             }
@@ -157,6 +157,10 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     };
 
     const changeRunOn = (RunOn: string) => {
+        if (runOn === RunOn) {
+            return;
+        }
+
         setSchedule(schedule => {
             schedule.Scope.HostIDs = [];
             schedule.Scope.GroupIDs = [];
