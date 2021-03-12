@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path"
 	"strconv"
 	"syscall"
 	"time"
@@ -199,8 +200,8 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 		Setpgid: true,
 	}
 	if !script.RunAs.Inherit {
-		if getCurrentUID() != 0 {
-			log.Error("Cannot run script as specific without being root")
+		if uid, _ := getCurrentUIDandGID(); uid != 0 {
+			log.Error("Cannot run script as specific user without the Otto client running as root")
 			canCancel = false
 			return otto.ScriptResult{
 				Success:   false,
@@ -285,21 +286,50 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 	return result
 }
 
+func createDirectoryForOttoFile(file otto.File) error {
+	dirName := path.Dir(file.Path)
+	info, err := os.Stat(dirName)
+	if err == nil && info.IsDir() {
+		return nil
+	}
+
+	if !os.IsNotExist(err) {
+		log.Error("Error performing stat on directory: directory='%s' error='%s'", dirName, err.Error())
+		return err
+	}
+
+	if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
+		log.Error("Error creating directory: directory='%s' error='%s'", dirName, err.Error())
+		return err
+	}
+
+	if err := os.Chown(dirName, file.UID, file.GID); err != nil {
+		log.Error("Error chowning directory: directory='%s' error='%s'", dirName, err.Error())
+	}
+
+	log.Debug("Created directory: directory='%s' uid=%d gid=%d", dirName, file.UID, file.GID)
+	return nil
+}
+
 func uploadFile(file otto.File) error {
+	if err := createDirectoryForOttoFile(file); err != nil {
+		return err
+	}
+
 	f, err := os.OpenFile(file.Path, os.O_CREATE|os.O_WRONLY, os.FileMode(file.Mode))
 	if err != nil {
-		log.Error("Error opening file '%s': %s", file.Path, err.Error())
+		log.Error("Error opening file: path='%s' error='%s'", file.Path, err.Error())
 		return err
 	}
 	defer f.Close()
 
 	n, err := io.Copy(f, bytes.NewReader(file.Data))
 	if err != nil {
-		log.Error("Error writing file '%s': %s", file.Path, err.Error())
+		log.Error("Error writing to file: path='%s' error='%s'", file.Path, err.Error())
 		return err
 	}
 	if err := f.Chown(file.UID, file.GID); err != nil {
-		log.Error("Error chowning file '%s': %s", file.Path, err.Error())
+		log.Error("Error chowning file: path='%s' error='%s'", file.Path, err.Error())
 		return err
 	}
 
@@ -308,7 +338,7 @@ func uploadFile(file otto.File) error {
 	return nil
 }
 
-func getCurrentUID() uint32 {
+func getCurrentUIDandGID() (uint32, uint32) {
 	current, err := user.Current()
 	if err != nil {
 		panic(err)
@@ -317,17 +347,10 @@ func getCurrentUID() uint32 {
 	if err != nil {
 		panic(err)
 	}
-	return uint32(uid)
-}
+	gid, err := strconv.ParseUint(current.Gid, 10, 32)
+	if err != nil {
+		panic(err)
+	}
 
-func getCurrentGID() uint32 {
-	current, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	uid, err := strconv.ParseUint(current.Gid, 10, 32)
-	if err != nil {
-		panic(err)
-	}
-	return uint32(uid)
+	return uint32(uid), uint32(gid)
 }

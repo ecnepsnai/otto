@@ -70,9 +70,9 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
     return (
         <ModalForm title={title} onSubmit={saveAttachment}>
             { fileInput() }
-            <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts" fixedWidth/>
+            <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts. If the parent directory does not exist it will be created with the same owner as the attachment." fixedWidth/>
             <Input.IDInput label="Owned By" defaultUID={attachment.UID} defaultGID={attachment.GID} onChange={changeOwner} />
-            <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (Mode) for the file" />
+            <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (mode) for the file" />
         </ModalForm>
     );
 };
