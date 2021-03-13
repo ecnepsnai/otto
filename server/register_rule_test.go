@@ -21,6 +21,7 @@ func TestAddGetRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
+		Name: randomString(12),
 		Clauses: []RegisterRuleClause{
 			{
 				Property: RegisterRulePropertyHostname,
@@ -57,6 +58,7 @@ func TestEditRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
+		Name: randomString(12),
 		Clauses: []RegisterRuleClause{
 			{
 				Property: RegisterRulePropertyHostname,
@@ -73,6 +75,7 @@ func TestEditRegisterRule(t *testing.T) {
 	}
 
 	_, err = RegisterRuleStore.EditRule(rule.ID, editRegisterRuleParams{
+		Name: rule.Name,
 		Clauses: []RegisterRuleClause{
 			{
 				Property: RegisterRulePropertyHostname,
@@ -103,6 +106,7 @@ func TestDeleteRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
+		Name: randomString(12),
 		Clauses: []RegisterRuleClause{
 			{
 				Property: RegisterRulePropertyHostname,

@@ -21,10 +21,10 @@ cp ../../artifacts/otto-${VERSION}_linux_amd64.tar.gz .
 tar -xzf otto-${VERSION}_linux_amd64.tar.gz
 rm otto-${VERSION}_linux_amd64.tar.gz
 mv otto-${VERSION} otto
-${DOCKER_CMD} build -t otto:${VERSION} ghcr.io/ecnepsnai/otto:${VERSION} otto:latest ghcr.io/ecnepsnai/otto:latest . >> ${LOG} 2>&1
+${DOCKER_CMD} build -t otto:${VERSION} -t ghcr.io/ecnepsnai/otto:${VERSION} -t otto:latest -t ghcr.io/ecnepsnai/otto:latest . >> ${LOG} 2>&1
 cd ../
 rm -rf Docker
-${DOCKER_CMD} save --quiet -o otto-${VERSION}_amd64_docker.tar otto:${VERSION}
-gzip otto-${VERSION}_amd64_docker.tar
-mv otto-${VERSION}_amd64_docker.tar.gz ../artifacts
+${DOCKER_CMD} save --quiet -o otto-${VERSION}_docker_amd64.tar otto:${VERSION} >> ${LOG} 2>&1
+gzip otto-${VERSION}_docker_amd64.tar
+mv otto-${VERSION}_docker_amd64.tar.gz ../artifacts
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"

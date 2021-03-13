@@ -12,5 +12,6 @@ require (
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/store v1.1.0
 	github.com/ecnepsnai/web v1.6.0
+	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
 )

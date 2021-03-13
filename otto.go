@@ -183,12 +183,12 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 	encryptedData := make([]byte, dataLength)
 	readLength, err := io.ReadFull(r, encryptedData)
 	if err != nil {
+		if err == io.ErrUnexpectedEOF {
+			log.Error("Incorrect data length. Reported: %d, actual: %d", dataLength, readLength)
+			return nil, fmt.Errorf("bad request length")
+		}
 		log.Error("Error reading encrypted data: %s", err.Error())
 		return nil, err
-	}
-	if dataLength != uint32(readLength) {
-		log.Error("Incorrect data length. Reported: %d, actual: %d", dataLength, readLength)
-		return nil, fmt.Errorf("bad request length")
 	}
 	log.Debug("Read frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, readLength)
 

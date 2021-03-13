@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 )
@@ -193,7 +194,9 @@ func TestAuthenticationUnknownCookie(t *testing.T) {
 }
 
 func TestAuthenticationNoCookie(t *testing.T) {
-	session := sessionForHTTPRequest(&http.Request{}, false)
+	session := sessionForHTTPRequest(&http.Request{
+		URL: &url.URL{},
+	}, false)
 	if session != nil {
 		t.Fatalf("Should not return an unknown session")
 	}

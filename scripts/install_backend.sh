@@ -19,6 +19,14 @@ mv *.go ${OTTO_PATH}/server
 cd ${OTTO_PATH}/cmd/client
 cbgen -n main -v ${OTTO_VERSION}
 cd ${OTTO_PATH}/
+go get -t
+cd ${OTTO_PATH}/cmd/client
+go get -t
+cd ${OTTO_PATH}/cmd/server
+go get -t
+cd ${OTTO_PATH}/server
+go get -t
+cd ${OTTO_PATH}/
 go build
 go test -v >> ${LOG} 2>&1
 cd ${OTTO_PATH}/server
