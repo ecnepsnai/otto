@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Script } from '../../types/Script';
 import { Loading } from '../../components/Loading';
-import { Form, Checkbox } from '../../components/Form';
+import { Input } from '../../components/input/Input';
+import { Form } from '../../components/Form';
 import { Card } from '../../components/Card';
-import { Rand } from '../../services/Rand';
 
 interface SGroup {
     ID: string;
@@ -15,28 +15,21 @@ interface SHost {
     Name: string;
 }
 
-export interface RunSetupProps {
+interface RunSetupProps {
     scriptID: string;
     onSelectedHosts: (hostIDs: string[]) => (void);
 }
-interface RunSetupState {
-    loading: boolean;
-    script?: Script;
-    groups?: SGroup[];
-    hosts?: SHost[];
-    selectedGroups?: {[id: string]: number};
-    selectedHosts?: {[id: string]: number};
-    groupMembers?: {[id: string]: string[]};
-}
-export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
-    constructor(props: RunSetupProps) {
-        super(props);
-        this.state = { loading: true };
-    }
+export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [groups, setGroups] = React.useState<SGroup[]>();
+    const [hosts, setHosts] = React.useState<SHost[]>();
+    const [selectedGroups, setSelectedGroups] = React.useState<{[id: string]: number}>();
+    const [selectedHosts, setSelectedHosts] = React.useState<{[id: string]: number}>();
+    const [groupMembers, setGroupMembers] = React.useState<{[id: string]: string[]}>();
 
-    private loadData = () => {
-        Script.Get(this.props.scriptID).then(script => {
-            script.Hosts().then(hosts => {
+    const loadData = () => {
+        Script.Get(props.scriptID).then(script => {
+            Script.Hosts(script.ID).then(hosts => {
                 const groupMap: {[id: string]: string} = {};
                 const groupMembership: {[id: string]: string[]} = {};
                 const selectedGroups: {[id: string]: number} = {};
@@ -59,108 +52,105 @@ export class RunSetup extends React.Component<RunSetupProps, RunSetupState> {
                     groups.push({ ID: id, Name: groupMap[id] });
                 });
 
-                this.setState({
-                    loading: false,
-                    script: script,
-                    groups: groups,
-                    hosts: shosts,
-                    selectedGroups: selectedGroups,
-                    selectedHosts: selectedHosts,
-                    groupMembers: groupMembership,
-                });
+                setGroups(groups);
+                setHosts(shosts);
+                setSelectedGroups(selectedGroups);
+                setSelectedHosts(selectedHosts);
+                setGroupMembers(groupMembership);
+                setLoading(false);
             });
         });
-    }
+    };
 
-    componentDidMount(): void {
-        this.loadData();
-    }
+    React.useEffect(() => {
+        loadData();
+    }, []);
 
-    private selectGroup = (groupID: string) => {
+    React.useEffect(() => {
+        if (selectedHosts == undefined || selectedGroups == undefined) {
+            return;
+        }
+
+        props.onSelectedHosts(selectedHostIDs());
+    }, [selectedHosts, selectedGroups]);
+
+    const selectGroup = (groupID: string) => {
         return (checked: boolean) => {
-            this.setState(state => {
-                const selectedGroups = state.selectedGroups;
+            setSelectedGroups(selectedGroups => {
                 if (checked) {
-                    selectedGroups[groupID]++;
+                    selectedGroups[groupID] = 1;
                 } else {
-                    selectedGroups[groupID]--;
+                    selectedGroups[groupID] = 0;
                 }
-                const selectedHosts = state.selectedHosts;
-                state.groupMembers[groupID].forEach(host => {
+                return {...selectedGroups};
+            });
+            setSelectedHosts(selectedHosts => {
+                groupMembers[groupID].forEach(host => {
                     if (checked) {
-                        selectedHosts[host]++;
+                        selectedHosts[host] = 1;
                     } else {
-                        selectedHosts[host]--;
+                        selectedHosts[host] = 0;
                     }
                 });
-                return {
-                    selectedGroups: selectedGroups,
-                    selectedHosts: selectedHosts,
-                };
-            }, () => {
-                this.props.onSelectedHosts(this.selectedHostIDs());
+                return {...selectedHosts};
             });
         };
-    }
+    };
 
-    private selectHost = (hostID: string) => {
+    const selectHost = (hostID: string) => {
         return (checked: boolean) => {
-            this.setState(state => {
-                const selected: {[id: string]: number} = state.selectedHosts;
+            setSelectedHosts(selectedHosts => {
+                const selected: {[id: string]: number} = selectedHosts;
                 if (checked) {
-                    selected[hostID]++;
+                    selected[hostID] = 1;
                 } else {
-                    selected[hostID]--;
+                    selected[hostID] = 0;
                 }
-                return {
-                    selectedHosts: selected,
-                };
-            }, () => {
-                this.props.onSelectedHosts(this.selectedHostIDs());
+                return {...selectedHosts};
             });
         };
-    }
+    };
 
-    private selectedHostIDs = () => {
+    const selectedHostIDs = () => {
         const hostIDs: string[] = [];
-        Object.keys(this.state.selectedHosts).forEach(hostID => {
-            if (this.state.selectedHosts[hostID] > 0) {
+        Object.keys(selectedHosts).forEach(hostID => {
+            if (selectedHosts[hostID] > 0) {
                 hostIDs.push(hostID);
             }
         });
         return hostIDs;
+    };
+
+    if (loading) {
+        return (<Loading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.loading) { return (<Loading />); }
-
-        return (
-            <Form>
-                <Card.Card>
-                    <Card.Header>Groups</Card.Header>
-                    <Card.Body>
-                        {
-                            this.state.groups.map(group => {
-                                return (
-                                    <Checkbox label={group.Name} onChange={this.selectGroup(group.ID)} defaultValue={this.state.selectedGroups[group.ID]>0} key={Rand.ID()}/>
-                                );
-                            })
-                        }
-                    </Card.Body>
-                </Card.Card>
-                <Card.Card className="mt-3">
-                    <Card.Header>Hosts</Card.Header>
-                    <Card.Body>
-                        {
-                            this.state.hosts.map(host => {
-                                return (
-                                    <Checkbox label={host.Name} onChange={this.selectHost(host.ID)} defaultValue={this.state.selectedHosts[host.ID]>0} key={Rand.ID()}/>
-                                );
-                            })
-                        }
-                    </Card.Body>
-                </Card.Card>
-            </Form>
-        );
-    }
-}
+    return (
+        <Form>
+            <Card.Card>
+                <Card.Header>Groups</Card.Header>
+                <Card.Body>
+                    {
+                        groups.map((group, idx) => {
+                            return (
+                                <Input.Checkbox label={group.Name} onChange={selectGroup(group.ID)} defaultValue={selectedGroups[group.ID]>0} key={idx}/>
+                            );
+                        })
+                    }
+                </Card.Body>
+            </Card.Card>
+            <Card.Card className="mt-3">
+                <Card.Header>Hosts</Card.Header>
+                <Card.Body>
+                    {
+                        hosts.map((host, idx) => {
+                            return (
+                                <Input.Checkbox label={host.Name} onChange={selectHost(host.ID)} defaultValue={selectedHosts[host.ID]>0} key={idx}/>
+                            );
+                        })
+                    }
+                </Card.Body>
+            </Card.Card>
+        </Form>
+    );
+};

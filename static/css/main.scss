@@ -1,4 +1,9 @@
 @import "~bootstrap/scss/bootstrap";
+@import "~@fontsource/fira-sans/index.css";
+
+* {
+    font-family: 'Fira Sans', sans-serif;
+}
 
 .page {
     margin-bottom: 4rem

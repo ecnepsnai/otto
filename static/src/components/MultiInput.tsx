@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { Rand } from '../services/Rand';
+import { Button } from './Button';
 import { FormGroup } from './Form';
 import { Icon } from './Icon';
+import { Style } from './Style';
 
 /**
  * Describes the properties for a multi-input
  */
-export interface MultiInputProps {
+interface MultiInputProps {
     /** Label for the input */
     label: string;
     /** Optional placeholder for empty inputs */
@@ -19,131 +21,130 @@ export interface MultiInputProps {
     helpText?: string;
     /** The maximum number of values that can be added */
     max?: number;
+    /** If a single value is required */
+    required?: boolean;
 }
-
-interface MultiInputState { values: string[]; labelID: string; }
 
 /**
  * A "multi" input, which is a list of text fields with add/remove buttons that accepts an array of strings
  * as its model
  */
-export class MultiInput extends React.Component<MultiInputProps, MultiInputState> {
-    constructor(props: MultiInputProps) {
-        super(props);
+export const MultiInput: React.FC<MultiInputProps> = (props: MultiInputProps) => {
+    const [values, setValues] = React.useState(props.defaultValue);
+    const labelID = Rand.ID();
+    const [valid, setValid] = React.useState('valid');
 
-        let values = this.props.defaultValue;
+    React.useEffect(() => {
         if (!values || values.length == 0) {
-            values = [''];
+            setValues(['']);
+            if (props.required) {
+                setValid('invalid');
+            }
         }
+    }, []);
 
-        this.state = { values: values, labelID: Rand.ID() };
-    }
+    React.useEffect(() => {
+        return () => {
+            let vl = 'valid';
+            if (props.required && values.length <= 0) {
+                vl = 'invalid';
+            }
+            setValid(vl);
+            props.onChange(values);
+        };
+    }, [values]);
 
-    private onChange = (value: string, index: number) => {
-        const values = this.state.values;
-        values[index] = value;
-        this.setState({ values: values });
-        this.props.onChange(values);
-    }
+    const onChange = (value: string, index: number) => {
+        setValues(values => {
+            values[index] = value;
+            values = values.filter(v => {
+                return v && v.length > 0;
+            });
+            return values;
+        });
+    };
 
-    private showAddButton = (): boolean => {
-        if (this.props.max > 0) {
-            return this.state.values.length < this.props.max;
+    const showAddButton = (): boolean => {
+        if (props.max > 0) {
+            return values.length < props.max;
         }
 
         return true;
-    }
+    };
 
-    private showRemoveButton = (index: number): boolean => {
+    const showRemoveButton = (index: number): boolean => {
         return index > 0;
-    }
+    };
 
-    private addButtonClicked = (index: number) => {
-        this.setState(state => {
-            const values = state.values;
-            values.splice(index + 1, 0, '');
-            return { values: values };
+    const addButtonClicked = (index: number) => {
+        setValues(v => {
+            v.splice(index + 1, 0, '');
+            return [...v];
         });
-    }
+    };
 
-    private removeButtonClicked = (index: number) => {
-        this.setState(state => {
-            const values = state.values;
-            values.splice(index, 1);
-            return { values: values };
+    const removeButtonClicked = (index: number) => {
+        setValues(v => {
+            v.splice(index, 1);
+            return [...v];
         });
-    }
+    };
 
-    private helpText(): JSX.Element {
-        if (this.props.helpText) {
-            return <div id={this.state.labelID + 'help'} className="form-text">{this.props.helpText}</div>;
-        } else {
-            return null;
+    const helpText = (): JSX.Element => {
+        if (props.helpText) {
+            return <div id={labelID + 'help'} className="form-text">{props.helpText}</div>;
         }
-    }
-    render(): JSX.Element {
-        return (
+
+        return null;
+    };
+
+    return (
+        <div data-valid={valid}>
             <FormGroup>
-                <label htmlFor={this.state.labelID} className="form-label">{this.props.label}</label>
+                <label htmlFor={labelID} className="form-label">{props.label}</label>
                 {
-                    this.state.values.map((value, idx) => {
+                    values.map((value, idx) => {
                         return <InputGroup
                             key={idx}
                             value={value}
                             index={idx}
-                            placeholder={this.props.placeholder}
-                            onChange={this.onChange}
-                            showAddButton={this.showAddButton}
-                            showRemoveButton={this.showRemoveButton}
-                            addButtonClicked={this.addButtonClicked}
-                            removeButtonClicked={this.removeButtonClicked}
-                        ></InputGroup>;
+                            placeholder={props.placeholder}
+                            onChange={onChange}
+                            showAddButton={showAddButton}
+                            showRemoveButton={showRemoveButton}
+                            addButtonClicked={addButtonClicked}
+                            removeButtonClicked={removeButtonClicked}/>;
                     })
                 }
-                { this.helpText() }
+                { helpText() }
             </FormGroup>
-        );
-    }
-}
+        </div>
+    );
+};
 
 interface FieldProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
 }
-class Field extends React.Component<FieldProps, {}> {
-    private onChange = (event: React.FormEvent<HTMLInputElement>) => {
+const Field: React.FC<FieldProps> = (props: FieldProps) => {
+    const onChange = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
-        this.props.onChange(target.value);
-    }
-    render(): JSX.Element {
-        return <input className="form-control" value={this.props.value} placeholder={this.props.placeholder} onChange={this.onChange}/>;
-    }
-}
+        props.onChange(target.value);
+    };
 
-interface AddButtonProps {
+    return (<input className="form-control" value={props.value} placeholder={props.placeholder} onChange={onChange}/>);
+};
+
+interface ButtonProps {
     onClick: () => void;
 }
-class AddButton extends React.Component<AddButtonProps, {}> {
-    private onClick = () => {
-        this.props.onClick();
-    }
-    render(): JSX.Element {
-        return <button className="btn btn-outline-secondary" type="button" onClick={this.onClick}><Icon.Plus /></button>;
-    }
-}
-
-interface RemoveButtonProps {
-    onClick: () => void;
-}
-class RemoveButton extends React.Component<RemoveButtonProps, {}> {
-    private onClick = () => {
-        this.props.onClick();
-    }
-    render(): JSX.Element {
-        return <button className="btn btn-outline-secondary" type="button" onClick={this.onClick}><Icon.Minus /></button>;
-    }
-}
+const AddButton: React.FC<ButtonProps> = (props: ButtonProps) => {
+    return (<Button color={Style.Palette.Secondary} outline onClick={props.onClick}><Icon.Plus /></Button>);
+};
+const RemoveButton: React.FC<ButtonProps> = (props: ButtonProps) => {
+    return (<Button color={Style.Palette.Secondary} outline onClick={props.onClick}><Icon.Minus /></Button>);
+};
 
 interface InputGroupProps {
     value: string;
@@ -155,39 +156,42 @@ interface InputGroupProps {
     addButtonClicked: (index: number) => void;
     removeButtonClicked: (index: number) => void;
 }
-class InputGroup extends React.Component<InputGroupProps, {}> {
-    private onChange = (value: string) => {
-        this.props.onChange(value, this.props.index);
-    }
-    private addButtonClicked = () => {
-        this.props.addButtonClicked(this.props.index);
-    }
-    private removeButtonClicked = () => {
-        this.props.removeButtonClicked(this.props.index);
-    }
-    private addButton(): JSX.Element {
-        if (this.props.showAddButton(this.props.index)) {
-            return <AddButton onClick={this.addButtonClicked}/>;
+const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
+    const onChange = (value: string) => {
+        props.onChange(value, props.index);
+    };
+
+    const addButtonClicked = () => {
+        props.addButtonClicked(props.index);
+    };
+
+    const removeButtonClicked = () => {
+        props.removeButtonClicked(props.index);
+    };
+
+    const addButton = (): JSX.Element => {
+        if (props.showAddButton(props.index)) {
+            return <AddButton onClick={addButtonClicked}/>;
         }
 
         return null;
-    }
-    private removeButton(): JSX.Element {
-        if (this.props.showRemoveButton(this.props.index)) {
-            return <RemoveButton onClick={this.removeButtonClicked}/>;
+    };
+
+    const removeButton = (): JSX.Element => {
+        if (props.showRemoveButton(props.index)) {
+            return <RemoveButton onClick={removeButtonClicked}/>;
         }
 
         return null;
+    };
+
+    let inputClass = '';
+    if (props.index > 0) {
+        inputClass = 'mt-2';
     }
-    render(): JSX.Element {
-        let inputClass = '';
-        if (this.props.index > 0) {
-            inputClass = 'mt-2';
-        }
-        return <div className={'input-group ' + inputClass}>
-            <Field value={this.props.value} onChange={this.onChange} placeholder={this.props.placeholder}/>
-            { this.removeButton() }
-            { this.addButton() }
-        </div>;
-    }
-}
+    return (<div className={'input-group ' + inputClass}>
+        <Field value={props.value} onChange={onChange} placeholder={props.placeholder}/>
+        { removeButton() }
+        { addButton() }
+    </div>);
+};

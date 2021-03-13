@@ -140,8 +140,10 @@ func (s *Script) Attachments() ([]Attachment, *Error) {
 	for i, id := range s.AttachmentIDs {
 		attachment := AttachmentStore.AttachmentWithID(id)
 		if attachment == nil {
-			log.Error("Attachment '%s' does not exist, found on script '%s'", id, s.ID)
-			return nil, ErrorServer("missing attachment")
+			log.Error("Unknown attachment found on script: attachment_id='%s' script_id='%s'", id, s.ID)
+			log.Warn("Triggering cleanup of attachments")
+			AttachmentStore.Cleanup()
+			return nil, ErrorUser("A temporary error occurred, reload the page to try again")
 		}
 		attachments[i] = *attachment
 	}

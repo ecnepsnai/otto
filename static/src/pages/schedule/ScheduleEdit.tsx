@@ -1,67 +1,58 @@
 import * as React from 'react';
-import { Schedule } from '../../types/Schedule';
+import { Schedule, ScheduleType } from '../../types/Schedule';
 import { Link, match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Form, Select, Input, Radio, RadioChoice, Checkbox } from '../../components/Form';
+import { Input } from '../../components/input/Input';
+import { Form } from '../../components/Form';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
-import { Script } from '../../types/Script';
-import { Group } from '../../types/Group';
+import { Script, ScriptType } from '../../types/Script';
 import { Host } from '../../types/Host';
 import { GroupCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Alert } from '../../components/Alert';
-import { Style } from '../../components/Style';
 import { Icon } from '../../components/Icon';
+import { Checkbox } from '../../components/input/Checkbox';
+import { RadioChoice } from '../../components/input/Radio';
 
-export interface ScheduleEditProps { match: match }
-interface ScheduleEditState {
-    noData?: boolean;
-    loading: boolean;
-    schedule?: Schedule;
-    isNew?: boolean;
-    RunOn: string;
-    patternTemplate?: string;
-    scripts?: Script[];
-    groups?: Group[];
-    hosts?: Host[];
+interface ScheduleEditProps {
+    match: match
 }
-export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEditState> {
-    constructor(props: ScheduleEditProps) {
-        super(props);
-        this.state = {
-            RunOn: 'groups',
-            loading: true,
-        };
-    }
+export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditProps) => {
+    const [noData, setNoData] = React.useState<boolean>();
+    const [loading, setLoading] = React.useState(true);
+    const [schedule, setSchedule] = React.useState<ScheduleType>();
+    const [isNew, setIsNew] = React.useState<boolean>();
+    const [runOn, setRunOn] = React.useState<'groups'|'hosts'>();
+    const [patternTemplate, setPatternTemplate] = React.useState<string>();
+    const [scripts, setScripts] = React.useState<ScriptType[]>();
 
-    componentDidMount(): void {
-        this.loadData();
-    }
+    React.useEffect(() => {
+        loadData();
+    }, []);
 
-    private loadSchedule = () => {
-        const id = (this.props.match.params as URLParams).id;
+    const loadSchedule = () => {
+        const id = (props.match.params as URLParams).id;
         if (id == null) {
             return Promise.resolve(Schedule.Blank());
         } else {
             return Schedule.Get(id);
         }
-    }
+    };
 
-    private loadData = () => {
-        Promise.all([ this.loadSchedule(), Script.List(), Group.List(), Host.List() ]).then(results => {
+    const loadData = () => {
+        Promise.all([ loadSchedule(), Script.List(), Host.List() ]).then(results => {
             const isNew = results[0].ID == undefined;
             const schedule = results[0];
             const scripts = results[1];
-            const groups = results[2];
-            const hosts = results[3];
-            let runOn = 'groups';
+            const hosts = results[2];
+            let runOn: ('groups'|'hosts') = 'groups';
             let patternTemplate = '';
 
             if (!hosts || hosts.length === 0 || !scripts || scripts.length === 0) {
-                this.setState({ noData: true });
+                setNoData(true);
                 return;
             }
 
@@ -71,231 +62,232 @@ export class ScheduleEdit extends React.Component<ScheduleEditProps, ScheduleEdi
                 patternTemplate = '0 * * * *';
             } else {
                 switch (schedule.Pattern) {
-                    case '0 * * * *':
-                    case '0 */4 * * *':
-                    case '0 0 * * *':
-                    case '0 0 * * 1':
-                        patternTemplate = schedule.Pattern;
-                        break;
-                    default:
-                        patternTemplate = 'custom';
-                        break;
+                case '0 * * * *':
+                case '0 */4 * * *':
+                case '0 0 * * *':
+                case '0 0 * * 1':
+                    patternTemplate = schedule.Pattern;
+                    break;
+                default:
+                    patternTemplate = 'custom';
+                    break;
                 }
 
-                if (hosts && hosts.length > 0) {
+                if (schedule.Scope.HostIDs && schedule.Scope.HostIDs.length > 0) {
                     runOn = 'hosts';
                 }
             }
 
-            this.setState({
-                loading: false,
-                schedule: schedule,
-                isNew: isNew,
-                scripts: scripts,
-                groups: groups,
-                hosts: hosts,
-                RunOn: runOn,
-                patternTemplate: patternTemplate,
-            });
+            setSchedule(schedule);
+            setIsNew(isNew);
+            setScripts(scripts);
+            setRunOn(runOn);
+            setPatternTemplate(patternTemplate);
+            setLoading(false);
         });
-    }
+    };
 
-    private changeName = (Name: string) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeName = (Name: string) => {
+        setSchedule(schedule => {
             schedule.Name = Name;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private changeScriptID = (ScriptID: string) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeScriptID = (ScriptID: string) => {
+        setSchedule(schedule => {
             schedule.ScriptID = ScriptID;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private changePatternTemplate = (pattern: string) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changePatternTemplate = (pattern: string) => {
+        setSchedule(schedule => {
             if (pattern !== 'custom') {
                 schedule.Pattern = pattern;
             } else {
                 schedule.Pattern = '';
             }
-            return { schedule: schedule, patternTemplate: pattern };
+            setPatternTemplate(pattern);
+            return {...schedule};
         });
-    }
+    };
 
-    private changeEnabled = (Enabled: boolean) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeEnabled = (Enabled: boolean) => {
+        setSchedule(schedule => {
             schedule.Enabled = Enabled;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private enabledCheckbox = () => {
-        if (this.state.isNew) { return null; }
-
-        return (
-            <Checkbox
-                label="Enabled"
-                defaultValue={this.state.schedule.Enabled}
-                onChange={this.changeEnabled} />
-        );
-    }
-
-    private cronPatternInput = () => {
-        if (this.state.patternTemplate !== 'custom') {
+    const enabledCheckbox = () => {
+        if (isNew) {
             return null;
         }
 
         return (
-            <Input
+            <Checkbox
+                label="Enabled"
+                defaultValue={schedule.Enabled}
+                onChange={changeEnabled} />
+        );
+    };
+
+    const cronPatternInput = () => {
+        if (patternTemplate !== 'custom') {
+            return null;
+        }
+
+        return (
+            <Input.Text
                 label="Frequency Expression"
                 type="text"
                 helpText="Cron expression"
-                defaultValue={this.state.schedule.Pattern}
-                onChange={this.changePattern}
+                defaultValue={schedule.Pattern}
+                onChange={changePattern}
                 required />
         );
-    }
+    };
 
-    private changePattern = (Pattern: string) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changePattern = (Pattern: string) => {
+        setSchedule(schedule => {
             schedule.Pattern = Pattern;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private changeRunOn = (RunOn: string) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeRunOn = (RunOn: string) => {
+        if (runOn === RunOn) {
+            return;
+        }
+
+        setSchedule(schedule => {
             schedule.Scope.HostIDs = [];
             schedule.Scope.GroupIDs = [];
-            return { schedule: schedule, RunOn: RunOn };
+            setRunOn(RunOn as 'groups'|'hosts');
+            return {...schedule};
         });
-    }
+    };
 
-    private changeHostIDs = (HostIDs: string[]) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeHostIDs = (HostIDs: string[]) => {
+        setSchedule(schedule => {
             schedule.Scope.HostIDs = HostIDs;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private changeGroupIDs = (GroupIDs: string[]) => {
-        this.setState(state => {
-            const schedule = state.schedule;
+    const changeGroupIDs = (GroupIDs: string[]) => {
+        setSchedule(schedule => {
             schedule.Scope.GroupIDs = GroupIDs;
-            return { schedule: schedule };
+            return {...schedule};
         });
-    }
+    };
 
-    private hostList = () => {
-        if (this.state.RunOn !== 'hosts') { return null; }
+    const hostList = () => {
+        if (runOn !== 'hosts') {
+            return null;
+        }
 
         return (
             <Card.Card>
                 <Card.Header>Hosts</Card.Header>
                 <Card.Body>
-                    <HostCheckList selectedHosts={this.state.schedule.Scope.HostIDs} onChange={this.changeHostIDs} />
+                    <HostCheckList selectedHosts={schedule.Scope.HostIDs} onChange={changeHostIDs} />
                 </Card.Body>
             </Card.Card>
         );
-    }
+    };
 
-    private groupList = () => {
-        if (this.state.RunOn !== 'groups') { return null; }
+    const groupList = () => {
+        if (runOn !== 'groups') {
+            return null;
+        }
 
         return (
             <Card.Card>
                 <Card.Header>Groups</Card.Header>
                 <Card.Body>
-                    <GroupCheckList selectedGroups={this.state.schedule.Scope.GroupIDs} onChange={this.changeGroupIDs} />
+                    <GroupCheckList selectedGroups={schedule.Scope.GroupIDs} onChange={changeGroupIDs} />
                 </Card.Body>
             </Card.Card>
         );
-    }
+    };
 
-    private formSave = () => {
-        let promise: Promise<Schedule>;
-        if (this.state.isNew) {
-            promise = Schedule.New(this.state.schedule);
+    const formSave = () => {
+        let promise: Promise<ScheduleType>;
+        if (isNew) {
+            promise = Schedule.New(schedule);
         } else {
-            promise = this.state.schedule.Save();
+            promise = Schedule.Save(schedule);
         }
 
         return promise.then(schedule => {
             Notification.success('Schedule Saved');
             Redirect.To('/schedules/schedule/' + schedule.ID);
         });
+    };
+
+    if (noData) return (<Page title="New Schedule">
+        <Alert.Danger>
+            <p>At least one script and host is required before you can create a schedule</p>
+            <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
+        </Alert.Danger>
+    </Page>);
+
+    if (loading) {
+        return (<PageLoading />);
     }
 
-    render(): JSX.Element {
-        if (this.state.noData) return (<Page title="New Schedule">
-            <Alert color={Style.Palette.Danger}>
-                <p>At least one script and host is required before you can create a schedule</p>
-                <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
-            </Alert>
-        </Page>);
-        if (this.state.loading) { return (<PageLoading />); }
+    const runOnChoices: RadioChoice[] = [
+        {
+            label: 'Individual Hosts',
+            value: 'hosts'
+        },
+        {
+            label: 'Groups',
+            value: 'groups'
+        }
+    ];
 
-        const runOnChoices: RadioChoice[] = [
-            {
-                label: 'Individual Hosts',
-                value: 'hosts'
-            },
-            {
-                label: 'Groups',
-                value: 'groups'
-            }
-        ];
-
-        return (
-        <Page title={ this.state.isNew ? 'New Schedule' : 'Edit Schedule' }>
-            <Form showSaveButton onSubmit={this.formSave}>
-                <Input
+    return (
+        <Page title={ isNew ? 'New Schedule' : 'Edit Schedule' }>
+            <Form showSaveButton onSubmit={formSave}>
+                <Input.Text
                     label="Name"
                     type="text"
-                    defaultValue={this.state.schedule.Name}
-                    onChange={this.changeName}
+                    defaultValue={schedule.Name}
+                    onChange={changeName}
                     required />
-                <Select
+                <Input.Select
                     label="Script"
-                    defaultValue={this.state.schedule.ScriptID}
-                    onChange={this.changeScriptID}
+                    defaultValue={schedule.ScriptID}
+                    onChange={changeScriptID}
                     required>
-                    { this.state.scripts.map((script, idx) => {
+                    { scripts.map((script, idx) => {
                         return (<option value={script.ID} key={idx}>{script.Name}</option>);
                     })}
-                </Select>
-                <Select
+                </Input.Select>
+                <Input.Select
                     label="Run Frequency"
-                    defaultValue={this.state.patternTemplate}
-                    onChange={this.changePatternTemplate}
+                    defaultValue={patternTemplate}
+                    onChange={changePatternTemplate}
                     required>
-                        <option value="0 * * * *">Every Hour</option>
-                        <option value="0 */4 * * *">Every 4 Hours</option>
-                        <option value="0 0 * * *">Every Day at Midnight</option>
-                        <option value="0 0 * * 1">Every Monday at Midnight</option>
-                        <option value="custom">Custom</option>
-                </Select>
-                { this.enabledCheckbox() }
-                { this.cronPatternInput() }
-                <Radio
+                    <option value="0 * * * *">Every Hour</option>
+                    <option value="0 */4 * * *">Every 4 Hours</option>
+                    <option value="0 0 * * *">Every Day at Midnight</option>
+                    <option value="0 0 * * 1">Every Monday at Midnight</option>
+                    <option value="custom">Custom</option>
+                </Input.Select>
+                { enabledCheckbox() }
+                { cronPatternInput() }
+                <Input.Radio
                     label="Run On"
-                    onChange={this.changeRunOn}
+                    onChange={changeRunOn}
                     choices={runOnChoices}
-                    defaultValue={this.state.RunOn} />
-                { this.hostList() }
-                { this.groupList() }
+                    defaultValue={runOn} />
+                { hostList() }
+                { groupList() }
             </Form>
         </Page>
-        );
-    }
-}
+    );
+};

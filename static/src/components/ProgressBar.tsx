@@ -4,70 +4,66 @@ import { Icon } from './Icon';
 import { Style } from './Style';
 import '../../css/progress.scss';
 
-export interface ProgressBarProps {
+interface ProgressBarProps {
     percent?: number;
     intermediate?: boolean;
     cancelClick?: () => void;
 }
-interface ProgressBarState {
-    cancelClicked?: boolean;
-}
-export class ProgressBar extends React.Component<ProgressBarProps, ProgressBarState> {
-    constructor(props: ProgressBarProps) {
-        super(props);
-        this.state = {};
+export const ProgressBar: React.FC<ProgressBarProps> = (props: ProgressBarProps) => {
+    const [cancelClicked, setCancelClicked] = React.useState(false);
+
+    React.useEffect(() => {
+        if (cancelClicked) {
+            props.cancelClick();
+        }
+    }, [cancelClicked]);
+
+    const cancelClick = () => {
+        setCancelClicked(true);
+    };
+
+    let width = props.percent;
+    let intermediate = props.intermediate;
+
+    if (props.percent == undefined && props.intermediate != undefined) {
+        width = 100;
+        intermediate = true;
     }
 
-    private cancelClick = () => {
-        this.setState({ cancelClicked: true }, () => {
-            this.props.cancelClick();
-        });
+    const style = {
+        width: width + '%',
+    };
+
+    let className = 'progress-bar';
+    if (width >= 100 || intermediate) {
+        className += ' progress-bar-striped progress-bar-animated';
     }
 
-    render(): JSX.Element {
-        let width = this.props.percent;
-        let intermediate = this.props.intermediate;
+    let content = (<span>{props.percent}%</span>);
+    if (intermediate) {
+        content = null;
+    }
 
-        if (this.props.percent == undefined && this.props.intermediate != undefined) {
-            width = 100;
-            intermediate = true;
-        }
-
-        const style = {
-            width: width + '%',
-        };
-
-        let className = 'progress-bar';
-        if (width >= 100 || intermediate) {
-            className += ' progress-bar-striped progress-bar-animated';
-        }
-
-        let content = (<span>{this.props.percent}%</span>);
-        if (intermediate) {
-            content = null;
-        }
-
-        if (this.props.cancelClick) {
-            return (
-                <div className="progress-wrapper">
-                    <div className="progress">
-                        <div className={className} role="progressbar" style={style} aria-valuenow={this.props.percent} aria-valuemin={0} aria-valuemax={100}>
-                            {content}
-                        </div>
-                    </div>
-                    <Button color={Style.Palette.Danger} outline disabled={this.state.cancelClicked} onClick={this.cancelClick} size={Style.Size.XS}>
-                        <Icon.Label icon={<Icon.TimesCircle />} label="Cancel" />
-                    </Button>
-                </div>
-            );
-        }
-
+    if (props.cancelClick) {
         return (
-            <div className="progress">
-                <div className={className} role="progressbar" style={style} aria-valuenow={this.props.percent} aria-valuemin={0} aria-valuemax={100}>
-                    {content}
+            <div className="progress-wrapper">
+                <div className="progress">
+                    <div className={className} role="progressbar" style={style} aria-valuenow={props.percent} aria-valuemin={0} aria-valuemax={100}>
+                        {content}
+                    </div>
                 </div>
+                <Button color={Style.Palette.Danger} outline disabled={cancelClicked} onClick={cancelClick} size={Style.Size.XS}>
+                    <Icon.Label icon={<Icon.TimesCircle />} label="Cancel" />
+                </Button>
             </div>
         );
     }
-}
+
+    return (
+        <div className="progress">
+            <div className={className} role="progressbar" style={style} aria-valuenow={props.percent} aria-valuemin={0} aria-valuemax={100}>
+                {content}
+            </div>
+        </div>
+    );
+};

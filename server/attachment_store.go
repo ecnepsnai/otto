@@ -171,6 +171,12 @@ func (s attachmentStoreObject) Cleanup() *Error {
 	attachmentsWithScripts := map[string]bool{}
 	attachments := s.AllAttachments()
 	scripts := ScriptStore.AllScripts()
+
+	attachmentIDMap := map[string]bool{}
+	for _, attachment := range attachments {
+		attachmentIDMap[attachment.ID] = true
+	}
+
 	for _, attachment := range attachments {
 		for _, script := range scripts {
 			if stringSliceContains(attachment.ID, script.AttachmentIDs) {
@@ -180,13 +186,35 @@ func (s attachmentStoreObject) Cleanup() *Error {
 		}
 	}
 
+	for _, script := range scripts {
+		for idx, attachmentID := range script.AttachmentIDs {
+			if attachmentIDMap[attachmentID] {
+				continue
+			}
+
+			log.Warn("Unknown attachment found on script: attachment_id='%s' script_id='%s'", attachmentID, script.ID)
+			attachmentIDs := append(script.AttachmentIDs[:idx], script.AttachmentIDs[idx+1:]...)
+			ScriptStore.EditScript(&script, editScriptParameters{
+				Name:             script.Name,
+				Enabled:          script.Enabled,
+				Executable:       script.Executable,
+				Script:           script.Script,
+				Environment:      script.Environment,
+				RunAs:            script.RunAs,
+				WorkingDirectory: script.WorkingDirectory,
+				AfterExecution:   script.AfterExecution,
+				AttachmentIDs:    attachmentIDs,
+			})
+		}
+	}
+
 	for _, attachment := range attachments {
 		if attachmentsWithScripts[attachment.ID] {
 			continue
 		}
 
 		if time.Since(attachment.Modified) > 1*time.Hour {
-			log.Warn("Removing orphaned script attachment '%s'", attachment.ID)
+			log.Warn("Orphaned attachment found: attachment_id='%s'", attachment.ID)
 			if err := s.DeleteAttachment(attachment.ID); err != nil {
 				return err
 			}

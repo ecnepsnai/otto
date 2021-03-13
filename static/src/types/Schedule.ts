@@ -1,34 +1,26 @@
-import { API } from "../services/API";
-import { Modal } from "../components/Modal";
-import { Notification } from "../components/Notification";
-import { Group } from "./Group";
-import { Host } from "./Host";
-import { Script } from "./Script";
+import { API } from '../services/API';
+import { Modal } from '../components/Modal';
+import { Notification } from '../components/Notification';
+import { GroupType } from './Group';
+import { HostType } from './Host';
+import { ScriptType } from './Script';
+
+export interface ScheduleType {
+    ID?: string;
+    Name?: string;
+    ScriptID?: string;
+    Scope?: ScheduleScope;
+    Pattern?: string;
+    Enabled?: boolean;
+    LastRunTime?: string;
+}
 
 export class Schedule {
-    ID: string;
-    Name: string;
-    ScriptID: string;
-    Scope: ScheduleScope;
-    Pattern: string;
-    Enabled: boolean;
-    LastRunTime: string;
-
-    public constructor(json: any) {
-        this.ID = json.ID as string;
-        this.Name = json.Name as string;
-        this.ScriptID = json.ScriptID as string;
-        this.Scope = json.Scope as ScheduleScope;
-        this.Pattern = json.Pattern as string;
-        this.Enabled = json.Enabled as boolean;
-        this.LastRunTime = json.LastRunTime as string;
-    }
-
     /**
      * Return a blank schedule
      */
-    public static Blank(): Schedule {
-        return new Schedule({
+    public static Blank(): ScheduleType {
+        return {
             Name: '',
             ScriptID: '',
             Scope: {
@@ -36,38 +28,38 @@ export class Schedule {
                 GroupIDs: [],
             },
             Pattern: '',
-        });
+        };
     }
 
     /**
      * Create a new Schedule
      */
-    public static async New(parameters: NewScheduleParameters): Promise<Schedule> {
+    public static async New(parameters: ScheduleType|NewScheduleParameters): Promise<ScheduleType> {
         const data = await API.PUT('/api/schedules/schedule', parameters);
-        return new Schedule(data);
+        return data as ScheduleType;
     }
 
     /**
      * Save this schedule
      */
-    public async Save(): Promise<Schedule> {
-        const data = await API.POST('/api/schedules/schedule/' + this.ID, this as EditScheduleParameters);
-        return new Schedule(data);
+    public static async Save(schedule: ScheduleType): Promise<ScheduleType> {
+        const data = await API.POST('/api/schedules/schedule/' + schedule.ID, schedule);
+        return data as ScheduleType;
     }
 
     /**
      * Delete this schedule
      */
-    public async Delete(): Promise<any> {
-        return await API.DELETE('/api/schedules/schedule/' + this.ID);
+    public static async Delete(schedule: ScheduleType): Promise<any> {
+        return await API.DELETE('/api/schedules/schedule/' + schedule.ID);
     }
 
     /**
      * Get the specified schedule by its id
      */
-    public static async Get(id: string): Promise<Schedule> {
+    public static async Get(id: string): Promise<ScheduleType> {
         const data = await API.GET('/api/schedules/schedule/' + id);
-        return new Schedule(data);
+        return data as ScheduleType;
     }
 
     /**
@@ -81,75 +73,41 @@ export class Schedule {
     }
 
     /**
-     * Get all reports for this schedule
-     */
-    public async Reports(): Promise<ScheduleReport[]> {
-        return Schedule.Reports(this.ID);
-    }
-
-    /**
      * Get all groups for a schedule
      */
-    public static async Groups(id: string): Promise<Group[]> {
+    public static async Groups(id: string): Promise<GroupType[]> {
         const data = await API.GET('/api/schedules/schedule/' + id + '/groups');
-        return (data as any[]).map(obj => {
-            return new Group(obj);
-        });
-    }
-
-    /**
-     * Get all groups for this schedule
-     */
-    public async Groups(): Promise<Group[]> {
-        return Schedule.Groups(this.ID);
+        return data as GroupType[];
     }
 
     /**
      * Get all hosts for a schedule
      */
-    public static async Hosts(id: string): Promise<Host[]> {
+    public static async Hosts(id: string): Promise<HostType[]> {
         const data = await API.GET('/api/schedules/schedule/' + id + '/hosts');
-        return (data as any[]).map(obj => {
-            return new Host(obj);
-        });
-    }
-
-    /**
-     * Get all hosts for this schedule
-     */
-    public async Hosts(): Promise<Host[]> {
-        return Schedule.Hosts(this.ID);
+        return data as HostType[];
     }
 
     /**
      * Get all script for a schedule
      */
-    public static async Script(id: string): Promise<Script> {
+    public static async Script(id: string): Promise<ScriptType> {
         const data = await API.GET('/api/schedules/schedule/' + id + '/script');
-        return data as Script;
-    }
-
-    /**
-     * Get all script for this schedule
-     */
-    public async Script(): Promise<Script> {
-        return Schedule.Script(this.ID);
+        return data as ScriptType;
     }
 
     /**
      * List all schedules
      */
-    public static async List(): Promise<Schedule[]> {
+    public static async List(): Promise<ScheduleType[]> {
         const data = await API.GET('/api/schedules');
-        return (data as any[]).map(obj => {
-            return new Schedule(obj);
-        });
+        return data as ScheduleType[];
     }
 
     /**
      * Show a modal to delete this schedule
      */
-    public async DeleteModal(): Promise<boolean> {
+    public static async DeleteModal(schedule: ScheduleType): Promise<boolean> {
         return new Promise(resolve => {
             Modal.delete('Delete Schedule?', 'Are you sure you want to delete this schedule? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
@@ -157,7 +115,7 @@ export class Schedule {
                     return;
                 }
 
-                API.DELETE('/api/schedules/schedule/' + this.ID).then(() => {
+                API.DELETE('/api/schedules/schedule/' + schedule.ID).then(() => {
                     Notification.success('Schedule Deleted');
                     resolve(true);
                 });

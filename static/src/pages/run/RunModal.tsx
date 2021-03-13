@@ -10,74 +10,61 @@ enum RunStage {
     Finished,
 }
 
-export interface RunModalProps {
+interface RunModalProps {
     scriptID: string;
     hostIDs?: string[];
 }
-interface RunModalState {
-    stage: RunStage;
-    selectedHostIDs?: string[];
-    finishedHosts: string[];
-}
-export class RunModal extends React.Component<RunModalProps, RunModalState> {
-    constructor(props: RunModalProps) {
-        super(props);
-        this.state = {
-            stage: props.hostIDs ? RunStage.Running : RunStage.Setup,
-            selectedHostIDs: props.hostIDs,
-            finishedHosts: [],
-        };
-    }
+export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
+    const [stage, setStage] = React.useState(props.hostIDs ? RunStage.Running : RunStage.Setup);
+    const [selectedHostIDs, setSelectedHostIDs] = React.useState(props.hostIDs);
+    const [finishedHosts, setFinishedHosts] = React.useState<string[]>([]);
 
-    private onSelectHostIDs = (hostIDs: string[]) => {
-        this.setState({
-            selectedHostIDs: hostIDs
-        });
-    }
+    const onSelectHostIDs = (hostIDs: string[]) => {
+        setSelectedHostIDs(hostIDs);
+    };
 
-    private checkFinished = () => {
-        if (this.state.finishedHosts.length <= this.state.selectedHostIDs.length) {
-            this.setState({
-                stage: RunStage.Finished
-            });
+    React.useEffect(() => {
+        checkFinished();
+    }, [finishedHosts]);
+
+    const checkFinished = () => {
+        if (selectedHostIDs && finishedHosts.length <= selectedHostIDs.length) {
+            setStage(RunStage.Finished);
         }
-    }
+    };
 
-    private scriptFinished = (hostID: string) => {
+    const scriptFinished = (hostID: string) => {
         return () => {
-            this.setState(state => {
-                state.finishedHosts.push(hostID);
-                return state;
-            }, () => {
-                this.checkFinished();
+            setFinishedHosts(finishedHosts => {
+                return [...finishedHosts, hostID];
             });
         };
-    }
+    };
 
-    private setup = () => {
+    const setup = () => {
         return (
-            <RunSetup scriptID={this.props.scriptID} onSelectedHosts={this.onSelectHostIDs}/>
+            <RunSetup scriptID={props.scriptID} onSelectedHosts={onSelectHostIDs}/>
         );
-    }
+    };
 
-    private running = () => {
+    const running = () => {
         return (
             <div className="cards">
-                { this.state.selectedHostIDs.map(hostID => {
+                { selectedHostIDs.map(hostID => {
                     return (
-                        <RunScript scriptID={this.props.scriptID} hostID={hostID} key={hostID} onFinished={this.scriptFinished(hostID)}/>
+                        <RunScript scriptID={props.scriptID} hostID={hostID} key={hostID} onFinished={scriptFinished(hostID)}/>
                     );
                 })}
             </div>
         );
-    }
+    };
 
-    private buttons = (): ModalButton[] => {
-        if (this.state.stage == RunStage.Running) {
+    const buttons = (): ModalButton[] => {
+        if (stage == RunStage.Running) {
             return [];
         }
 
-        if (this.state.stage == RunStage.Finished) {
+        if (stage == RunStage.Finished) {
             return [
                 {
                     label: 'Close',
@@ -89,29 +76,27 @@ export class RunModal extends React.Component<RunModalProps, RunModalState> {
             {
                 label: 'Start',
                 onClick: () => {
-                    this.setState({
-                        stage: RunStage.Running,
-                    });
+                    if (selectedHostIDs && selectedHostIDs.length > 0) {
+                        setStage(RunStage.Running);
+                    }
                 },
                 dontDismiss: true,
             }
         ];
-    }
+    };
 
-    private content = () => {
-        if (this.state.stage == RunStage.Setup) {
-            return this.setup();
-        } else if (this.state.stage == RunStage.Running || this.state.stage == RunStage.Finished) {
-            return this.running();
+    const content = () => {
+        if (stage == RunStage.Setup) {
+            return setup();
+        } else if (stage == RunStage.Running || stage == RunStage.Finished) {
+            return running();
         }
         return null;
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <Modal title="Run Script" size={Style.Size.L} buttons={this.buttons()} static={this.state.stage === RunStage.Running}>
-                { this.content() }
-            </Modal>
-        );
-    }
-}
+    return (
+        <Modal title="Run Script" size={Style.Size.L} buttons={buttons()} static>
+            { content() }
+        </Modal>
+    );
+};

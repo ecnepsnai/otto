@@ -21,6 +21,6 @@ export class Rand {
     public static PSK(): string {
         const array = new Uint32Array(6);
         window.crypto.getRandomValues(array);
-        return Array.from(array, byte => byte.toString(16).padStart(2, "0")).join("");
+        return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
     }
 }

@@ -38,5 +38,10 @@ func checkFirstRun() {
 			log.Fatal("Unable to make default group: %s", err.Message)
 		}
 		EventStore.GroupAdded(group, "system")
+		if Options.Register.DefaultGroupID == "" {
+			o := Options
+			o.Register.DefaultGroupID = group.ID
+			o.Save()
+		}
 	}
 }

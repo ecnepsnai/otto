@@ -1,31 +1,30 @@
 import * as React from 'react';
 import { Style } from './Style';
 import { Rand } from '../services/Rand';
-import '../../css/notification.scss';
 import { Alert } from './Alert';
+import '../../css/notification.scss';
 
-export interface NotificationProps {
+interface NotificationProps {
     message: string;
     color: Style.Palette;
     id: string;
 }
 
-export class Notification extends React.Component<NotificationProps, {}> {
+export class Notification extends React.Component<NotificationProps, unknown> {
     private onClose = () => {
         GlobalNotificationFrame.removeNotification(this.props.id);
     }
     componentDidMount(): void {
-        const duration = Math.max(this.props.message.length * 100, 1250);
         setTimeout(() => {
             this.onClose();
-        }, duration);
+        }, 1250);
     }
     render(): JSX.Element {
         return (
             <div className="notification">
-                <Alert color={this.props.color} onClose={this.onClose}>
+                <Alert.Alert color={this.props.color} onClose={this.onClose}>
                     { this.props.message }
-                </Alert>
+                </Alert.Alert>
             </div>
         );
     }
@@ -70,13 +69,12 @@ export class Notification extends React.Component<NotificationProps, {}> {
     }
 }
 
-export interface GlobalNotificationFrameProps { }
 interface GlobalNotificationFrameState {
     notifications: JSX.Element[];
 }
 
-export class GlobalNotificationFrame extends React.Component<GlobalNotificationFrameProps, GlobalNotificationFrameState> {
-    constructor(props: GlobalNotificationFrameProps) {
+export class GlobalNotificationFrame extends React.Component<unknown, GlobalNotificationFrameState> {
+    constructor(props: unknown) {
         super(props);
         this.state = { notifications: [] };
         GlobalNotificationFrame.instance = this;

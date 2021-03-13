@@ -2,20 +2,26 @@
 
 The Otto server is controlled via a REST API. This document details how you may use that API.
 
-**⚠️ Otto is still in active development and there are frequently breaking changes between releases.**
-
 ## Using the API
 
-All API exports, excluding the login endpoint, require you to provide a session cookie. The cookie is returned when
-you log in to the Otto server.
+All API endpoints, excluding the login endpoint, require that you provide a username and API key. API keys are
+associated with a user and must be generated before it can be used. Generate an API key by clicking the "Reset API Key"
+button when editing a user.
 
-The session expires 1 hour after the last request.
+Each HTTP request must provide the following headers:
+
+- `X-OTTO-USERNAME`: The username of the user
+- `X-OTTO-API-KEY`: The API key for the user
+
+Only URLs that start with `/api` can be accessed using these headers.
 
 # Endpoints
 
 ## Authentication
 
 **POST /api/login**
+
+**Note:** This should only be used if you cannot use the API key authentication method.
 
 This is the only request that can be performed without an session cookie, or with an expired cookie. Upon successful
 authentication, a valid session cookie is required.
@@ -302,6 +308,10 @@ Expected body:
 To change a users password, include the variable `Password` with a string value containing the new password in the
 request. The password will not be changed if the `Password` variable is not present, or is an empty string.
 
+**POST /api/users/user/:username/apikey**
+
+
+
 **DELETE /api/users/user/:username**
 
 Delete the existing user `:username`.
@@ -323,6 +333,26 @@ Returns the current state of the system. This endpoint is used by the web interf
 
 **POST /api/options**
 
+
+## Registration Rules
+
+**GET /api/register/rules**
+
+
+
+**PUT /api/register/rules/rule**
+
+
+
+**GET /api/register/rules/rule/:id**
+
+
+
+**POST /api/register/rules/rule/:id**
+
+
+
+**DELETE /api/register/rules/rule/:id**
 
 
 

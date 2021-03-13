@@ -6,7 +6,9 @@ import (
 )
 
 const (
-	ottoSessionCookie = "otto-session"
+	ottoSessionCookie     = "otto-session"
+	ottoAPIUsernameHeader = "X-OTTO-USERNAME"
+	ottoAPIKeyheader      = "X-OTTO-API-KEY"
 )
 
 // AuthenticationResult describes an authentication result
@@ -18,7 +20,37 @@ type AuthenticationResult struct {
 func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 	sessionCookie, _ := r.Cookie(ottoSessionCookie)
 	if sessionCookie == nil {
-		return nil
+		if len(r.URL.Path) < 4 || r.URL.Path[0:4] != "/api" {
+			return nil
+		}
+
+		apiUsername := r.Header.Get(ottoAPIUsernameHeader)
+		if apiUsername == "" {
+			return nil
+		}
+		apiKey := r.Header.Get(ottoAPIKeyheader)
+		if apiKey == "" {
+			return nil
+		}
+
+		user := UserStore.UserWithUsername(apiUsername)
+		if user == nil {
+			log.Warn("API request for non-existant user: username='%s'", apiUsername)
+			return nil
+		}
+
+		if !user.APIKey.Compare([]byte(apiKey)) {
+			log.Warn("API request with incorrect API key: username='%s'", apiUsername)
+			return nil
+		}
+
+		session := Session{
+			Key:      generateSessionSecret(),
+			ShortID:  newPlainID(),
+			Username: user.Username,
+		}
+		log.Info("HTTP request: api_session method='%s' url='%s' username='%s'", r.Method, r.URL.String(), session.Username)
+		return &session
 	}
 
 	sessionKey := sessionCookie.Value

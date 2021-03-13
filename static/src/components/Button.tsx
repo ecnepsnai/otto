@@ -1,11 +1,19 @@
 import * as React from 'react';
 import '../../css/button.scss';
 import { Style } from './Style';
-import { Icon } from './Icon';
 import { Redirect } from './Redirect';
-import { GlobalModalFrame } from './Modal';
+import { Icon } from './Icon';
 
-export interface ButtonProps {
+interface CommonButtonProps {
+    onClick: () => (void);
+    disabled?: boolean;
+}
+
+interface CommonButtonLinkProps {
+    to: string;
+}
+
+interface ButtonProps {
     /**
      * The color of this button
      */
@@ -21,7 +29,7 @@ export interface ButtonProps {
     /**
      * Event called when the button is clicked
      */
-    onClick?: Function;
+    onClick?: () => void;
     /**
      * Should the button be disabled
      */
@@ -30,40 +38,34 @@ export interface ButtonProps {
      * Optional classes to append to the button
      */
     className?: string;
+
+    children?: React.ReactNode;
 }
 
 /**
  * A button that the user can click
  */
-export class Button extends React.Component<ButtonProps, {}> {
-    constructor(props: ButtonProps) {
-        super(props);
-    }
-    private onClick = () => {
-        this.props.onClick();
-    }
-    public static className(props: ButtonProps): string {
-        let className = 'btn ';
-        if (props.outline) {
-            className += 'btn-outline-';
-        } else {
-            className += 'btn-';
-        }
-        className += props.color.toString();
-        const size = props.size || Style.Size.S;
-        className += ' btn-' + size.toString();
-        className += ' ' + (props.className || '');
-        return className;
-    }
-    render(): JSX.Element {
-        const className = Button.className(this.props);
-        return (
-            <button type="button" className={className} onClick={this.onClick} disabled={this.props.disabled}>{this.props.children}</button>
-        );
-    }
-}
+export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
+    const onClick = () => {
+        props.onClick();
+    };
 
-export interface ButtonLinkProps {
+    let className = 'btn ';
+    if (props.outline) {
+        className += 'btn-outline-';
+    } else {
+        className += 'btn-';
+    }
+    className += props.color.toString();
+    const size = props.size || Style.Size.S;
+    className += ' btn-' + size.toString();
+    className += ' ' + (props.className || '');
+    return (
+        <button type="button" className={className} onClick={onClick} disabled={props.disabled}>{props.children}</button>
+    );
+};
+
+interface ButtonLinkProps {
     /**
      * The color of this button
      */
@@ -84,105 +86,153 @@ export interface ButtonLinkProps {
      * Should the button be disabled
      */
     disabled?: boolean;
+
+    children?: React.ReactNode;
 }
 
 /**
  * A button that acts as a link. When clicked it redirects the user to the destination.
  */
-export class ButtonLink extends React.Component<ButtonLinkProps, {}> {
-    private onClick = () => {
-        GlobalModalFrame.removeModal();
-        Redirect.To(this.props.to);
-    }
-    render(): JSX.Element {
-        return <Button
-            color={this.props.color}
-            outline={this.props.outline}
-            size={this.props.size}
-            disabled={this.props.disabled}
-            onClick={this.onClick}>
-                { this.props.children }
-            </Button>;
-    }
+export const ButtonLink: React.FC<ButtonLinkProps> = (props: ButtonLinkProps) => {
+    const onClick = () => {
+        Redirect.To(props.to);
+    };
+    return <Button
+        color={props.color}
+        outline={props.outline}
+        size={props.size}
+        disabled={props.disabled}
+        onClick={onClick}>
+        { props.children }
+    </Button>;
+};
+
+export const Buttons: React.FC = (props: { children: React.ReactNode }) => {
+    return (<div className="buttons">{ props.children }</div>);
+};
+
+export const ButtonGroup: React.FC = (props: { children: React.ReactNode }) => {
+    return (<div className="btn-group">{ props.children }</div>);
+};
+
+export const AddButton: React.FC<CommonButtonProps> = (props: CommonButtonProps) => {
+    return (<Button onClick={props.onClick} color={Style.Palette.Primary} outline size={Style.Size.S} disabled={props.disabled}>
+        <Icon.Label label="Add" icon={<Icon.Plus />} />
+    </Button>);
+};
+
+export const CreateButton: React.FC<CommonButtonLinkProps> = (props: CommonButtonLinkProps) => {
+    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
+        <Icon.Label label="Create New" icon={<Icon.Plus />} />
+    </ButtonLink>);
+};
+
+export const EditButton: React.FC<CommonButtonLinkProps> = (props: CommonButtonLinkProps) => {
+    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
+        <Icon.Label label="Edit" icon={<Icon.Edit />} />
+    </ButtonLink>);
+};
+
+export const DeleteButton: React.FC<CommonButtonProps> = (props: CommonButtonProps) => {
+    return (<Button onClick={props.onClick} color={Style.Palette.Danger} outline size={Style.Size.S} disabled={props.disabled}>
+        <Icon.Label label="Delete" icon={<Icon.Delete />} />
+    </Button>);
+};
+
+export const SmallPlayButton: React.FC<CommonButtonProps> = (props: CommonButtonProps) => {
+    return (
+        <button className="play-button" onClick={props.onClick}>
+            <Icon.PlayCircle />
+        </button>
+    );
+};
+
+interface ButtonAnchorProps {
+    /**
+     * The color of this button
+     */
+    color: Style.Palette;
+    /**
+     * If an outline style should be used for this button
+     */
+    outline?: boolean;
+    /**
+     * Optional size for the button, defaults to regular
+     */
+    size?: Style.Size;
+    /**
+     * The destination for the link
+     */
+    href: string;
+    /**
+     * Target value for the anchor
+     */
+    target?: string;
+    /**
+     * Should the destination be downloaded
+     */
+    download?: boolean;
+    children?: React.ReactNode;
 }
 
-export class Buttons extends React.Component<{}, {}> {
-    render(): JSX.Element {
-        return <div className="buttons">{ this.props.children }</div>;
+/**
+ * A true anchor button. Should only be used when actual navigation is required, otherwise use ButtonLink.
+ */
+export const ButtonAnchor: React.FC<ButtonAnchorProps> = (props: ButtonAnchorProps) => {
+    let className = 'btn ';
+    if (props.outline) {
+        className += 'btn-outline-';
+    } else {
+        className += 'btn-';
     }
-}
+    className += props.color.toString();
+    const size = props.size || Style.Size.S;
+    className += ' btn-' + size.toString();
+    return (<a href={props.href} download={props.download} className={className} target={props.target}>{props.children}</a>);
+};
 
-export class ButtonGroup extends React.Component<{}, {}> {
-    render(): JSX.Element {
-        return <div className="btn-group">{ this.props.children }</div>;
-    }
-}
+/**
+ * A button where the user must click twice within 5 seconds before the action is performed.
+ */
+export const ConfirmButton: React.FC<ButtonProps> = (props: ButtonProps) => {
+    const [didClick, setDidClick] = React.useState(false);
 
-export interface CreateButtonProps {
-    onClick?: () => (void);
-    to?: string;
-}
-
-export class CreateButton extends React.Component<CreateButtonProps, {}> {
-    render(): JSX.Element {
-        if (this.props.onClick != undefined) {
-            return (
-                <Button onClick={this.props.onClick} color={Style.Palette.Primary} outline size={Style.Size.S}>
-                    <Icon.Label label="Create New" icon={<Icon.Plus />} />
-                </Button>
-            );
+    React.useEffect(() => {
+        if (!didClick) {
+            return;
         }
 
-        if (this.props.to != undefined) {
-            return (
-                <ButtonLink to={this.props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
-                    <Icon.Label label="Create New" icon={<Icon.Plus />} />
-                </ButtonLink>
-            );
+        setTimeout(() => {
+            if (didClick) {
+                setDidClick(false);
+            }
+        }, 5000);
+    }, [didClick]);
+
+    const onClick = () => {
+        if (didClick) {
+            setDidClick(false);
+            props.onClick();
+        } else {
+            setDidClick(true);
         }
+    };
 
-        return null;
+    if (didClick) {
+        return (<Button
+            color={props.color}
+            outline={props.outline}
+            size={props.size}
+            onClick={onClick}
+            disabled={props.disabled}
+            className={props.className}>Confirm?</Button>);
     }
-}
 
-export interface EditButtonProps {
-    to: string;
-}
-
-export class EditButton extends React.Component<EditButtonProps, {}> {
-    render(): JSX.Element {
-        return (
-            <ButtonLink to={this.props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
-                <Icon.Label label="Edit" icon={<Icon.Edit />} />
-            </ButtonLink>
-        );
-    }
-}
-
-export interface DeleteButtonProps {
-    onClick: () => (void);
-    disabled?: boolean;
-}
-
-export class DeleteButton extends React.Component<DeleteButtonProps, {}> {
-    render(): JSX.Element {
-        return (
-            <Button onClick={this.props.onClick} color={Style.Palette.Danger} outline size={Style.Size.S} disabled={this.props.disabled}>
-                <Icon.Label label="Delete" icon={<Icon.Delete />} />
-            </Button>
-        );
-    }
-}
-
-export interface SmallPlayButtonProps {
-    onClick: () => (void);
-}
-export class SmallPlayButton extends React.Component<SmallPlayButtonProps, {}> {
-    render(): JSX.Element {
-        return (
-            <button className="play-button" onClick={this.props.onClick}>
-                <Icon.PlayCircle />
-            </button>
-        );
-    }
-}
+    return (<Button
+        color={props.color}
+        outline={props.outline}
+        size={props.size}
+        onClick={onClick}
+        disabled={props.disabled}
+        className={props.className}>{ props.children }</Button>);
+};

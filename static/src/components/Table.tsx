@@ -1,94 +1,83 @@
 import * as React from 'react';
-import '../../css/table.scss';
-import { Icon } from './Icon';
-import { Dropdown } from './Menu';
 import { Nothing } from './Nothing';
-import { Style } from './Style';
+import { Dropdown } from './Menu';
+import { Icon } from './Icon';
+import '../../css/table.scss';
 
 export namespace Table {
-    export interface TableProps { className?: string; }
-    export class Table extends React.Component<TableProps, {}> {
-        render(): JSX.Element {
-            let className = 'table';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
-            return (
-                <div>
-                    <table className={className}>{this.props.children}</table>
-                </div>
-            );
-        }
+    interface TableProps {
+        className?: string;
+        children?: React.ReactNode;
     }
-
-    export class Head extends React.Component<{}, {}> {
-        render(): JSX.Element {
-            return (
-                <thead className="table-thead"><tr>{this.props.children}</tr></thead>
-            );
+    export const Table: React.FC<TableProps> = (props: TableProps) => {
+        let className = 'table';
+        if (props.className) {
+            className += ' ' + props.className;
         }
-    }
+        return (
+            <table className={className}>{props.children}</table>
+        );
+    };
 
-    export interface ColumnProps { className?: string; }
-    export class Column extends React.Component<ColumnProps, {}> {
-        render(): JSX.Element {
-            let className = 'table-th';
-            if (this.props.className) {
-                className += ' ' + this.props.className;
-            }
-            return (
-                <th className={className}>{this.props.children}</th>
-            );
+    interface HeadProps {
+        children?: React.ReactNode;
+    }
+    export const Head: React.FC<HeadProps> = (props: HeadProps) => {
+        return (<thead className="table-thead"><tr>{props.children}</tr></thead>);
+    };
+
+    interface ColumnProps {
+        className?: string;
+        children?: React.ReactNode;
+    }
+    export const Column: React.FC<ColumnProps> = (props: ColumnProps) => {
+        let className = 'table-th';
+        if (props.className) {
+            className += ' ' + props.className;
         }
-    }
+        return (
+            <th className={className}>{props.children}</th>
+        );
+    };
+    export const MenuColumn: React.FC<ColumnProps> = (props: ColumnProps) => Column({ className: 'table-th-menu', children: props.children });
 
-    export class MenuColumn extends React.Component<{}, {}> {
-        render(): JSX.Element {
-            return (
-                <Column className=" table-th-menu"></Column>
-            );
+    interface BodyProps {
+        children?: React.ReactNode;
+    }
+    export const Body: React.FC<BodyProps> = (props: BodyProps) => {
+        let content = props.children;
+        if (!React.Children.count(props.children)) {
+            content = ( <tr><td colSpan={10}><Nothing /></td></tr> );
         }
+
+        return (
+            <tbody>{ content }</tbody>
+        );
+    };
+
+    interface RowProps {
+        disabled?: boolean;
+        children?: React.ReactNode;
     }
-
-    export class Body extends React.Component<{}, {}> {
-        render(): JSX.Element {
-            let content = this.props.children;
-            if (!React.Children.count(this.props.children)) {
-                content = ( <Nothing /> );
-            }
-
-            return (
-                <tbody>{ content }</tbody>
-            );
+    export const Row: React.FC<RowProps> = (props: RowProps) => {
+        let className = 'table-tr';
+        if (props.disabled) {
+            className += ' disabled';
         }
-    }
+        return (
+            <tr className={className}>{props.children}</tr>
+        );
+    };
 
-    export interface RowProps { disabled?: boolean; }
-    export class Row extends React.Component<RowProps, {}> {
-        render(): JSX.Element {
-            let className = 'table-tr';
-            if (this.props.disabled) {
-                className += ' disabled';
-            }
-            return (
-                <tr className={className}>{this.props.children}</tr>
-            );
-        }
+    interface MenuProps {
+        disabled?: boolean;
+        children?: React.ReactNode;
     }
-
-    export interface MenuProps { disabled?: boolean; }
-    export class Menu extends React.Component<MenuProps, {}> {
-        render(): JSX.Element {
-            const buttonProps = {
-                color: Style.Palette.Secondary,
-                outline: true,
-                size: Style.Size.XS,
-            };
-            return (<td>
-                <Dropdown label={<Icon.Bars />} button={buttonProps}>
-                    {this.props.children}
-                </Dropdown>
-            </td>);
-        }
-    }
+    export const Menu: React.FC<MenuProps> = (props: MenuProps) => {
+        return (<td>
+            <Dropdown label={<Icon.Bars />}>
+                {props.children}
+            </Dropdown>
+        </td>);
+    };
 }

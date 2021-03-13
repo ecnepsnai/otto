@@ -1,82 +1,73 @@
-import { API } from "../services/API";
-import { Modal } from "../components/Modal";
-import { Notification } from "../components/Notification";
-import { Group } from "./Group";
-import { Variable } from "./Variable";
-import { Schedule } from "./Schedule";
+import { API } from '../services/API';
+import { Modal } from '../components/Modal';
+import { Notification } from '../components/Notification';
+import { GroupType } from './Group';
+import { Variable } from './Variable';
+import { ScheduleType } from './Schedule';
+
+export interface HostType {
+    ID?: string;
+    Name?: string;
+    Address?: string;
+    Port?: number;
+    PSK?: string;
+    Enabled?: boolean;
+    GroupIDs?: string[];
+    Environment?: Variable[];
+}
 
 export class Host {
-    ID: string;
-    Name: string;
-    Address: string;
-    Port: number;
-    PSK: string;
-    Enabled: boolean;
-    GroupIDs: string[];
-    Environment: Variable[];
-
-    constructor(json: any) {
-        this.ID = json.ID as string;
-        this.Name = json.Name as string;
-        this.Address = json.Address as string;
-        this.Port = json.Port as number;
-        this.PSK = json.PSK as string;
-        this.Enabled = json.Enabled as boolean;
-        this.GroupIDs = (json.GroupIDs || []) as string[];
-        this.Environment = (json.Environment || []) as Variable[];
-    }
-
     /**
      * Return a blank host
      */
-    public static Blank(): Host {
-        return new Host({
+    public static Blank(): HostType {
+        return {
             Name: '',
             Address: '',
             Port: 12444,
             PSK: '',
-            Enabled: '',
+            Enabled: true,
             GroupIDs: [],
             Environment: [],
-        });
+        };
     }
 
     /**
      * Create a new Host
      */
-    public static async New(parameters: NewHostParameters): Promise<Host> {
+    public static async New(parameters: HostType|NewHostParameters): Promise<HostType> {
         const data = await API.PUT('/api/hosts/host', parameters);
-        return new Host(data);
+        return data as HostType;
     }
 
     /**
      * Save this host
      */
-    public async Save(): Promise<Host> {
-        const data = await API.POST('/api/hosts/host/' + this.ID, this as EditHostParameters);
-        return new Host(data);
+    public static async Save(host: HostType): Promise<HostType> {
+        const data = await API.POST('/api/hosts/host/' + host.ID, host);
+        return data as HostType;
     }
 
     /**
      * Delete this host
      */
-    public async Delete(): Promise<any> {
-        return await API.DELETE('/api/hosts/host/' + this.ID);
+    public static async Delete(host: HostType): Promise<unknown> {
+        return await API.DELETE('/api/hosts/host/' + host.ID);
     }
 
     /**
      * Modify the host changing the properties specified
      * @param properties properties to change
      */
-    public async Update(properties: {[key:string]: any}): Promise<Host> {
-        const data = await API.PATCH('/api/hosts/host/' + this.ID, properties);
-        return new Host(data);
+    public static async Update(host: HostType, properties: {[key:string]: unknown}): Promise<HostType> {
+        const data = await API.PATCH('/api/hosts/host/' + host.ID, properties);
+        return data as HostType;
     }
 
     /**
      * Show a modal to delete this host
      */
-    public async DeleteModal(): Promise<boolean> {
+    public static async DeleteModal(host: HostType): Promise<boolean> {
         return new Promise(resolve => {
             Modal.delete('Delete Host?', 'Are you sure you want to delete this host? This can not be undone.').then(confirmed => {
                 if (!confirmed) {
@@ -84,7 +75,7 @@ export class Host {
                     return;
                 }
 
-                API.DELETE('/api/hosts/host/' + this.ID).then(() => {
+                API.DELETE('/api/hosts/host/' + host.ID).then(() => {
                     Notification.success('Host Deleted');
                     resolve(true);
                 });
@@ -95,26 +86,17 @@ export class Host {
     /**
      * Get the specified host by its id
      */
-    public static async Get(id: string): Promise<Host> {
+    public static async Get(id: string): Promise<HostType> {
         const data = await API.GET('/api/hosts/host/' + id);
-        return new Host(data);
+        return data as HostType;
     }
 
     /**
      * List all hosts
      */
-    public static async List(): Promise<Host[]> {
+    public static async List(): Promise<HostType[]> {
         const data = await API.GET('/api/hosts');
-        return (data as any[]).map(obj => {
-            return new Host(obj);
-        });
-    }
-
-    /**
-     * List all scripts for this host
-     */
-    public async Scripts(): Promise<ScriptEnabledGroup[]> {
-        return Host.Scripts(this.ID);
+        return data as HostType[];
     }
 
     /**
@@ -126,37 +108,19 @@ export class Host {
     }
 
     /**
-     * List all groups for this host
-     */
-    public async Groups(): Promise<Group[]> {
-        return Host.Groups(this.ID);
-    }
-
-    /**
      * List all groups for a host
      */
-    public static async Groups(id: string): Promise<Group[]> {
+    public static async Groups(id: string): Promise<GroupType[]> {
         const data = await API.GET('/api/hosts/host/' + id + '/groups');
-        return (data as any[]).map(obj => {
-            return new Group(obj);
-        });
-    }
-
-    /**
-     * List all schedules for this host
-     */
-    public async Schedules(): Promise<Schedule[]> {
-        return Host.Schedules(this.ID);
+        return data as GroupType[];
     }
 
     /**
      * List all schedules for a host
      */
-    public static async Schedules(id: string): Promise<Schedule[]> {
+    public static async Schedules(id: string): Promise<ScheduleType[]> {
         const data = await API.GET('/api/hosts/host/' + id + '/schedules');
-        return (data as any[]).map(obj => {
-            return new Schedule(obj);
-        });
+        return data as ScheduleType[];
     }
 }
 

@@ -4,47 +4,47 @@ import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
 import { Variable } from '../types/Variable';
 
-export interface EnvironmentVariableCardProps {
+interface EnvironmentVariableCardProps {
     variables: Variable[];
     className?: string;
 }
-export class EnvironmentVariableCard extends React.Component<EnvironmentVariableCardProps, {}> {
-    private list = () => {
+export const EnvironmentVariableCard: React.FC<EnvironmentVariableCardProps> = (props: EnvironmentVariableCardProps) => {
+    const list = () => {
         return (
-        <ListGroup.List>
-            {
-                this.props.variables.map((variable, index) => {
-                    const content = variable.Secret ? '******' : variable.Value;
-                    return (
-                    <ListGroup.TextItem title={variable.Key} key={index}>
-                        <code>{content}</code>
-                    </ListGroup.TextItem>
-                    );
-                })
-            }
-        </ListGroup.List>
+            <ListGroup.List>
+                {
+                    (props.variables || []).map((variable, index) => {
+                        const content = variable.Secret ? '******' : variable.Value;
+                        return (
+                            <ListGroup.TextItem title={variable.Key} key={index}>
+                                <code>{content}</code>
+                            </ListGroup.TextItem>
+                        );
+                    })
+                }
+            </ListGroup.List>
         );
-    }
-    private nothing = () => {
-        return (
-        <Card.Body>
-            <Nothing />
-        </Card.Body>
-        );
-    }
-    private content = () => {
-        if (Object.keys(this.props.variables).length == 0) {
-            return this.nothing();
-        }
-        return this.list();
-    }
+    };
 
-    render(): JSX.Element {
+    const nothing = () => {
         return (
-        <Card.Card className={this.props.className}>
-            <Card.Header>Environment Variables</Card.Header>
-            { this.content() }
-        </Card.Card>
+            <Card.Body>
+                <Nothing />
+            </Card.Body>
         );
-    }
-}
+    };
+
+    const content = () => {
+        if (Object.keys((props.variables || [])).length == 0) {
+            return nothing();
+        }
+        return list();
+    };
+
+    return (
+        <Card.Card className={props.className}>
+            <Card.Header>Environment Variables</Card.Header>
+            { content() }
+        </Card.Card>
+    );
+};

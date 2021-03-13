@@ -1,4 +1,6 @@
-FROM alpine
+FROM alpine:3
+LABEL maintainer="Ian Spence <ian@ecn.io>"
+LABEL org.opencontainers.image.source=https://github.com/ecnepsnai/otto
 
 EXPOSE 8080
 RUN mkdir /otto_data

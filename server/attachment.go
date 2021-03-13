@@ -1,7 +1,7 @@
 package server
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"time"
@@ -31,7 +31,7 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 		return nil, err
 	}
 	defer f.Close()
-	fileData, err := ioutil.ReadAll(f)
+	fileData, err := io.ReadAll(f)
 	if err != nil {
 		log.Error("Error reading file '%s': %s", attachment.ID, err.Error())
 		return nil, err

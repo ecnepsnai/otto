@@ -1,6 +1,12 @@
 package server
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/web"
+)
 
 func TestAddGetRegisterRule(t *testing.T) {
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -15,9 +21,14 @@ func TestAddGetRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
-		Property: RegisterRulePropertyHostname,
-		Pattern:  randomString(6),
-		GroupID:  group.ID,
+		Name: randomString(12),
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyHostname,
+				Pattern:  randomString(6),
+			},
+		},
+		GroupID: group.ID,
 	})
 	if err != nil {
 		t.Fatalf("Error making new rule: %s", err.Message)
@@ -47,9 +58,14 @@ func TestEditRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
-		Property: RegisterRulePropertyHostname,
-		Pattern:  randomString(6),
-		GroupID:  group.ID,
+		Name: randomString(12),
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyHostname,
+				Pattern:  randomString(6),
+			},
+		},
+		GroupID: group.ID,
 	})
 	if err != nil {
 		t.Fatalf("Error making new rule: %s", err.Message)
@@ -59,15 +75,20 @@ func TestEditRegisterRule(t *testing.T) {
 	}
 
 	_, err = RegisterRuleStore.EditRule(rule.ID, editRegisterRuleParams{
-		Property: RegisterRulePropertyHostname,
-		Pattern:  randomString(6),
-		GroupID:  group.ID,
+		Name: rule.Name,
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyHostname,
+				Pattern:  randomString(6),
+			},
+		},
+		GroupID: group.ID,
 	})
 	if err != nil {
 		t.Fatalf("Error editing rule: %s", err.Message)
 	}
 
-	if RegisterRuleStore.RuleWithID(rule.ID).Pattern == rule.Pattern {
+	if RegisterRuleStore.RuleWithID(rule.ID).Clauses[0].Pattern == rule.Clauses[0].Pattern {
 		t.Fatalf("Should change pattern")
 	}
 }
@@ -85,9 +106,14 @@ func TestDeleteRegisterRule(t *testing.T) {
 	}
 
 	rule, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
-		Property: RegisterRulePropertyHostname,
-		Pattern:  randomString(6),
-		GroupID:  group.ID,
+		Name: randomString(12),
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyHostname,
+				Pattern:  randomString(6),
+			},
+		},
+		GroupID: group.ID,
 	})
 	if err != nil {
 		t.Fatalf("Error making new rule: %s", err.Message)
@@ -102,5 +128,143 @@ func TestDeleteRegisterRule(t *testing.T) {
 
 	if RegisterRuleStore.RuleWithID(rule.ID) != nil {
 		t.Fatalf("Should not return rule")
+	}
+}
+
+func TestRegisterRuleEndToEnd(t *testing.T) {
+	PSK := randomString(6)
+
+	defaultGroup, err := GroupStore.NewGroup(newGroupParameters{
+		Name:      randomString(6),
+		ScriptIDs: []string{},
+	})
+	if err != nil {
+		t.Fatalf("Error making new group: %s", err.Message)
+	}
+	centos7group, err := GroupStore.NewGroup(newGroupParameters{
+		Name:      randomString(6),
+		ScriptIDs: []string{},
+	})
+	if err != nil {
+		t.Fatalf("Error making new group: %s", err.Message)
+	}
+	centos8group, err := GroupStore.NewGroup(newGroupParameters{
+		Name:      randomString(6),
+		ScriptIDs: []string{},
+	})
+	if err != nil {
+		t.Fatalf("Error making new group: %s", err.Message)
+	}
+
+	RegisterRuleStore.Table.DeleteAll()
+	if _, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
+		Name: "CentOS 7 Hosts",
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyDistributionName,
+				Pattern:  "CentOS Linux",
+			},
+			{
+				Property: RegisterRulePropertyDistributionVersion,
+				Pattern:  "7",
+			},
+		},
+		GroupID: centos7group.ID,
+	}); err != nil {
+		t.Fatalf("Error making new rule: %s", err.Message)
+	}
+	if _, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
+		Name: "CentOS 8 Hosts",
+		Clauses: []RegisterRuleClause{
+			{
+				Property: RegisterRulePropertyDistributionName,
+				Pattern:  "CentOS Linux",
+			},
+			{
+				Property: RegisterRulePropertyDistributionVersion,
+				Pattern:  "8",
+			},
+		},
+		GroupID: centos8group.ID,
+	}); err != nil {
+		t.Fatalf("Error making new rule: %s", err.Message)
+	}
+	o := Options
+	o.Register.Enabled = true
+	o.Register.DefaultGroupID = defaultGroup.ID
+	o.Register.PSK = PSK
+	o.Save()
+
+	mockRequest := func(params otto.RegisterRequest) web.Request {
+		request := web.MockRequest(nil, map[string]string{}, params)
+		request.HTTP.Header.Add("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
+		return request
+	}
+
+	// Test that a host that doesn't match any rules gets added to the default group
+	defaultAddress := randomString(6)
+	h := handle{}
+	_, webErr := h.Register(mockRequest(otto.RegisterRequest{
+		Address: defaultAddress,
+		PSK:     PSK,
+		Port:    12444,
+		Properties: otto.RegisterRequestProperties{
+			Hostname:            randomString(6),
+			KernelName:          randomString(6),
+			KernelVersion:       randomString(6),
+			DistributionName:    randomString(6),
+			DistributionVersion: randomString(6),
+		},
+	}))
+	if webErr != nil {
+		t.Errorf("Unexpected error trying to register valid host")
+	}
+	if HostStore.HostWithAddress(defaultAddress) == nil {
+		t.Errorf("Host was not registered")
+	}
+
+	// Test that a host that matches a rule gets added to the correct group
+	centos8address := randomString(6)
+	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
+		Address: centos8address,
+		PSK:     PSK,
+		Port:    12444,
+		Properties: otto.RegisterRequestProperties{
+			Hostname:            randomString(6),
+			KernelName:          randomString(6),
+			KernelVersion:       randomString(6),
+			DistributionName:    "CentOS Linux",
+			DistributionVersion: "8",
+		},
+	}))
+	if webErr != nil {
+		t.Errorf("Unexpected error trying to register valid host")
+	}
+	if HostStore.HostWithAddress(centos8address) == nil {
+		t.Errorf("Host was not registered")
+	}
+	if HostStore.HostWithAddress(centos8address).GroupIDs[0] != centos8group.ID {
+		t.Errorf("Incorrect group")
+	}
+
+	// Test that an incorrect PSK does not get registered
+	incorrectPSKAddress := randomString(6)
+	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
+		Address: incorrectPSKAddress,
+		PSK:     randomString(6),
+		Port:    12444,
+		Properties: otto.RegisterRequestProperties{
+			Hostname:            randomString(6),
+			KernelName:          randomString(6),
+			KernelVersion:       randomString(6),
+			DistributionName:    "CentOS Linux",
+			DistributionVersion: "8",
+		},
+	}))
+	if webErr == nil {
+		t.Errorf("No error seen when one expected")
+	}
+	if HostStore.HostWithAddress(incorrectPSKAddress) != nil {
+		t.Errorf("Host was registered when one was not expected")
 	}
 }

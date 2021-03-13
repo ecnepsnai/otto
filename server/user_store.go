@@ -158,6 +158,29 @@ func (s *userStoreObject) ResetPassword(username string, newPassword []byte) (*U
 	return user, nil
 }
 
+func (s *userStoreObject) ResetAPIKey(username string) (*string, *Error) {
+	u := UserStore.UserWithUsername(username)
+	if u == nil {
+		return nil, ErrorUser("no user with username %s", username)
+	}
+	user := *u
+
+	apiKey := newAPIKey()
+	hashedKey, err := secutil.HashPassword([]byte(apiKey))
+	if err != nil {
+		log.Error("Error hashing API key: %s", err.Error())
+		return nil, ErrorFrom(err)
+	}
+	user.APIKey = *hashedKey
+	err = UserStore.Table.Update(user)
+	if err != nil {
+		return nil, ErrorFrom(err)
+	}
+	UpdateUserCache()
+	log.Info("API key reset: username='%s'", username)
+	return &apiKey, nil
+}
+
 func (s *userStoreObject) DeleteUser(user *User) *Error {
 	if err := s.Table.Delete(*user); err != nil {
 		log.Error("Error deleting user '%s': %s", user.Email, err.Error())

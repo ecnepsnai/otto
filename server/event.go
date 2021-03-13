@@ -154,9 +154,15 @@ func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.Register
 		"distribution_version": request.Properties.DistributionVersion,
 	})
 	if matchedRule != nil {
-		event.Details["matched_rule_property"] = matchedRule.Property
-		event.Details["matched_rule_pattern"] = matchedRule.Pattern
+		for i, clause := range matchedRule.Clauses {
+			keyProperty := fmt.Sprintf("matched_rule_clause%d_property", i)
+			keyPattern := fmt.Sprintf("matched_rule_clause%d_pattern", i)
+			event.Details[keyProperty] = clause.Property
+			event.Details[keyPattern] = clause.Pattern
+		}
 		event.Details["matched_rule_group_id"] = matchedRule.GroupID
+		event.Details["matched_rule_id"] = matchedRule.ID
+		event.Details["matched_rule_name"] = matchedRule.Name
 	}
 
 	event.Save()
@@ -338,37 +344,58 @@ func (s *eventStoreObject) ServerOptionsModified(newHash string, currentUser str
 }
 
 func (s *eventStoreObject) RegisterRuleAdded(rule *RegisterRule, currentUser string) {
-	event := newEvent(EventTypeRegisterRuleAdded, map[string]string{
-		"rule_id":  rule.ID,
-		"property": rule.Property,
-		"pattern":  rule.Pattern,
-		"group_id": rule.GroupID,
-		"added_by": currentUser,
-	})
+	details := map[string]string{
+		"rule_id":   rule.ID,
+		"rule_name": rule.Name,
+		"group_id":  rule.GroupID,
+		"added_by":  currentUser,
+	}
 
+	for i, clause := range rule.Clauses {
+		keyProperty := fmt.Sprintf("clause%d_property", i)
+		keyPattern := fmt.Sprintf("clause%d_pattern", i)
+		details[keyProperty] = clause.Property
+		details[keyPattern] = clause.Pattern
+	}
+
+	event := newEvent(EventTypeRegisterRuleAdded, details)
 	event.Save()
 }
 
 func (s *eventStoreObject) RegisterRuleModified(rule *RegisterRule, currentUser string) {
-	event := newEvent(EventTypeRegisterRuleModified, map[string]string{
+	details := map[string]string{
 		"rule_id":     rule.ID,
-		"property":    rule.Property,
-		"pattern":     rule.Pattern,
+		"rule_name":   rule.Name,
 		"group_id":    rule.GroupID,
 		"modified_by": currentUser,
-	})
+	}
 
+	for i, clause := range rule.Clauses {
+		keyProperty := fmt.Sprintf("clause%d_property", i)
+		keyPattern := fmt.Sprintf("clause%d_pattern", i)
+		details[keyProperty] = clause.Property
+		details[keyPattern] = clause.Pattern
+	}
+
+	event := newEvent(EventTypeRegisterRuleAdded, details)
 	event.Save()
 }
 
 func (s *eventStoreObject) RegisterRuleDeleted(rule *RegisterRule, currentUser string) {
-	event := newEvent(EventTypeRegisterRuleDeleted, map[string]string{
+	details := map[string]string{
 		"rule_id":    rule.ID,
-		"property":   rule.Property,
-		"pattern":    rule.Pattern,
+		"rule_name":  rule.Name,
 		"group_id":   rule.GroupID,
 		"deleted_by": currentUser,
-	})
+	}
 
+	for i, clause := range rule.Clauses {
+		keyProperty := fmt.Sprintf("clause%d_property", i)
+		keyPattern := fmt.Sprintf("clause%d_pattern", i)
+		details[keyProperty] = clause.Property
+		details[keyPattern] = clause.Pattern
+	}
+
+	event := newEvent(EventTypeRegisterRuleAdded, details)
 	event.Save()
 }

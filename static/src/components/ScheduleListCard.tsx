@@ -1,45 +1,39 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Schedule } from '../types/Schedule';
+import { ScheduleType } from '../types/Schedule';
 import { Card } from './Card';
 import { Icon } from './Icon';
 import { ListGroup } from './ListGroup';
 import { Nothing } from './Nothing';
 
-export interface ScheduleListCardProps {
-    schedules: Schedule[];
+interface ScheduleListCardProps {
+    schedules: ScheduleType[];
     className?: string;
 }
-interface ScheduleListCardState {}
-export class ScheduleListCard extends React.Component<ScheduleListCardProps, ScheduleListCardState> {
-    constructor(props: ScheduleListCardProps) {
-        super(props);
-        this.state = { };
-    }
-
-    private content = () => {
-        if (!this.props.schedules || this.props.schedules.length == 0) { return (<Card.Body><Nothing /></Card.Body>); }
+export const ScheduleListCard: React.FC<ScheduleListCardProps> = (props: ScheduleListCardProps) => {
+    const content = () => {
+        if (!props.schedules || props.schedules.length == 0) {
+            return (<Card.Body><Nothing /></Card.Body>);
+        }
 
         return (<ListGroup.List>
             {
-                this.props.schedules.map((schedule, index) => {
+                props.schedules.map((schedule, index) => {
                     return (
-                    <ListGroup.Item key={index}>
-                        <Icon.Calendar />
-                        <Link to={'/schedules/schedule/' + schedule.ID} className="ms-1">{ schedule.Name }</Link>
-                    </ListGroup.Item>
+                        <ListGroup.Item key={index}>
+                            <Icon.Calendar />
+                            <Link to={'/schedules/schedule/' + schedule.ID} className="ms-1">{ schedule.Name }</Link>
+                        </ListGroup.Item>
                     );
                 })
             }
         </ListGroup.List>);
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <Card.Card className={this.props.className}>
-                <Card.Header>Schedules</Card.Header>
-                { this.content() }
-            </Card.Card>
-        );
-    }
-}
+    return (
+        <Card.Card className={props.className}>
+            <Card.Header>Schedules</Card.Header>
+            { content() }
+        </Card.Card>
+    );
+};

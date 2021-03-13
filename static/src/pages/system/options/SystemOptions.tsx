@@ -9,70 +9,56 @@ import { OptionsNetwork } from './OptionsNetwork';
 import { Notification } from '../../../components/Notification';
 import { OptionsSecurity } from './OptionsSecurity';
 
-export interface SystemOptionsProps {}
-interface SystemOptionsState {
-    loading?: boolean,
-    options: Options.OttoOptions,
-}
-export class SystemOptions extends React.Component<SystemOptionsProps, SystemOptionsState> {
-    constructor(props: SystemOptionsProps) {
-        super(props);
-        this.state = {
-            options: StateManager.Current().Options
-        };
-    }
+export const SystemOptions: React.FC = () => {
+    const [loading, setLoading] = React.useState(false);
+    const [options, setOptions] = React.useState(StateManager.Current().Options);
 
-    private changeGeneral = (value: Options.General) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeGeneral = (value: Options.General) => {
+        setOptions(options => {
             options.General = value;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private changeAuthentication = (value: Options.Authentication) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeAuthentication = (value: Options.Authentication) => {
+        setOptions(options => {
             options.Authentication = value;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private changeNetwork = (value: Options.Network) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeNetwork = (value: Options.Network) => {
+        setOptions(options => {
             options.Network = value;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private changeSecurity = (value: Options.Security) => {
-        this.setState(state => {
-            const options = state.options;
+    const changeSecurity = (value: Options.Security) => {
+        setOptions(options => {
             options.Security = value;
-            return { options: options };
+            return {...options};
         });
-    }
+    };
 
-    private onSubmit = () => {
-        this.setState({ loading: true });
-        return Options.Options.Save(this.state.options).then(() => {
+    const onSubmit = () => {
+        setLoading(true);
+        return Options.Options.Save(options).then(options => {
             Notification.success('Options Saved');
-            this.setState({ loading: false });
+            setOptions(options);
+            setLoading(false);
         });
-    }
+    };
 
-    render(): JSX.Element {
-        return (
-            <Page title="Options">
-                <Form className="cards" showSaveButton onSubmit={this.onSubmit}>
-                    <OptionsGeneral defaultValue={this.state.options.General} onUpdate={this.changeGeneral}/>
-                    <OptionsAuthentication defaultValue={this.state.options.Authentication} onUpdate={this.changeAuthentication}/>
-                    <OptionsNetwork defaultValue={this.state.options.Network} onUpdate={this.changeNetwork}/>
-                    <OptionsSecurity defaultValue={this.state.options.Security} onUpdate={this.changeSecurity}/>
-                    <div className="mb-2"></div>
-                </Form>
-            </Page>
-        );
-    }
-}
+    return (
+        <Page title="Options">
+            <Form className="cards" showSaveButton onSubmit={onSubmit} loading={loading}>
+                <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral}/>
+                <OptionsAuthentication defaultValue={options.Authentication} onUpdate={changeAuthentication}/>
+                <OptionsNetwork defaultValue={options.Network} onUpdate={changeNetwork}/>
+                <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity}/>
+                <div className="mb-2"></div>
+            </Form>
+        </Page>
+    );
+};

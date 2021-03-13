@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
     entry: './src/Login.tsx',
@@ -16,7 +17,10 @@ module.exports = {
                 { from: 'img/*.jpg', to: 'assets/', noErrorOnMissing: true},
                 { from: 'img/*.ico', to: 'assets/', noErrorOnMissing: true},
             ]
-        })
+        }),
+        new ESLintPlugin({
+            extensions: [".ts", ".tsx"]
+        }),
     ],
 
     module: {
@@ -34,6 +38,12 @@ module.exports = {
                 enforce: "pre",
                 test: /\.js$/,
                 loader: "source-map-loader"
+            },
+            {
+                test: /\.(woff|woff2)$/,
+                use: {
+                    loader: 'url-loader',
+                },
             },
             {
                 test: /\.s[ac]ss$/i,

@@ -4,7 +4,7 @@ import { Notification } from '../components/Notification';
  * Class for interacting with the API
  */
 export class API {
-    private static do(url: string, options: RequestInit, noCheckError?: boolean): Promise<Object> {
+    private static do(url: string, options: RequestInit, noCheckError?: boolean): Promise<unknown> {
         return new Promise((resolve, reject) => {
             fetch(url, options).then(response => {
                 response.json().then(results => {
@@ -24,7 +24,7 @@ export class API {
                             message = results.error.message;
                         }
                         console.error('API error caught', results);
-                        Notification.error('An Error Occured: ' + message);
+                        Notification.error('An Error Occurred: ' + message);
                         reject(results);
                     } else {
                         resolve(results.data);
@@ -32,14 +32,14 @@ export class API {
                 }, e => {
                     if (!noCheckError) {
                         console.error('API error caught', e);
-                        Notification.error('An Error Occured: Internal Server Error');
+                        Notification.error('An Error Occurred: Internal Server Error');
                     }
                     reject(e);
                 });
             }, e => {
                 if (!noCheckError) {
                     console.error('API error caught', e);
-                    Notification.error('An Error Occured: Internal Server Error');
+                    Notification.error('An Error Occurred: Internal Server Error');
                 }
                 reject(e);
             });
@@ -51,7 +51,7 @@ export class API {
      * @param url the URL to request
      * @returns The JSON object of the results
      */
-    public static GET(url: string): Promise<Object> {
+    public static GET(url: string): Promise<unknown> {
         return this.do(url, { method: 'GET' });
     }
 
@@ -61,7 +61,7 @@ export class API {
      * @param url the URL to request
      * @returns The JSON object of the results
      */
-    public static UnsafeGET(url: string): Promise<Object> {
+    public static UnsafeGET(url: string): Promise<unknown> {
         return this.do(url, { method: 'GET' }, true);
     }
 
@@ -71,7 +71,7 @@ export class API {
      * @param data Body data to be encoded as JSON
      * @returns The JSON object of the results
      */
-    public static async POST(url: string, data: Object): Promise<Object> {
+    public static async POST(url: string, data: unknown): Promise<unknown> {
         return this.do(url, { method: 'POST', body: JSON.stringify(data) });
     }
 
@@ -81,7 +81,7 @@ export class API {
      * @param data Body data to be encoded as JSON
      * @returns The JSON object of the results
      */
-    public static async PUT(url: string, data: Object): Promise<Object> {
+    public static async PUT(url: string, data: unknown): Promise<unknown> {
         return this.do(url, { method: 'PUT', body: JSON.stringify(data) });
     }
 
@@ -91,7 +91,7 @@ export class API {
      * @param data Body data to be encoded as JSON
      * @returns The JSON object of the results
      */
-    public static async PATCH(url: string, data: Object): Promise<Object> {
+    public static async PATCH(url: string, data: unknown): Promise<unknown> {
         return this.do(url, { method: 'PATCH', body: JSON.stringify(data) });
     }
 
@@ -100,7 +100,7 @@ export class API {
      * @param url the URL to request
      * @returns The JSON object of the results
      */
-    public static async DELETE(url: string): Promise<Object> {
+    public static async DELETE(url: string): Promise<unknown> {
         return this.do(url, { method: 'DELETE' });
     }
 
@@ -108,10 +108,10 @@ export class API {
      * Perform a HTTP PUT Multipart Upload to the specified URL
      * @param url the URL to request
      * @param file The file data
-     * @param data Additional paramaters to add to the form data
+     * @param data Additional parameters to add to the form data
      * @returns The JSON object of the results
      */
-    public static async PUTFile(url: string, file: File, data: { [key: string]: string; }): Promise<Object> {
+    public static async PUTFile(url: string, file: File, data: { [key: string]: string; }): Promise<unknown> {
         const fd = new FormData();
         fd.append('file', file);
         Object.keys(data).forEach(key => {

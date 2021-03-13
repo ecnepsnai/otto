@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 )
@@ -193,7 +194,9 @@ func TestAuthenticationUnknownCookie(t *testing.T) {
 }
 
 func TestAuthenticationNoCookie(t *testing.T) {
-	session := sessionForHTTPRequest(&http.Request{}, false)
+	session := sessionForHTTPRequest(&http.Request{
+		URL: &url.URL{},
+	}, false)
 	if session != nil {
 		t.Fatalf("Should not return an unknown session")
 	}
@@ -228,5 +231,92 @@ func TestAuthenticationPartialSession(t *testing.T) {
 	session = sessionForHTTPRequest(mockHTTPRequest("/", authenticationResult.SessionKey), false)
 	if session != nil {
 		t.Fatalf("Should not return a partial session")
+	}
+}
+
+func TestAuthenticationAPIKey(t *testing.T) {
+	username := randomString(6)
+	password := randomString(6)
+	if _, err := UserStore.NewUser(newUserParameters{
+		Username: username,
+		Email:    randomString(6),
+		Password: password,
+	}); err != nil {
+		t.Fatalf("Error making user: %s", err.Message)
+	}
+
+	a, err := UserStore.ResetAPIKey(username)
+	if err != nil {
+		t.Fatalf("Error resetting API key: %s", err.Message)
+	}
+	if a == nil {
+		t.Fatalf("must return API key")
+	}
+	apiKey := *a
+
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+	req.Header.Add(ottoAPIUsernameHeader, username)
+	req.Header.Add(ottoAPIKeyheader, apiKey)
+
+	if sessionForHTTPRequest(req, false) == nil {
+		t.Fatalf("Should return a session for an API key")
+	}
+}
+
+func TestAuthenticationMissingAPIHeaders(t *testing.T) {
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+
+	if sessionForHTTPRequest(req, false) != nil {
+		t.Fatalf("Should not return a session with missing API headers")
+	}
+}
+
+func TestAuthenticationIncorrectAPIUsername(t *testing.T) {
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+	req.Header.Add(ottoAPIUsernameHeader, randomString(6))
+	req.Header.Add(ottoAPIKeyheader, randomString(6))
+
+	if sessionForHTTPRequest(req, false) != nil {
+		t.Fatalf("Should not return a session for API request with an unknown username")
+	}
+}
+
+func TestAuthenticationIncorrectAPIKey(t *testing.T) {
+	username := randomString(6)
+	password := randomString(6)
+	if _, err := UserStore.NewUser(newUserParameters{
+		Username: username,
+		Email:    randomString(6),
+		Password: password,
+	}); err != nil {
+		t.Fatalf("Error making user: %s", err.Message)
+	}
+
+	a, err := UserStore.ResetAPIKey(username)
+	if err != nil {
+		t.Fatalf("Error resetting API key: %s", err.Message)
+	}
+	if a == nil {
+		t.Fatalf("must return API key")
+	}
+
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+	req.Header.Add(ottoAPIUsernameHeader, username)
+	req.Header.Add(ottoAPIKeyheader, randomString(6))
+
+	if sessionForHTTPRequest(req, false) != nil {
+		t.Fatalf("Should not return a session for an API request with an unknown API key")
 	}
 }

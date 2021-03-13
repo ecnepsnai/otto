@@ -111,9 +111,11 @@ Event for when a new host successfully registers itself and is added.
 |`distribution_name`|The name of the distribution running on the host|
 |`distribution_version`|The version of the distribution running on the host|
 |`group_id`|The ID of the group that the host was added to|
-|`matched_rule_property`|If the host matched a registration rule, the property of the matched rule|
-|`matched_rule_pattern`|If the host matched a registration rule, the pattern of the matched rule|
+|`matched_rule_clause#_property`|If the host matched a registration rule, the property of the matched rule|
+|`matched_rule_clause#_pattern`|If the host matched a registration rule, the pattern of the matched rule|
 |`matched_rule_group_id`|If the host matched a registration rule, the group ID of the matched rule|
+|`matched_rule_id`|The ID of the matched rule|
+|`matched_rule_name`|The name of the matched rule|
 
 ### HostRegisterIncorrectPSK
 
@@ -285,3 +287,42 @@ Event for when the Otto server options are modified.
 |-|-|
 |`config_hash`|The SHA-256 hash of the config file|
 |`modified_by`|The username of the user who modified the server options|
+
+### RegisterRuleAdded
+
+Event for when a registration rule is added.
+
+|Parameter|Description|
+|-|-|
+|`rule_id`|The ID of the registration rule|
+|`rule_name`|The name of the registration rule|
+|`clause#_property`|The property of the host to match|
+|`clause#_pattern`|The regex pattern to test against the property value|
+|`group_id`|The group ID to assign hosts that match this rule|
+|`added_by`|The username of the user that added this rule|
+
+### RegisterRuleModified
+
+Event for when a registration rule is modified.
+
+|Parameter|Description|
+|-|-|
+|`rule_id`|The ID of the registration rule|
+|`rule_name`|The name of the registration rule|
+|`clause#_property`|The property of the host to match|
+|`clause#_pattern`|The regex pattern to test against the property value|
+|`group_id`|The group ID to assign hosts that match this rule|
+|`modified_by`|The username of the user that modified this rule|
+
+### RegisterRuleDeleted
+
+Event for when a registration rule is deleted.
+
+|Parameter|Description|
+|-|-|
+|`rule_id`|The ID of the registration rule|
+|`rule_name`|The name of the registration rule|
+|`clause#_property`|The property of the host to match|
+|`clause#_pattern`|The regex pattern to test against the property value|
+|`group_id`|The group ID to assign hosts that match this rule|
+|`deleted_by`|The username of the user that deleted this rule|

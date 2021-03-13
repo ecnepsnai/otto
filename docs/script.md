@@ -38,8 +38,8 @@ the web interface.
 You can attach files to scripts that will be uploaded and placed on hosts at specified paths before the script is run.
 Attachments are uploaded each time a script runs, and will overwrite any existing files at the same path.
 
-The destination directory for the attachment must already exist and be accessible by the Otto client. Script execution
-will fail if the Otto client cannot write the attachment to the specified path.
+If the destination directory for the attachment does not exist the Otto client will create it. The otto client will use
+the default mode for the directory, and set the owner to the same as the attachment.
 
 Attachments can be owned by specific UID/GID, and have a specific permission mode. Attachments have a maximum file size
 of 100MiB.

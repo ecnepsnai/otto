@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/otto/server/environ"
+	"github.com/ecnepsnai/secutil"
 )
 
 func preBootstrapArgs() {
@@ -68,7 +69,7 @@ func postBootstrapArgs() {
 				Environment: []environ.Variable{},
 			})
 			if err != nil {
-				panic(err)
+				panic(err.Message)
 			}
 			el7, err := GroupStore.NewGroup(newGroupParameters{
 				Name:      "CentOS 7 Servers",
@@ -78,7 +79,7 @@ func postBootstrapArgs() {
 				},
 			})
 			if err != nil {
-				panic(err)
+				panic(err.Message)
 			}
 			el8, err := GroupStore.NewGroup(newGroupParameters{
 				Name:      "CentOS 8 Servers",
@@ -88,7 +89,7 @@ func postBootstrapArgs() {
 				},
 			})
 			if err != nil {
-				panic(err)
+				panic(err.Message)
 			}
 			el7Host, err := HostStore.NewHost(newHostParameters{
 				Name:     "el7-host.example.com",
@@ -98,7 +99,7 @@ func postBootstrapArgs() {
 				GroupIDs: []string{el7.ID},
 			})
 			if err != nil {
-				panic(err)
+				panic(err.Message)
 			}
 			el8Host, err := HostStore.NewHost(newHostParameters{
 				Name:     "el8-host.example.com",
@@ -108,9 +109,10 @@ func postBootstrapArgs() {
 				GroupIDs: []string{el8.ID},
 			})
 			if err != nil {
-				panic(err)
+				panic(err.Message)
 			}
 			schedule, err := ScheduleStore.NewSchedule(newScheduleParameters{
+				Name:     "OS Updates",
 				ScriptID: script.ID,
 				Scope: ScheduleScope{
 					GroupIDs: []string{
@@ -120,6 +122,9 @@ func postBootstrapArgs() {
 				},
 				Pattern: "0 0 * * *",
 			})
+			if err != nil {
+				panic(err.Message)
+			}
 			x := int64(0)
 			for x < 10 {
 				report := ScheduleReport{
@@ -136,6 +141,44 @@ func postBootstrapArgs() {
 				ScheduleReportStore.Table.Add(report)
 				x++
 			}
+			_, err = RegisterRuleStore.NewRule(newRegisterRuleParams{
+				Name: "CentOS 7 Servers",
+				Clauses: []RegisterRuleClause{
+					{
+						Property: RegisterRulePropertyDistributionName,
+						Pattern:  "CentOS Linux",
+					},
+					{
+						Property: RegisterRulePropertyDistributionVersion,
+						Pattern:  "7",
+					},
+				},
+				GroupID: el7.ID,
+			})
+			if err != nil {
+				panic(err.Message)
+			}
+			_, err = RegisterRuleStore.NewRule(newRegisterRuleParams{
+				Name: "CentOS 8 Servers",
+				Clauses: []RegisterRuleClause{
+					{
+						Property: RegisterRulePropertyDistributionName,
+						Pattern:  "CentOS Linux",
+					},
+					{
+						Property: RegisterRulePropertyDistributionVersion,
+						Pattern:  "8",
+					},
+				},
+				GroupID: el8.ID,
+			})
+			if err != nil {
+				panic(err.Message)
+			}
+			o := Options
+			o.Register.Enabled = true
+			o.Register.PSK = secutil.RandomString(6)
+			o.Save()
 		}
 
 		i++

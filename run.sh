@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-ROOT=$(pwd)
+ROOT=$(dirname $(readlink -f "$0"))
 
 cd $ROOT
 cd scripts/codegen/
