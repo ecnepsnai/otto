@@ -71,8 +71,10 @@ done
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
 echo -en "Packaging server build... "
-for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
-    build_server ${OS} amd64 ${PRODUCT_NAME}
+for ARCH in 'amd64' 'arm64'; do
+    for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
+        build_server ${OS} ${ARCH} ${PRODUCT_NAME}
+    done
 done
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 

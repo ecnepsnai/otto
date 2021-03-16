@@ -12,10 +12,10 @@ Docker.
 If you were using Podman, you can run the container with:
 
 ```bash
-podman run -p 8080:8080 -v <data dir>:/otto_data otto:latest
+podman run -p 8080:8080 -v <data dir>:/otto_data ghcr.io/ecnepsnai/otto:latest
 ```
 
-*Substitute `podman` with `docker` if you're using Docker*
+*Note:* Substitute `podman` with `docker` if you're using Docker.
 
 Replace `<data dir>` with a directory where you want Otto to store all server data, or omit the volume parameter
 entirely if you don't care about persistence
@@ -24,6 +24,9 @@ Navigating to `http://localhost:8080` in your web browser and use the default cr
 You will need to change your password the first time you log in.
 
 We recommend using a reverse proxy such as NGINX and configuring TLS.
+
+*Note:* An arm64v8 image is available as of version 0.8.0 on the
+[https://github.com/ecnepsnai/otto/releases](Releases) page.
 
 ### As a Service
 
