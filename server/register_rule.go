@@ -50,27 +50,22 @@ func (rule RegisterRule) Matches(properties otto.RegisterRequestProperties) bool
 			if !pattern.MatchString(properties.Hostname) {
 				allClausesMatched = false
 			}
-			break
 		case RegisterRulePropertyKernelName:
 			if !pattern.MatchString(properties.KernelName) {
 				allClausesMatched = false
 			}
-			break
 		case RegisterRulePropertyKernelVersion:
 			if !pattern.MatchString(properties.KernelVersion) {
 				allClausesMatched = false
 			}
-			break
 		case RegisterRulePropertyDistributionName:
 			if !pattern.MatchString(properties.DistributionName) {
 				allClausesMatched = false
 			}
-			break
 		case RegisterRulePropertyDistributionVersion:
 			if !pattern.MatchString(properties.DistributionVersion) {
 				allClausesMatched = false
 			}
-			break
 		}
 
 		if !allClausesMatched {

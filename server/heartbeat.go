@@ -52,7 +52,7 @@ func (s *heartbeatStoreType) LastHeartbeat(host *Host) *Heartbeat {
 
 // StartHeartbeatMonitor starts the heartbeat monitor
 func StartHeartbeatMonitor() {
-	for true {
+	for {
 		HostStore.PingAll()
 		time.Sleep(time.Duration(Options.Network.HeartbeatFrequency) * time.Minute)
 	}

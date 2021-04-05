@@ -147,17 +147,17 @@ func optionsFileHash() string {
 // Validate returns an error if the options is not valid
 func (o *OttoOptions) Validate() error {
 	if o.General.ServerURL == "" {
-		return fmt.Errorf("A server URL is required")
+		return fmt.Errorf("a server URL is required")
 	}
 	if err := environ.Validate(o.General.GlobalEnvironment); err != nil {
 		return err
 	}
 	if !IsIPVersionOption(o.Network.ForceIPVersion) {
-		return fmt.Errorf("Invalid value for IP version")
+		return fmt.Errorf("invalid value for IP version")
 	}
 	if o.Register.Enabled {
 		if o.Register.PSK == "" {
-			return fmt.Errorf("A register PSK is required if auto registration is enabled")
+			return fmt.Errorf("a register PSK is required if auto registration is enabled")
 		}
 	}
 	return nil

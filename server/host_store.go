@@ -76,7 +76,7 @@ func (s *hostStoreObject) AllHosts() []Host {
 		log.Error("Error listing all hosts: error='%s'", err.Error())
 		return []Host{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Host{}
 	}
 

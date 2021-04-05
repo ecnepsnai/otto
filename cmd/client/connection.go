@@ -34,7 +34,7 @@ func (sc *serverConnection) Start() {
 
 	cancel := make(chan bool)
 
-	for true {
+	for {
 		messageType, message, err := otto.ReadMessage(sc.c, config.PSK)
 		if err == io.EOF || messageType == 0 {
 			break
@@ -54,7 +54,6 @@ func (sc *serverConnection) Start() {
 			cancel <- true
 		default:
 			log.Warn("Unexpected message with type %d from %s", messageType, sc.remoteAddress)
-			break
 		}
 	}
 }
@@ -92,15 +91,12 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 		if err := loadConfig(); err != nil {
 			reply.Error = err
 		}
-		break
 	case otto.ActionRunScript:
 		reply.ScriptResult = runScript(c, message.Script, cancel)
-		break
 	case otto.ActionUploadFile, otto.ActionUploadFileAndExit:
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err
 		}
-		break
 	default:
 		log.Error("Unknown action %d", message.Action)
 		return
@@ -261,8 +257,8 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 	log.Info("Script '%s' exited after %s", time.Since(start))
 	didExit = true
 
-	result.Stderr = string(stderr.Bytes())
-	result.Stdout = string(stdout.Bytes())
+	result.Stderr = stderr.String()
+	result.Stdout = stdout.String()
 	result.Elapsed = time.Since(start)
 	log.Debug("Stdout: %s", result.Stdout)
 	log.Debug("Stderr: %s", result.Stderr)

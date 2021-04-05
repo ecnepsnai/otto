@@ -151,10 +151,10 @@ func RouterSetup() {
 			json.NewEncoder(w).Encode(web.CommonErrors.NotFound)
 		} else if FileExists(notFoundFile) {
 			file, err := os.OpenFile(path.Join(Directories.Build, "404.html"), os.O_RDONLY, os.ModePerm)
-			defer file.Close()
 			if err != nil {
 				panic(err)
 			}
+			defer file.Close()
 			io.CopyBuffer(w, file, nil)
 		} else {
 			w.Write([]byte("not found"))
@@ -207,5 +207,4 @@ func unauthorizedHandle(w http.ResponseWriter, request *http.Request) {
 
 	w.WriteHeader(403)
 	w.Write([]byte("{\"error\":{\"code\":403,\"message\":\"unauthorized\"}}"))
-	return
 }

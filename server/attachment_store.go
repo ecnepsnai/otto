@@ -14,7 +14,7 @@ func (s attachmentStoreObject) AllAttachments() []Attachment {
 		log.Error("Error listing attachments: error='%s'", err.Error())
 		return []Attachment{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Attachment{}
 	}
 
@@ -45,6 +45,7 @@ func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) []Attach
 		attachment := s.AttachmentWithID(id)
 		if attachment == nil {
 			log.Error("Script references non-existant attachment: script_id='%s' attachment_id='%s'", scriptID, id)
+			continue
 		}
 		attachments[i] = *attachment
 	}

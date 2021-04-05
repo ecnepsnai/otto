@@ -109,7 +109,6 @@ func (h *handle) UserResetAPIKey(request web.Request) (interface{}, *web.Error) 
 
 func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
-	user := session.User()
 
 	type changePasswordParameters struct {
 		Password string `min:"1"`

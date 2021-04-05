@@ -46,7 +46,7 @@ func (s *scriptStoreObject) AllScripts() []Script {
 		log.Error("Error listing scripts: error='%s'", err.Error())
 		return []Script{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Script{}
 	}
 

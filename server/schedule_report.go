@@ -29,7 +29,7 @@ func (s *schedulereportStoreObject) GetReportsForSchedule(scheduleID string) []S
 		log.Error("Error getting all schedule reports: %s", err.Error())
 		return []ScheduleReport{}
 	}
-	if objs == nil || len(objs) == 0 {
+	if len(objs) == 0 {
 		return []ScheduleReport{}
 	}
 

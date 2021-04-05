@@ -88,7 +88,6 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	attachmentID := request.Params.ByName("id")
-	attachment := AttachmentStore.AttachmentWithID(attachmentID)
 
 	req := editAttachmentParams{}
 	if err := request.Decode(&req); err != nil {

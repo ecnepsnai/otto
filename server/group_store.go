@@ -46,7 +46,7 @@ func (s *groupStoreObject) AllGroups() []Group {
 		log.Error("Error listing all groups: error='%s'", err.Error())
 		return []Group{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Group{}
 	}
 

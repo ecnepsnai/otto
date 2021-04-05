@@ -36,7 +36,7 @@ func (s *userStoreObject) AllUsers() []User {
 	if err != nil {
 		log.Error("Error listing all users: error='%s'", err.Error())
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []User{}
 	}
 

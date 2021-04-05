@@ -71,7 +71,7 @@ func Validate(vars []Variable) error {
 	for _, v := range vars {
 		for _, key := range ReservedKeys {
 			if v.Key == key {
-				return fmt.Errorf("Key is reserved by the Otto system")
+				return fmt.Errorf("key is reserved by the Otto system")
 			}
 		}
 	}

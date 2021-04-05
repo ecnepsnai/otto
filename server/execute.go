@@ -95,14 +95,12 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 
 	go func() {
 		for {
-			select {
-			case <-cancel:
-				conn.SendMessage(otto.MessageTypeCancelAction, otto.MessageCancelAction{})
-			}
+			<-cancel
+			conn.SendMessage(otto.MessageTypeCancelAction, otto.MessageCancelAction{})
 		}
 	}()
 
-	for true {
+	for {
 		messageType, message, err := conn.ReadMessage()
 		if err == io.EOF || messageType == 0 {
 			return nil, nil
@@ -117,7 +115,6 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 			if actionOutput != nil {
 				actionOutput(output.Stdout, output.Stderr)
 			}
-			break
 		case otto.MessageTypeActionResult:
 			result := message.(otto.MessageActionResult)
 			scriptResult := &result.ScriptResult
@@ -131,8 +128,6 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 			return nil, ErrorUser(generalError.Error())
 		}
 	}
-
-	return nil, nil
 }
 
 // Ping ping the host
@@ -160,7 +155,6 @@ func (host *Host) Ping() *Error {
 	case otto.MessageTypeHeartbeatResponse:
 		response := message.(otto.MessageHeartbeatResponse)
 		heartbeatStore.RegisterHeartbeatReply(host, response)
-		break
 	default:
 		log.Error("Unexpected otto message %d while looking for heartbeat reply", messageType)
 		return ErrorServer("Unexpected response")

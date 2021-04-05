@@ -14,7 +14,7 @@ func (s scheduleStoreObject) AllSchedules() []Schedule {
 		log.Error("Error listing all schedules: error='%s'", err.Error())
 		return []Schedule{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Schedule{}
 	}
 
@@ -36,7 +36,7 @@ func (s scheduleStoreObject) AllSchedulesForScript(scriptID string) []Schedule {
 		log.Error("Error listing all schedules for script: script_id='%s' error='%s'", scriptID, err.Error())
 		return []Schedule{}
 	}
-	if objects == nil || len(objects) == 0 {
+	if len(objects) == 0 {
 		return []Schedule{}
 	}
 
