@@ -312,7 +312,7 @@ func uploadFile(file otto.File) error {
 		return err
 	}
 
-	f, err := os.OpenFile(file.Path, os.O_CREATE|os.O_WRONLY, os.FileMode(file.Mode))
+	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, os.FileMode(file.Mode))
 	if err != nil {
 		log.Error("Error opening file: path='%s' error='%s'", file.Path, err.Error())
 		return err
@@ -324,9 +324,13 @@ func uploadFile(file otto.File) error {
 		log.Error("Error writing to file: path='%s' error='%s'", file.Path, err.Error())
 		return err
 	}
-	if err := f.Chown(file.UID, file.GID); err != nil {
-		log.Error("Error chowning file: path='%s' error='%s'", file.Path, err.Error())
-		return err
+	// Only chown if we need to
+	if uid, gid := getCurrentUIDandGID(); uid != uint32(file.UID) || gid != uint32(file.GID) {
+		if err := f.Chown(file.UID, file.GID); err != nil {
+			log.Error("Error chowning file: path='%s' error='%s'", file.Path, err.Error())
+			return err
+		}
+		log.Debug("Chowned file: path='%s' uid=%d gid=%d", file.Path, file.UID, file.GID)
 	}
 
 	log.Debug("Wrote %d bytes to '%s'", n, file.Path)
