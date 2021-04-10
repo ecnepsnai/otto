@@ -22,8 +22,7 @@ func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError(err.Error())
 	}
 
-	authenticationResult := authenticateUser(login.Username, login.Password, request.HTTP)
-	login.Password = ""
+	authenticationResult := authenticateUser(login.Username, []byte(login.Password), request.HTTP)
 	login = credentials{}
 	if authenticationResult == nil {
 		return nil, web.CommonErrors.Unauthorized

@@ -44,6 +44,7 @@ func testSetup() {
 	GobSetup()
 	StateSetup()
 	DataStoreSetup()
+	StoreSetup()
 	WarmCache()
 	LoadOptions()
 }
@@ -52,6 +53,7 @@ func testSetup() {
 func testTeardown() {
 	State.Close()
 	DataStoreTeardown()
+	StoreTeardown()
 	logtic.Close()
 	if tmpDir != nil {
 		os.RemoveAll(*tmpDir)

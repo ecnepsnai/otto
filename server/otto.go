@@ -45,6 +45,7 @@ func initLogtic(verbose bool) {
 
 func startup() {
 	CommonSetup()
+	StoreSetup()
 	DataStoreSetup()
 	WarmCache()
 	CronSetup()
@@ -55,5 +56,6 @@ func startup() {
 func shutdown() {
 	State.Close()
 	DataStoreTeardown()
+	StoreTeardown()
 	logtic.Close()
 }

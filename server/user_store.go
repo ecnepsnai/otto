@@ -78,7 +78,6 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 	user := User{
 		Username:           params.Username,
 		Email:              params.Email,
-		PasswordHash:       *hashedPassword,
 		CanLogIn:           true,
 		MustChangePassword: params.MustChangePassword,
 	}
@@ -91,6 +90,7 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 		log.Error("Error adding new user '%s': %s", params.Email, err.Error())
 		return nil, ErrorFrom(err)
 	}
+	ShadowStore.Set(user.Username, *hashedPassword)
 
 	UpdateUserCache()
 
@@ -121,7 +121,7 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 			return nil, ErrorFrom(err)
 		}
 
-		user.PasswordHash = *hashedPassword
+		ShadowStore.Set(user.Username, *hashedPassword)
 	}
 
 	if err := s.Table.Update(*user); err != nil {
@@ -146,13 +146,14 @@ func (s *userStoreObject) ResetPassword(username string, newPassword []byte) (*U
 		return nil, ErrorFrom(err)
 	}
 
-	user.PasswordHash = *passwordHash
 	user.MustChangePassword = false
 
 	if err := s.Table.Update(*user); err != nil {
 		log.Error("Error updating user '%s': %s", username, err.Error())
 		return nil, ErrorFrom(err)
 	}
+
+	ShadowStore.Set(user.Username, *passwordHash)
 
 	UpdateUserCache()
 	return user, nil
@@ -171,12 +172,8 @@ func (s *userStoreObject) ResetAPIKey(username string) (*string, *Error) {
 		log.Error("Error hashing API key: %s", err.Error())
 		return nil, ErrorFrom(err)
 	}
-	user.APIKey = *hashedKey
-	err = UserStore.Table.Update(user)
-	if err != nil {
-		return nil, ErrorFrom(err)
-	}
-	UpdateUserCache()
+
+	ShadowStore.Set("api_"+user.Username, *hashedKey)
 	log.Info("API key reset: username='%s'", username)
 	return &apiKey, nil
 }
@@ -186,6 +183,7 @@ func (s *userStoreObject) DeleteUser(user *User) *Error {
 		log.Error("Error deleting user '%s': %s", user.Email, err.Error())
 		return ErrorFrom(err)
 	}
+	ShadowStore.Delete(user.Username)
 
 	UpdateUserCache()
 

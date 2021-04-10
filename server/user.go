@@ -1,13 +1,9 @@
 package server
 
-import "github.com/ecnepsnai/secutil"
-
 // User describes a user object
 type User struct {
-	Username           string                 `ds:"primary" max:"32" min:"1"`
-	Email              string                 `ds:"unique" max:"128" min:"1"`
-	APIKey             secutil.HashedPassword `json:"-"`
-	PasswordHash       secutil.HashedPassword `json:"-"`
+	Username           string `ds:"primary" max:"32" min:"1"`
+	Email              string `ds:"unique" max:"128" min:"1"`
 	CanLogIn           bool
 	MustChangePassword bool
 }

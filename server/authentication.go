@@ -39,7 +39,7 @@ func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 			return nil
 		}
 
-		if !user.APIKey.Compare([]byte(apiKey)) {
+		if !ShadowStore.Compare("api_"+user.Username, []byte(apiKey)) {
 			log.Warn("API request with incorrect API key: username='%s'", apiUsername)
 			return nil
 		}
@@ -79,7 +79,7 @@ func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 	return &updatedSession
 }
 
-func authenticateUser(username, password string, req *http.Request) *AuthenticationResult {
+func authenticateUser(username string, password []byte, req *http.Request) *AuthenticationResult {
 	usernameLen := len(username)
 	passwordLen := len(password)
 	if usernameLen == 0 || usernameLen > 32 || passwordLen == 0 || passwordLen > 256 {
@@ -98,21 +98,14 @@ func authenticateUser(username, password string, req *http.Request) *Authenticat
 		return nil
 	}
 
-	if !user.PasswordHash.Compare([]byte(password)) {
+	if !ShadowStore.Compare(user.Username, password) {
 		EventStore.UserIncorrectPassword(username, req.RemoteAddr)
 		log.Warn("Reject login with incorrect password: username='%s'", user.Username)
 		return nil
 	}
 
-	if upgradedPassword := user.PasswordHash.Upgrade([]byte(password)); upgradedPassword != nil {
-		user.PasswordHash = *upgradedPassword
-		if err := UserStore.Table.Update(*user); err != nil {
-			log.Error("Error upgrading user password: username='%s' error='%s'", user.Username, err.Error())
-		} else {
-			log.Info("Upgraded user password: username='%s'", user.Username)
-		}
-	}
-	password = ""
+	ShadowStore.Upgrade(user.Username, password)
+	password = nil
 
 	session := SessionStore.NewSessionForUser(user)
 	EventStore.UserLoggedIn(username, req.RemoteAddr)

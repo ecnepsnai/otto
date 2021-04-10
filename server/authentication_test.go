@@ -32,7 +32,7 @@ func TestAuthenticationLogin(t *testing.T) {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
 
-	authenticationResult := authenticateUser(username, password, &http.Request{RemoteAddr: randomString(6)})
+	authenticationResult := authenticateUser(username, []byte(password), &http.Request{RemoteAddr: randomString(6)})
 	if authenticationResult == nil {
 		t.Fatalf("Should return a session key")
 	}
@@ -54,7 +54,7 @@ func TestAuthenticationIncorrectPassword(t *testing.T) {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
 
-	sessionKey := authenticateUser(username, randomString(6), &http.Request{RemoteAddr: randomString(6)})
+	sessionKey := authenticateUser(username, []byte(randomString(6)), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
@@ -71,7 +71,7 @@ func TestAuthenticationUnknownUsername(t *testing.T) {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
 
-	sessionKey := authenticateUser(randomString(6), randomString(6), &http.Request{RemoteAddr: randomString(6)})
+	sessionKey := authenticateUser(randomString(6), []byte(randomString(6)), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
@@ -79,25 +79,25 @@ func TestAuthenticationUnknownUsername(t *testing.T) {
 
 func TestAuthenticationIllegalParams(t *testing.T) {
 	// Empty username
-	sessionKey := authenticateUser("", randomString(6), &http.Request{RemoteAddr: randomString(6)})
+	sessionKey := authenticateUser("", []byte(randomString(6)), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
 
 	// Empty password
-	sessionKey = authenticateUser(randomString(6), "", &http.Request{RemoteAddr: randomString(6)})
+	sessionKey = authenticateUser(randomString(6), []byte(""), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
 
 	// Too long username
-	sessionKey = authenticateUser(randomString(32), randomString(6), &http.Request{RemoteAddr: randomString(6)})
+	sessionKey = authenticateUser(randomString(32), []byte(randomString(6)), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
 
 	// Too long password
-	sessionKey = authenticateUser(randomString(6), randomString(256), &http.Request{RemoteAddr: randomString(6)})
+	sessionKey = authenticateUser(randomString(6), []byte(randomString(256)), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
@@ -122,7 +122,7 @@ func TestAuthenticationDisabledUser(t *testing.T) {
 		t.Fatalf("Error updating user: %s", err.Message)
 	}
 
-	sessionKey := authenticateUser(username, password, &http.Request{RemoteAddr: randomString(6)})
+	sessionKey := authenticateUser(username, []byte(password), &http.Request{RemoteAddr: randomString(6)})
 	if sessionKey != nil {
 		t.Fatalf("Should not return authentication result")
 	}
@@ -140,7 +140,7 @@ func TestAuthenticationDeletedUser(t *testing.T) {
 		t.Fatalf("Error making user: %s", erro.Message)
 	}
 
-	authenticationResult := authenticateUser(username, password, &http.Request{RemoteAddr: randomString(6)})
+	authenticationResult := authenticateUser(username, []byte(password), &http.Request{RemoteAddr: randomString(6)})
 	if authenticationResult == nil {
 		t.Fatalf("Should return a session key")
 	}
@@ -168,7 +168,7 @@ func TestAuthenticationExpiredSession(t *testing.T) {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
 
-	authenticationResult := authenticateUser(username, password, &http.Request{RemoteAddr: randomString(6)})
+	authenticationResult := authenticateUser(username, []byte(password), &http.Request{RemoteAddr: randomString(6)})
 	if authenticationResult == nil {
 		t.Fatalf("Should return a session key")
 	}
@@ -214,7 +214,7 @@ func TestAuthenticationPartialSession(t *testing.T) {
 		t.Fatalf("Error making user: %s", err.Message)
 	}
 
-	authenticationResult := authenticateUser(username, password, &http.Request{RemoteAddr: randomString(6)})
+	authenticationResult := authenticateUser(username, []byte(password), &http.Request{RemoteAddr: randomString(6)})
 	if authenticationResult == nil {
 		t.Fatalf("Should return a session key")
 	}
