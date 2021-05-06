@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -254,7 +255,7 @@ func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResu
 		}
 	}()
 	err = cmd.Wait()
-	log.Info("Script '%s' exited after %s", time.Since(start))
+	log.Info("Script '%s' exited after %s", script.Name, time.Since(start))
 	didExit = true
 
 	result.Stderr = stderr.String()
@@ -312,7 +313,7 @@ func uploadFile(file otto.File) error {
 		return err
 	}
 
-	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, os.FileMode(file.Mode))
+	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, intToFileMode(file.Mode))
 	if err != nil {
 		log.Error("Error opening file: path='%s' error='%s'", file.Path, err.Error())
 		return err
@@ -336,6 +337,14 @@ func uploadFile(file otto.File) error {
 	log.Debug("Wrote %d bytes to '%s'", n, file.Path)
 
 	return nil
+}
+
+func intToFileMode(m uint32) os.FileMode {
+	n, err := strconv.ParseUint(fmt.Sprintf("0%d", m), 8, 32)
+	if err != nil {
+		panic(err)
+	}
+	return os.FileMode(n)
 }
 
 func getCurrentUIDandGID() (uint32, uint32) {
