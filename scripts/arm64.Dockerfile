@@ -1,4 +1,4 @@
-FROM arv64v8/alpine:3
+FROM arm64v8/alpine:3
 LABEL maintainer="Ian Spence <ian@ecn.io>"
 LABEL org.opencontainers.image.source=https://github.com/ecnepsnai/otto
 
