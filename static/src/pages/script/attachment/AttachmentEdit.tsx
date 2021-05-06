@@ -27,7 +27,7 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
     };
 
     const editAttachment = () => {
-        return Attachment.Save(props.attachment).then(attachment => {
+        return Attachment.Save(attachment).then(attachment => {
             props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
         });

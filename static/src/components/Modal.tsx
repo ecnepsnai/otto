@@ -278,6 +278,7 @@ export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameS
     public static removeModal(): void {
         try {
             document.body.classList.remove('modal-open');
+            document.body.removeAttribute('style');
             document.querySelector('.modal-backdrop').remove();
         } catch (e) {
             //
