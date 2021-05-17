@@ -84,7 +84,7 @@ export const SystemUsers: React.FC = () => {
         if (StateManager.Current().User.Username != user.Username) {
             deleteMenuItem = (<React.Fragment>
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteUserMenuClick(user)}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteUserMenuClick(user)} />
             </React.Fragment>);
         }
 
@@ -94,8 +94,8 @@ export const SystemUsers: React.FC = () => {
                 <td>{user.Email}</td>
                 <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
                 <Table.Menu>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editUserMenuClick(user)}/>
-                    { deleteMenuItem }
+                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editUserMenuClick(user)} />
+                    {deleteMenuItem}
                 </Table.Menu>
             </Table.Row>
         );
@@ -116,7 +116,7 @@ export const SystemUsers: React.FC = () => {
                     <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
-                    { users.map(userRow) }
+                    {users.map(userRow)}
                 </Table.Body>
             </Table.Table>
         </Page>
@@ -135,35 +135,35 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
     const changeUsername = (Username: string) => {
         setUser(user => {
             user.Username = Username;
-            return {...user};
+            return { ...user };
         });
     };
 
     const changeEmail = (Email: string) => {
         setUser(user => {
             user.Email = Email;
-            return {...user};
+            return { ...user };
         });
     };
 
     const changePassword = (Password: string) => {
         setUser(user => {
             user.Password = Password;
-            return {...user};
+            return { ...user };
         });
     };
 
     const changeCanLogIn = (CanLogIn: boolean) => {
         setUser(user => {
             user.CanLogIn = CanLogIn;
-            return {...user};
+            return { ...user };
         });
     };
 
     const changeMustChangePassword = (MustChangePassword: boolean) => {
         setUser(user => {
             user.MustChangePassword = MustChangePassword;
-            return {...user};
+            return { ...user };
         });
     };
 
@@ -249,10 +249,10 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
                 defaultValue={user.Email}
                 onChange={changeEmail}
                 required />
-            { passwordField() }
-            { resetAPIKey() }
-            { canLogInCheckbox() }
-            { mustChangePasswordCheckbox() }
+            { passwordField()}
+            { resetAPIKey()}
+            { canLogInCheckbox()}
+            { mustChangePasswordCheckbox()}
         </ModalForm>
     );
 };

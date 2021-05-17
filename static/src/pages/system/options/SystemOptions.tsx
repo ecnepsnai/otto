@@ -16,28 +16,28 @@ export const SystemOptions: React.FC = () => {
     const changeGeneral = (value: Options.General) => {
         setOptions(options => {
             options.General = value;
-            return {...options};
+            return { ...options };
         });
     };
 
     const changeAuthentication = (value: Options.Authentication) => {
         setOptions(options => {
             options.Authentication = value;
-            return {...options};
+            return { ...options };
         });
     };
 
     const changeNetwork = (value: Options.Network) => {
         setOptions(options => {
             options.Network = value;
-            return {...options};
+            return { ...options };
         });
     };
 
     const changeSecurity = (value: Options.Security) => {
         setOptions(options => {
             options.Security = value;
-            return {...options};
+            return { ...options };
         });
     };
 
@@ -53,10 +53,10 @@ export const SystemOptions: React.FC = () => {
     return (
         <Page title="Options">
             <Form className="cards" showSaveButton onSubmit={onSubmit} loading={loading}>
-                <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral}/>
-                <OptionsAuthentication defaultValue={options.Authentication} onUpdate={changeAuthentication}/>
-                <OptionsNetwork defaultValue={options.Network} onUpdate={changeNetwork}/>
-                <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity}/>
+                <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral} />
+                <OptionsAuthentication defaultValue={options.Authentication} onUpdate={changeAuthentication} />
+                <OptionsNetwork defaultValue={options.Network} onUpdate={changeNetwork} />
+                <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity} />
                 <div className="mb-2"></div>
             </Form>
         </Page>

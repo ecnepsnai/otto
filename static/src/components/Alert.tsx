@@ -22,8 +22,8 @@ export namespace Alert {
         }
         return (
             <div className={className} role="alert">
-                { closeButton() }
-                { props.children }
+                { closeButton()}
+                { props.children}
             </div>
         );
     };

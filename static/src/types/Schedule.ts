@@ -34,7 +34,7 @@ export class Schedule {
     /**
      * Create a new Schedule
      */
-    public static async New(parameters: ScheduleType|NewScheduleParameters): Promise<ScheduleType> {
+    public static async New(parameters: ScheduleType | NewScheduleParameters): Promise<ScheduleType> {
         const data = await API.PUT('/api/schedules/schedule', parameters);
         return data as ScheduleType;
     }
@@ -149,7 +149,7 @@ export interface ScheduleReport {
     HostIDs: string[];
     Time: ScheduleReportTime;
     Result: number;
-    HostResult: {[HostID: string]: number};
+    HostResult: { [HostID: string]: number };
 }
 
 export interface ScheduleReportTime {

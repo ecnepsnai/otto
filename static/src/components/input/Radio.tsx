@@ -4,7 +4,7 @@ import { Rand } from '../../services/Rand';
 import '../../../css/form.scss';
 
 export interface RadioChoice {
-    value: string|number;
+    value: string | number;
     label: string;
 }
 interface RadioProps {
@@ -19,11 +19,11 @@ interface RadioProps {
     /**
      * The default value to be selected
      */
-    defaultValue?: string|number;
+    defaultValue?: string | number;
     /**
      * Called when a new value is selected
      */
-    onChange: (value: string|number) => (void);
+    onChange: (value: string | number) => (void);
     /**
      * If toggle buttons should be used instead of classic radio controls
      */
@@ -41,7 +41,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
             throw new Error('default value not a valid choice');
         }
     }
-    const [value, setValue] = React.useState<string|number>(props.defaultValue);
+    const [value, setValue] = React.useState<string | number>(props.defaultValue);
 
     React.useEffect(() => {
         props.onChange(value);
@@ -62,7 +62,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
                         const labelID = Rand.ID();
                         return (
                             <div className="form-check" key={labelID}>
-                                <input className="form-check-input" type="radio" name={labelID} id={labelID} value={choice.value} checked={value===choice.value} onChange={onChange}/>
+                                <input className="form-check-input" type="radio" name={labelID} id={labelID} value={choice.value} checked={value === choice.value} onChange={onChange} />
                                 <label className="form-check-label" htmlFor={labelID}>
                                     {choice.label}
                                 </label>
@@ -83,7 +83,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
                             const labelID = Rand.ID();
                             return (
                                 <React.Fragment key={labelID}>
-                                    <input type="radio" className="btn-check" name={labelID} id={labelID} value={choice.value} checked={value===choice.value} onChange={onChange} />
+                                    <input type="radio" className="btn-check" name={labelID} id={labelID} value={choice.value} checked={value === choice.value} onChange={onChange} />
                                     <label className="btn btn-secondary btn-sm" htmlFor={labelID}>{choice.label}</label>
                                 </React.Fragment>
                             );

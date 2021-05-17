@@ -18,14 +18,14 @@ export const OptionsAuthentication: React.FC<OptionsAuthenticationProps> = (prop
     const changeMaxAgeMinutes = (MaxAgeMinutes: number) => {
         setValue(value => {
             value.MaxAgeMinutes = MaxAgeMinutes;
-            return {...value};
+            return { ...value };
         });
     };
 
     const changeSecureOnly = (SecureOnly: boolean) => {
         setValue(value => {
             value.SecureOnly = SecureOnly;
-            return {...value};
+            return { ...value };
         });
     };
 

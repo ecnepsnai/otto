@@ -88,7 +88,7 @@ export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentL
             <Table.Body>
                 {
                     attachments.map((attachment, idx) => {
-                        return (<AttachmentListItem attachment={attachment} key={idx} didEdit={didEditAttachment(idx)} didDelete={didDeleteAttachment(idx)}/>);
+                        return (<AttachmentListItem attachment={attachment} key={idx} didEdit={didEditAttachment(idx)} didDelete={didDeleteAttachment(idx)} />);
                     })
                 }
             </Table.Body>

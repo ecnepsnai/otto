@@ -75,21 +75,21 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
     };
 
     const executeClick = () => {
-        GlobalModalFrame.showModal(<RunModal scriptID={script.ID} key={Rand.ID()}/>);
+        GlobalModalFrame.showModal(<RunModal scriptID={script.ID} key={Rand.ID()} />);
     };
 
     const runScriptGroupClick = (groupID: string) => {
         return () => {
             Group.Hosts(groupID).then(hosts => {
                 const hostIDs = hosts.map(host => host.ID);
-                GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={hostIDs} key={Rand.ID()}/>);
+                GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={hostIDs} key={Rand.ID()} />);
             });
         };
     };
 
     const runScriptHostClick = (hostID: string) => {
         return () => {
-            GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={[hostID]} key={Rand.ID()}/>);
+            GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={[hostID]} key={Rand.ID()} />);
         };
     };
 
@@ -140,13 +140,13 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
                         <Card.Header>Script Details</Card.Header>
                         <ListGroup.List>
                             <ListGroup.TextItem title="Name">{script.Name}</ListGroup.TextItem>
-                            { runAs() }
+                            {runAs()}
                             <ListGroup.TextItem title="Working Directory">{script.WorkingDirectory}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Executable">{script.Executable}</ListGroup.TextItem>
-                            <ListGroup.TextItem title="Status"><EnabledBadge value={script.Enabled}/></ListGroup.TextItem>
+                            <ListGroup.TextItem title="Status"><EnabledBadge value={script.Enabled} /></ListGroup.TextItem>
                         </ListGroup.List>
                     </Card.Card>
-                    <EnvironmentVariableCard variables={script.Environment} className="mb-3"/>
+                    <EnvironmentVariableCard variables={script.Environment} className="mb-3" />
                     <Card.Card className="mb-3">
                         <Card.Header>Attachments</Card.Header>
                         {attachmentList()}
@@ -163,7 +163,7 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
                                         <div className="d-flex justify-content-between">
                                             <div>
                                                 <Icon.LayerGroup />
-                                                <Link to={'/groups/group/' + host.GroupID} className="ms-1">{ host.GroupName }</Link>
+                                                <Link to={'/groups/group/' + host.GroupID} className="ms-1">{host.GroupName}</Link>
                                             </div>
                                             <div>
                                                 <SmallPlayButton onClick={runScriptGroupClick(host.GroupID)} />
@@ -173,7 +173,7 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
                                             <div>
                                                 <Icon.Descendant />
                                                 <Icon.Desktop />
-                                                <Link to={'/hosts/host/' + host.HostID} className="ms-1">{ host.HostName }</Link>
+                                                <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
                                             </div>
                                             <div>
                                                 <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />

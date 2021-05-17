@@ -21,25 +21,25 @@ export const GroupListItem: React.FC<GroupListItemProps> = (props: GroupListItem
         });
     };
 
-    const link = <Link to={'/groups/group/' + props.group.ID}>{ props.group.Name }</Link>;
+    const link = <Link to={'/groups/group/' + props.group.ID}>{props.group.Name}</Link>;
 
     let deleteMenuItem: JSX.Element = null;
     if (props.numGroups > 1) {
         deleteMenuItem = (
             <React.Fragment>
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
             </React.Fragment>
         );
     }
 
     return (
         <Table.Row>
-            <td>{ link }</td>
-            <td>{ Formatter.ValueOrNothing(props.hosts.length) }</td>
-            <td>{ Formatter.ValueOrNothing((props.group.ScriptIDs || []).length) }</td>
+            <td>{link}</td>
+            <td>{Formatter.ValueOrNothing(props.hosts.length)}</td>
+            <td>{Formatter.ValueOrNothing((props.group.ScriptIDs || []).length)}</td>
             <Table.Menu>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + props.group.ID + '/edit'}/>
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + props.group.ID + '/edit'} />
                 {deleteMenuItem}
             </Table.Menu>
         </Table.Row>

@@ -23,7 +23,7 @@ interface CommonScriptType {
 export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListCardProps) => {
     const runScriptClick = (scriptID: string, hostIDs: string[]) => {
         return () => {
-            GlobalModalFrame.showModal(<RunModal scriptID={scriptID} hostIDs={hostIDs} key={Rand.ID()}/>);
+            GlobalModalFrame.showModal(<RunModal scriptID={scriptID} hostIDs={hostIDs} key={Rand.ID()} />);
         };
     };
 
@@ -41,13 +41,13 @@ export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListC
             });
         });
 
-        return (<ListGroup.List>{ scripts.map((script, index) => {
+        return (<ListGroup.List>{scripts.map((script, index) => {
             return (
                 <ListGroup.Item key={index}>
                     <div className="d-flex justify-content-between">
                         <div>
                             <Icon.Scroll />
-                            <Link to={'/scripts/script/' + script.ID} className="ms-1">{ script.Name }</Link>
+                            <Link to={'/scripts/script/' + script.ID} className="ms-1">{script.Name}</Link>
                         </div>
                         <div>
                             <SmallPlayButton onClick={runScriptClick(script.ID, props.hostIDs)} />
@@ -61,7 +61,7 @@ export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListC
     return (
         <Card.Card className={props.className}>
             <Card.Header>Scripts</Card.Header>
-            { content() }
+            { content()}
         </Card.Card>
     );
 };

@@ -35,8 +35,8 @@ export const Nav: React.FC = () => {
                 </div>
             </nav>
             { StateManager.Current().Warnings.map((warn, idx) => {
-                return ( <Warning warning={warn} key={idx} /> );
-            }) }
+                return (<Warning warning={warn} key={idx} />);
+            })}
         </header>
     );
 };

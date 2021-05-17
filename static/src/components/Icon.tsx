@@ -61,15 +61,15 @@ export namespace Icon {
         if (props.options.color) {
             className = 'text-' + props.options.color.toString();
         }
-        return ( <FontAwesomeIcon icon={props.icon} pulse={props.options.pulse} spin={props.options.spin} className={className}/> );
+        return (<FontAwesomeIcon icon={props.icon} pulse={props.options.pulse} spin={props.options.spin} className={className} />);
     };
 
-    interface LabelProps { icon: JSX.Element; spin?: boolean; label: string|number; }
+    interface LabelProps { icon: JSX.Element; spin?: boolean; label: string | number; }
     export const Label: React.FC<LabelProps> = (props: LabelProps) => {
         return (
             <span>
-                { props.icon }
-                <span className="ms-1">{ props.label }</span>
+                { props.icon}
+                <span className="ms-1">{props.label}</span>
             </span>
         );
     };
@@ -115,6 +115,6 @@ export namespace Icon {
 
     // Special icons
     export const Descendant: React.FC = () => {
-        return ( <span className="descendant-icon"><FontAwesomeIcon icon={faLevelDownAlt} flip="horizontal" transform={{ rotate: 90 }}/></span> );
+        return (<span className="descendant-icon"><FontAwesomeIcon icon={faLevelDownAlt} flip="horizontal" transform={{ rotate: 90 }} /></span>);
     };
 }

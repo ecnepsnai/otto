@@ -44,7 +44,7 @@ export const EnvironmentVariableCard: React.FC<EnvironmentVariableCardProps> = (
     return (
         <Card.Card className={props.className}>
             <Card.Header>Environment Variables</Card.Header>
-            { content() }
+            { content()}
         </Card.Card>
     );
 };

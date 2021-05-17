@@ -23,17 +23,17 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [groups, setGroups] = React.useState<SGroup[]>();
     const [hosts, setHosts] = React.useState<SHost[]>();
-    const [selectedGroups, setSelectedGroups] = React.useState<{[id: string]: number}>();
-    const [selectedHosts, setSelectedHosts] = React.useState<{[id: string]: number}>();
-    const [groupMembers, setGroupMembers] = React.useState<{[id: string]: string[]}>();
+    const [selectedGroups, setSelectedGroups] = React.useState<{ [id: string]: number }>();
+    const [selectedHosts, setSelectedHosts] = React.useState<{ [id: string]: number }>();
+    const [groupMembers, setGroupMembers] = React.useState<{ [id: string]: string[] }>();
 
     const loadData = () => {
         Script.Get(props.scriptID).then(script => {
             Script.Hosts(script.ID).then(hosts => {
-                const groupMap: {[id: string]: string} = {};
-                const groupMembership: {[id: string]: string[]} = {};
-                const selectedGroups: {[id: string]: number} = {};
-                const selectedHosts: {[id: string]: number} = {};
+                const groupMap: { [id: string]: string } = {};
+                const groupMembership: { [id: string]: string[] } = {};
+                const selectedGroups: { [id: string]: number } = {};
+                const selectedHosts: { [id: string]: number } = {};
 
                 const shosts: SHost[] = [];
                 hosts.forEach(host => {
@@ -82,7 +82,7 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                 } else {
                     selectedGroups[groupID] = 0;
                 }
-                return {...selectedGroups};
+                return { ...selectedGroups };
             });
             setSelectedHosts(selectedHosts => {
                 groupMembers[groupID].forEach(host => {
@@ -92,7 +92,7 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                         selectedHosts[host] = 0;
                     }
                 });
-                return {...selectedHosts};
+                return { ...selectedHosts };
             });
         };
     };
@@ -100,13 +100,13 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
     const selectHost = (hostID: string) => {
         return (checked: boolean) => {
             setSelectedHosts(selectedHosts => {
-                const selected: {[id: string]: number} = selectedHosts;
+                const selected: { [id: string]: number } = selectedHosts;
                 if (checked) {
                     selected[hostID] = 1;
                 } else {
                     selected[hostID] = 0;
                 }
-                return {...selectedHosts};
+                return { ...selectedHosts };
             });
         };
     };
@@ -133,7 +133,7 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                     {
                         groups.map((group, idx) => {
                             return (
-                                <Input.Checkbox label={group.Name} onChange={selectGroup(group.ID)} defaultValue={selectedGroups[group.ID]>0} key={idx}/>
+                                <Input.Checkbox label={group.Name} onChange={selectGroup(group.ID)} defaultValue={selectedGroups[group.ID] > 0} key={idx} />
                             );
                         })
                     }
@@ -145,7 +145,7 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
                     {
                         hosts.map((host, idx) => {
                             return (
-                                <Input.Checkbox label={host.Name} onChange={selectHost(host.ID)} defaultValue={selectedHosts[host.ID]>0} key={idx}/>
+                                <Input.Checkbox label={host.Name} onChange={selectHost(host.ID)} defaultValue={selectedHosts[host.ID] > 0} key={idx} />
                             );
                         })
                     }

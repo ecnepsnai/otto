@@ -23,7 +23,7 @@ export class Notification extends React.Component<NotificationProps, unknown> {
         return (
             <div className="notification">
                 <Alert.Alert color={this.props.color} onClose={this.onClose}>
-                    { this.props.message }
+                    {this.props.message}
                 </Alert.Alert>
             </div>
         );
@@ -64,7 +64,7 @@ export class Notification extends React.Component<NotificationProps, unknown> {
     private static post(message: string, color: Style.Palette) {
         const id = Rand.ID();
         GlobalNotificationFrame.addNotification(
-            <Notification message={message} color={color} key={id} id={id}/>
+            <Notification message={message} color={color} key={id} id={id} />
         );
     }
 }
@@ -86,16 +86,18 @@ export class GlobalNotificationFrame extends React.Component<unknown, GlobalNoti
         this.instance.setState(state => {
             const notifications = state.notifications;
             notifications.push(notification);
-            return { notifications: notifications};
+            return { notifications: notifications };
         });
     }
 
     public static removeNotification(key: string): void {
         this.instance.setState(state => {
             const notifications = state.notifications;
-            return { notifications: notifications.filter(n => {
-                return n.key !== key;
-            })};
+            return {
+                notifications: notifications.filter(n => {
+                    return n.key !== key;
+                })
+            };
         });
     }
 

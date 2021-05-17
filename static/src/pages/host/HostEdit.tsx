@@ -49,28 +49,28 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
             if (useHostName) {
                 host.Address = Name;
             }
-            return {...host};
+            return { ...host };
         });
     };
 
     const changeAddress = (Address: string) => {
         setHost(host => {
             host.Address = Address;
-            return {...host};
+            return { ...host };
         });
     };
 
     const changePort = (Port: number) => {
         setHost(host => {
             host.Port = Port;
-            return {...host};
+            return { ...host };
         });
     };
 
     const changePSK = (PSK: string) => {
         setHost(host => {
             host.PSK = PSK;
-            return {...host};
+            return { ...host };
         });
     };
 
@@ -91,21 +91,21 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
     const changeEnabled = (Enabled: boolean) => {
         setHost(host => {
             host.Enabled = Enabled;
-            return {...host};
+            return { ...host };
         });
     };
 
     const changeEnvironment = (Environment: Variable[]) => {
         setHost(host => {
             host.Environment = Environment;
-            return {...host};
+            return { ...host };
         });
     };
 
     const changeGroupIDs = (GroupIDs: string[]) => {
         setHost(host => {
             host.GroupIDs = GroupIDs;
-            return {...host};
+            return { ...host };
         });
     };
 
@@ -148,7 +148,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
     }
 
     return (
-        <Page title={ isNew ? 'New Host' : 'Edit Host' }>
+        <Page title={isNew ? 'New Host' : 'Edit Host'}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"
@@ -157,7 +157,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                     onChange={changeName}
                     required />
                 <Input.Checkbox label="Connect to host using this name" defaultValue={useHostName} onChange={changeUseHostName} />
-                { addressInput() }
+                {addressInput()}
                 <Input.Number
                     label="Port"
                     defaultValue={host.Port}
@@ -168,7 +168,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                     defaultValue={host.PSK}
                     onChange={changePSK}
                     required />
-                { enabledCheckbox() }
+                {enabledCheckbox()}
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>
                     <Card.Body>
@@ -180,7 +180,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                 <Card.Card className="mt-3">
                     <Card.Header>Groups</Card.Header>
                     <Card.Body>
-                        <GroupCheckList selectedGroups={host.GroupIDs} onChange={changeGroupIDs}/>
+                        <GroupCheckList selectedGroups={host.GroupIDs} onChange={changeGroupIDs} />
                     </Card.Body>
                 </Card.Card>
             </Form>

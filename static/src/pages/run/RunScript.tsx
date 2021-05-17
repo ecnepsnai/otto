@@ -73,14 +73,14 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
 
     const content = () => {
         if (!runningScript && results != undefined) {
-            return ( <RunResults results={results} /> );
+            return (<RunResults results={results} />);
         }
 
         if (stdout || stderr) {
             return (
                 <Card.Body>
                     <ProgressBar intermediate cancelClick={cancelClick} />
-                    <RunOutput stdout={stdout } stderr={stderr}/>
+                    <RunOutput stdout={stdout} stderr={stderr} />
                 </Card.Body>
             );
         }
@@ -104,7 +104,7 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
     return (
         <Card.Card color={color}>
             <Card.Header>{host.Name}</Card.Header>
-            { content() }
+            { content()}
         </Card.Card>
     );
 };

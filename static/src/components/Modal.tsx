@@ -109,8 +109,8 @@ export class Modal extends React.Component<ModalProps, ModalState> {
         if (this.props.title) {
             return (
                 <div className="modal-header">
-                    <h5 className="modal-title">{ this.props.title }</h5>
-                    { this.closeButton() }
+                    <h5 className="modal-title">{this.props.title}</h5>
+                    { this.closeButton()}
                 </div>
             );
         } else if (this.props.header) {
@@ -128,7 +128,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                 {
                     this.props.buttons.map(button => {
                         button.color = button.color ?? Style.Palette.Primary;
-                        return <Button color={button.color} onClick={this.buttonClick(button)} key={Rand.ID()} disabled={button.disabled}>{ button.label }</Button>;
+                        return <Button color={button.color} onClick={this.buttonClick(button)} key={Rand.ID()} disabled={button.disabled}>{button.label}</Button>;
                     })
                 }
             </div>
@@ -144,11 +144,11 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             <div className="modal fade" id={this.state.id}>
                 <div className={className}>
                     <div className="modal-content">
-                        { this.header() }
+                        {this.header()}
                         <div className="modal-body">
-                            { this.props.children }
+                            {this.props.children}
                         </div>
-                        { this.footer() }
+                        {this.footer()}
                     </div>
                 </div>
             </div>
@@ -193,7 +193,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             ];
             GlobalModalFrame.showModal(
                 <Modal title={title} buttons={buttons} dismissed={dismissed}>
-                    <p>{ body }</p>
+                    <p>{body}</p>
                 </Modal>
             );
         });
@@ -229,7 +229,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             ];
             GlobalModalFrame.showModal(
                 <Modal title={title} buttons={buttons} dismissed={dismissed}>
-                    <p>{ body }</p>
+                    <p>{body}</p>
                 </Modal>
             );
         });
@@ -247,7 +247,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = (props: ModalHeaderProps)
 
     return (
         <div className="modal-header">
-            { props.children }
+            { props.children}
             <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={closeButtonClicked}></button>
         </div>
     );
@@ -354,7 +354,7 @@ export const ModalForm: React.FC<ModalFormProps> = (props: ModalFormProps) => {
     return (
         <Modal title={props.title} buttons={buttons} static>
             <Form ref={formRef}>
-                { props.children }
+                {props.children}
             </Form>
         </Modal>
     );

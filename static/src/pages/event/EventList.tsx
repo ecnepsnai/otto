@@ -26,7 +26,7 @@ export const EventList: React.FC = () => {
     };
 
     if (loading) {
-        return ( <PageLoading /> );
+        return (<PageLoading />);
     }
     return (
         <Page title="Audit Log">

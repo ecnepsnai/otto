@@ -35,7 +35,7 @@ export class Host {
     /**
      * Create a new Host
      */
-    public static async New(parameters: HostType|NewHostParameters): Promise<HostType> {
+    public static async New(parameters: HostType | NewHostParameters): Promise<HostType> {
         const data = await API.PUT('/api/hosts/host', parameters);
         return data as HostType;
     }
@@ -59,7 +59,7 @@ export class Host {
      * Modify the host changing the properties specified
      * @param properties properties to change
      */
-    public static async Update(host: HostType, properties: {[key:string]: unknown}): Promise<HostType> {
+    public static async Update(host: HostType, properties: { [key: string]: unknown }): Promise<HostType> {
         const data = await API.PATCH('/api/hosts/host/' + host.ID, properties);
         return data as HostType;
     }

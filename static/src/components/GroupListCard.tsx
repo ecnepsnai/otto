@@ -22,7 +22,7 @@ export const GroupListCard: React.FC<GroupListCardProps> = (props: GroupListCard
                     return (
                         <ListGroup.Item key={index}>
                             <Icon.LayerGroup />
-                            <Link to={'/groups/group/' + group.ID} className="ms-1">{ group.Name }</Link>
+                            <Link to={'/groups/group/' + group.ID} className="ms-1">{group.Name}</Link>
                         </ListGroup.Item>
                     );
                 })
@@ -33,7 +33,7 @@ export const GroupListCard: React.FC<GroupListCardProps> = (props: GroupListCard
     return (
         <Card.Card className={props.className}>
             <Card.Header>Groups</Card.Header>
-            { content() }
+            { content()}
         </Card.Card>
     );
 };

@@ -35,7 +35,7 @@ export const HostList: React.FC = () => {
     };
 
     if (loading) {
-        return ( <PageLoading /> );
+        return (<PageLoading />);
     }
 
     return (

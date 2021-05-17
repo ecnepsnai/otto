@@ -18,7 +18,7 @@ export const OptionsSecurity: React.FC<OptionsSecurityProps> = (props: OptionsSe
     const changeIncludePSKEnv = (IncludePSKEnv: boolean) => {
         setValue(value => {
             value.IncludePSKEnv = IncludePSKEnv;
-            return {...value};
+            return { ...value };
         });
     };
 

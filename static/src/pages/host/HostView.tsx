@@ -104,7 +104,7 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
             <React.Fragment>
                 { Object.keys(heartbeat.Properties).map((key, idx) => {
                     return (
-                        <ListGroup.TextItem title={key} key={idx}><code>{ heartbeat.Properties[key] }</code></ListGroup.TextItem>
+                        <ListGroup.TextItem title={key} key={idx}><code>{heartbeat.Properties[key]}</code></ListGroup.TextItem>
                     );
                 })}
             </React.Fragment>
@@ -127,8 +127,8 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                         <Card.Card className="mb-3">
                             <Card.Header>Host Information</Card.Header>
                             <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{ host.Name }</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Address">{ host.Address }:{ host.Port }</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
                                 <ListGroup.TextItem title="PSK"><code>*****</code> <CopyButton text={host.PSK} /></ListGroup.TextItem>
                             </ListGroup.List>
@@ -137,17 +137,17 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                             <Card.Header>Otto Client Information</Card.Header>
                             <ListGroup.List>
                                 <ListGroup.TextItem title="Status"><HeartbeatBadge heartbeat={heartbeat} /></ListGroup.TextItem>
-                                { lastReply() }
-                                { clientVersion() }
-                                { hostProperties() }
+                                {lastReply()}
+                                {clientVersion()}
+                                {hostProperties()}
                             </ListGroup.List>
                         </Card.Card>
                         <EnvironmentVariableCard className="mb-3" variables={host.Environment} />
                         <ScheduleListCard schedules={schedules} className="mb-3" />
                     </Layout.Column>
                     <Layout.Column>
-                        <GroupListCard groups={groups} className="mb-3"/>
-                        <ScriptListCard scripts={scripts} hostIDs={[host.ID]} className="mb-3"/>
+                        <GroupListCard groups={groups} className="mb-3" />
+                        <ScriptListCard scripts={scripts} hostIDs={[host.ID]} className="mb-3" />
                     </Layout.Column>
                 </Layout.Row>
             </Layout.Container>

@@ -11,7 +11,7 @@ interface IDInputProps {
 export const IDInput: React.FC<IDInputProps> = (props: IDInputProps) => {
     const [uid, setUID] = React.useState<string>((props.defaultUID || 0).toString());
     const [gid, setGID] = React.useState<string>((props.defaultGID || 0).toString());
-    const [valid, setValid] = React.useState<ValidationResult>({valid: true});
+    const [valid, setValid] = React.useState<ValidationResult>({ valid: true });
     const [touched, setTouched] = React.useState(false);
 
     React.useEffect(() => {

@@ -34,7 +34,7 @@ export class RegisterRule {
     /**
      * Create a new RegisterRule
      */
-    public static async New(parameters: RegisterRuleType|NewRegisterRuleParameters): Promise<RegisterRuleType> {
+    public static async New(parameters: RegisterRuleType | NewRegisterRuleParameters): Promise<RegisterRuleType> {
         const data = await API.PUT('/api/register/rules/rule', parameters);
         return data as RegisterRuleType;
     }
@@ -58,7 +58,7 @@ export class RegisterRule {
      * Modify the rule changing the properties specified
      * @param properties properties to change
      */
-    public static async Update(rule: RegisterRuleType, properties: {[key:string]: any}): Promise<RegisterRuleType> {
+    public static async Update(rule: RegisterRuleType, properties: { [key: string]: any }): Promise<RegisterRuleType> {
         const data = await API.PATCH('/api/register/rules/rule/' + rule.ID, properties);
         return data as RegisterRuleType;
     }

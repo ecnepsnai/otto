@@ -18,7 +18,7 @@ export const AttachmentListItem: React.FC<AttachmentListItemProps> = (props: Att
     };
 
     const editClick = () => {
-        GlobalModalFrame.showModal(<AttachmentEdit attachment={props.attachment} didUpdate={didEditAttachment}/>);
+        GlobalModalFrame.showModal(<AttachmentEdit attachment={props.attachment} didUpdate={didEditAttachment} />);
     };
 
     const deleteClick = () => {
@@ -31,16 +31,16 @@ export const AttachmentListItem: React.FC<AttachmentListItemProps> = (props: Att
 
     return (
         <Table.Row>
-            <td>{ props.attachment.Path }</td>
-            <td>{ props.attachment.MimeType }</td>
-            <td>{ props.attachment.UID + ':' + props.attachment.GID }</td>
-            <td>{ props.attachment.Mode }</td>
-            <td>{ Formatter.Bytes(props.attachment.Size) }</td>
+            <td>{props.attachment.Path}</td>
+            <td>{props.attachment.MimeType}</td>
+            <td>{props.attachment.UID + ':' + props.attachment.GID}</td>
+            <td>{props.attachment.Mode}</td>
+            <td>{Formatter.Bytes(props.attachment.Size)}</td>
             <Table.Menu>
-                <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editClick}/>
+                <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editClick} />
                 <Menu.Anchor label="Download" icon={<Icon.Download />} href={'/api/attachments/attachment/' + props.attachment.ID + '/download'} />
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteClick}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteClick} />
             </Table.Menu>
         </Table.Row>
     );

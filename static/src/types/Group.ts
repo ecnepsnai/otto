@@ -28,7 +28,7 @@ export class Group {
     /**
      * Create a new Group
      */
-    public static async New(parameters: GroupType|NewGroupParameters): Promise<GroupType> {
+    public static async New(parameters: GroupType | NewGroupParameters): Promise<GroupType> {
         const data = await API.PUT('/api/groups/group', parameters);
         return data as GroupType;
     }
@@ -52,7 +52,7 @@ export class Group {
      * Modify the group changing the properties specified
      * @param properties properties to change
      */
-    public static async Update(group: GroupType, properties: {[key:string]: any}): Promise<GroupType> {
+    public static async Update(group: GroupType, properties: { [key: string]: any }): Promise<GroupType> {
         const data = await API.PATCH('/api/groups/group/' + group.ID, properties);
         return data as GroupType;
     }
@@ -95,9 +95,9 @@ export class Group {
     /**
      * Return a mapping of group ID to an array of host IDs
      */
-    public static async Membership(): Promise<{[id: string]: string[]}> {
+    public static async Membership(): Promise<{ [id: string]: string[] }> {
         const data = await API.GET('/api/groups/membership');
-        return (data as {[id: string]: string[]});
+        return (data as { [id: string]: string[] });
     }
 
     /**

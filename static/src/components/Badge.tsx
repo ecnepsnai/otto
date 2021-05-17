@@ -20,7 +20,7 @@ export const Badge: React.FC<BadgeProps> = (props: BadgeProps) => {
         className += ' ' + props.className;
     }
     return (
-        <div className={className}>{ props.children }</div>
+        <div className={className}>{props.children}</div>
     );
 };
 
@@ -43,7 +43,7 @@ export const EnabledBadge: React.FC<EnabledBadgeProps> = (props: EnabledBadgePro
         return props.falseText ?? 'Disabled';
     };
     return (
-        <Badge color={color()} pill>{ text() }</Badge>
+        <Badge color={color()} pill>{text()}</Badge>
     );
 };
 
@@ -75,13 +75,13 @@ export const HeartbeatBadge: React.FC<HeartbeatBadgeProps> = (props: HeartbeatBa
 
     const icon = (): JSX.Element => {
         if (!props.heartbeat) {
-            return ( <Icon.QuestionCircle /> );
+            return (<Icon.QuestionCircle />);
         }
 
         if (props.heartbeat.IsReachable) {
-            return ( <Icon.CheckCircle /> );
+            return (<Icon.CheckCircle />);
         }
-        return ( <Icon.TimesCircle /> );
+        return (<Icon.TimesCircle />);
     };
 
     return (

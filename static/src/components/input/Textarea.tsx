@@ -108,7 +108,7 @@ export const Textarea: React.FC<TextareaProps> = (props: TextareaProps) => {
 
     const validationError = () => {
         if (!valid.invalidMessage || !touched) {
-            return null; 
+            return null;
         }
         return (<div className="invalid-feedback">{valid.invalidMessage}</div>);
     };
@@ -139,15 +139,15 @@ export const Textarea: React.FC<TextareaProps> = (props: TextareaProps) => {
     const content = () => {
         return (
             <React.Fragment>
-                { input() }
-                { validationError() }
+                { input()}
+                { validationError()}
             </React.Fragment>
         );
     };
 
     const requiredFlag = () => {
         if (!props.required) {
-            return null; 
+            return null;
         }
         return (<span className="form-required">*</span>);
     };
@@ -155,8 +155,8 @@ export const Textarea: React.FC<TextareaProps> = (props: TextareaProps) => {
     return (
         <FormGroup>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
-            { content() }
-            { helpText() }
+            { content()}
+            { helpText()}
         </FormGroup>
     );
 };

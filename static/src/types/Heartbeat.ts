@@ -6,7 +6,7 @@ export interface HeartbeatType {
     LastReply?: string;
     LastAttempt?: string;
     Version?: string;
-    Properties?: { [key: string]: string};
+    Properties?: { [key: string]: string };
 }
 
 export class Heartbeat {

@@ -4,7 +4,7 @@ export interface EventType {
     ID?: string;
     Event?: string;
     Time?: string;
-    Details?: {[key: string]: string;};
+    Details?: { [key: string]: string; };
 }
 
 export class Event {

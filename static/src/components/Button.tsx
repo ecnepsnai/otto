@@ -103,16 +103,16 @@ export const ButtonLink: React.FC<ButtonLinkProps> = (props: ButtonLinkProps) =>
         size={props.size}
         disabled={props.disabled}
         onClick={onClick}>
-        { props.children }
+        {props.children}
     </Button>;
 };
 
 export const Buttons: React.FC = (props: { children: React.ReactNode }) => {
-    return (<div className="buttons">{ props.children }</div>);
+    return (<div className="buttons">{props.children}</div>);
 };
 
 export const ButtonGroup: React.FC = (props: { children: React.ReactNode }) => {
-    return (<div className="btn-group">{ props.children }</div>);
+    return (<div className="btn-group">{props.children}</div>);
 };
 
 export const AddButton: React.FC<CommonButtonProps> = (props: CommonButtonProps) => {
@@ -234,5 +234,5 @@ export const ConfirmButton: React.FC<ButtonProps> = (props: ButtonProps) => {
         size={props.size}
         onClick={onClick}
         disabled={props.disabled}
-        className={props.className}>{ props.children }</Button>);
+        className={props.className}>{props.children}</Button>);
 };

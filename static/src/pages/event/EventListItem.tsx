@@ -16,7 +16,7 @@ export const EventListItem: React.FC<EventListItemProps> = (props: EventListItem
 
     return (
         <Table.Row>
-            <td>{ props.event.Event }</td>
+            <td>{props.event.Event}</td>
             <td><DateLabel date={props.event.Time} /></td>
             <td>
                 <Button color={Style.Palette.Secondary} outline size={Style.Size.XS} onClick={viewClick}>

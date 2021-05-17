@@ -11,18 +11,18 @@ export const Page: React.FC<PageProps> = (props: PageProps) => {
     if (props.header) {
         content = props.header;
     } else {
-        content = (<p>{ props.title }</p>);
+        content = (<p>{props.title}</p>);
     }
 
     return (
         <div className="page">
             <div className="page-title">
                 <div className="container">
-                    { content }
+                    {content}
                 </div>
             </div>
             <div className="container">
-                { props.children }
+                {props.children}
             </div>
         </div>
     );

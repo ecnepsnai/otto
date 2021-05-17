@@ -16,7 +16,7 @@ export namespace Layout {
         }
         return (
             <div className={className}>
-                { props.children }
+                { props.children}
             </div>
         );
     };
@@ -28,7 +28,7 @@ export namespace Layout {
         }
         return (
             <div className={className}>
-                { props.children }
+                { props.children}
             </div>
         );
     };
@@ -37,7 +37,7 @@ export namespace Layout {
         const className = props.className || 'col-md';
         return (
             <div className={className}>
-                { props.children }
+                { props.children}
             </div>
         );
     };

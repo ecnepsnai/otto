@@ -48,21 +48,21 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
     const changeName = (Name: string) => {
         setGroup(group => {
             group.Name = Name;
-            return {...group};
+            return { ...group };
         });
     };
 
     const changeEnvironment = (Environment: Variable[]) => {
         setGroup(group => {
             group.Environment = Environment;
-            return {...group};
+            return { ...group };
         });
     };
 
     const changeScriptIDs = (ScriptIDs: string[]) => {
         setGroup(group => {
             group.ScriptIDs = ScriptIDs;
-            return {...group};
+            return { ...group };
         });
     };
 
@@ -91,7 +91,7 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
     }
 
     return (
-        <Page title={ isNew ? 'New Group' : 'Edit Group' }>
+        <Page title={isNew ? 'New Group' : 'Edit Group'}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"
@@ -110,13 +110,13 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
                 <Card.Card className="mt-3">
                     <Card.Header>Scripts</Card.Header>
                     <Card.Body>
-                        <ScriptCheckList selectedScripts={group.ScriptIDs} onChange={changeScriptIDs}/>
+                        <ScriptCheckList selectedScripts={group.ScriptIDs} onChange={changeScriptIDs} />
                     </Card.Body>
                 </Card.Card>
                 <Card.Card className="mt-3">
                     <Card.Header>Hosts</Card.Header>
                     <Card.Body>
-                        <HostCheckList selectedHosts={hostIDs} onChange={changeHostIDs}/>
+                        <HostCheckList selectedHosts={hostIDs} onChange={changeHostIDs} />
                     </Card.Body>
                 </Card.Card>
             </Form>

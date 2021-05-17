@@ -18,5 +18,5 @@ export const Popover: React.FC<PopoverProps> = (props: PopoverProps) => {
         });
     }, []);
 
-    return (<span ref={spanRef} className="popover-hover" data-toggle="popover">{ props.children }</span>);
+    return (<span ref={spanRef} className="popover-hover" data-toggle="popover">{props.children}</span>);
 };

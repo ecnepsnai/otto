@@ -35,7 +35,7 @@ export class GlobalRedirectFrame extends React.Component<unknown, GlobalRedirect
     render(): JSX.Element {
         return (
             <div id="global-redirect-frame">
-                { this.state.redirect }
+                { this.state.redirect}
             </div>
         );
     }

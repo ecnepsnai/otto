@@ -36,7 +36,7 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
     const changePath = (Path: string) => {
         setAttachment(attachment => {
             attachment.Path = Path;
-            return {...attachment};
+            return { ...attachment };
         });
     };
 
@@ -48,14 +48,14 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
         setAttachment(attachment => {
             attachment.UID = UID;
             attachment.GID = GID;
-            return {...attachment};
+            return { ...attachment };
         });
     };
 
     const changeMode = (Mode: number) => {
         setAttachment(attachment => {
             attachment.Mode = Mode;
-            return {...attachment};
+            return { ...attachment };
         });
     };
 
@@ -63,14 +63,14 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
         if (props.attachment) {
             return null;
         }
-        return (<Input.FileChooser label="Upload File" onChange={changeFile}/>);
+        return (<Input.FileChooser label="Upload File" onChange={changeFile} />);
     };
 
     const title = props.attachment ? 'Edit Attachment' : 'New Attachment';
     return (
         <ModalForm title={title} onSubmit={saveAttachment}>
-            { fileInput() }
-            <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts. If the parent directory does not exist it will be created with the same owner as the attachment." fixedWidth/>
+            { fileInput()}
+            <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts. If the parent directory does not exist it will be created with the same owner as the attachment." fixedWidth />
             <Input.IDInput label="Owned By" defaultUID={attachment.UID} defaultGID={attachment.GID} onChange={changeOwner} />
             <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (mode) for the file" />
         </ModalForm>

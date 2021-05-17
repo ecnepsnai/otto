@@ -13,11 +13,11 @@ interface CheckListProps {
     onChange: (selected: string[]) => (void),
 }
 export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
-    const initialChecked: {[id: string]: boolean} = {};
+    const initialChecked: { [id: string]: boolean } = {};
     (props.selectedKeys || []).forEach(key => {
         initialChecked[key] = true;
     });
-    const [selected, setSelected] = React.useState<{[id: string]: boolean}>(initialChecked);
+    const [selected, setSelected] = React.useState<{ [id: string]: boolean }>(initialChecked);
 
     React.useEffect(() => {
         const keys: string[] = [];
@@ -33,7 +33,7 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         return (checked: boolean) => {
             setSelected(selected => {
                 selected[key] = checked;
-                return {...selected};
+                return { ...selected };
             });
         };
     };
@@ -93,7 +93,7 @@ export const GroupCheckList: React.FC<GroupCheckListProps> = (props: GroupCheckL
             selectedKeys={props.selectedGroups}
             keys={keys}
             labels={labels}
-            onChange={props.onChange}/>
+            onChange={props.onChange} />
     );
 };
 
@@ -132,7 +132,7 @@ export const ScriptCheckList: React.FC<ScriptCheckListProps> = (props: ScriptChe
             selectedKeys={props.selectedScripts}
             keys={keys}
             labels={labels}
-            onChange={props.onChange}/>
+            onChange={props.onChange} />
     );
 };
 
@@ -171,6 +171,6 @@ export const HostCheckList: React.FC<HostCheckListProps> = (props: HostCheckList
             selectedKeys={props.selectedHosts}
             keys={keys}
             labels={labels}
-            onChange={props.onChange}/>
+            onChange={props.onChange} />
     );
 };

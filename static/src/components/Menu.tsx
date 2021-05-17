@@ -12,10 +12,10 @@ export const Dropdown: React.FC<DropdownProps> = (props: DropdownProps) => {
     return (
         <div className="dropdown">
             <button className="btn btn-outline-secondary btn-xs" type="button" role="button" id={id} data-bs-toggle="dropdown" aria-expanded="false">
-                { props.label }
+                {props.label}
             </button>
             <Menu.Menu name={id}>
-                { props.children }
+                {props.children}
             </Menu.Menu>
         </div>
     );
@@ -28,7 +28,7 @@ export namespace Menu {
     }
     export const Menu: React.FC<MenuProps> = (props: MenuProps) => {
         return (
-            <ul className="dropdown-menu" aria-labelledby={props.name}>{ props.children }</ul>
+            <ul className="dropdown-menu" aria-labelledby={props.name}>{props.children}</ul>
         );
     };
 
@@ -43,7 +43,7 @@ export namespace Menu {
             props.onClick();
         };
         return (
-            <li><a className="dropdown-item" href="#" onClick={onClick}>{ props.icon }<span className="ms-1">{ props.label }</span></a></li>
+            <li><a className="dropdown-item" href="#" onClick={onClick}>{props.icon}<span className="ms-1">{props.label}</span></a></li>
         );
     };
 
@@ -69,7 +69,7 @@ export namespace Menu {
     }
     export const Anchor: React.FC<AnchorProps> = (props: AnchorProps) => {
         return (
-            <li><a className="dropdown-item" href={props.href}>{ props.icon }<span className="ms-1">{ props.label }</span></a></li>
+            <li><a className="dropdown-item" href={props.href}>{props.icon}<span className="ms-1">{props.label}</span></a></li>
         );
     };
 

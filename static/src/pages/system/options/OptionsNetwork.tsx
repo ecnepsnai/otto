@@ -18,21 +18,21 @@ export const OptionsNetwork: React.FC<OptionsNetworkProps> = (props: OptionsNetw
     const changeForceIPVersion = (ForceIPVersion: string) => {
         setValue(value => {
             value.ForceIPVersion = ForceIPVersion;
-            return {...value};
+            return { ...value };
         });
     };
 
     const changeTimeout = (Timeout: number) => {
         setValue(value => {
             value.Timeout = Timeout;
-            return {...value};
+            return { ...value };
         });
     };
 
     const changeHeartbeatFrequency = (HeartbeatFrequency: number) => {
         setValue(value => {
             value.HeartbeatFrequency = HeartbeatFrequency;
-            return {...value};
+            return { ...value };
         });
     };
 
@@ -61,7 +61,7 @@ export const OptionsNetwork: React.FC<OptionsNetworkProps> = (props: OptionsNetw
                     label="IP Version"
                     choices={radioChoices}
                     defaultValue={value.ForceIPVersion}
-                    onChange={changeForceIPVersion}/>
+                    onChange={changeForceIPVersion} />
                 <Input.Number
                     label="Timeout"
                     append="Seconds"

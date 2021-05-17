@@ -49,14 +49,14 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     const changeName = (Name: string) => {
         setScript(script => {
             script.Name = Name;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeEnvironment = (Environment: Variable[]) => {
         setScript(script => {
             script.Environment = Environment;
-            return {...script};
+            return { ...script };
         });
     };
 
@@ -80,7 +80,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     const changeRunAsInherit = (DontInherit: boolean) => {
         setScript(script => {
             script.RunAs.Inherit = !DontInherit;
-            return {...script};
+            return { ...script };
         });
     };
 
@@ -99,7 +99,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     const changeEnabled = (Enabled: boolean) => {
         setScript(script => {
             script.Enabled = Enabled;
-            return {...script};
+            return { ...script };
         });
     };
 
@@ -107,42 +107,42 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
         setScript(script => {
             script.RunAs.UID = UID;
             script.RunAs.GID = GID;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeWorkingDirectory = (WorkingDirectory: string) => {
         setScript(script => {
             script.WorkingDirectory = WorkingDirectory;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeAfterExecution = (AfterExecution: string) => {
         setScript(script => {
             script.AfterExecution = AfterExecution;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeExecutable = (Executable: string) => {
         setScript(script => {
             script.Executable = Executable;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeScript = (Script: string) => {
         setScript(script => {
             script.Script = Script;
-            return {...script};
+            return { ...script };
         });
     };
 
     const changeAttachments = (AttachmentIDs: string[]) => {
         setScript(script => {
             script.AttachmentIDs = AttachmentIDs;
-            return {...script};
+            return { ...script };
         });
     };
 
@@ -167,7 +167,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     }
 
     return (
-        <Page title={ isNew ? 'New Script' : 'Edit Script' }>
+        <Page title={isNew ? 'New Script' : 'Edit Script'}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"
@@ -175,9 +175,9 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
                     defaultValue={script.Name}
                     onChange={changeName}
                     required />
-                { enabledCheckbox() }
+                {enabledCheckbox()}
                 <Input.Checkbox label="Run As Specific User" defaultValue={!script.RunAs.Inherit} onChange={changeRunAsInherit} />
-                { runAs() }
+                {runAs()}
                 <Input.Text
                     label="Working Directory"
                     type="text"
@@ -212,16 +212,16 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
                 <Card.Card className="mt-3">
                     <Card.Header>Groups</Card.Header>
                     <Card.Body>
-                        <GroupCheckList selectedGroups={groupIDs} onChange={changeGroupIDs}/>
+                        <GroupCheckList selectedGroups={groupIDs} onChange={changeGroupIDs} />
                     </Card.Body>
                 </Card.Card>
                 <Card.Card className="mt-3">
                     <Card.Header>Attachments</Card.Header>
                     <Card.Body>
-                        <AttachmentList scriptID={script.ID} didUpdateAttachments={changeAttachments}/>
+                        <AttachmentList scriptID={script.ID} didUpdateAttachments={changeAttachments} />
                     </Card.Body>
                 </Card.Card>
-                <hr/>
+                <hr />
                 <Input.Textarea
                     label="Script"
                     defaultValue={script.Script}

@@ -22,7 +22,7 @@ export const DateLabel: React.FC<DateLabelProps> = (props: DateLabelProps) => {
 
     return (
         <Popover content={d.formateDate()}>
-            { d.timeFrom() }
+            { d.timeFrom()}
         </Popover>
     );
 };

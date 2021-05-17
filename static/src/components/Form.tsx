@@ -80,15 +80,15 @@ export class Form extends React.Component<FormProps, FormState> {
             return null;
         }
 
-        let content = (<Icon.Label icon={<Icon.CheckCircle/>} label="Apply"/>);
+        let content = (<Icon.Label icon={<Icon.CheckCircle />} label="Apply" />);
         if (this.props.loading) {
-            content = (<Icon.Label icon={<Icon.Spinner pulse/>} label="Loading..."/>);
+            content = (<Icon.Label icon={<Icon.Spinner pulse />} label="Loading..." />);
         }
 
         return (
             <div className="mt-3">
                 <Button color={Style.Palette.Primary} size={Style.Size.M} onClick={this.onClick} disabled={this.props.loading}>
-                    { content }
+                    {content}
                 </Button>
             </div>
         );
@@ -96,12 +96,12 @@ export class Form extends React.Component<FormProps, FormState> {
 
     private error = () => {
         if (!this.state.invalid) {
-            return null; 
+            return null;
         }
 
         return (
             <div className="mt-2">
-                <Icon.Label icon={<Icon.TimesCircle color={Style.Palette.Danger}/>} label="Correct Errors Before Continuing" />
+                <Icon.Label icon={<Icon.TimesCircle color={Style.Palette.Danger} />} label="Correct Errors Before Continuing" />
             </div>
         );
     }
@@ -110,9 +110,9 @@ export class Form extends React.Component<FormProps, FormState> {
         const className = this.props.className || '';
         return (
             <form onSubmit={this.onSubmit} ref={this.domRef} className={className}>
-                <fieldset>{ this.props.children }</fieldset>
-                { this.saveButton() }
-                { this.error() }
+                <fieldset>{this.props.children}</fieldset>
+                { this.saveButton()}
+                { this.error()}
             </form>
         );
     }
@@ -123,5 +123,5 @@ interface FormGroupProps {
     children?: React.ReactNode;
 }
 export const FormGroup: React.FC<FormGroupProps> = (props: FormGroupProps) => {
-    return ( <div className={ (props.className ?? '') + ' mb-3'}>{ props.children }</div> );
+    return (<div className={(props.className ?? '') + ' mb-3'}>{props.children}</div>);
 };

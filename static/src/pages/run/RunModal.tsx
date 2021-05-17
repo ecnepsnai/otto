@@ -43,7 +43,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
 
     const setup = () => {
         return (
-            <RunSetup scriptID={props.scriptID} onSelectedHosts={onSelectHostIDs}/>
+            <RunSetup scriptID={props.scriptID} onSelectedHosts={onSelectHostIDs} />
         );
     };
 
@@ -52,7 +52,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
             <div className="cards">
                 { selectedHostIDs.map(hostID => {
                     return (
-                        <RunScript scriptID={props.scriptID} hostID={hostID} key={hostID} onFinished={scriptFinished(hostID)}/>
+                        <RunScript scriptID={props.scriptID} hostID={hostID} key={hostID} onFinished={scriptFinished(hostID)} />
                     );
                 })}
             </div>
@@ -96,7 +96,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
 
     return (
         <Modal title="Run Script" size={Style.Size.L} buttons={buttons()} static>
-            { content() }
+            { content()}
         </Modal>
     );
 };

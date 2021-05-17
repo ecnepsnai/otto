@@ -4,7 +4,7 @@ import '../../css/list-group.scss';
 export namespace ListGroup {
     export const List: React.FC = (props: { children: React.ReactNode }) => {
         return (
-            <ul className="list-group list-group-flush">{ props.children }</ul>
+            <ul className="list-group list-group-flush">{props.children}</ul>
         );
     };
 
@@ -29,7 +29,7 @@ export namespace ListGroup {
             className += ' ' + props.className;
         }
         return (
-            <li className={className} onClick={itemClicked}>{ props.children }</li>
+            <li className={className} onClick={itemClicked}>{props.children}</li>
         );
     };
 
@@ -39,7 +39,7 @@ export namespace ListGroup {
     }
     export const TextItem: React.FC<TextItemProps> = (props: TextItemProps) => {
         return (
-            <li className="list-group-item"><strong>{ props.title }</strong><span className="ms-1">{ props.children }</span></li>
+            <li className="list-group-item"><strong>{props.title}</strong><span className="ms-1">{props.children}</span></li>
         );
     };
 }

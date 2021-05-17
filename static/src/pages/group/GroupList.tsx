@@ -9,7 +9,7 @@ import { GroupListItem } from './GroupListItem';
 export const GroupList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
     const [groups, setGroups] = React.useState<GroupType[]>();
-    const [membership, setMembership] = React.useState<{[id: string]: string[]}>({});
+    const [membership, setMembership] = React.useState<{ [id: string]: string[] }>({});
 
     React.useEffect(() => {
         loadData();
@@ -34,7 +34,7 @@ export const GroupList: React.FC = () => {
     };
 
     if (loading) {
-        return ( <PageLoading /> );
+        return (<PageLoading />);
     }
 
     return (

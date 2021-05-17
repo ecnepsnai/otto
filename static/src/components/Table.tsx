@@ -47,11 +47,11 @@ export namespace Table {
     export const Body: React.FC<BodyProps> = (props: BodyProps) => {
         let content = props.children;
         if (!React.Children.count(props.children)) {
-            content = ( <tr><td colSpan={10}><Nothing /></td></tr> );
+            content = (<tr><td colSpan={10}><Nothing /></td></tr>);
         }
 
         return (
-            <tbody>{ content }</tbody>
+            <tbody>{content}</tbody>
         );
     };
 

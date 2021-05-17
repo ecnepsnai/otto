@@ -27,7 +27,7 @@ export const CopyButton: React.FC<CopyButtonProps> = (props: CopyButtonProps) =>
     const color = didCopy ? Style.Palette.Success : Style.Palette.Primary;
     return (
         <Button color={color} outline size={Style.Size.XS} onClick={onClick} disabled={didCopy}>
-            { content() }
+            { content()}
         </Button>
     );
 };

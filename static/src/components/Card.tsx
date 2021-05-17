@@ -20,7 +20,7 @@ export namespace Card {
 
         return (
             <div className={className} onClick={props.onClick}>
-                { props.children }
+                { props.children}
             </div>
         );
     };
@@ -36,7 +36,7 @@ export namespace Card {
         }
         return (
             <div className={className}>
-                { props.children }
+                { props.children}
             </div>
         );
     };
@@ -52,7 +52,7 @@ export namespace Card {
         }
         return (
             <div className={className}>
-                { props.children }
+                { props.children}
             </div>
         );
     };
@@ -73,7 +73,7 @@ export namespace Card {
     export const Footer: React.FC<FooterProps> = (props: FooterProps) => {
         return (
             <div className="card-footer">
-                { props.children }
+                { props.children}
             </div>
         );
     };

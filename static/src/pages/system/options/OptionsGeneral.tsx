@@ -40,14 +40,14 @@ export const OptionsGeneral: React.FC<OptionsGeneralProps> = (props: OptionsGene
     const changeServerURL = (ServerURL: string) => {
         setValue(value => {
             value.ServerURL = ServerURL;
-            return {...value};
+            return { ...value };
         });
     };
 
     const changeGlobalEnvironment = (GlobalEnvironment: Variable[]) => {
         setValue(value => {
             value.GlobalEnvironment = GlobalEnvironment;
-            return {...value};
+            return { ...value };
         });
     };
 
@@ -64,7 +64,7 @@ export const OptionsGeneral: React.FC<OptionsGeneralProps> = (props: OptionsGene
                     helpText="The absolute URL (Including protocol) where this otto server is accessed from"
                     defaultValue={value.ServerURL}
                     onChange={changeServerURL} />
-                { originWarning() }
+                {originWarning()}
                 <label className="form-label">Global Environment Variables</label>
                 <div>
                     <EnvironmentVariableEdit

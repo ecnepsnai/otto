@@ -39,7 +39,7 @@ export const ScheduleList: React.FC = () => {
     };
 
     if (loading) {
-        return ( <PageLoading /> );
+        return (<PageLoading />);
     }
 
     return (

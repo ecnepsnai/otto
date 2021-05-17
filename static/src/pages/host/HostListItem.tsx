@@ -23,18 +23,18 @@ export const HostListItem: React.FC<HostListItemProps> = (props: HostListItemPro
         });
     };
 
-    const link = <Link to={'/hosts/host/' + props.host.ID}>{ props.host.Name }</Link>;
+    const link = <Link to={'/hosts/host/' + props.host.ID}>{props.host.Name}</Link>;
     return (
         <Table.Row disabled={!props.host.Enabled}>
-            <td>{ link }</td>
-            <td>{ props.host.Address }</td>
-            <td>{ Formatter.ValueOrNothing(props.host.GroupIDs.length) }</td>
-            <td><HeartbeatBadge heartbeat={props.heartbeat}/></td>
+            <td>{link}</td>
+            <td>{props.host.Address}</td>
+            <td>{Formatter.ValueOrNothing(props.host.GroupIDs.length)}</td>
+            <td><HeartbeatBadge heartbeat={props.heartbeat} /></td>
             <td><ClientVersion heartbeat={props.heartbeat} /></td>
             <Table.Menu>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/hosts/host/' + props.host.ID +'/edit'}/>
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/hosts/host/' + props.host.ID + '/edit'} />
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
             </Table.Menu>
         </Table.Row>
     );

@@ -88,7 +88,7 @@ export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
                         <Card.Card className="mb-3">
                             <Card.Header>Host Information</Card.Header>
                             <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{ group.Name }</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Name">{group.Name}</ListGroup.TextItem>
                             </ListGroup.List>
                         </Card.Card>
                         <EnvironmentVariableCard variables={group.Environment} className="mb-3" />
@@ -125,7 +125,7 @@ export const HostListCard: React.FC<HostListCardProps> = (props: HostListCardPro
                     return (
                         <ListGroup.Item key={index}>
                             <Icon.Desktop />
-                            <Link to={'/hosts/host/' + host.ID} className="ms-1">{ host.Name }</Link>
+                            <Link to={'/hosts/host/' + host.ID} className="ms-1">{host.Name}</Link>
                         </ListGroup.Item>
                     );
                 })

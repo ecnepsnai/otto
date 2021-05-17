@@ -113,10 +113,10 @@ export const MultiInput: React.FC<MultiInputProps> = (props: MultiInputProps) =>
                             showAddButton={showAddButton}
                             showRemoveButton={showRemoveButton}
                             addButtonClicked={addButtonClicked}
-                            removeButtonClicked={removeButtonClicked}/>;
+                            removeButtonClicked={removeButtonClicked} />;
                     })
                 }
-                { helpText() }
+                {helpText()}
             </FormGroup>
         </div>
     );
@@ -133,7 +133,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps) => {
         props.onChange(target.value);
     };
 
-    return (<input className="form-control" value={props.value} placeholder={props.placeholder} onChange={onChange}/>);
+    return (<input className="form-control" value={props.value} placeholder={props.placeholder} onChange={onChange} />);
 };
 
 interface ButtonProps {
@@ -171,7 +171,7 @@ const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
 
     const addButton = (): JSX.Element => {
         if (props.showAddButton(props.index)) {
-            return <AddButton onClick={addButtonClicked}/>;
+            return <AddButton onClick={addButtonClicked} />;
         }
 
         return null;
@@ -179,7 +179,7 @@ const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
 
     const removeButton = (): JSX.Element => {
         if (props.showRemoveButton(props.index)) {
-            return <RemoveButton onClick={removeButtonClicked}/>;
+            return <RemoveButton onClick={removeButtonClicked} />;
         }
 
         return null;
@@ -190,8 +190,8 @@ const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
         inputClass = 'mt-2';
     }
     return (<div className={'input-group ' + inputClass}>
-        <Field value={props.value} onChange={onChange} placeholder={props.placeholder}/>
-        { removeButton() }
-        { addButton() }
+        <Field value={props.value} onChange={onChange} placeholder={props.placeholder} />
+        { removeButton()}
+        { addButton()}
     </div>);
 };

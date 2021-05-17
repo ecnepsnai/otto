@@ -102,7 +102,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
                             <Link className="ms-1" to={'/groups/group/' + group.ID}>{group.Name}</Link>
                         </div>
                     );
-                }) }
+                })}
             </ListGroup.TextItem>
         );
     };
@@ -117,7 +117,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
                             <Link className="ms-1" to={'/hosts/host/' + host.ID}>{host.Name}</Link>
                         </div>
                     );
-                }) }
+                })}
             </ListGroup.TextItem>
         );
     };
@@ -129,7 +129,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
 
         return (<ListGroup.List>
             { reports.map((report, idx) => {
-                return (<ScheduleReportItem report={report} key={idx}/>);
+                return (<ScheduleReportItem report={report} key={idx} />);
             })}
         </ListGroup.List>);
     };
@@ -150,13 +150,13 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
                         <Card.Card>
                             <Card.Header>Schedule Information</Card.Header>
                             <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{ schedule.Name }</ListGroup.TextItem>
+                                <ListGroup.TextItem title="Name">{schedule.Name}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Script"><Link to={'/scripts/script/' + schedule.ScriptID}>{script.Name}</Link></ListGroup.TextItem>
                                 <ListGroup.TextItem title="Frequency"><SchedulePattern pattern={schedule.Pattern} /></ListGroup.TextItem>
                                 <ListGroup.TextItem title="Last Run"><DateLabel date={schedule.LastRunTime} /></ListGroup.TextItem>
                                 <ListGroup.TextItem title="Enabled"><EnabledBadge value={schedule.Enabled} /></ListGroup.TextItem>
-                                { groupsList() }
-                                { hostsList() }
+                                {groupsList()}
+                                {hostsList()}
                             </ListGroup.List>
                         </Card.Card>
                     </Layout.Column>

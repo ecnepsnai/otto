@@ -87,16 +87,16 @@ const EnvironmentVariableEditListItem: React.FC<EnvironmentVariableEditListItemP
     return (
         <Table.Row>
             <td>
-                { props.variable.Key }
+                {props.variable.Key}
             </td>
             <td>
                 <code>{content}</code>
             </td>
             <td>
                 <Dropdown label={<Icon.Bars />}>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={props.requestEdit}/>
+                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={props.requestEdit} />
                     <Menu.Divider />
-                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={props.requestDelete}/>
+                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={props.requestDelete} />
                 </Dropdown>
             </td>
         </Table.Row>

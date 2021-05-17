@@ -42,7 +42,7 @@ export const Checkbox: React.FC<CheckboxProps> = (props: CheckboxProps) => {
         setChecked(target.checked);
     };
 
-    const helpText =() => {
+    const helpText = () => {
         if (props.helpText) {
             return <div id={labelID + 'help'} className="form-text">{props.helpText}</div>;
         } else {
@@ -52,9 +52,9 @@ export const Checkbox: React.FC<CheckboxProps> = (props: CheckboxProps) => {
 
     return (
         <FormGroup className="form-check">
-            <input type="checkbox" className="form-check-input" id={labelID} defaultChecked={checked} onChange={onChange} disabled={props.disabled}/>
+            <input type="checkbox" className="form-check-input" id={labelID} defaultChecked={checked} onChange={onChange} disabled={props.disabled} />
             <label htmlFor={labelID} className="form-check-label">{props.label}</label>
-            { helpText() }
+            { helpText()}
         </FormGroup>
     );
 };

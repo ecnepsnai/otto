@@ -32,28 +32,28 @@ export const ScriptListItem: React.FC<ScriptListItemProps> = (props: ScriptListI
 
     const enableDisableMenu = () => {
         if (props.script.Enabled) {
-            return ( <Menu.Item icon={<Icon.TimesCircle />} onClick={toggleMenuClick} label="Disable" /> );
+            return (<Menu.Item icon={<Icon.TimesCircle />} onClick={toggleMenuClick} label="Disable" />);
         }
-        return ( <Menu.Item icon={<Icon.CheckCircle />} onClick={toggleMenuClick} label="Enable" /> );
+        return (<Menu.Item icon={<Icon.CheckCircle />} onClick={toggleMenuClick} label="Enable" />);
     };
 
     const executeScriptMenuClick = () => {
-        GlobalModalFrame.showModal(<RunModal scriptID={props.script.ID} key={Rand.ID()}/>);
+        GlobalModalFrame.showModal(<RunModal scriptID={props.script.ID} key={Rand.ID()} />);
     };
 
-    const link = <Link to={'/scripts/script/' + props.script.ID}>{ props.script.Name }</Link>;
+    const link = <Link to={'/scripts/script/' + props.script.ID}>{props.script.Name}</Link>;
 
     return (
         <Table.Row disabled={!props.script.Enabled}>
-            <td>{ link }</td>
-            <td>{ props.script.Executable }</td>
-            <td>{ Formatter.ValueOrNothing((props.script.AttachmentIDs || []).length) }</td>
+            <td>{link}</td>
+            <td>{props.script.Executable}</td>
+            <td>{Formatter.ValueOrNothing((props.script.AttachmentIDs || []).length)}</td>
             <Table.Menu>
-                <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={executeScriptMenuClick}/>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + props.script.ID + '/edit'}/>
-                { enableDisableMenu() }
+                <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={executeScriptMenuClick} />
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + props.script.ID + '/edit'} />
+                {enableDisableMenu()}
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
             </Table.Menu>
         </Table.Row>
     );

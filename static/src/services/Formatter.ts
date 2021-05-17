@@ -1,6 +1,6 @@
 export class Formatter {
     private static round(value: number, decimals: number): number {
-        return Number(Math.round(parseFloat(value+'e'+decimals))+'e-'+decimals);
+        return Number(Math.round(parseFloat(value + 'e' + decimals)) + 'e-' + decimals);
     }
 
     public static Duration(input: number): string {
@@ -13,11 +13,11 @@ export class Formatter {
         }
 
         if (input > 600000000000) {
-            const nHours = this.round(input/600000000000, 2);
+            const nHours = this.round(input / 600000000000, 2);
             return nHours + ' hours';
         }
 
-        const nSeconds = this.round(input/10000000000, 2);
+        const nSeconds = this.round(input / 10000000000, 2);
         return nSeconds + ' minutes';
     }
 

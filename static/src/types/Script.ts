@@ -44,7 +44,7 @@ export class Script {
     /**
      * Create a new Script
      */
-    public static async New(parameters: ScriptType|NewScriptParameters): Promise<ScriptType> {
+    public static async New(parameters: ScriptType | NewScriptParameters): Promise<ScriptType> {
         const data = await API.PUT('/api/scripts/script', parameters);
         return data as ScriptType;
     }
@@ -68,7 +68,7 @@ export class Script {
      * Modify the script changing the properties specified
      * @param properties properties to change
      */
-    public static async Update(script: ScriptType, properties: {[key:string]: unknown}): Promise<ScriptType> {
+    public static async Update(script: ScriptType, properties: { [key: string]: unknown }): Promise<ScriptType> {
         const data = await API.PATCH('/api/scripts/script/' + script.ID, properties);
         return data as ScriptType;
     }

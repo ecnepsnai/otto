@@ -131,7 +131,7 @@ export const Number: React.FC<NumberProps> = (props: NumberProps) => {
 
     const validationError = () => {
         if (!valid.invalidMessage || !touched) {
-            return null; 
+            return null;
         }
         return (<div className="invalid-feedback">{valid.invalidMessage}</div>);
     };
@@ -166,34 +166,34 @@ export const Number: React.FC<NumberProps> = (props: NumberProps) => {
         if (!props.prepend && !props.append) {
             return (
                 <React.Fragment>
-                    { input() }
-                    { validationError() }
+                    { input()}
+                    { validationError()}
                 </React.Fragment>
             );
         }
 
         let prepend: JSX.Element = null;
         if (props.prepend) {
-            prepend = ( <span className="input-group-text">{props.prepend}</span> );
+            prepend = (<span className="input-group-text">{props.prepend}</span>);
         }
         let append: JSX.Element = null;
         if (props.append) {
-            append = ( <span className="input-group-text">{props.append}</span> );
+            append = (<span className="input-group-text">{props.append}</span>);
         }
 
         return (
             <div className="input-group">
                 {prepend}
-                { input() }
+                { input()}
                 {append}
-                { validationError() }
+                { validationError()}
             </div>
         );
     };
 
     const requiredFlag = () => {
         if (!props.required) {
-            return null; 
+            return null;
         }
         return (<span className="form-required">*</span>);
     };
@@ -201,8 +201,8 @@ export const Number: React.FC<NumberProps> = (props: NumberProps) => {
     return (
         <FormGroup>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
-            { content() }
-            { helpText() }
+            { content()}
+            { helpText()}
         </FormGroup>
     );
 };

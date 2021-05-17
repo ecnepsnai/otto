@@ -61,18 +61,18 @@ export class ScriptRequest {
                 }
 
                 switch (response.Code) {
-                case 400: // Error
-                    reject(response.Error);
-                    break;
-                case 100: // Progress
-                    onOutput(response.Stdout, response.Stderr);
-                    break;
-                case 200: // Finished
-                    result = response.Result;
-                    break;
-                default:
-                    console.error('Unknown response from server', response);
-                    break;
+                    case 400: // Error
+                        reject(response.Error);
+                        break;
+                    case 100: // Progress
+                        onOutput(response.Stdout, response.Stderr);
+                        break;
+                    case 200: // Finished
+                        result = response.Result;
+                        break;
+                    default:
+                        console.error('Unknown response from server', response);
+                        break;
                 }
             });
 
@@ -95,6 +95,6 @@ export class ScriptRequest {
             return;
         }
 
-        this.socket.send(JSON.stringify({ Cancel: true}));
+        this.socket.send(JSON.stringify({ Cancel: true }));
     }
 }

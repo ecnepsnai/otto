@@ -26,7 +26,7 @@ export const ScheduleListItem: React.FC<ScheduleListItemProps> = (props: Schedul
     const enabledOnColumn = () => {
         if (props.schedule.Scope.GroupIDs && props.schedule.Scope.GroupIDs.length > 0) {
             let unit = 'groups';
-            if (props.schedule.Scope.GroupIDs.length  == 1) {
+            if (props.schedule.Scope.GroupIDs.length == 1) {
                 unit = 'group';
             }
             return (<td>{props.schedule.Scope.GroupIDs.length} {unit}</td>);
@@ -41,20 +41,20 @@ export const ScheduleListItem: React.FC<ScheduleListItemProps> = (props: Schedul
         return (<td></td>);
     };
 
-    const link = <Link to={'/schedules/schedule/' + props.schedule.ID}>{ props.schedule.Name }</Link>;
+    const link = <Link to={'/schedules/schedule/' + props.schedule.ID}>{props.schedule.Name}</Link>;
 
     return (
         <Table.Row>
-            <td>{ link }</td>
-            <td>{ props.script.Name }</td>
+            <td>{link}</td>
+            <td>{props.script.Name}</td>
             <td><SchedulePattern pattern={props.schedule.Pattern} /></td>
             {enabledOnColumn()}
             <td><DateLabel date={props.schedule.LastRunTime} /></td>
             <td><EnabledBadge value={props.schedule.Enabled} /></td>
             <Table.Menu>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + props.schedule.ID + '/edit'}/>
+                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + props.schedule.ID + '/edit'} />
                 <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick}/>
+                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
             </Table.Menu>
         </Table.Row>
     );

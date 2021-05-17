@@ -32,13 +32,13 @@ export class ErrorBoundary extends React.Component<unknown, ErrorBoundaryState> 
                         <div className="card-body">
                             <p>An unrecoverable error occurred while attempting to render this page.
                                 Please report this as an issue on <a href="https://github.com/ecnepsnai/otto/issues/new/choose" target="_blank" rel="noreferrer">Github</a> and include the following information:</p>
-                            <pre>{ this.state.errorDetails }</pre>
+                            <pre>{this.state.errorDetails}</pre>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        return (<React.Fragment>{ this.props.children }</React.Fragment>);
+        return (<React.Fragment>{this.props.children}</React.Fragment>);
     }
 }

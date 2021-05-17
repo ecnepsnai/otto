@@ -30,7 +30,7 @@ export class Attachment {
     /**
      * Create a new Attachment
      */
-    public static async New(attachment: File, parameters: AttachmentType|NewAttachmentParameters): Promise<AttachmentType> {
+    public static async New(attachment: File, parameters: AttachmentType | NewAttachmentParameters): Promise<AttachmentType> {
         const data = await API.PUTFile('/api/attachments', attachment, {
             Path: parameters.Path,
             UID: parameters.UID.toString(),
@@ -59,7 +59,7 @@ export class Attachment {
      * Modify the attachment changing the properties specified
      * @param properties properties to change
      */
-    public static async Update(attachment: AttachmentType, properties: {[key:string]: unknown}): Promise<AttachmentType> {
+    public static async Update(attachment: AttachmentType, properties: { [key: string]: unknown }): Promise<AttachmentType> {
         const data = await API.PATCH('/api/attachments/attachment/' + attachment.ID, properties);
         return data as AttachmentType;
     }

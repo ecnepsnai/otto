@@ -25,7 +25,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     const [loading, setLoading] = React.useState(true);
     const [schedule, setSchedule] = React.useState<ScheduleType>();
     const [isNew, setIsNew] = React.useState<boolean>();
-    const [runOn, setRunOn] = React.useState<'groups'|'hosts'>();
+    const [runOn, setRunOn] = React.useState<'groups' | 'hosts'>();
     const [patternTemplate, setPatternTemplate] = React.useState<string>();
     const [scripts, setScripts] = React.useState<ScriptType[]>();
 
@@ -43,12 +43,12 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     };
 
     const loadData = () => {
-        Promise.all([ loadSchedule(), Script.List(), Host.List() ]).then(results => {
+        Promise.all([loadSchedule(), Script.List(), Host.List()]).then(results => {
             const isNew = results[0].ID == undefined;
             const schedule = results[0];
             const scripts = results[1];
             const hosts = results[2];
-            let runOn: ('groups'|'hosts') = 'groups';
+            let runOn: ('groups' | 'hosts') = 'groups';
             let patternTemplate = '';
 
             if (!hosts || hosts.length === 0 || !scripts || scripts.length === 0) {
@@ -62,15 +62,15 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                 patternTemplate = '0 * * * *';
             } else {
                 switch (schedule.Pattern) {
-                case '0 * * * *':
-                case '0 */4 * * *':
-                case '0 0 * * *':
-                case '0 0 * * 1':
-                    patternTemplate = schedule.Pattern;
-                    break;
-                default:
-                    patternTemplate = 'custom';
-                    break;
+                    case '0 * * * *':
+                    case '0 */4 * * *':
+                    case '0 0 * * *':
+                    case '0 0 * * 1':
+                        patternTemplate = schedule.Pattern;
+                        break;
+                    default:
+                        patternTemplate = 'custom';
+                        break;
                 }
 
                 if (schedule.Scope.HostIDs && schedule.Scope.HostIDs.length > 0) {
@@ -90,14 +90,14 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     const changeName = (Name: string) => {
         setSchedule(schedule => {
             schedule.Name = Name;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
     const changeScriptID = (ScriptID: string) => {
         setSchedule(schedule => {
             schedule.ScriptID = ScriptID;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
@@ -109,14 +109,14 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                 schedule.Pattern = '';
             }
             setPatternTemplate(pattern);
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
     const changeEnabled = (Enabled: boolean) => {
         setSchedule(schedule => {
             schedule.Enabled = Enabled;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
@@ -152,7 +152,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     const changePattern = (Pattern: string) => {
         setSchedule(schedule => {
             schedule.Pattern = Pattern;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
@@ -164,22 +164,22 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
         setSchedule(schedule => {
             schedule.Scope.HostIDs = [];
             schedule.Scope.GroupIDs = [];
-            setRunOn(RunOn as 'groups'|'hosts');
-            return {...schedule};
+            setRunOn(RunOn as 'groups' | 'hosts');
+            return { ...schedule };
         });
     };
 
     const changeHostIDs = (HostIDs: string[]) => {
         setSchedule(schedule => {
             schedule.Scope.HostIDs = HostIDs;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
     const changeGroupIDs = (GroupIDs: string[]) => {
         setSchedule(schedule => {
             schedule.Scope.GroupIDs = GroupIDs;
-            return {...schedule};
+            return { ...schedule };
         });
     };
 
@@ -250,7 +250,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     ];
 
     return (
-        <Page title={ isNew ? 'New Schedule' : 'Edit Schedule' }>
+        <Page title={isNew ? 'New Schedule' : 'Edit Schedule'}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"
@@ -263,7 +263,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                     defaultValue={schedule.ScriptID}
                     onChange={changeScriptID}
                     required>
-                    { scripts.map((script, idx) => {
+                    {scripts.map((script, idx) => {
                         return (<option value={script.ID} key={idx}>{script.Name}</option>);
                     })}
                 </Input.Select>
@@ -278,15 +278,15 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                     <option value="0 0 * * 1">Every Monday at Midnight</option>
                     <option value="custom">Custom</option>
                 </Input.Select>
-                { enabledCheckbox() }
-                { cronPatternInput() }
+                {enabledCheckbox()}
+                {cronPatternInput()}
                 <Input.Radio
                     label="Run On"
                     onChange={changeRunOn}
                     choices={runOnChoices}
                     defaultValue={runOn} />
-                { hostList() }
-                { groupList() }
+                {hostList()}
+                {groupList()}
             </Form>
         </Page>
     );

@@ -74,7 +74,7 @@ export const Select: React.FC<SelectProps> = (props: SelectProps) => {
 
     const requiredFlag = () => {
         if (!props.required) {
-            return null; 
+            return null;
         }
         return (<span className="form-required">*</span>);
     };
@@ -112,7 +112,7 @@ export const Select: React.FC<SelectProps> = (props: SelectProps) => {
 
     const validationError = () => {
         if (!valid.invalidMessage || !touched) {
-            return null; 
+            return null;
         }
         return (<div className="invalid-feedback">{valid.invalidMessage}</div>);
     };
@@ -132,11 +132,11 @@ export const Select: React.FC<SelectProps> = (props: SelectProps) => {
                 disabled={props.disabled}
                 onBlur={onBlur}
                 data-valid={valid.valid ? 'valid' : 'invalid'}>
-                { defaultSelection() }
-                { props.children }
+                {defaultSelection()}
+                {props.children}
             </select>
-            { validationError() }
-            { helpText() }
+            { validationError()}
+            { helpText()}
         </FormGroup>
     );
 };

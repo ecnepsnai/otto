@@ -6,6 +6,6 @@ interface PreProps {
 }
 export const Pre: React.FC<PreProps> = (props: PreProps) => {
     return (
-        <div className="pre-wrapper"><pre>{ props.children }</pre></div>
+        <div className="pre-wrapper"><pre>{props.children}</pre></div>
     );
 };

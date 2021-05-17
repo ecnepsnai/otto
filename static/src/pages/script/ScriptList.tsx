@@ -22,7 +22,7 @@ export const ScriptList: React.FC = () => {
     };
 
     if (loading) {
-        return ( <PageLoading /> );
+        return (<PageLoading />);
     }
 
     return (

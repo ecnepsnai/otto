@@ -76,7 +76,7 @@ export const RunOutput: React.FC<RunOutputProps> = (props: RunOutputProps) => {
     return (
         <Card.Card>
             <Card.Header>Output</Card.Header>
-            { content() }
+            { content()}
         </Card.Card>
     );
 };

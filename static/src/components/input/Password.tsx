@@ -138,8 +138,8 @@ export const Password: React.FC<PasswordProps> = (props: PasswordProps) => {
     const content = () => {
         return (
             <React.Fragment>
-                { input() }
-                { validationError() }
+                { input()}
+                { validationError()}
             </React.Fragment>
         );
     };
@@ -174,10 +174,10 @@ export const Password: React.FC<PasswordProps> = (props: PasswordProps) => {
     return (
         <FormGroup>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
-            { content() }
-            { helpText() }
+            { content()}
+            { helpText()}
             <div className="mt-1">
-                { randomButton() }
+                {randomButton()}
             </div>
         </FormGroup>
     );
