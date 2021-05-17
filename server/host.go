@@ -24,7 +24,7 @@ func (h Host) Groups() ([]Group, *Error) {
 	return groups, nil
 }
 
-// ScriptEnabledGroup describes a host where a script is eanbled on it by a group
+// ScriptEnabledGroup describes a host where a script is enabled on it by a group
 type ScriptEnabledGroup struct {
 	ScriptID   string
 	ScriptName string

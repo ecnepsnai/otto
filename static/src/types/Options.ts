@@ -31,6 +31,7 @@ export namespace Options {
         Enabled: boolean;
         PSK: string;
         DefaultGroupID: string;
+        RunScriptsOnRegister: boolean;
     }
 
     export interface Security {

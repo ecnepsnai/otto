@@ -126,7 +126,7 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 	}
 }
 
-func runScript(c net.Conn, script otto.Script, cancel chan bool) otto.ScriptResult {
+func runScript(c io.Writer, script otto.Script, cancel chan bool) otto.ScriptResult {
 	var proc *os.Process
 	canCancel := true
 	go func() {

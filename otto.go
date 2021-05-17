@@ -154,7 +154,8 @@ type RegisterRequestProperties struct {
 
 // RegisterResponse describes the response to a register request
 type RegisterResponse struct {
-	PSK string `json:"psk"`
+	PSK     string   `json:"psk"`
+	Scripts []Script `json:"scripts,omitempty"`
 }
 
 func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {

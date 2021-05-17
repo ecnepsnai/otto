@@ -60,7 +60,21 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	}
 	log.Info("Registered new host '%s' -> '%s'", r.Properties.Hostname, host.ID)
 	EventStore.HostRegisterSuccess(host, r, matchedRule)
+
+	scripts := []otto.Script{}
+	if Options.Register.RunScriptsOnRegister {
+		for _, scriptID := range host.Scripts() {
+			script := ScriptStore.ScriptWithID(scriptID.ScriptID)
+			scriptRequest, err := script.OttoScript()
+			if err != nil {
+				continue
+			}
+			scripts = append(scripts, *scriptRequest)
+		}
+	}
+
 	return otto.RegisterResponse{
-		PSK: psk,
+		PSK:     psk,
+		Scripts: scripts,
 	}, nil
 }

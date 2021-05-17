@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
@@ -149,4 +150,33 @@ func (s *Script) Attachments() ([]Attachment, *Error) {
 	}
 
 	return attachments, nil
+}
+
+func (s Script) OttoScript() (*otto.Script, *Error) {
+	fileIDs, err := s.Attachments()
+	if err != nil {
+		return nil, err
+	}
+	files := make([]otto.File, len(s.AttachmentIDs))
+	for i, file := range fileIDs {
+		file, erro := file.OttoFile()
+		if erro != nil {
+			return nil, ErrorFrom(erro)
+		}
+		files[i] = *file
+	}
+
+	return &otto.Script{
+		Name: s.Name,
+		RunAs: otto.ScriptRunAs{
+			UID:     s.RunAs.UID,
+			GID:     s.RunAs.GID,
+			Inherit: s.RunAs.Inherit,
+		},
+		Executable:       s.Executable,
+		Data:             []byte(s.Script),
+		WorkingDirectory: s.WorkingDirectory,
+		Environment:      map[string]string{},
+		Files:            files,
+	}, nil
 }

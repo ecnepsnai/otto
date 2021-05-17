@@ -168,32 +168,11 @@ func (host *Host) Ping() *Error {
 func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte), cancel chan bool) (*ScriptResult, *Error) {
 	start := time.Now()
 
-	fileIDs, err := script.Attachments()
+	sr, err := script.OttoScript()
 	if err != nil {
 		return nil, err
 	}
-	files := make([]otto.File, len(script.AttachmentIDs))
-	for i, file := range fileIDs {
-		file, erro := file.OttoFile()
-		if erro != nil {
-			return nil, ErrorFrom(erro)
-		}
-		files[i] = *file
-	}
-
-	scriptRequest := otto.Script{
-		Name: script.Name,
-		RunAs: otto.ScriptRunAs{
-			UID:     script.RunAs.UID,
-			GID:     script.RunAs.GID,
-			Inherit: script.RunAs.Inherit,
-		},
-		Executable:       script.Executable,
-		Data:             []byte(script.Script),
-		WorkingDirectory: script.WorkingDirectory,
-		Environment:      map[string]string{},
-		Files:            files,
-	}
+	scriptRequest := *sr
 
 	variables := environ.Merge(staticEnvironment(), []environ.Variable{
 		environ.New("OTTO_HOST_ADDRESS", host.Address),

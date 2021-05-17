@@ -65,14 +65,21 @@ export const SystemRegister: React.FC = () => {
     const changeEnabled = (Enabled: boolean) => {
         setOptions(options => {
             options.Enabled = Enabled;
-            return {...options};
+            return { ...options };
         });
     };
 
     const changePSK = (PSK: string) => {
         setOptions(options => {
             options.PSK = PSK;
-            return {...options};
+            return { ...options };
+        });
+    };
+
+    const changeRunScriptsOnRegister = (RunScriptsOnRegister: boolean) => {
+        setOptions(options => {
+            options.RunScriptsOnRegister = RunScriptsOnRegister;
+            return { ...options };
         });
     };
 
@@ -109,7 +116,7 @@ export const SystemRegister: React.FC = () => {
     const changeDefaultGroupID = (DefaultGroupID: string) => {
         setOptions(options => {
             options.DefaultGroupID = DefaultGroupID;
-            return {...options};
+            return { ...options };
         });
     };
 
@@ -130,7 +137,7 @@ export const SystemRegister: React.FC = () => {
                     Rules
                 </Card.Header>
                 <Card.Body>
-                    <RegisterRules rules={rules} onAdd={addRule} onChange={modifyRule} onDelete={deleteRule} groups={groups}/>
+                    <RegisterRules rules={rules} onAdd={addRule} onChange={modifyRule} onDelete={deleteRule} groups={groups} />
                 </Card.Body>
             </Card.Card>
             <Input.Select
@@ -138,10 +145,15 @@ export const SystemRegister: React.FC = () => {
                 helpText="If none of the above rules match the client will be added to this group"
                 defaultValue={options.DefaultGroupID}
                 onChange={changeDefaultGroupID}>
-                { groups.map((group, idx) => {
-                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                }) }
+                {groups.map((group, idx) => {
+                    return (<option key={idx} value={group.ID}>{group.Name}</option>);
+                })}
             </Input.Select>
+            <Input.Checkbox
+                label="Automatically Run Scripts on Registration"
+                helpText="When a host successfully registers all scripts associated with the host will run automatically."
+                defaultValue={options.RunScriptsOnRegister}
+                onChange={changeRunScriptsOnRegister} />
         </React.Fragment>);
     };
 
@@ -157,7 +169,7 @@ export const SystemRegister: React.FC = () => {
                     helpText="If checked hosts can automatically register themselves with this Otto server"
                     defaultValue={options.Enabled}
                     onChange={changeEnabled} />
-                { enabledContent() }
+                {enabledContent()}
             </Form>
         </Page>
     );
@@ -172,7 +184,7 @@ interface RegisterRulesProps {
 }
 export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRulesProps) => {
     const createNew = () => {
-        GlobalModalFrame.showModal(<RuleModal onSave={props.onAdd} groups={props.groups}/>);
+        GlobalModalFrame.showModal(<RuleModal onSave={props.onAdd} groups={props.groups} />);
     };
 
     const modifyRule = (rule: RegisterRuleType) => {
@@ -189,7 +201,7 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
 
     const editRuleMenuClick = (rule: RegisterRuleType) => {
         return () => {
-            GlobalModalFrame.showModal(<RuleModal defaultValue={rule} onSave={modifyRule(rule)} groups={props.groups}/>);
+            GlobalModalFrame.showModal(<RuleModal defaultValue={rule} onSave={modifyRule(rule)} groups={props.groups} />);
         };
     };
 
@@ -204,13 +216,13 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
         return (
             <Table.Row key={Rand.ID()}>
                 <td>{rule.Name}</td>
-                <td>{ Formatter.ValueOrNothing(rule.Clauses.length) }</td>
+                <td>{Formatter.ValueOrNothing(rule.Clauses.length)}</td>
                 <td>{groupName}</td>
                 <td>
                     <Dropdown label={<Icon.Bars />}>
-                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editRuleMenuClick(rule)}/>
+                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editRuleMenuClick(rule)} />
                         <Menu.Divider />
-                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteRuleMenuClick(rule)}/>
+                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteRuleMenuClick(rule)} />
                     </Dropdown>
                 </td>
             </Table.Row>
@@ -228,9 +240,9 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
                     <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
-                    { props.rules.map(rule => {
+                    {props.rules.map(rule => {
                         return ruleRow(rule);
-                    }) }
+                    })}
                 </Table.Body>
             </Table.Table>
         </div>
@@ -255,21 +267,21 @@ const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
     const changeName = (Name: string) => {
         setRule(rule => {
             rule.Name = Name;
-            return {...rule};
+            return { ...rule };
         });
     };
 
     const changeClauses = (Clauses: RegisterRuleClauseType[]) => {
         setRule(rule => {
             rule.Clauses = Clauses;
-            return {...rule};
+            return { ...rule };
         });
     };
 
     const changeGroupID = (GroupID: string) => {
         setRule(rule => {
             rule.GroupID = GroupID;
-            return {...rule};
+            return { ...rule };
         });
     };
 
@@ -294,9 +306,9 @@ const RuleModal: React.FC<RuleModalProps> = (props: RuleModalProps) => {
                 label="Add To Group"
                 defaultValue={rule.GroupID}
                 onChange={changeGroupID}>
-                { props.groups.map((group, idx) => {
-                    return ( <option key={idx} value={group.ID}>{group.Name}</option> );
-                }) }
+                {props.groups.map((group, idx) => {
+                    return (<option key={idx} value={group.ID}>{group.Name}</option>);
+                })}
             </Input.Select>
         </ModalForm>
     );
@@ -337,7 +349,7 @@ const RuleClauseListEdit: React.FC<RuleClauseListEditProps> = (props: RuleClause
 
     const removeClauseClick = () => {
         setClauses(clauses => {
-            clauses.splice(clauses.length-1, 1);
+            clauses.splice(clauses.length - 1, 1);
             return [...clauses];
         });
     };
@@ -370,14 +382,14 @@ const RuleClauseEdit: React.FC<RuleClauseEditProps> = (props: RuleClauseEditProp
     const changeProperty = (Property: string) => {
         setClause(clause => {
             clause.Property = Property;
-            return {...clause};
+            return { ...clause };
         });
     };
 
     const changePattern = (Pattern: string) => {
         setClause(clause => {
             clause.Pattern = Pattern;
-            return {...clause};
+            return { ...clause };
         });
     };
 
