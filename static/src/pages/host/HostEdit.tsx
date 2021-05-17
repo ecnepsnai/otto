@@ -125,6 +125,7 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
 
     const changeUseHostName = (useHostName: boolean) => {
         setUseHostname(useHostName);
+        changeAddress(useHostName ? host.Name : '');
     };
 
     const addressInput = () => {
