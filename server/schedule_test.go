@@ -17,7 +17,7 @@ func TestAddGetScheduleGroup(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -89,7 +89,7 @@ func TestAddGetScheduleHost(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -149,7 +149,7 @@ func TestEditSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -230,7 +230,7 @@ func TestDeleteSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -302,7 +302,7 @@ func TestAddDuplicateSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -378,7 +378,7 @@ func TestRenameDuplicateSchedule(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},

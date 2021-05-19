@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Script, ScriptType } from '../../types/Script';
+import { RunAs, Script, ScriptType } from '../../types/Script';
 import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
@@ -77,25 +77,6 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
         );
     };
 
-    const changeRunAsInherit = (DontInherit: boolean) => {
-        setScript(script => {
-            script.RunAs.Inherit = !DontInherit;
-            return { ...script };
-        });
-    };
-
-    const runAs = () => {
-        if (script.RunAs.Inherit) {
-            return null;
-        }
-
-        return (<Input.IDInput
-            label="Run Script As"
-            defaultUID={script.RunAs.UID}
-            defaultGID={script.RunAs.GID}
-            onChange={changeID} />);
-    };
-
     const changeEnabled = (Enabled: boolean) => {
         setScript(script => {
             script.Enabled = Enabled;
@@ -103,10 +84,9 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
         });
     };
 
-    const changeID = (UID: number, GID: number) => {
+    const changeRunAs = (runAs: RunAs) => {
         setScript(script => {
-            script.RunAs.UID = UID;
-            script.RunAs.GID = GID;
+            script.RunAs = runAs;
             return { ...script };
         });
     };
@@ -176,8 +156,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
                     onChange={changeName}
                     required />
                 {enabledCheckbox()}
-                <Input.Checkbox label="Run As Specific User" defaultValue={!script.RunAs.Inherit} onChange={changeRunAsInherit} />
-                {runAs()}
+                <Input.RunAsInput inheritLabel="Run As Specific User" label="Run As" defaultValue={script.RunAs} onChange={changeRunAs} />
                 <Input.Text
                     label="Working Directory"
                     type="text"

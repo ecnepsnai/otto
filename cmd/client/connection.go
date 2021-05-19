@@ -300,11 +300,14 @@ func createDirectoryForOttoFile(file otto.File) error {
 		return err
 	}
 
-	if err := os.Chown(dirName, file.UID, file.GID); err != nil {
-		log.Error("Error chowning directory: directory='%s' error='%s'", dirName, err.Error())
+	if !file.Owner.Inherit && !compareUIDandGID(file.Owner.UID, file.Owner.GID) {
+		if err := os.Chown(dirName, int(file.Owner.UID), int(file.Owner.GID)); err != nil {
+			log.Error("Error chowning directory: directory='%s' error='%s'", dirName, err.Error())
+			return err
+		}
 	}
 
-	log.Debug("Created directory: directory='%s' uid=%d gid=%d", dirName, file.UID, file.GID)
+	log.Debug("Created directory: directory='%s'", dirName)
 	return nil
 }
 
@@ -326,12 +329,12 @@ func uploadFile(file otto.File) error {
 		return err
 	}
 	// Only chown if we need to
-	if uid, gid := getCurrentUIDandGID(); uid != uint32(file.UID) || gid != uint32(file.GID) {
-		if err := f.Chown(file.UID, file.GID); err != nil {
+	if !file.Owner.Inherit && !compareUIDandGID(file.Owner.UID, file.Owner.GID) {
+		if err := f.Chown(int(file.Owner.UID), int(file.Owner.GID)); err != nil {
 			log.Error("Error chowning file: path='%s' error='%s'", file.Path, err.Error())
 			return err
 		}
-		log.Debug("Chowned file: path='%s' uid=%d gid=%d", file.Path, file.UID, file.GID)
+		log.Debug("Chowned file: path='%s' uid=%d gid=%d", file.Path, file.Owner.UID, file.Owner.GID)
 	}
 
 	log.Debug("Wrote %d bytes to '%s'", n, file.Path)

@@ -101,7 +101,7 @@ const (
 // Script describes a script
 type Script struct {
 	Name             string
-	RunAs            ScriptRunAs
+	RunAs            RunAs
 	Environment      map[string]string
 	WorkingDirectory string
 	Executable       string
@@ -109,8 +109,8 @@ type Script struct {
 	Data             []byte
 }
 
-// ScriptRunAs describes the user to run a script as
-type ScriptRunAs struct {
+// RunAs describes the user to run a script as
+type RunAs struct {
 	Inherit bool
 	UID     uint32
 	GID     uint32
@@ -128,11 +128,10 @@ type ScriptResult struct {
 
 // File Describes a file
 type File struct {
-	Path string
-	UID  int
-	GID  int
-	Mode uint32
-	Data []byte
+	Path  string
+	Owner RunAs
+	Mode  uint32
+	Data  []byte
 }
 
 // RegisterRequest describes a register request

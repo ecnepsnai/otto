@@ -29,11 +29,18 @@ export const AttachmentListItem: React.FC<AttachmentListItemProps> = (props: Att
         });
     };
 
+    const owner = () => {
+        if (props.attachment.Owner.Inherit) {
+            return (<em>Inherit from Script</em>);
+        }
+        return (<span>{props.attachment.Owner.UID + ':' + props.attachment.Owner.GID}</span>);
+    };
+
     return (
         <Table.Row>
             <td>{props.attachment.Path}</td>
             <td>{props.attachment.MimeType}</td>
-            <td>{props.attachment.UID + ':' + props.attachment.GID}</td>
+            <td>{owner()}</td>
             <td>{props.attachment.Mode}</td>
             <td>{Formatter.Bytes(props.attachment.Size)}</td>
             <Table.Menu>

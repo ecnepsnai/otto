@@ -16,10 +16,12 @@ func TestAddGetAttachment(t *testing.T) {
 		Path:     randomString(6),
 		Name:     randomString(6),
 		MimeType: "text",
-		UID:      os.Getuid(),
-		GID:      os.Getgid(),
-		Mode:     0644,
-		Size:     16,
+		Owner: RunAs{
+			UID: uint32(os.Getuid()),
+			GID: uint32(os.Getgid()),
+		},
+		Mode: 0644,
+		Size: 16,
 	})
 	if err != nil {
 		t.Fatalf("Error making new attachment: %s", err.Message)
@@ -58,10 +60,12 @@ func TestEditAttachment(t *testing.T) {
 		Path:     randomString(6),
 		Name:     randomString(6),
 		MimeType: "text",
-		UID:      os.Getuid(),
-		GID:      os.Getgid(),
-		Mode:     0644,
-		Size:     16,
+		Owner: RunAs{
+			UID: uint32(os.Getuid()),
+			GID: uint32(os.Getgid()),
+		},
+		Mode: 0644,
+		Size: 16,
 	})
 	if err != nil {
 		t.Fatalf("Error making new attachment: %s", err.Message)
@@ -72,8 +76,6 @@ func TestEditAttachment(t *testing.T) {
 
 	_, err = AttachmentStore.EditAttachment(attachment.ID, editAttachmentParams{
 		Path: attachment.Path,
-		UID:  attachment.UID,
-		GID:  attachment.GID,
 		Mode: 0777,
 	})
 	if err != nil {
@@ -93,10 +95,12 @@ func TestDeleteAttachment(t *testing.T) {
 		Path:     randomString(6),
 		Name:     randomString(6),
 		MimeType: "text",
-		UID:      os.Getuid(),
-		GID:      os.Getgid(),
-		Mode:     0644,
-		Size:     16,
+		Owner: RunAs{
+			UID: uint32(os.Getuid()),
+			GID: uint32(os.Getgid()),
+		},
+		Mode: 0644,
+		Size: 16,
 	})
 	if err != nil {
 		t.Fatalf("Error making new attachment: %s", err.Message)

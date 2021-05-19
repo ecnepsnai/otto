@@ -16,6 +16,8 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 	session := request.UserData.(*Session)
 
 	pathStr := request.HTTP.FormValue("Path")
+	inheritStr := request.HTTP.FormValue("Inherit")
+	inherit := inheritStr == "true"
 	uidStr := request.HTTP.FormValue("UID")
 	gidStr := request.HTTP.FormValue("GID")
 	modeStr := request.HTTP.FormValue("Mode")
@@ -44,10 +46,13 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 		Path:     pathStr,
 		Name:     info.Filename,
 		MimeType: info.Header.Get("Content-Type"),
-		UID:      uid,
-		GID:      gid,
-		Mode:     uint32(mode),
-		Size:     uint64(info.Size),
+		Owner: RunAs{
+			Inherit: inherit,
+			UID:     uint32(uid),
+			GID:     uint32(gid),
+		},
+		Mode: uint32(mode),
+		Size: uint64(info.Size),
 	}
 
 	attachment, erro := AttachmentStore.NewAttachment(req)
@@ -90,6 +95,8 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 	attachmentID := request.Params.ByName("id")
 
 	pathStr := request.HTTP.FormValue("Path")
+	inheritStr := request.HTTP.FormValue("Inherit")
+	inherit := inheritStr == "true"
 	uidStr := request.HTTP.FormValue("UID")
 	gidStr := request.HTTP.FormValue("GID")
 	modeStr := request.HTTP.FormValue("Mode")
@@ -115,8 +122,11 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 
 	req := editAttachmentParams{
 		Path: pathStr,
-		UID:  uid,
-		GID:  gid,
+		Owner: RunAs{
+			Inherit: inherit,
+			UID:     uint32(uid),
+			GID:     uint32(gid),
+		},
 		Mode: uint32(mode),
 	}
 

@@ -19,7 +19,7 @@ func TestAddGetScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -52,7 +52,7 @@ func TestEditScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -75,7 +75,7 @@ func TestEditScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -106,7 +106,7 @@ func TestDeleteScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -142,7 +142,7 @@ func TestAddDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -164,7 +164,7 @@ func TestAddDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -187,7 +187,7 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -209,7 +209,7 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},
@@ -232,7 +232,7 @@ func TestRenameDuplicateScript(t *testing.T) {
 				Value: "BAR",
 			},
 		},
-		RunAs: ScriptRunAs{
+		RunAs: RunAs{
 			UID: 0,
 			GID: 0,
 		},

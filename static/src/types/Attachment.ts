@@ -1,14 +1,14 @@
 import { Modal } from '../components/Modal';
 import { Notification } from '../components/Notification';
 import { API } from '../services/API';
+import { RunAs } from './Script';
 
 export interface AttachmentType {
     ID?: string;
     Path?: string;
     Name?: string;
     MimeType?: string;
-    UID?: number;
-    GID?: number;
+    Owner?: RunAs;
     Mode?: number;
     Size?: number;
 }
@@ -21,8 +21,11 @@ export class Attachment {
         return {
             Path: '',
             Name: '',
-            UID: 0,
-            GID: 0,
+            Owner: {
+                Inherit: true,
+                UID: 0,
+                GID: 0,
+            },
             Mode: 644,
         };
     }
@@ -33,8 +36,9 @@ export class Attachment {
     public static async New(attachment: File, parameters: AttachmentType | NewAttachmentParameters): Promise<AttachmentType> {
         const data = await API.PUTFile('/api/attachments', attachment, {
             Path: parameters.Path,
-            UID: parameters.UID.toString(),
-            GID: parameters.GID.toString(),
+            Inherit: parameters.Owner.Inherit ? 'true' : 'false',
+            UID: parameters.Owner.UID.toString(),
+            GID: parameters.Owner.GID.toString(),
             Mode: parameters.Mode.toString(),
         });
         return data as AttachmentType;
@@ -46,8 +50,9 @@ export class Attachment {
     public static async Save(attachment: File, parameters: AttachmentType): Promise<AttachmentType> {
         const data = await API.POSTFile('/api/attachments/attachment/' + parameters.ID, attachment, {
             Path: parameters.Path,
-            UID: parameters.UID.toString(),
-            GID: parameters.GID.toString(),
+            Inherit: parameters.Owner.Inherit ? 'true' : 'false',
+            UID: parameters.Owner.UID.toString(),
+            GID: parameters.Owner.GID.toString(),
             Mode: parameters.Mode.toString(),
         });
         return data as AttachmentType;
@@ -107,14 +112,12 @@ export class Attachment {
 
 export interface NewAttachmentParameters {
     Path: string;
-    UID: number;
-    GID: number;
+    Owner: RunAs;
     Mode: number;
 }
 
 export interface EditAttachmentParameters {
     Path: string;
-    UID: number;
-    GID: number;
+    Owner: RunAs;
     Mode: number;
 }

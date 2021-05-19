@@ -67,7 +67,7 @@ type newScriptParameters struct {
 	Executable       string
 	Script           string
 	Environment      []environ.Variable
-	RunAs            ScriptRunAs
+	RunAs            RunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
@@ -117,7 +117,7 @@ type editScriptParameters struct {
 	Executable       string
 	Script           string
 	Environment      []environ.Variable
-	RunAs            ScriptRunAs
+	RunAs            RunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string

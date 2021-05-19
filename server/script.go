@@ -13,14 +13,14 @@ type Script struct {
 	Executable       string `min:"1"`
 	Script           string `min:"1"`
 	Environment      []environ.Variable
-	RunAs            ScriptRunAs
+	RunAs            RunAs
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
 }
 
-// ScriptRunAs describes the properties of which user runs a script
-type ScriptRunAs struct {
+// RunAs describes the properties of which user runs a script
+type RunAs struct {
 	Inherit bool
 	UID     uint32
 	GID     uint32
@@ -168,7 +168,7 @@ func (s Script) OttoScript() (*otto.Script, *Error) {
 
 	return &otto.Script{
 		Name: s.Name,
-		RunAs: otto.ScriptRunAs{
+		RunAs: otto.RunAs{
 			UID:     s.RunAs.UID,
 			GID:     s.RunAs.GID,
 			Inherit: s.RunAs.Inherit,

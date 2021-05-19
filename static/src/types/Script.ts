@@ -13,7 +13,7 @@ export interface ScriptType {
     Executable?: string;
     Script?: string;
     Environment?: Variable[];
-    RunAs?: ScriptRunAs;
+    RunAs?: RunAs;
     WorkingDirectory?: string;
     AfterExecution?: string;
     AttachmentIDs?: string[];
@@ -150,7 +150,7 @@ export class Script {
     }
 }
 
-export interface ScriptRunAs {
+export interface RunAs {
     UID: number;
     GID: number;
     Inherit: boolean;
@@ -170,7 +170,7 @@ export interface NewScriptParameters {
     Executable: string;
     Script: string;
     Environment: Variable[];
-    RunAs: ScriptRunAs;
+    RunAs: RunAs;
     WorkingDirectory: string;
     AfterExecution: string;
     AttachmentIDs: string[];
@@ -182,7 +182,7 @@ export interface EditScriptParameters {
     Executable: string;
     Script: string;
     Environment: Variable[];
-    RunAs: ScriptRunAs;
+    RunAs: RunAs;
     WorkingDirectory: string;
     AfterExecution: string;
     AttachmentIDs: string[];

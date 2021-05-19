@@ -75,8 +75,7 @@ type newAttachmentParameters struct {
 	Path     string `min:"1"`
 	Name     string `min:"1"`
 	MimeType string `min:"1"`
-	UID      int
-	GID      int
+	Owner    RunAs
 	Mode     uint32
 	Size     uint64
 }
@@ -91,8 +90,7 @@ func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*A
 		Path:     params.Path,
 		Name:     params.Name,
 		MimeType: params.MimeType,
-		UID:      params.UID,
-		GID:      params.GID,
+		Owner:    params.Owner,
 		Mode:     params.Mode,
 		Created:  time.Now(),
 		Modified: time.Now(),
@@ -124,8 +122,7 @@ type editAttachmentParams struct {
 	Path     string `min:"1"`
 	Name     string `min:"1"`
 	MimeType string `min:"1"`
-	UID      int
-	GID      int
+	Owner    RunAs
 	Mode     uint32
 	Size     uint64
 }
@@ -137,8 +134,7 @@ func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentPa
 	}
 
 	attachment.Path = params.Path
-	attachment.UID = params.UID
-	attachment.GID = params.GID
+	attachment.Owner = params.Owner
 	attachment.Mode = params.Mode
 	attachment.Modified = time.Now()
 

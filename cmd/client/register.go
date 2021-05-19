@@ -208,6 +208,12 @@ func getUIDandGID() (uid, gid uint32) {
 	return
 }
 
+// compareUIDandGID compare the given UID and GID to that of the running user
+func compareUIDandGID(uid, gid uint32) bool {
+	u, g := getUIDandGID()
+	return uid == u && gid == g
+}
+
 // getOutboundIP get the IP address used to connect to a remote destination
 func getOutboundIP() net.IP {
 	// Because we're using udp there's no handshake or connection actually happening here

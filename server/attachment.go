@@ -15,8 +15,7 @@ type Attachment struct {
 	Path     string
 	Name     string
 	MimeType string
-	UID      int
-	GID      int
+	Owner    RunAs
 	Created  time.Time
 	Modified time.Time
 	Mode     uint32
@@ -39,9 +38,12 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 
 	ottoFile := otto.File{
 		Path: attachment.Path,
-		UID:  attachment.UID,
-		GID:  attachment.GID,
 		Mode: attachment.Mode,
+		Owner: otto.RunAs{
+			UID:     attachment.Owner.UID,
+			GID:     attachment.Owner.GID,
+			Inherit: attachment.Owner.Inherit,
+		},
 		Data: fileData,
 	}
 	return &ottoFile, nil

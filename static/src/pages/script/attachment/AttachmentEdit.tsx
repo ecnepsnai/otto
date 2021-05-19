@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Input } from '../../../components/input/Input';
 import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Attachment, AttachmentType } from '../../../types/Attachment';
+import { RunAs } from '../../../types/Script';
 
 interface AttachmentEditProps {
     attachment?: AttachmentType;
@@ -44,10 +45,9 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
         setFile(file);
     };
 
-    const changeOwner = (UID: number, GID: number) => {
+    const changeOwner = (Owner: RunAs) => {
         setAttachment(attachment => {
-            attachment.UID = UID;
-            attachment.GID = GID;
+            attachment.Owner = Owner;
             return { ...attachment };
         });
     };
@@ -70,7 +70,7 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
         <ModalForm title={title} onSubmit={saveAttachment}>
             { fileInput()}
             <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts. If the parent directory does not exist it will be created with the same owner as the attachment." fixedWidth />
-            <Input.IDInput label="Owned By" defaultUID={attachment.UID} defaultGID={attachment.GID} onChange={changeOwner} />
+            <Input.RunAsInput inheritLabel="Specify File Owner" label="Owned By" defaultValue={attachment.Owner} onChange={changeOwner} />
             <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (mode) for the file" />
         </ModalForm>
     );
