@@ -6,12 +6,13 @@ This is the home of documentation for the Otto automation framework.
 
 ## Table of Contents
 
-- [Introduction](introduction.md)
-- [The Otto Server](server.md)
-- [The Otto Client](client.md)
-- [Groups](group.md)
-- [Scripts](script.md)
-- [Schedules](schedule.md)
 - [Audit Log](audit_log.md)
-- [REST API](api.md)
+- [Automatic Client Registration](automatic_register.md)
+- [Groups](group.md)
+- [Introduction](introduction.md)
 - [Otto Protocol](protocol.md)
+- [REST API](api.md)
+- [Schedules](schedule.md)
+- [Scripts](script.md)
+- [The Otto Client](client.md)
+- [The Otto Server](server.md)

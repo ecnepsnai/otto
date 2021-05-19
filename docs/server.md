@@ -81,40 +81,13 @@ All active sessions for that user will be ended if their password is changed by 
 
 **Reset/Restore the Default Account**
 
-If you have no way to access the Otto service:
+If you have no way to access the Otto service then you will need to reset the user store.
+
+*Note: All users will be deleted and will need to be manually recreated.*
 
 1. Stop the Otto server
 2. Navigate to the data directory for the otto server
-3. Delete `user.db`
+3. Delete `user.db` and `shadow.db`
 4. Start the Otto server
 
 The default account will be recreated and you can log in using `admin`:`admin`.
-
-## Client Registration
-
-If enabled, Otto clients can register themselves with the Otto server and be assigned to groups based on information
-about the client.
-
-To enable client registration, check "Allow Hosts to Register Themselves" in the options page of the Otto web UI.
-
-A register PSK must be specified. This PSK must be specified when telling the client to register itself with the Otto
-server.
-
-Registration rules can be added to automatically assign hosts to specific groups based off of information about the
-operating system of the host. Each rule must have at least one clause, which is a simple regex test against a predefined
-property of the system
-
-Possible properties are:
-- **Hostname.** The hostname of the host.
-- **Kernel Name.** The name of the kernel running on the host, as determined by running `uname`.
-- **Kernel Version.** The version of the kernel running on the host, as determined by running `uname -r`.
-- **Distribution Name.** The name of the distribution or variant of the host. The value varies by system.
-- **Distribution Version.** The version of the distribution or variant of the host. The value varies by distribution.
-
-Each clause must match for the host to be added to the group specified by the rule. Multiple rules may be applied to
-incoming hosts.
-
-For example, you may wish to have a rule that assign hosts to a group for CentOS Linux and another for Ubuntu Linux,
-or you may further segregate hosts into specific versions such as CentOS Linux 7 or Ubuntu Linux 20.04.
-
-There is an implicit 'any' rule at the end that will assign the host to a default group, much must be specified.

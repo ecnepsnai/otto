@@ -5,7 +5,8 @@ long as the executable itself requires only the first and only parameter being t
 
 For example: `bash <script>`, `python <python file>`.
 
-An Otto client can run multiple scripts in parallel.
+An Otto client can run multiple scripts in parallel, and scripts can be aborted by the user during execution. Aborted
+scripts are killed with SIGTERM.
 
 ## Environment Variables
 
@@ -41,5 +42,5 @@ Attachments are uploaded each time a script runs, and will overwrite any existin
 If the destination directory for the attachment does not exist the Otto client will create it. The otto client will use
 the default mode for the directory, and set the owner to the same as the attachment.
 
-Attachments can be owned by specific UID/GID, and have a specific permission mode. Attachments have a maximum file size
-of 100MiB.
+Attachments can be owned by specific UID/GID or inherit the UID/GID that the script runs as, and have a specific
+permission mode. Attachments have a maximum file size of 100MiB.

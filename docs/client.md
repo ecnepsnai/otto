@@ -35,27 +35,7 @@ It works best if you run it as root, but will run as a non-root user.
 
 If enabled on the server, clients can configure themselves by automatically registering with the Otto server.
 
-For server configuration information, see the server documentation.
-
-Run the Otto client executable with the following environment variables **only once** to register the host:
-
-|Variable|Description|
-|-|-|
-|`REGISTER_HOST`|The base URL of the Otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
-|`REGISTER_PSK`|The register PSK|
-|`REGISTER_NO_TLS_VERIFY`|Optional. If `1` then no TLS verification is done when connecting to the server.|
-|`OTTO_CLIENT_PORT`|Optional. Specify the port that the Otto client will listen on.|
-
-To aid with registration, running the client with the `-v` argument will print out the property values that are passed
-to the Otto server during registration.
-
-**Example:**
-
-```bash
-REGISTER_HOST='https://otto.mydomain' REGISTER_PSK='super_secret' ./otto
-```
-
-The client will then configure itself and exit with a status code of `0` and will now be ready for normal use.
+Please see the [Automatic Registration](automatic_register.md) documentation for further information.
 
 ### Manual Configuration
 
