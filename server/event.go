@@ -91,9 +91,18 @@ func (s *eventStoreObject) UserModified(modifiedUsername string, currentUser str
 	event.Save()
 }
 
-func (s *eventStoreObject) UserChangedPassword(username string) {
-	event := newEvent(EventTypeUserChangedPassword, map[string]string{
+func (s *eventStoreObject) UserResetPassword(username string) {
+	event := newEvent(EventTypeUserResetPassword, map[string]string{
 		"username": username,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) UserResetAPIKey(modifiedUsername string, currentUser string) {
+	event := newEvent(EventTypeUserResetAPIKey, map[string]string{
+		"username": modifiedUsername,
+		"reset_by": currentUser,
 	})
 
 	event.Save()

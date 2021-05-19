@@ -133,9 +133,14 @@
                 "value": "\"UserModified\""
             },
             {
-                "key": "UserChangedPassword",
-                "description": "UserChangedPassword event",
-                "value": "\"UserChangedPassword\""
+                "key": "UserResetPassword",
+                "description": "UserResetPassword event",
+                "value": "\"UserResetPassword\""
+            },
+            {
+                "key": "UserResetAPIKey",
+                "description": "UserResetAPIKey event",
+                "value": "\"UserResetAPIKey\""
             },
             {
                 "key": "UserDeleted",

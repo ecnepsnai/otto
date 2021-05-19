@@ -54,6 +54,23 @@ Event for when an existing user is modified.
 |`username`|The username of the user|
 |`modified_by`|The username of the user who modified this user|
 
+### UserResetPassword
+
+Event for when a user reset their password. This occurs when a user is forced to change their password on next login.
+
+|Parameter|Description|
+|-|-|
+|`username`|The username of the user|
+
+### UserResetAPIKey
+
+Event for when a users API key is reset. This occurs regardless of wether or not there is an existing API key for the user.
+
+|Parameter|Description|
+|-|-|
+|`username`|The username of the user|
+|`reset_by`|The username of the user who reset the key|
+
 ### UserDeleted
 
 Event for when a user is deleted.

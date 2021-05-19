@@ -103,7 +103,7 @@ func (h *handle) UserResetAPIKey(request web.Request) (interface{}, *web.Error) 
 		return nil, web.ValidationError(err.Message)
 	}
 
-	EventStore.UserModified(username, session.Username)
+	EventStore.UserResetAPIKey(username, session.Username)
 	return *apiKey, nil
 }
 
@@ -131,7 +131,7 @@ func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error
 		return nil, web.ValidationError(err.Message)
 	}
 
-	EventStore.UserChangedPassword(session.Username)
+	EventStore.UserResetPassword(session.Username)
 	SessionStore.CompletePartialSession(session.Key)
 	return user, nil
 }
