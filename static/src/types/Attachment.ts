@@ -43,8 +43,13 @@ export class Attachment {
     /**
      * Save this attachment
      */
-    public static async Save(attachment: AttachmentType): Promise<AttachmentType> {
-        const data = await API.POST('/api/attachments/attachment/' + attachment.ID, attachment);
+    public static async Save(attachment: File, parameters: AttachmentType): Promise<AttachmentType> {
+        const data = await API.POSTFile('/api/attachments/attachment/' + parameters.ID, attachment, {
+            Path: parameters.Path,
+            UID: parameters.UID.toString(),
+            GID: parameters.GID.toString(),
+            Mode: parameters.Mode.toString(),
+        });
         return data as AttachmentType;
     }
 

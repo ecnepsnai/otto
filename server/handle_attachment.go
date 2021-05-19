@@ -89,17 +89,50 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 
 	attachmentID := request.Params.ByName("id")
 
-	req := editAttachmentParams{}
-	if err := request.Decode(&req); err != nil {
+	pathStr := request.HTTP.FormValue("Path")
+	uidStr := request.HTTP.FormValue("UID")
+	gidStr := request.HTTP.FormValue("GID")
+	modeStr := request.HTTP.FormValue("Mode")
+
+	uid, err := strconv.Atoi(uidStr)
+	if err != nil {
+		return nil, web.ValidationError("Invalid uid '%s'", uidStr)
+	}
+	gid, err := strconv.Atoi(gidStr)
+	if err != nil {
+		return nil, web.ValidationError("Invalid gid '%s'", gidStr)
+	}
+	mode, err := strconv.ParseUint(modeStr, 10, 32)
+	if err != nil {
+		return nil, web.ValidationError("Invalid mode '%s'", modeStr)
+	}
+
+	fileUpload, info, err := request.HTTP.FormFile("file")
+	if err != nil && err.Error() != "http: no such file" {
+		log.Error("Error getting form file: %s", err.Error())
 		return nil, web.CommonErrors.BadRequest
 	}
 
-	attachment, err := AttachmentStore.EditAttachment(attachmentID, req)
-	if err != nil {
-		if err.Server {
+	req := editAttachmentParams{
+		Path: pathStr,
+		UID:  uid,
+		GID:  gid,
+		Mode: uint32(mode),
+	}
+
+	if info != nil {
+		req.Data = fileUpload
+		req.Name = info.Filename
+		req.MimeType = info.Header.Get("Content-Type")
+		req.Size = uint64(info.Size)
+	}
+
+	attachment, erro := AttachmentStore.EditAttachment(attachmentID, req)
+	if erro != nil {
+		if erro.Server {
 			return nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, web.ValidationError(erro.Message)
 	}
 
 	EventStore.AttachmentModified(attachment, session.Username)

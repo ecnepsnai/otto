@@ -104,6 +104,21 @@ export class API {
         return this.do(url, { method: 'DELETE' });
     }
 
+    private static async UploadFile(method: 'POST' | 'PUT', url: string, file: File, data: { [key: string]: string; }): Promise<unknown> {
+        const fd = new FormData();
+        if (file) {
+            fd.append('file', file);
+        }
+        Object.keys(data).forEach(key => {
+            fd.append(key, data[key]);
+        });
+
+        return this.do(url, {
+            method: method,
+            body: fd
+        });
+    }
+
     /**
      * Perform a HTTP PUT Multipart Upload to the specified URL
      * @param url the URL to request
@@ -112,15 +127,17 @@ export class API {
      * @returns The JSON object of the results
      */
     public static async PUTFile(url: string, file: File, data: { [key: string]: string; }): Promise<unknown> {
-        const fd = new FormData();
-        fd.append('file', file);
-        Object.keys(data).forEach(key => {
-            fd.append(key, data[key]);
-        });
+        return API.UploadFile('PUT', url, file, data);
+    }
 
-        return this.do(url, {
-            method: 'PUT',
-            body: fd
-        });
+    /**
+     * Perform a HTTP POST Multipart Upload to the specified URL
+     * @param url the URL to request
+     * @param file The file data
+     * @param data Additional parameters to add to the form data
+     * @returns The JSON object of the results
+     */
+    public static async POSTFile(url: string, file: File, data: { [key: string]: string; }): Promise<unknown> {
+        return API.UploadFile('POST', url, file, data);
     }
 }

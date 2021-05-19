@@ -27,7 +27,7 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
     };
 
     const editAttachment = () => {
-        return Attachment.Save(attachment).then(attachment => {
+        return Attachment.Save(file, attachment).then(attachment => {
             props.didUpdate(attachment);
             GlobalModalFrame.removeModal();
         });
@@ -60,10 +60,9 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
     };
 
     const fileInput = () => {
-        if (props.attachment) {
-            return null;
-        }
-        return (<Input.FileChooser label="Upload File" onChange={changeFile} />);
+        const labelText = props.attachment ? 'Replace File' : 'Select File';
+        const helpText = props.attachment ? 'Select a new file to replace the existing file, otherwise the file is not changed.' : '';
+        return (<Input.FileChooser label={labelText} onChange={changeFile} helpText={helpText} />);
     };
 
     const title = props.attachment ? 'Edit Attachment' : 'New Attachment';

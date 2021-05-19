@@ -120,10 +120,14 @@ func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*A
 }
 
 type editAttachmentParams struct {
-	Path string
-	UID  int
-	GID  int
-	Mode uint32
+	Data     io.Reader
+	Path     string `min:"1"`
+	Name     string `min:"1"`
+	MimeType string `min:"1"`
+	UID      int
+	GID      int
+	Mode     uint32
+	Size     uint64
 }
 
 func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (*Attachment, *Error) {
@@ -137,6 +141,24 @@ func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentPa
 	attachment.GID = params.GID
 	attachment.Mode = params.Mode
 	attachment.Modified = time.Now()
+
+	if params.Data != nil {
+		f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
+			log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
+			return nil, ErrorFrom(err)
+		}
+		defer f.Close()
+
+		if _, err := io.Copy(f, params.Data); err != nil {
+			log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
+			return nil, ErrorFrom(err)
+		}
+
+		attachment.Name = params.Name
+		attachment.Size = params.Size
+		attachment.MimeType = params.MimeType
+	}
 
 	if err := s.Table.Update(*attachment); err != nil {
 		log.Error("Error updating script attachment '%s': %s", attachment.ID, err.Error())

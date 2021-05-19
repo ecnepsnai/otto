@@ -9,6 +9,10 @@ interface FileChooserProps {
      */
     label: string;
     /**
+     * Additional text to show below the input
+     */
+    helpText?: string;
+    /**
      * Event called when a file is selected
      */
     onChange: (file: File) => (void);
@@ -21,12 +25,21 @@ export const FileChooser: React.FC<FileChooserProps> = (props: FileChooserProps)
         props.onChange(file);
     };
 
+    const helpText = () => {
+        if (props.helpText) {
+            return <div id={labelID + 'help'} className="form-text">{props.helpText}</div>;
+        } else {
+            return null;
+        }
+    };
+
     return (
         <FormGroup>
             <label className="form-label" htmlFor={labelID}>{props.label}</label>
             <div className="form-file">
                 <input className="form-control" type="file" id={labelID} onChange={didSelectFile} />
             </div>
+            { helpText()}
         </FormGroup>
     );
 };
