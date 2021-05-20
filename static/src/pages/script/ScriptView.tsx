@@ -24,13 +24,19 @@ import { Nothing } from '../../components/Nothing';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 
+interface DedupedScriptEnabledHost {
+    GroupName: string;
+    GroupID: string;
+    Hosts: ScriptEnabledHost[];
+}
+
 interface ScriptViewProps {
     match: match;
 }
 export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) => {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [script, setScript] = React.useState<ScriptType>();
-    const [hosts, setHosts] = React.useState<ScriptEnabledHost[]>();
+    const [hosts, setHosts] = React.useState<DedupedScriptEnabledHost[]>();
     const [attachments, setAttachments] = React.useState<AttachmentType[]>();
     const [schedules, setSchedules] = React.useState<ScheduleType[]>();
 
@@ -40,7 +46,29 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
 
     const loadHosts = async () => {
         const scriptID = (props.match.params as URLParams).id;
-        setHosts(await Script.Hosts(scriptID));
+        const scriptHosts = await Script.Hosts(scriptID);
+
+        const groupMap: { [id: string]: ScriptEnabledHost[] } = {};
+        const groupNameMap: { [id: string]: string } = {};
+
+        scriptHosts.forEach(sh => {
+            const hosts = groupMap[sh.GroupID] ?? [];
+            hosts.push(sh);
+            groupMap[sh.GroupID] = hosts;
+            groupNameMap[sh.GroupID] = sh.GroupName;
+        });
+
+        const hosts: DedupedScriptEnabledHost[] = [];
+        Object.keys(groupMap).forEach(groupID => {
+            const groupName = groupNameMap[groupID];
+            hosts.push({
+                GroupName: groupName,
+                GroupID: groupID,
+                Hosts: groupMap[groupID],
+            });
+        });
+
+        setHosts(hosts);
     };
 
     const loadScript = async () => {
@@ -158,27 +186,31 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
                         <Card.Header>Enabled on Hosts</Card.Header>
                         <ListGroup.List>
                             {
-                                hosts.map((host, index) => {
+                                hosts.map((scriptHost, index) => {
                                     return (<ListGroup.Item key={index}>
                                         <div className="d-flex justify-content-between">
                                             <div>
                                                 <Icon.LayerGroup />
-                                                <Link to={'/groups/group/' + host.GroupID} className="ms-1">{host.GroupName}</Link>
+                                                <Link to={'/groups/group/' + scriptHost.GroupID} className="ms-1">{scriptHost.GroupName}</Link>
                                             </div>
                                             <div>
-                                                <SmallPlayButton onClick={runScriptGroupClick(host.GroupID)} />
+                                                <SmallPlayButton onClick={runScriptGroupClick(scriptHost.GroupID)} />
                                             </div>
                                         </div>
-                                        <div className="d-flex justify-content-between">
-                                            <div>
-                                                <Icon.Descendant />
-                                                <Icon.Desktop />
-                                                <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
-                                            </div>
-                                            <div>
-                                                <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />
-                                            </div>
-                                        </div>
+                                        {
+                                            scriptHost.Hosts.map((host, index) => {
+                                                return (<div className="d-flex justify-content-between" key={index}>
+                                                    <div>
+                                                        <Icon.Descendant />
+                                                        <Icon.Desktop />
+                                                        <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
+                                                    </div>
+                                                    <div>
+                                                        <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />
+                                                    </div>
+                                                </div>);
+                                            })
+                                        }
                                     </ListGroup.Item>);
                                 })
                             }
