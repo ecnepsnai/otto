@@ -177,8 +177,8 @@ func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.Register
 	event.Save()
 }
 
-func (s *eventStoreObject) HostRegisterIncorrectPSK(request otto.RegisterRequest) {
-	event := newEvent(EventTypeHostRegisterIncorrectPSK, map[string]string{
+func (s *eventStoreObject) HostRegisterIncorrectKey(request otto.RegisterRequest) {
+	event := newEvent(EventTypeHostRegisterIncorrectKey, map[string]string{
 		"address":              request.Address,
 		"hostname":             request.Properties.Hostname,
 		"kernel_name":          request.Properties.KernelName,

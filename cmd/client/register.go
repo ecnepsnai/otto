@@ -22,14 +22,12 @@ var registerProperties otto.RegisterRequestProperties
 func tryAutoRegister() {
 	env := envMap()
 
-	// Host
 	host, present := env["REGISTER_HOST"]
 	if !present {
 		return
 	}
 
-	// PSK
-	psk, present := env["REGISTER_PSK"]
+	key, present := env["REGISTER_KEY"]
 	if !present {
 		return
 	}
@@ -67,7 +65,7 @@ func tryAutoRegister() {
 	// Make the request
 	request := otto.RegisterRequest{
 		Address:    localIP.String(),
-		PSK:        psk,
+		Key:        key,
 		Port:       port,
 		Properties: registerProperties,
 	}

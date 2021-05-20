@@ -168,9 +168,9 @@
                 "value": "\"HostRegisterSuccess\""
             },
             {
-                "key": "HostRegisterIncorrectPSK",
-                "description": "HostRegisterIncorrectPSK event",
-                "value": "\"HostRegisterIncorrectPSK\""
+                "key": "HostRegisterIncorrectKey",
+                "description": "HostRegisterIncorrectKey event",
+                "value": "\"HostRegisterIncorrectKey\""
             },
             {
                 "key": "GroupAdded",

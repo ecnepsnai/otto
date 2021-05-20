@@ -34,6 +34,7 @@ import {
     faSignOutAlt,
     faSpinner,
     faStarOfLife,
+    faTerminal,
     faTimesCircle,
     faTrashAlt,
     faUndo,
@@ -105,6 +106,7 @@ export namespace Icon {
     export const SignOut: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faSignOutAlt, options: props });
     export const Spinner: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faSpinner, options: props });
     export const StarOfLife: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faStarOfLife, options: props });
+    export const Terminal: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTerminal, options: props });
     export const TimesCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTimesCircle, options: props });
     export const Delete: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTrashAlt, options: props });
     export const Undo: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUndo, options: props });

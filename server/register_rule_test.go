@@ -132,7 +132,7 @@ func TestDeleteRegisterRule(t *testing.T) {
 }
 
 func TestRegisterRuleEndToEnd(t *testing.T) {
-	PSK := randomString(6)
+	Key := randomString(6)
 
 	defaultGroup, err := GroupStore.NewGroup(newGroupParameters{
 		Name:      randomString(6),
@@ -192,7 +192,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	o := Options
 	o.Register.Enabled = true
 	o.Register.DefaultGroupID = defaultGroup.ID
-	o.Register.PSK = PSK
+	o.Register.Key = Key
 	o.Save()
 
 	mockRequest := func(params otto.RegisterRequest) web.Request {
@@ -206,7 +206,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	h := handle{}
 	_, webErr := h.Register(mockRequest(otto.RegisterRequest{
 		Address: defaultAddress,
-		PSK:     PSK,
+		Key:     Key,
 		Port:    12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -227,7 +227,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	centos8address := randomString(6)
 	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
 		Address: centos8address,
-		PSK:     PSK,
+		Key:     Key,
 		Port:    12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -247,11 +247,11 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 		t.Errorf("Incorrect group")
 	}
 
-	// Test that an incorrect PSK does not get registered
-	incorrectPSKAddress := randomString(6)
+	// Test that an incorrect Key does not get registered
+	incorrectKeyAddress := randomString(6)
 	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
-		Address: incorrectPSKAddress,
-		PSK:     randomString(6),
+		Address: incorrectKeyAddress,
+		Key:     randomString(6),
 		Port:    12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -264,7 +264,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	if webErr == nil {
 		t.Errorf("No error seen when one expected")
 	}
-	if HostStore.HostWithAddress(incorrectPSKAddress) != nil {
+	if HostStore.HostWithAddress(incorrectKeyAddress) != nil {
 		t.Errorf("Host was registered when one was not expected")
 	}
 }

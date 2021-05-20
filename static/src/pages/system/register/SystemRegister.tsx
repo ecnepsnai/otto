@@ -6,7 +6,7 @@ import { Form } from '../../../components/Form';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
 import { Dropdown, Menu } from '../../../components/Menu';
-import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
+import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
 import { Notification } from '../../../components/Notification';
 import { Page } from '../../../components/Page';
 import { Table } from '../../../components/Table';
@@ -17,6 +17,7 @@ import { Options } from '../../../types/Options';
 import { RegisterRuleType, RegisterRuleClauseType, RegisterRule } from '../../../types/RegisterRule';
 import { Formatter } from '../../../services/Formatter';
 import { Style } from '../../../components/Style';
+import { Pre } from '../../../components/Pre';
 import '../../../../css/registerrules.scss';
 
 export const SystemRegister: React.FC = () => {
@@ -24,6 +25,7 @@ export const SystemRegister: React.FC = () => {
     const [rules, setRules] = React.useState<RegisterRuleType[]>();
     const [groups, setGroups] = React.useState<GroupType[]>();
     const [options, setOptions] = React.useState<Options.Register>();
+    const [keyInputKey, setKeyInputKey] = React.useState(Rand.ID());
 
     React.useEffect(() => {
         loadData();
@@ -69,11 +71,28 @@ export const SystemRegister: React.FC = () => {
         });
     };
 
-    const changePSK = (PSK: string) => {
+    const changeKey = (Key: string) => {
         setOptions(options => {
-            options.PSK = PSK;
+            options.Key = Key;
             return { ...options };
         });
+    };
+
+    const randomKey = () => {
+        changeKey(Rand.PSK());
+        setKeyInputKey(Rand.ID());
+    };
+
+    const showCommand = () => {
+        const registerKey = options.Key.replace('"', '\\"');
+        let url = StateManager.Current().Options.General.ServerURL;
+        url = url.substr(0, url.length - 1);
+        const command = 'REGISTER_KEY="' + registerKey + '" \\\nREGISTER_HOST="' + url + '" \\\n./otto';
+
+        GlobalModalFrame.showModal(<Modal title="Register Command">
+            <p>Copy and paste the following command into any shell to start client registration</p>
+            <Pre>{command}</Pre>
+        </Modal>);
     };
 
     const changeRunScriptsOnRegister = (RunScriptsOnRegister: boolean) => {
@@ -126,12 +145,18 @@ export const SystemRegister: React.FC = () => {
         }
 
         return (<React.Fragment>
-            <Input.Password
-                label="Register PSK"
-                helpText="Clients that wish to register with this server must specify this PSK to authenticate"
-                defaultValue={options.PSK}
-                onChange={changePSK}
+            <Input.Text
+                type="text"
+                label="Register Key"
+                helpText="Clients that wish to register with this server must specify this key to authenticate"
+                defaultValue={options.Key}
+                onChange={changeKey}
+                key={keyInputKey}
                 required />
+            <div className="buttons mb-2">
+                <Button color={Style.Palette.Secondary} size={Style.Size.XS} outline onClick={randomKey}><Icon.Label icon={<Icon.Random />} label="Generate Random Key" /></Button>
+                <Button color={Style.Palette.Secondary} size={Style.Size.XS} outline onClick={showCommand}><Icon.Label icon={<Icon.Terminal />} label="Show Command Line" /></Button>
+            </div>
             <Card.Card className="mb-2">
                 <Card.Header>
                     Rules

@@ -29,7 +29,7 @@ export namespace Options {
 
     export interface Register {
         Enabled: boolean;
-        PSK: string;
+        Key: string;
         DefaultGroupID: string;
         RunScriptsOnRegister: boolean;
     }

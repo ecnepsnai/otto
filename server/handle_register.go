@@ -23,9 +23,9 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	if Options.Register.PSK != r.PSK {
-		EventStore.HostRegisterIncorrectPSK(r)
-		log.Error("Invalid PSK for register request")
+	if Options.Register.Key != r.Key {
+		EventStore.HostRegisterIncorrectKey(r)
+		log.Error("Invalid Key for register request")
 		return nil, web.CommonErrors.Unauthorized
 	}
 

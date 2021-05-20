@@ -7,7 +7,7 @@ about the client.
 
 To enable client registration, check "Allow Hosts to Register Themselves" in the options page of the Otto web UI.
 
-A register PSK must be specified. This PSK must be specified when telling the client to register itself with the Otto
+A register key must be specified. This key must be specified when telling the client to register itself with the Otto
 server.
 
 Registration rules can be added to automatically assign hosts to specific groups based off of information about the
@@ -36,7 +36,7 @@ Run the Otto client executable with the following environment variables **only o
 |Variable|Description|
 |-|-|
 |`REGISTER_HOST`|The base URL of the Otto server, including the protocol and port (if needed). Must not contain any trailing slash.|
-|`REGISTER_PSK`|The register PSK|
+|`REGISTER_KEY`|The register key.|
 |`REGISTER_NO_TLS_VERIFY`|Optional. If `1` then no TLS verification is done when connecting to the server.|
 |`OTTO_CLIENT_PORT`|Optional. Specify the port that the Otto client will listen on.|
 
@@ -46,7 +46,7 @@ to the Otto server during registration.
 **Example:**
 
 ```bash
-REGISTER_HOST='https://otto.mydomain' REGISTER_PSK='super_secret' ./otto
+REGISTER_HOST='https://otto.mydomain' REGISTER_KEY='super_secret' ./otto
 ```
 
 The client will then configure itself and exit with a status code of `0` and will now be ready for normal use.

@@ -1,11 +1,14 @@
 package server
 
 import (
+	"encoding/json"
+	"os"
 	"path"
 	"sync"
 	"time"
 
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/secutil"
 )
 
@@ -38,11 +41,13 @@ func migrateIfNeeded() {
 // #10
 // - move user password & api key hash into dedicated store
 // - update script attachment owner
+// - update script run as type
+// - rename register PSK as Key
 func migrate10() {
 	log.Debug("Start migrate 10")
 
 	wg := sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(4)
 
 	allSuccess := true
 
@@ -164,6 +169,143 @@ func migrate10() {
 		if results.Error != nil {
 			log.Error("Error migrating attachment database: %s", results.Error.Error())
 			allSuccess = false
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		if !FileExists(path.Join(Directories.Data, "script.db")) {
+			return
+		}
+
+		type ScriptRunAs struct {
+			Inherit bool
+			UID     uint32
+			GID     uint32
+		}
+
+		type oldScriptType struct {
+			ID               string `ds:"primary"`
+			Name             string `ds:"unique" min:"1" max:"140"`
+			Enabled          bool   `ds:"index"`
+			Executable       string `min:"1"`
+			Script           string `min:"1"`
+			Environment      []environ.Variable
+			RunAs            ScriptRunAs
+			WorkingDirectory string
+			AfterExecution   string
+			AttachmentIDs    []string
+		}
+
+		type newScriptType struct {
+			ID               string `ds:"primary"`
+			Name             string `ds:"unique" min:"1" max:"140"`
+			Enabled          bool   `ds:"index"`
+			Executable       string `min:"1"`
+			Script           string `min:"1"`
+			Environment      []environ.Variable
+			RunAs            RunAs
+			WorkingDirectory string
+			AfterExecution   string
+			AttachmentIDs    []string
+		}
+
+		results := ds.Migrate(ds.MigrateParams{
+			TablePath: path.Join(Directories.Data, "script.db"),
+			NewPath:   path.Join(Directories.Data, "script.db"),
+			OldType:   oldScriptType{},
+			NewType:   newScriptType{},
+			MigrateObject: func(old interface{}) (interface{}, error) {
+				oldScript, ok := old.(oldScriptType)
+				if !ok {
+					panic("Invalid type")
+				}
+				newScript := newScriptType{
+					ID:          oldScript.ID,
+					Name:        oldScript.Name,
+					Enabled:     oldScript.Enabled,
+					Executable:  oldScript.Executable,
+					Script:      oldScript.Script,
+					Environment: oldScript.Environment,
+					RunAs: RunAs{
+						Inherit: oldScript.RunAs.Inherit,
+						UID:     oldScript.RunAs.UID,
+						GID:     oldScript.RunAs.GID,
+					},
+					WorkingDirectory: oldScript.WorkingDirectory,
+					AfterExecution:   oldScript.AfterExecution,
+					AttachmentIDs:    oldScript.AttachmentIDs,
+				}
+				return newScript, nil
+			},
+		})
+
+		if results.Error != nil {
+			log.Error("Error migrating script database: %s", results.Error.Error())
+			allSuccess = false
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		if !FileExists(path.Join(Directories.Data, configFileName)) {
+			return
+		}
+
+		if FileExists(path.Join(Directories.Data, configFileName) + "_backup") {
+			return
+		}
+
+		f, err := os.OpenFile(path.Join(Directories.Data, configFileName), os.O_RDONLY, os.ModePerm)
+		if err != nil {
+			log.Error("Error opening config file: %s", err.Error())
+			allSuccess = false
+			return
+		}
+
+		optionsMap := map[string]interface{}{}
+		if err := json.NewDecoder(f).Decode(&optionsMap); err != nil {
+			log.Error("Error decoding options file: %s", err.Error())
+			allSuccess = false
+			f.Close()
+			return
+		}
+
+		register, present := optionsMap["Register"].(map[string]interface{})
+		if !present {
+			f.Close()
+			return
+		}
+
+		psk, present := register["PSK"]
+		if !present {
+			f.Close()
+			return
+		}
+
+		delete(register, "PSK")
+		register["Key"] = psk
+		optionsMap["Register"] = register
+
+		if err := os.Rename(path.Join(Directories.Data, configFileName), path.Join(Directories.Data, configFileName)+"_backup"); err != nil {
+			log.Error("Error making backup of config file: %s", err.Error())
+			allSuccess = false
+			return
+		}
+
+		f, err = os.OpenFile(path.Join(Directories.Data, configFileName), os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			log.Error("Error opening config file: %s", err.Error())
+			allSuccess = false
+			return
+		}
+
+		if err := json.NewEncoder(f).Encode(&optionsMap); err != nil {
+			log.Error("Error writing new options file: %s", err.Error())
+			allSuccess = false
+			f.Close()
 		}
 	}()
 

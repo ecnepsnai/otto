@@ -177,7 +177,7 @@ func postBootstrapArgs() {
 			}
 			o := Options
 			o.Register.Enabled = true
-			o.Register.PSK = secutil.RandomString(6)
+			o.Register.Key = secutil.RandomString(6)
 			o.Save()
 		}
 

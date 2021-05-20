@@ -48,7 +48,7 @@ type OptionsNetwork struct {
 // OptionsRegister describes register options
 type OptionsRegister struct {
 	Enabled              bool
-	PSK                  string
+	Key                  string
 	DefaultGroupID       string
 	RunScriptsOnRegister bool
 }
@@ -157,8 +157,8 @@ func (o *OttoOptions) Validate() error {
 		return fmt.Errorf("invalid value for IP version")
 	}
 	if o.Register.Enabled {
-		if o.Register.PSK == "" {
-			return fmt.Errorf("a register PSK is required if auto registration is enabled")
+		if o.Register.Key == "" {
+			return fmt.Errorf("a register key is required if auto registration is enabled")
 		}
 	}
 	return nil

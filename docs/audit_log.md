@@ -134,9 +134,9 @@ Event for when a new host successfully registers itself and is added.
 |`matched_rule_id`|The ID of the matched rule|
 |`matched_rule_name`|The name of the matched rule|
 
-### HostRegisterIncorrectPSK
+### HostRegisterIncorrectKey
 
-Event for when host registration fails with an incorrect pre-shared key.
+Event for when host registration fails with an incorrect registration key.
 
 |Parameter|Description|
 |-|-|
