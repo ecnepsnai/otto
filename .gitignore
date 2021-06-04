@@ -23,10 +23,6 @@ cmd/client/*
 cmd/server/*
 !cmd/server/*.go
 
-# cbgen
-server/cbgen*.go
-cmd/client/cbgen*.go
-
 # Static
 /static/node_modules
 /static/build

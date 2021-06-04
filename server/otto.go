@@ -25,8 +25,8 @@ var log *logtic.Source
 func CommonSetup() {
 	fsSetup()
 	initLogtic(isVerbose())
-	GobSetup()
-	StateSetup()
+	gobSetup()
+	stateSetup()
 	migrateIfNeeded()
 	LoadOptions()
 }
@@ -45,8 +45,8 @@ func initLogtic(verbose bool) {
 
 func startup() {
 	CommonSetup()
-	StoreSetup()
-	DataStoreSetup()
+	storeSetup()
+	dataStoreSetup()
 	WarmCache()
 	CronSetup()
 	checkFirstRun()
@@ -55,7 +55,7 @@ func startup() {
 
 func shutdown() {
 	State.Close()
-	DataStoreTeardown()
-	StoreTeardown()
+	dataStoreTeardown()
+	storeTeardown()
 	logtic.Close()
 }
