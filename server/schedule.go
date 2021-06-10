@@ -39,11 +39,7 @@ func (s ScheduleScope) Hosts() ([]Host, *Error) {
 	hostIDs := set.NewString()
 	if len(s.GroupIDs) > 0 {
 		for _, id := range s.GroupIDs {
-			groupHosts, ok := GetGroupCache()[id]
-			if !ok {
-				return nil, ErrorServer("empty cache")
-			}
-			for _, hostID := range groupHosts {
+			for _, hostID := range GroupCache.HostIDs(id) {
 				hostIDs.Add(hostID)
 			}
 		}
@@ -82,12 +78,7 @@ func (s Schedule) RunNow() {
 	hosts := set.NewString()
 	if len(s.Scope.GroupIDs) > 0 {
 		for _, id := range s.Scope.GroupIDs {
-			hostIDs, ok := GetGroupCache()[id]
-			if !ok {
-				log.Error("Group cache empty, cannot run scheduled script")
-				return
-			}
-			for _, hostID := range hostIDs {
+			for _, hostID := range GroupCache.HostIDs(id) {
 				hosts.Add(hostID)
 			}
 		}

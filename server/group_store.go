@@ -104,7 +104,7 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 	}
 
 	log.Info("Added new group '%s'", params.Name)
-	UpdateGroupCache()
+	GroupCache.Update()
 	return &group, nil
 }
 
@@ -147,7 +147,7 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 	}
 
 	log.Info("Updating group '%s'", params.Name)
-	UpdateGroupCache()
+	GroupCache.Update()
 	return group, nil
 }
 
@@ -188,7 +188,7 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 	}
 
 	heartbeatStore.CleanupHeartbeats()
-	UpdateGroupCache()
+	GroupCache.Update()
 	log.Info("Deleting group '%s'", group.Name)
 	return nil
 }

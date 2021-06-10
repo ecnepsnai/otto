@@ -12,7 +12,7 @@ type Group struct {
 
 // HostIDs return the IDs for each host member of this group
 func (g Group) HostIDs() []string {
-	return GetGroupCache()[g.ID]
+	return GroupCache.HostIDs(g.ID)
 }
 
 // Hosts get all hosts for this group

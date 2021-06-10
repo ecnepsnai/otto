@@ -16,7 +16,7 @@ func (h *handle) GroupList(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.Error) {
-	return GetGroupCache(), nil
+	return GroupCache.Membership(), nil
 }
 
 func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {

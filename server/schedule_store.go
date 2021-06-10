@@ -70,11 +70,7 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) []Schedule {
 	for _, schedule := range schedules {
 		if len(schedule.Scope.GroupIDs) > 0 {
 			for _, groupID := range schedule.Scope.GroupIDs {
-				hostIDs, ok := GetGroupCache()[groupID]
-				if !ok {
-					continue
-				}
-				for _, h := range hostIDs {
+				for _, h := range GroupCache.HostIDs(groupID) {
 					if hostID == h {
 						matchedSchedules = append(matchedSchedules, schedule)
 						break

@@ -47,7 +47,7 @@ func startup() {
 	CommonSetup()
 	storeSetup()
 	dataStoreSetup()
-	WarmCache()
+	CacheSetup()
 	CronSetup()
 	checkFirstRun()
 	go StartHeartbeatMonitor()

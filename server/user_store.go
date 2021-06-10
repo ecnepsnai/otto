@@ -7,7 +7,7 @@ import (
 )
 
 func (s *userStoreObject) UserWithUsername(username string) *User {
-	user, present := GetUserCache()[username]
+	user, present := UserCache.ByUsername(username)
 	if !present {
 		return nil
 	}
@@ -15,19 +15,10 @@ func (s *userStoreObject) UserWithUsername(username string) *User {
 }
 
 func (s *userStoreObject) UserWithEmail(email string) *User {
-	objects, err := s.Table.GetUnique("Email", email)
-	if err != nil {
-		log.Error("Error getting user: email='%s' error='%s'", email, err.Error())
+	user, present := UserCache.ByEmail(email)
+	if !present {
 		return nil
 	}
-	if objects == nil {
-		return nil
-	}
-	user, k := objects.(User)
-	if !k {
-		log.Fatal("Error getting user: email='%s' error='%s'", email, "invalid type")
-	}
-
 	return &user
 }
 
@@ -92,8 +83,7 @@ func (s *userStoreObject) NewUser(params newUserParameters) (*User, *Error) {
 	}
 	ShadowStore.Set(user.Username, *hashedPassword)
 
-	UpdateUserCache()
-
+	UserCache.Update()
 	log.Info("New user added: username='%s' email='%s'", params.Username, params.Email)
 	return &user, nil
 }
@@ -129,8 +119,7 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (*User
 		return nil, ErrorFrom(err)
 	}
 
-	UpdateUserCache()
-
+	UserCache.Update()
 	return user, nil
 }
 
@@ -155,7 +144,7 @@ func (s *userStoreObject) ResetPassword(username string, newPassword []byte) (*U
 
 	ShadowStore.Set(user.Username, *passwordHash)
 
-	UpdateUserCache()
+	UserCache.Update()
 	return user, nil
 }
 
@@ -185,8 +174,7 @@ func (s *userStoreObject) DeleteUser(user *User) *Error {
 	}
 	ShadowStore.Delete(user.Username)
 
-	UpdateUserCache()
-
+	UserCache.Update()
 	log.Warn("User deleted: username='%s' email='%s'", user.Username, user.Email)
 	return nil
 }

@@ -1,0 +1,17 @@
+#system-search-input {
+    transition: width .2s, background-color .2s;
+    background-color: #891d1d;
+
+    &::placeholder {
+        color: white;
+        opacity: 1;
+    }
+
+    &:focus {
+        background-color: white;
+
+        &::placeholder {
+            color: #666;
+        }
+    }
+}

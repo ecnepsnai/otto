@@ -29,11 +29,11 @@ func (e Event) Save() {
 		log.Error("Error saving event: %s", err.Error())
 	}
 	if logtic.Log.Level >= logtic.LevelInfo {
-		details := []string{}
+		details := map[string]interface{}{}
 		for k, v := range e.Details {
-			details = append(details, fmt.Sprintf("'%s=%s'", k, v))
+			details[k] = v
 		}
-		eventLog.Info("%s: %s", e.Event, strings.Join(details, " "))
+		eventLog.PInfo(e.Event, details)
 	}
 }
 

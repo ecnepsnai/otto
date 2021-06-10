@@ -34,10 +34,13 @@ func (s *sessionStoreObject) NewSessionForUser(user *User) Session {
 		Expires:  time.Now().AddDate(0, 0, 1),
 		Partial:  user.MustChangePassword,
 	}
-	log.Info("Started new session: username='%s' session_id='%s'", user.Username, session.ShortID)
+	log.PInfo("Started new session", map[string]interface{}{
+		"username":   user.Username,
+		"session_id": session.ShortID,
+		"expires":    session.Expires,
+	})
 	s.l.Lock()
 	s.m[session.Key] = session
-	log.Debug("Sessions: %+v", s.m)
 	s.l.Unlock()
 	return session
 }
@@ -58,9 +61,11 @@ func (s *sessionStoreObject) SessionWithID(ID string) *Session {
 func (s *sessionStoreObject) DeleteSession(session *Session) {
 	s.l.Lock()
 	delete(s.m, session.Key)
-	log.Debug("Sessions: %+v", s.m)
 	s.l.Unlock()
-	log.Info("Ending session: username='%s' session_id='%s'", session.Username, session.ShortID)
+	log.PInfo("Ended session", map[string]interface{}{
+		"username":   session.Username,
+		"session_id": session.ShortID,
+	})
 }
 
 // SessionForUser locate all sessions for the given user
@@ -83,7 +88,6 @@ func (s *sessionStoreObject) EndAllForUser(username string) {
 	defer s.l.Unlock()
 	for _, session := range sessions {
 		delete(s.m, session.Key)
-		log.Debug("Sessions: %+v", s.m)
 	}
 }
 
@@ -98,7 +102,6 @@ func (s *sessionStoreObject) EndAllOtherForUser(username string, current *Sessio
 		}
 
 		delete(s.m, session.Key)
-		log.Debug("Sessions: %+v", s.m)
 	}
 }
 
@@ -107,7 +110,6 @@ func (s *sessionStoreObject) UpdateSessionExpiry(sessionKey string) Session {
 	session := s.m[sessionKey]
 	session.Expires = time.Now().Add(time.Duration(Options.Authentication.MaxAgeMinutes) * time.Minute)
 	s.m[sessionKey] = session
-	log.Debug("Sessions: %+v", s.m)
 	s.l.Unlock()
 	return session
 }
@@ -117,7 +119,6 @@ func (s *sessionStoreObject) CompletePartialSession(sessionKey string) Session {
 	session := s.m[sessionKey]
 	session.Partial = false
 	s.m[sessionKey] = session
-	log.Debug("Sessions: %+v", s.m)
 	s.l.Unlock()
 	return session
 }

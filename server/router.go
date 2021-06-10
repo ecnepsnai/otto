@@ -138,6 +138,9 @@ func RouterSetup() {
 	// Events
 	server.API.GET("/api/events", h.EventsGet, authenticatedOptions(false))
 
+	// System Search
+	server.API.POST("/api/search/system", h.SystemSearch, authenticatedOptions(false))
+
 	// Redirect
 	server.HTTP.GET("/", v.Redirect, unauthenticatedOptions)
 

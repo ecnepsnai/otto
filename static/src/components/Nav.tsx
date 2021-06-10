@@ -6,6 +6,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { StateManager } from '../services/StateManager';
 import { Style } from './Style';
 import { UserManager } from '../pages/system/users/SystemUsers';
+import { SystemSearch } from './SystemSearch';
 import '../../css/nav.scss';
 
 export const Nav: React.FC = () => {
@@ -28,6 +29,7 @@ export const Nav: React.FC = () => {
                             <NavItem link="/events" icon={<Icon.List />} label="Audit Log" />
                         </ul>
                         <div className="d-flex">
+                            <SystemSearch />
                             <SystemMenu />
                             <UserMenu />
                         </div>
