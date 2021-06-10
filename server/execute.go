@@ -22,7 +22,10 @@ type ScriptResult struct {
 }
 
 var clientActionMap = map[string]uint32{
+	ClientActionRunScript:  otto.ActionRunScript,
 	ClientActionExitClient: otto.ActionExit,
+	ClientActionReboot:     otto.ActionReboot,
+	ClientActionShutdown:   otto.ActionShutdown,
 }
 
 type hostConnection struct {
@@ -238,9 +241,26 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 
 	if result.Success {
 		if script.AfterExecution != "" {
+			clientAction, ok := clientActionMap[script.AfterExecution]
+			if !ok {
+				log.PError("Unknown post-execution action", map[string]interface{}{
+					"action":    script.AfterExecution,
+					"script_id": script.ID,
+				})
+				return &ScriptResult{
+					ScriptID:    script.ID,
+					Duration:    time.Since(start),
+					Environment: variables,
+					Result: otto.ScriptResult{
+						Success: false,
+					},
+					RunError: fmt.Sprintf("unknown post-execution action %s", script.AfterExecution),
+				}, nil
+			}
+
 			log.Info("Performing post-execution action '%s' on host '%s'", script.AfterExecution, host.Address)
 			_, err = host.TriggerAction(otto.MessageTriggerAction{
-				Action: clientActionMap[script.AfterExecution],
+				Action: clientAction,
 			}, nil, cancel)
 			if err != nil {
 				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ExecError)

@@ -269,6 +269,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
                 </Input.Select>
                 <Input.Select
                     label="Run Frequency"
+                    helpText="All schedules trigger in UTC/GMT time"
                     defaultValue={patternTemplate}
                     onChange={changePatternTemplate}
                     required>

@@ -130,7 +130,7 @@ func (s scheduleStoreObject) RunSchedules() {
 		}
 
 		j := cron.Job{Pattern: schedule.Pattern}
-		if j.WouldRunNow() {
+		if j.WouldRunNowInTZ(time.UTC) {
 			schedule.RunNow()
 		}
 	}

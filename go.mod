@@ -3,7 +3,7 @@ module github.com/ecnepsnai/otto
 go 1.16
 
 require (
-	github.com/ecnepsnai/cron v1.2.0
+	github.com/ecnepsnai/cron v1.3.0
 	github.com/ecnepsnai/ds v1.6.0
 	github.com/ecnepsnai/limits v1.0.1
 	github.com/ecnepsnai/logtic v1.6.0
