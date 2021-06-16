@@ -43,6 +43,8 @@ You may also manually configure the Otto client with a configuration file. The c
 single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client
 binary.
 
+The Otto client offers an interactive setup which can be accessed by running the client with the `-s` argument.
+
 If you choose to manually configure the Otto client, you must also add the host to the Otto server through the web UI.
 
 |Property|Required|Description|

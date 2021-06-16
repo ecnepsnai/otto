@@ -65,6 +65,8 @@ func parseArgs() {
 			fmt.Printf("    Version: %s\n    Protocol version: %d\n    Go Runtime: %s\n", MainVersion, otto.ProtocolVersion, runtime.Version())
 			printOSInfo()
 			os.Exit(0)
+		} else if arg == "-s" {
+			tryGuidedSetup()
 		}
 		i++
 	}

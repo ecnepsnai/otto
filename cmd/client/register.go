@@ -132,20 +132,15 @@ func tryAutoRegister() {
 		AllowFrom:  allowFrom,
 	}
 	config = &conf
-	f, err := os.OpenFile("otto_client.conf", os.O_RDWR|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		rlog.Fatalf("Error opening config file: %s", err.Error())
-	}
-	defer f.Close()
-	if err := json.NewEncoder(f).Encode(conf); err != nil {
-		rlog.Fatalf("Error encoding options: %s", err.Error())
+	if err := saveNewConfig(conf); err != nil {
+		rlog.Fatalf("Error saving config file: %s", err.Error())
 	}
 	rlog.Printf("Successfully registered with otto server '%s', configuration: %+v", host, conf)
 
 	for _, script := range registerResponse.Data.Scripts {
 		rlog.Printf("Executing first-run script: %s", script.Name)
 		devNull, _ := os.OpenFile(os.DevNull, os.O_WRONLY, os.ModePerm)
-		runScript(f, script, nil)
+		runScript(devNull, script, nil)
 		devNull.Close()
 	}
 

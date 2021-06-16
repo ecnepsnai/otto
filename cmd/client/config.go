@@ -26,7 +26,7 @@ const (
 
 func loadConfig() error {
 	if _, err := os.Stat(otto_CONFIG_FILE_NAME); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n", MainVersion)
+		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n\nUse -s to run interactive setup.\n", MainVersion)
 		os.Exit(1)
 	}
 
@@ -63,6 +63,39 @@ func mustLoadConfig() {
 	}
 }
 
+func saveNewConfig(c clientConfig) error {
+	f, err := os.OpenFile(otto_CONFIG_ATOMIC_FILE_NAME, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.PError("Error opening atomic file for writing", map[string]interface{}{
+			"file_path": otto_CONFIG_ATOMIC_FILE_NAME,
+			"error":     err.Error(),
+		})
+		return err
+	}
+
+	encoder := json.NewEncoder(f)
+	encoder.SetIndent("", "    ")
+	err = encoder.Encode(c)
+	f.Close()
+	if err != nil {
+		log.PError("Error writing config JSON", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+
+	if err := os.Rename(otto_CONFIG_ATOMIC_FILE_NAME, otto_CONFIG_FILE_NAME); err != nil {
+		log.PError("Error renaming atomic config file", map[string]interface{}{
+			"file_path":        otto_CONFIG_FILE_NAME,
+			"atomic_file_path": otto_CONFIG_ATOMIC_FILE_NAME,
+			"error":            err.Error(),
+		})
+		return err
+	}
+
+	return nil
+}
+
 func updatePSK(newPSK string) error {
 	f, err := os.OpenFile(otto_CONFIG_FILE_NAME, os.O_RDONLY, 0644)
 	if err != nil {
@@ -86,30 +119,9 @@ func updatePSK(newPSK string) error {
 
 	c.PSK = newPSK
 
-	f, err = os.OpenFile(otto_CONFIG_ATOMIC_FILE_NAME, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
+	if err := saveNewConfig(c); err != nil {
 		log.PError("Error updating PSK", map[string]interface{}{
-			"where": "opening atomic file for writing",
-			"error": err.Error(),
-		})
-		return err
-	}
-
-	encoder := json.NewEncoder(f)
-	encoder.SetIndent("", "    ")
-	err = encoder.Encode(c)
-	f.Close()
-	if err != nil {
-		log.PError("Error updating PSK", map[string]interface{}{
-			"where": "writing atomic file",
-			"error": err.Error(),
-		})
-		return err
-	}
-
-	if err := os.Rename(otto_CONFIG_ATOMIC_FILE_NAME, otto_CONFIG_FILE_NAME); err != nil {
-		log.PError("Error updating PSK", map[string]interface{}{
-			"where": "renaming atomic config file",
+			"where": "saving config file",
 			"error": err.Error(),
 		})
 		return err
