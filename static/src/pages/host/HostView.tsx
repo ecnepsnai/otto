@@ -17,9 +17,9 @@ import { ScheduleType } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
-import { CopyButton } from '../../components/CopyButton';
 import { DateLabel } from '../../components/DateLabel';
 import { ClientVersion } from '../../components/ClientVersion';
+import { HostPSK } from './HostPSK';
 
 interface HostViewProps {
     match: match;
@@ -102,13 +102,20 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
 
         return (
             <React.Fragment>
-                { Object.keys(heartbeat.Properties).map((key, idx) => {
+                {Object.keys(heartbeat.Properties).map((key, idx) => {
                     return (
                         <ListGroup.TextItem title={key} key={idx}><code>{heartbeat.Properties[key]}</code></ListGroup.TextItem>
                     );
                 })}
             </React.Fragment>
         );
+    };
+
+    const didRotatePSK = (newPSK: string) => {
+        setHost(value => {
+            value.PSK = newPSK;
+            return { ...value };
+        });
     };
 
     if (loading) {
@@ -130,7 +137,7 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                                 <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
                                 <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
-                                <ListGroup.TextItem title="PSK"><code>*****</code> <CopyButton text={host.PSK} /></ListGroup.TextItem>
+                                <HostPSK host={host} didRotate={didRotatePSK} />
                             </ListGroup.List>
                         </Card.Card>
                         <Card.Card className="mb-3">

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
 	"github.com/ecnepsnai/otto/server/environ"
@@ -93,12 +95,13 @@ func (s *hostStoreObject) AllHosts() []Host {
 }
 
 type newHostParameters struct {
-	Name        string
-	Address     string
-	Port        uint32
-	PSK         string
-	GroupIDs    []string
-	Environment []environ.Variable
+	Name          string
+	Address       string
+	Port          uint32
+	PSK           string
+	LastPSKRotate time.Time
+	GroupIDs      []string
+	Environment   []environ.Variable
 }
 
 func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
@@ -122,14 +125,15 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	}
 
 	host := Host{
-		ID:          newID(),
-		Name:        params.Name,
-		Address:     params.Address,
-		Port:        params.Port,
-		PSK:         params.PSK,
-		Enabled:     true,
-		GroupIDs:    groupIDs,
-		Environment: params.Environment,
+		ID:            newID(),
+		Name:          params.Name,
+		Address:       params.Address,
+		Port:          params.Port,
+		PSK:           params.PSK,
+		LastPSKRotate: params.LastPSKRotate,
+		Enabled:       true,
+		GroupIDs:      groupIDs,
+		Environment:   params.Environment,
 	}
 	if err := limits.Check(host); err != nil {
 		return nil, ErrorUser(err.Error())
@@ -147,13 +151,14 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 }
 
 type editHostParameters struct {
-	Name        string
-	Address     string
-	Port        uint32
-	PSK         string
-	Enabled     bool
-	GroupIDs    []string
-	Environment []environ.Variable
+	Name          string
+	Address       string
+	Port          uint32
+	PSK           string
+	LastPSKRotate time.Time
+	Enabled       bool
+	GroupIDs      []string
+	Environment   []environ.Variable
 }
 
 func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host, *Error) {
@@ -181,6 +186,7 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	host.Address = params.Address
 	host.Port = params.Port
 	host.PSK = params.PSK
+	host.LastPSKRotate = params.LastPSKRotate
 	host.Enabled = params.Enabled
 	host.GroupIDs = groupIDs
 	host.Environment = params.Environment

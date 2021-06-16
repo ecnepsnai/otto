@@ -10,14 +10,14 @@ interface DropdownProps {
 export const Dropdown: React.FC<DropdownProps> = (props: DropdownProps) => {
     const id = Rand.ID();
     return (
-        <div className="dropdown">
+        <span className="dropdown">
             <button className="btn btn-outline-secondary btn-xs" type="button" role="button" id={id} data-bs-toggle="dropdown" aria-expanded="false">
                 {props.label}
             </button>
             <Menu.Menu name={id}>
                 {props.children}
             </Menu.Menu>
-        </div>
+        </span>
     );
 };
 

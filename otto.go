@@ -38,13 +38,13 @@ func init() {
 
 // Message types
 const (
-	MessageTypeHeartbeatRequest  uint32 = 1
-	MessageTypeHeartbeatResponse uint32 = 2
-	MessageTypeTriggerAction     uint32 = 3
-	MessageTypeCancelAction      uint32 = 4
-	MessageTypeActionOutput      uint32 = 5
-	MessageTypeActionResult      uint32 = 6
-	MessageTypeGeneralFailure    uint32 = 7
+	MessageTypeHeartbeatRequest uint32 = iota + 1
+	MessageTypeHeartbeatResponse
+	MessageTypeTriggerAction
+	MessageTypeCancelAction
+	MessageTypeActionOutput
+	MessageTypeActionResult
+	MessageTypeGeneralFailure
 )
 
 // MessageHeartbeatRequest describes a heartbeat request
@@ -63,6 +63,7 @@ type MessageTriggerAction struct {
 	Action uint32
 	Script Script
 	File   File
+	NewPSK string
 }
 
 // MessageCancelAction describes a request to cancel an action
@@ -89,13 +90,14 @@ type MessageGeneralFailure struct {
 
 // Actions
 const (
-	ActionRunScript         uint32 = 1
-	ActionReloadConfig      uint32 = 2
-	ActionUploadFile        uint32 = 3
-	ActionUploadFileAndExit uint32 = 4
-	ActionExit              uint32 = 5
-	ActionReboot            uint32 = 6
-	ActionShutdown          uint32 = 7
+	ActionRunScript uint32 = iota + 1
+	ActionReloadConfig
+	ActionUploadFile
+	ActionUploadFileAndExit
+	ActionExit
+	ActionReboot
+	ActionShutdown
+	ActionUpdatePSK
 )
 
 // Script describes a script

@@ -2,9 +2,9 @@ package server
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ecnepsnai/otto"
-	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
 )
 
@@ -46,13 +46,14 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		break
 	}
 
-	psk := secutil.RandomString(32)
+	psk := newHostPSK()
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:     r.Properties.Hostname,
-		Address:  r.Address,
-		Port:     r.Port,
-		PSK:      psk,
-		GroupIDs: []string{groupID},
+		Name:          r.Properties.Hostname,
+		Address:       r.Address,
+		Port:          r.Port,
+		PSK:           psk,
+		LastPSKRotate: time.Now(),
+		GroupIDs:      []string{groupID},
 	})
 	if err != nil {
 		log.Error("Error adding new host '%s': %s", r.Properties.Hostname, err.Message)

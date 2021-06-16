@@ -43,10 +43,12 @@ You may also manually configure the Otto client with a configuration file. The c
 single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client
 binary.
 
+If you choose to manually configure the Otto client, you must also add the host to the Otto server through the web UI.
+
 |Property|Required|Description|
 |-|-|-|
 |`listen_addr`|No|The address to listen to. Defaults to `0.0.0.0:12444`.|
-|`psk`|Yes|The PSK configured for this host on the server|
+|`psk`|Yes|The PSK configured for this host on the server.|
 |`log_path`|No|The path to a file where the Otto client should log. Defaults to the directory where the otto binary is.|
 |`default_uid`|No|The default UID if not specified by the script. Defaults to `0`.|
 |`default_gid`|No|The default GID if not specified by the script. Defaults to `0`.|
@@ -65,3 +67,5 @@ binary.
     "allow_from": "10.0.0.0/8"
 }
 ```
+
+Please note that the Otto client may update this config file, such as to rotate the PSK.

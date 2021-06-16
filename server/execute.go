@@ -159,7 +159,7 @@ func (host *Host) Ping() *Error {
 		response := message.(otto.MessageHeartbeatResponse)
 		heartbeatStore.RegisterHeartbeatReply(host, response)
 	default:
-		log.Error("Unexpected otto message %d while looking for heartbeat reply", messageType)
+		log.Error("Unexpected otto message %d while looking for heartbeat reply (%d)", messageType, otto.MessageTypeHeartbeatResponse)
 		return ErrorServer("Unexpected response")
 	}
 

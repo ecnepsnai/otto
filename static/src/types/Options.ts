@@ -36,6 +36,12 @@ export namespace Options {
 
     export interface Security {
         IncludePSKEnv: boolean;
+        RotatePSK: RotatePSK;
+    }
+
+    export interface RotatePSK {
+        Enabled: boolean;
+        FrequencyDays: number;
     }
 
     export class Options {

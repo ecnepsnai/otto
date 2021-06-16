@@ -3,6 +3,7 @@ import { Card } from '../../../components/Card';
 import { Icon } from '../../../components/Icon';
 import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
+import { OptionsRotatePSK } from './OptionsRotatePSK';
 
 interface OptionsSecurityProps {
     defaultValue: Options.Security;
@@ -22,6 +23,13 @@ export const OptionsSecurity: React.FC<OptionsSecurityProps> = (props: OptionsSe
         });
     };
 
+    const changeRotatePSK = (RotatePSK: Options.RotatePSK) => {
+        setValue(value => {
+            value.RotatePSK = RotatePSK;
+            return { ...value };
+        });
+    };
+
     return (
         <Card.Card>
             <Card.Header>
@@ -33,6 +41,8 @@ export const OptionsSecurity: React.FC<OptionsSecurityProps> = (props: OptionsSe
                     defaultValue={value.IncludePSKEnv}
                     helpText="If checked the OTTO_CLIENT_PSK environment variable is included when scripts are run."
                     onChange={changeIncludePSKEnv} />
+                <hr />
+                <OptionsRotatePSK defaultValue={value.RotatePSK} onUpdate={changeRotatePSK} />
             </Card.Body>
         </Card.Card>
     );

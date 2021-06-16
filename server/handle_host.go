@@ -60,6 +60,25 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 	return schedules, nil
 }
 
+func (h *handle) HostRotatePSK(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	host := HostStore.HostWithID(id)
+	if host == nil {
+		return nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	newPSK, err := host.RotatePSKNow()
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return newPSK, nil
+}
+
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

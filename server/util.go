@@ -82,3 +82,7 @@ func newAPIKey() string {
 	}
 	return "otto_" + id
 }
+
+func newHostPSK() string {
+	return secutil.RandomString(32)
+}

@@ -66,6 +66,23 @@ Otto sessions are automatically cleaned up, so logging out is not mandatory.
 
 
 
+**POST /api/hosts/host/:id/psk**
+
+Rotate the PSK used to connect to the client and return the new PSK
+
+Expected body:
+```json
+{}
+```
+
+Example response:
+```json
+{
+    "data": "example_psk",
+    "error": null
+}
+```
+
 **POST /api/hosts/host/:id**
 
 

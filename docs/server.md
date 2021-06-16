@@ -12,7 +12,7 @@ Docker.
 If you were using Podman, you can run the container with:
 
 ```bash
-podman run -p 8080:8080 -v <data dir>:/otto_data ghcr.io/ecnepsnai/otto:latest
+podman run --user root -p 8080:8080 -v <data dir>:/otto_data:Z ghcr.io/ecnepsnai/otto:latest
 ```
 
 *Note:* Substitute `podman` with `docker` if you're using Docker.
@@ -91,3 +91,18 @@ If you have no way to access the Otto service then you will need to reset the us
 4. Start the Otto server
 
 The default account will be recreated and you can log in using `admin`:`admin`.
+
+## Host PSK Rotation
+
+By default, Otto will automatically rotate the PSK used when connecting to hosts every 7 days, as well as the first time
+Otto connects to a host manually added by the user, that is, a host that was added through the web UI and not added with
+client registration.
+
+New PSKs are 64-characters long and are sourced from the servers cryptographically-secure pseudorandom number generator,
+such as `/dev/urandom`. Rotation occurs during heartbeats and the server records the last time each host was updated.
+
+The frequency of this rotation can be configured in server settings. You may also disable automatic rotation entirely
+if you so desire.
+
+Host PSKs can also be rotated at any time when viewing a host on the Otto server web UI. You can rotate a client PSK
+even if automatic rotation is disabled.

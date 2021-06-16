@@ -63,6 +63,7 @@ func (s *hostStoreObject) PingAll() error {
 	for _, h := range hosts {
 		go func(host Host) {
 			host.Ping()
+			host.RotatePSKIfNeeded()
 		}(h)
 	}
 	return nil

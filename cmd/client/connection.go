@@ -98,6 +98,15 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err
 		}
+	case otto.ActionUpdatePSK:
+		newPSK := message.NewPSK
+		if newPSK == "" {
+			reply.Error = fmt.Errorf("no psk provided")
+		} else {
+			if err := updatePSK(newPSK); err != nil {
+				reply.Error = err
+			}
+		}
 	default:
 		log.Error("Unknown action %d", message.Action)
 		return
@@ -107,6 +116,10 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 	if err := otto.WriteMessage(otto.MessageTypeActionResult, reply, c, config.PSK); err != nil {
 		log.Error("Error writing reply to '%s': %s", c.RemoteAddr().String(), err.Error())
 		return
+	}
+
+	if message.Action == otto.ActionUpdatePSK {
+		loadConfig()
 	}
 
 	if message.Action == otto.ActionUploadFileAndExit || message.Action == otto.ActionExit {

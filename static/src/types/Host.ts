@@ -11,6 +11,7 @@ export interface HostType {
     Address?: string;
     Port?: number;
     PSK?: string;
+    LastPSKRotate?: string;
     Enabled?: boolean;
     GroupIDs?: string[];
     Environment?: Variable[];
@@ -122,6 +123,14 @@ export class Host {
         const data = await API.GET('/api/hosts/host/' + id + '/schedules');
         return data as ScheduleType[];
     }
+
+    /**
+     * Rotate the PSK for a host, returning the new PSK
+     */
+    public static async RotatePSK(id: string): Promise<string> {
+        const data = await API.POST('/api/hosts/host/' + id + '/psk', null);
+        return data as string;
+    }
 }
 
 export interface NewHostParameters {
@@ -138,6 +147,7 @@ export interface EditHostParameters {
     Address: string;
     Port: number;
     PSK: string;
+    LastPSKRotate: string;
     GroupIDs: string[];
     Enabled: boolean;
     Environment: Variable[];
