@@ -76,9 +76,9 @@ func newPlainID() string {
 }
 
 func newAPIKey() string {
-	id, err := nanoid.Generate("BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz1234567890", 64)
+	id, err := nanoid.Generate("BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz1234567890", 59)
 	if err != nil {
 		panic(err)
 	}
-	return id
+	return "otto_" + id
 }
