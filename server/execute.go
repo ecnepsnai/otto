@@ -139,20 +139,24 @@ func (host *Host) Ping() *Error {
 	conn, err := host.connect()
 	if err != nil {
 		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
+		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorFrom(err)
 	}
 	defer conn.Close()
 
 	if err := conn.SendMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{ServerVersion: ServerVersion}); err != nil {
 		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
+		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorFrom(err)
 	}
 	messageType, message, err := conn.ReadMessage()
 	if err == io.EOF {
 		log.Error("Client closed connection before replying to heartbeat '%s'", host.ID)
+		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorServer("Client closed connection")
 	} else if err != nil {
 		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
+		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorFrom(err)
 	}
 	switch messageType {
@@ -161,6 +165,7 @@ func (host *Host) Ping() *Error {
 		heartbeatStore.RegisterHeartbeatReply(host, response)
 	default:
 		log.Error("Unexpected otto message %d while looking for heartbeat reply (%d)", messageType, otto.MessageTypeHeartbeatResponse)
+		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorServer("Unexpected response")
 	}
 
