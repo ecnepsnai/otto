@@ -27,9 +27,19 @@ func tryAutoRegister() {
 		return
 	}
 
+	if !strings.HasPrefix(host, "http://") && !strings.HasPrefix(host, "https://") {
+		panic("Invalid value for variable REGISTER_HOST")
+	}
+	// Trim trailing slash if there is one
+	host = strings.TrimSuffix(host, "/")
+	hostNoProto := strings.ReplaceAll(strings.ReplaceAll(host, "http://", ""), "https://", "")
+
 	key, present := env["REGISTER_KEY"]
 	if !present {
 		return
+	}
+	if key == "" {
+		panic("Invalid value for variable REGISTER_KEY")
 	}
 
 	// Disable TLS Verification
@@ -56,15 +66,15 @@ func tryAutoRegister() {
 	if noTLSVerify {
 		rlog.Printf("WARNING - TLS Verification disabled, this is insecure and should not be used in production")
 	}
+	if strings.HasSuffix(host, "http://") {
+		rlog.Printf("WARNING - Not using TLS, registration key will be sent in plain-text")
+	}
 
 	// Get the current uid and gid for the defaults
 	uid, gid := getUIDandGID()
-	// Get the local IP
-	localIP := getOutboundIP()
 
 	// Make the request
 	request := otto.RegisterRequest{
-		Address:    localIP.String(),
 		Key:        key,
 		Port:       port,
 		Properties: registerProperties,
@@ -116,7 +126,8 @@ func tryAutoRegister() {
 
 	var listenAddr = fmt.Sprintf("0.0.0.0:%d", port)
 	var allowFrom = "0.0.0.0/0"
-	if len(localIP) == 16 {
+	// Check if we connected to the server using IPv6
+	if len(getOutboundIP(hostNoProto)) == 16 {
 		listenAddr = fmt.Sprintf("[::]:%d", port)
 		allowFrom = "::/0"
 	}
@@ -208,9 +219,9 @@ func compareUIDandGID(uid, gid uint32) bool {
 }
 
 // getOutboundIP get the IP address used to connect to a remote destination
-func getOutboundIP() net.IP {
+func getOutboundIP(host string) net.IP {
 	// Because we're using udp there's no handshake or connection actually happening here
-	conn, err := net.Dial("udp", "1.1.1.1:80")
+	conn, err := net.Dial("udp", host)
 	if err != nil {
 		rlog.Fatal(err)
 	}

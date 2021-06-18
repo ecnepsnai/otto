@@ -138,7 +138,6 @@ type File struct {
 
 // RegisterRequest describes a register request
 type RegisterRequest struct {
-	Address    string                    `json:"address"`
 	Key        string                    `json:"key"`
 	Port       uint32                    `json:"port"`
 	Properties RegisterRequestProperties `json:"properties"`

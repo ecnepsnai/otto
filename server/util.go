@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/ecnepsnai/secutil"
 	nanoid "github.com/matoous/go-nanoid"
@@ -85,4 +86,13 @@ func newAPIKey() string {
 
 func newHostPSK() string {
 	return secutil.RandomString(32)
+}
+
+func stripPortFromRemoteAddr(remoteAddr string) string {
+	pattern := regexp.MustCompile(`\:[0-9]+$`)
+	ip := pattern.ReplaceAllString(remoteAddr, "")
+	if ip[0] == '[' && ip[len(ip)-1] == ']' {
+		return ip[1 : len(ip)-1]
+	}
+	return ip
 }

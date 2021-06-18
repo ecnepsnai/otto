@@ -195,19 +195,19 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	o.Register.Key = Key
 	o.Save()
 
-	mockRequest := func(params otto.RegisterRequest) web.Request {
+	mockRequest := func(remoteAddr string, params otto.RegisterRequest) web.Request {
 		request := web.MockRequest(nil, map[string]string{}, params)
 		request.HTTP.Header.Add("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
+		request.HTTP.RemoteAddr = remoteAddr
 		return request
 	}
 
 	// Test that a host that doesn't match any rules gets added to the default group
 	defaultAddress := randomString(6)
 	h := handle{}
-	_, webErr := h.Register(mockRequest(otto.RegisterRequest{
-		Address: defaultAddress,
-		Key:     Key,
-		Port:    12444,
+	_, webErr := h.Register(mockRequest(defaultAddress, otto.RegisterRequest{
+		Key:  Key,
+		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -225,10 +225,9 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 
 	// Test that a host that matches a rule gets added to the correct group
 	centos8address := randomString(6)
-	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
-		Address: centos8address,
-		Key:     Key,
-		Port:    12444,
+	_, webErr = h.Register(mockRequest(centos8address, otto.RegisterRequest{
+		Key:  Key,
+		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -249,10 +248,9 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 
 	// Test that an incorrect Key does not get registered
 	incorrectKeyAddress := randomString(6)
-	_, webErr = h.Register(mockRequest(otto.RegisterRequest{
-		Address: incorrectKeyAddress,
-		Key:     randomString(6),
-		Port:    12444,
+	_, webErr = h.Register(mockRequest(incorrectKeyAddress, otto.RegisterRequest{
+		Key:  randomString(6),
+		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
