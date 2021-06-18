@@ -48,6 +48,11 @@
                 "key": "Shutdown",
                 "description": "Power off the host",
                 "value": "\"shutdown\""
+            },
+            {
+                "key": "UpdatePSK",
+                "description": "Update the client PSK",
+                "value": "\"update_psk\""
             }
         ]
     },

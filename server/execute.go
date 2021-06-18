@@ -26,6 +26,7 @@ var clientActionMap = map[string]uint32{
 	ClientActionExitClient: otto.ActionExit,
 	ClientActionReboot:     otto.ActionReboot,
 	ClientActionShutdown:   otto.ActionShutdown,
+	ClientActionUpdatePSK:  otto.ActionUpdatePSK,
 }
 
 type hostConnection struct {

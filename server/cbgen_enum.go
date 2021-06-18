@@ -19,6 +19,9 @@ const (
 
 	// ClientActionShutdown Power off the host
 	ClientActionShutdown = "shutdown"
+
+	// ClientActionUpdatePSK Update the client PSK
+	ClientActionUpdatePSK = "update_psk"
 )
 
 // AllClientAction all ClientAction values
@@ -33,6 +36,8 @@ var AllClientAction = []string{
 	ClientActionReboot,
 
 	ClientActionShutdown,
+
+	ClientActionUpdatePSK,
 }
 
 // ClientActionMap map ClientAction keys to values
@@ -47,6 +52,8 @@ var ClientActionMap = map[string]string{
 	ClientActionReboot: "reboot",
 
 	ClientActionShutdown: "shutdown",
+
+	ClientActionUpdatePSK: "update_psk",
 }
 
 // ClientActionNameMap map ClientAction keys to values
@@ -61,6 +68,8 @@ var ClientActionNameMap = map[string]string{
 	"Reboot": "reboot",
 
 	"Shutdown": "shutdown",
+
+	"UpdatePSK": "update_psk",
 }
 
 // IsClientAction is the provided value a valid ClientAction
@@ -100,6 +109,12 @@ var ClientActionSchema = []map[string]interface{}{
 		"name":        "Shutdown",
 		"description": "Power off the host",
 		"value":       "shutdown",
+	},
+
+	{
+		"name":        "UpdatePSK",
+		"description": "Update the client PSK",
+		"value":       "update_psk",
 	},
 }
 

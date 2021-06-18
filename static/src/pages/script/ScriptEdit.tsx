@@ -172,6 +172,7 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
                     <option value="exit_client">Stop the Otto Client</option>
                     <option value="reboot">Reboot the Host</option>
                     <option value="shutdown">Shutdown the Host</option>
+                    <option value="update_psk">Rotate the Client PSK</option>
                 </Input.Select>
                 <Input.Text
                     label="Executable"
