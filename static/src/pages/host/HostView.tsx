@@ -10,16 +10,15 @@ import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
-import { EnabledBadge, HeartbeatBadge } from '../../components/Badge';
+import { EnabledBadge } from '../../components/Badge';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Redirect } from '../../components/Redirect';
 import { ScheduleType } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
-import { DateLabel } from '../../components/DateLabel';
-import { ClientVersion } from '../../components/ClientVersion';
 import { HostPSK } from './HostPSK';
+import { HostHeartbeat } from './HostHeartbeat';
 
 interface HostViewProps {
     match: match;
@@ -79,38 +78,6 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
         });
     };
 
-    const lastReply = (): JSX.Element => {
-        if (!heartbeat) {
-            return null;
-        }
-
-        return (<ListGroup.TextItem title="Last Heartbeat"><DateLabel date={heartbeat.LastReply} /></ListGroup.TextItem>);
-    };
-
-    const clientVersion = (): JSX.Element => {
-        if (!heartbeat) {
-            return null;
-        }
-
-        return (<ListGroup.TextItem title="Client Version"><ClientVersion heartbeat={heartbeat} /></ListGroup.TextItem>);
-    };
-
-    const hostProperties = (): JSX.Element => {
-        if (!heartbeat || !heartbeat.Properties) {
-            return null;
-        }
-
-        return (
-            <React.Fragment>
-                {Object.keys(heartbeat.Properties).map((key, idx) => {
-                    return (
-                        <ListGroup.TextItem title={key} key={idx}><code>{heartbeat.Properties[key]}</code></ListGroup.TextItem>
-                    );
-                })}
-            </React.Fragment>
-        );
-    };
-
     const didRotatePSK = (newPSK: string) => {
         setHost(value => {
             value.PSK = newPSK;
@@ -140,15 +107,7 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                                 <HostPSK host={host} didRotate={didRotatePSK} />
                             </ListGroup.List>
                         </Card.Card>
-                        <Card.Card className="mb-3">
-                            <Card.Header>Otto Client Information</Card.Header>
-                            <ListGroup.List>
-                                <ListGroup.TextItem title="Status"><HeartbeatBadge heartbeat={heartbeat} /></ListGroup.TextItem>
-                                {lastReply()}
-                                {clientVersion()}
-                                {hostProperties()}
-                            </ListGroup.List>
-                        </Card.Card>
+                        <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />
                         <EnvironmentVariableCard className="mb-3" variables={host.Environment} />
                         <ScheduleListCard schedules={schedules} className="mb-3" />
                     </Layout.Column>

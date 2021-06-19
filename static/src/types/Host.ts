@@ -4,6 +4,7 @@ import { Notification } from '../components/Notification';
 import { GroupType } from './Group';
 import { Variable } from './Variable';
 import { ScheduleType } from './Schedule';
+import { HeartbeatType } from './Heartbeat';
 
 export interface HostType {
     ID?: string;
@@ -130,6 +131,14 @@ export class Host {
     public static async RotatePSK(id: string): Promise<string> {
         const data = await API.POST('/api/hosts/host/' + id + '/psk', null);
         return data as string;
+    }
+
+    /**
+     * Trigger a heartbeat for this host
+     */
+    public static async Heartbeat(id: string): Promise<HeartbeatType> {
+        const data = await API.POST('/api/hosts/host/' + id + '/heartbeat', null);
+        return data as HeartbeatType;
     }
 }
 

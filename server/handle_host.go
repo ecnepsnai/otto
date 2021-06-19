@@ -79,6 +79,18 @@ func (h *handle) HostRotatePSK(request web.Request) (interface{}, *web.Error) {
 	return newPSK, nil
 }
 
+func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	host := HostStore.HostWithID(id)
+	if host == nil {
+		return nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	host.Ping()
+	return heartbeatStore.LastHeartbeat(host), nil
+}
+
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 

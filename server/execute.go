@@ -162,6 +162,12 @@ func (host *Host) Ping() *Error {
 	switch messageType {
 	case otto.MessageTypeHeartbeatResponse:
 		response := message.(otto.MessageHeartbeatResponse)
+		log.PDebug("Heartbeat reply received", map[string]interface{}{
+			"host_name":      host.Name,
+			"host_address":   host.Address,
+			"client_version": response.ClientVersion,
+			"properties":     response.Properties,
+		})
 		heartbeatStore.RegisterHeartbeatReply(host, response)
 	default:
 		log.Error("Unexpected otto message %d while looking for heartbeat reply (%d)", messageType, otto.MessageTypeHeartbeatResponse)
