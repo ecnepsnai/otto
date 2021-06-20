@@ -49,21 +49,21 @@ const (
 
 // MessageHeartbeatRequest describes a heartbeat request
 type MessageHeartbeatRequest struct {
-	ServerVersion string
+	ServerVersion string `json:"server_version"`
 }
 
 // MessageHeartbeatResponse describes a heartbeat response
 type MessageHeartbeatResponse struct {
-	ClientVersion string
-	Properties    map[string]string
+	ClientVersion string            `json:"client_version"`
+	Properties    map[string]string `json:"properties"`
 }
 
 // MessageTriggerAction describes an action trigger
 type MessageTriggerAction struct {
-	Action uint32
-	Script Script
-	File   File
-	NewPSK string
+	Action uint32 `json:"action"`
+	Script Script `json:"script"`
+	File   File   `json:"file"`
+	NewPSK string `json:"new_psk"`
 }
 
 // MessageCancelAction describes a request to cancel an action
@@ -71,21 +71,21 @@ type MessageCancelAction struct{}
 
 // MessageActionOutput describes output from an action
 type MessageActionOutput struct {
-	Stdout []byte
-	Stderr []byte
+	Stdout []byte `json:"stdout"`
+	Stderr []byte `json:"stderr"`
 }
 
 // MessageActionResult describes the result of a triggered action
 type MessageActionResult struct {
-	ScriptResult  ScriptResult
-	Error         error
-	File          File
-	ClientVersion string
+	ScriptResult  ScriptResult `json:"script_result"`
+	Error         error        `json:"error"`
+	File          File         `json:"file"`
+	ClientVersion string       `json:"client_version"`
 }
 
 // MessageGeneralFailure describes a general failure
 type MessageGeneralFailure struct {
-	Error error
+	Error error `json:"error"`
 }
 
 // Actions
@@ -102,38 +102,38 @@ const (
 
 // Script describes a script
 type Script struct {
-	Name             string
-	RunAs            RunAs
-	Environment      map[string]string
-	WorkingDirectory string
-	Executable       string
-	Files            []File
-	Data             []byte
+	Name             string            `json:"name"`
+	RunAs            RunAs             `json:"run_as"`
+	Environment      map[string]string `json:"environment"`
+	WorkingDirectory string            `json:"working_directory"`
+	Executable       string            `json:"executable"`
+	Files            []File            `json:"files"`
+	Data             []byte            `json:"data"`
 }
 
 // RunAs describes the user to run a script as
 type RunAs struct {
-	Inherit bool
-	UID     uint32
-	GID     uint32
+	Inherit bool   `json:"inherit"`
+	UID     uint32 `json:"uid"`
+	GID     uint32 `json:"gid"`
 }
 
 // ScriptResult describes the result of the script
 type ScriptResult struct {
-	Success   bool
-	ExecError string
-	Code      int
-	Stdout    string
-	Stderr    string
-	Elapsed   time.Duration
+	Success   bool          `json:"success"`
+	ExecError string        `json:"exec_error"`
+	Code      int           `json:"code"`
+	Stdout    string        `json:"stdout"`
+	Stderr    string        `json:"stderr"`
+	Elapsed   time.Duration `json:"elapsed"`
 }
 
 // File Describes a file
 type File struct {
-	Path  string
-	Owner RunAs
-	Mode  uint32
-	Data  []byte
+	Path  string `json:"path"`
+	Owner RunAs  `json:"owner"`
+	Mode  uint32 `json:"mode"`
+	Data  []byte `json:"data"`
 }
 
 // RegisterRequest describes a register request
