@@ -123,7 +123,7 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 			result := message.(otto.MessageActionResult)
 			scriptResult := &result.ScriptResult
 			heartbeatStore.UpdateHostReachability(host, true)
-			log.Debug("Action completed with result: %+v", *scriptResult)
+			log.Debug("Action completed with result: %s", scriptResult.String())
 			return scriptResult, nil
 		case otto.MessageTypeGeneralFailure:
 			result := message.(otto.MessageGeneralFailure)

@@ -11,6 +11,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/ecnepsnai/logtic"
@@ -38,7 +39,8 @@ func init() {
 
 // Message types
 const (
-	MessageTypeHeartbeatRequest uint32 = iota + 1
+	MessageTypeKeepalive uint32 = iota + 1
+	MessageTypeHeartbeatRequest
 	MessageTypeHeartbeatResponse
 	MessageTypeTriggerAction
 	MessageTypeCancelAction
@@ -128,6 +130,17 @@ type ScriptResult struct {
 	Elapsed   time.Duration `json:"elapsed"`
 }
 
+func (sr ScriptResult) String() string {
+	return logtic.StringFromParameters(map[string]interface{}{
+		"success":    sr.Success,
+		"exec_error": sr.ExecError,
+		"code":       sr.Code,
+		"stdout":     strings.ReplaceAll(sr.Stdout, "\n", "\\n"),
+		"stderr":     strings.ReplaceAll(sr.Stderr, "\n", "\\n"),
+		"elapsed":    sr.Elapsed.String(),
+	})
+}
+
 // File Describes a file
 type File struct {
 	Path  string `json:"path"`
@@ -180,18 +193,27 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 		return nil, err
 	}
 	dataLength := binary.BigEndian.Uint32(dataLengthBuf)
+	log.PDebug("Read frame", map[string]interface{}{
+		"version":     version,
+		"data_length": dataLength,
+	})
+	if dataLength == 0 {
+		return []byte{}, nil
+	}
 
 	encryptedData := make([]byte, dataLength)
 	readLength, err := io.ReadFull(r, encryptedData)
 	if err != nil {
 		if err == io.ErrUnexpectedEOF {
-			log.Error("Incorrect data length. Reported: %d, actual: %d", dataLength, readLength)
+			log.PError("Incorrect data length", map[string]interface{}{
+				"reported": dataLength,
+				"actual":   readLength,
+			})
 			return nil, fmt.Errorf("bad request length")
 		}
 		log.Error("Error reading encrypted data: %s", err.Error())
 		return nil, err
 	}
-	log.Debug("Read frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, readLength)
 
 	data, err := secutil.Decrypt(encryptedData, psk)
 	if err != nil {
@@ -214,7 +236,10 @@ func ReadMessage(r io.Reader, psk string) (uint32, interface{}, error) {
 	}
 
 	messageType := binary.BigEndian.Uint32(data[:4])
-	log.Debug("Read message: messageType=%d dataLength=%d", messageType, len(data)-4)
+	log.PDebug("Read message", map[string]interface{}{
+		"message_type": messageType,
+		"data_length":  len(data) - 4,
+	})
 	message, err := DecodeMessage(messageType, data[4:])
 	if err != nil {
 		log.Error("Error decoding message data: %s", err.Error())
@@ -248,7 +273,11 @@ func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk stri
 		i++
 	}
 
-	log.Debug("Preparing message: messageType=%d dataLength=%d messageLength=%d", messageType, messageDataLength, dataLength)
+	log.PDebug("Preparing message", map[string]interface{}{
+		"message_type":        messageType,
+		"message_data_length": messageDataLength,
+		"total_length":        dataLength,
+	})
 	return writeEncryptedFrame(data, psk, w)
 }
 
@@ -283,7 +312,11 @@ func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
 	}
 
 	wrote, err := w.Write(replyBuf)
-	log.Debug("Wrote frame: encryptedLength=%d version=%d total=%d", dataLength, ProtocolVersion, wrote)
+	log.PDebug("Wrote frame", map[string]interface{}{
+		"encrypted_length": dataLength,
+		"version":          ProtocolVersion,
+		"total":            wrote,
+	})
 	if wrote != replyLength {
 		log.Error("Unable to write all of reply: wrote=%d total=%d", wrote, replyLength)
 		return fmt.Errorf("out of space")
@@ -299,6 +332,8 @@ func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
 // type.
 func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
 	switch messageType {
+	case MessageTypeKeepalive:
+		return nil, nil
 	case MessageTypeHeartbeatRequest:
 		message := MessageHeartbeatRequest{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
@@ -343,11 +378,15 @@ func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
 		return message, nil
 	}
 
-	return nil, fmt.Errorf("unknown message type")
+	return nil, fmt.Errorf("unknown message type %d", messageType)
 }
 
 // EncodeMessage try to encode the given message
 func EncodeMessage(messageType uint32, message interface{}) ([]byte, error) {
+	if message == nil {
+		return []byte{}, nil
+	}
+
 	buf := &bytes.Buffer{}
 
 	if err := gob.NewEncoder(buf).Encode(message); err != nil {

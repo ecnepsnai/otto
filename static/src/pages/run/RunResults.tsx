@@ -13,7 +13,7 @@ interface RunResultsProps {
 }
 export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) => {
     const error = () => {
-        const errorMessage = props.results.RunError || props.results.Result.ExecError || 'Unknown Error';
+        const errorMessage = props.results.RunError || props.results.Result.exec_error || 'Unknown Error';
 
         return (
             <Card.Body>
@@ -24,12 +24,12 @@ export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) =>
         );
     };
 
-    if (props.results.RunError || props.results.Result.ExecError) {
+    if (props.results.RunError || props.results.Result.exec_error) {
         return error();
     }
 
     let returnCodeIcon = (<Icon.CheckCircle color={Style.Palette.Success} />);
-    if (props.results.Result.Code !== 0) {
+    if (props.results.Result.code !== 0) {
         returnCodeIcon = (<Icon.ExclamationCircle color={Style.Palette.Danger} />);
     }
 
@@ -38,12 +38,12 @@ export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) =>
             <Card.Card>
                 <Card.Header>Details</Card.Header>
                 <ListGroup.List>
-                    <ListGroup.TextItem title="Return Code">{props.results.Result.Code} {returnCodeIcon}</ListGroup.TextItem>
+                    <ListGroup.TextItem title="Return Code">{props.results.Result.code} {returnCodeIcon}</ListGroup.TextItem>
                     <ListGroup.TextItem title="Duration">{Formatter.Duration(props.results.Duration)}</ListGroup.TextItem>
                 </ListGroup.List>
             </Card.Card>
             <EnvironmentVariableCard variables={props.results.Environment} />
-            <RunOutput stdout={props.results.Result.Stdout} stderr={props.results.Result.Stderr} />
+            <RunOutput stdout={props.results.Result.stdout} stderr={props.results.Result.stderr} />
         </Card.Body>
     );
 };
@@ -76,7 +76,7 @@ export const RunOutput: React.FC<RunOutputProps> = (props: RunOutputProps) => {
     return (
         <Card.Card>
             <Card.Header>Output</Card.Header>
-            { content()}
+            {content()}
         </Card.Card>
     );
 };

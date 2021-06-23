@@ -126,6 +126,7 @@ func runScript(c io.Writer, script otto.Script, cancel chan bool) otto.ScriptRes
 	didExit := false
 	go func() {
 		lastLen := 0
+		lastKA := time.Now().AddDate(0, 0, -1)
 		for !didExit {
 			outputLength := stdout.Len() + stderr.Len()
 			if outputLength > lastLen {
@@ -135,6 +136,10 @@ func runScript(c io.Writer, script otto.Script, cancel chan bool) otto.ScriptRes
 					Stdout: stdout.Bytes(),
 					Stderr: stderr.Bytes(),
 				}, c, config.PSK)
+			}
+			if time.Since(lastKA) > 10*time.Second {
+				otto.WriteMessage(otto.MessageTypeKeepalive, nil, c, config.PSK)
+				lastKA = time.Now()
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

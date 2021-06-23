@@ -91,7 +91,10 @@ func (s *heartbeatStoreType) RegisterHeartbeatReply(host *Host, reply otto.Messa
 	s.Heartbeats[host.Address] = heartbeat
 
 	if wasUnreachable {
-		log.Info("Host became reachable: host_name='%s'", host.Name)
+		log.PInfo("Host became reachable", map[string]interface{}{
+			"host_id":   host.ID,
+			"host_name": host.Name,
+		})
 	}
 
 	return &heartbeat, nil
@@ -100,10 +103,15 @@ func (s *heartbeatStoreType) RegisterHeartbeatReply(host *Host, reply otto.Messa
 func (s *heartbeatStoreType) UpdateHostReachability(host *Host, isReachable bool) (*Heartbeat, *Error) {
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
+	log.PDebug("Update reachability", map[string]interface{}{
+		"host_id":      host.ID,
+		"host_name":    host.Name,
+		"is_reachable": isReachable,
+	})
 
 	heartbeat := s.Heartbeats[host.Address]
 
-	becameUnreachable := heartbeat.IsReachable && isReachable
+	becameUnreachable := heartbeat.IsReachable && !isReachable
 	becameReachable := !heartbeat.IsReachable && isReachable
 
 	heartbeat.Address = host.Address
@@ -113,10 +121,16 @@ func (s *heartbeatStoreType) UpdateHostReachability(host *Host, isReachable bool
 	s.Heartbeats[host.Address] = heartbeat
 
 	if becameUnreachable {
-		log.Warn("Host became unreachable: host_name='%s'", host.Name)
+		log.PWarn("Host became unreachable", map[string]interface{}{
+			"host_id":   host.ID,
+			"host_name": host.Name,
+		})
 	}
 	if becameReachable {
-		log.Info("Host became reachable: host_name='%s'", host.Name)
+		log.PInfo("Host became reachable", map[string]interface{}{
+			"host_id":   host.ID,
+			"host_name": host.Name,
+		})
 	}
 
 	return &heartbeat, nil

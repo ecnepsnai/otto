@@ -3,9 +3,10 @@ import { Loading } from '../../components/Loading';
 import { Card } from '../../components/Card';
 import { Host, HostType } from '../../types/Host';
 import { ProgressBar } from '../../components/ProgressBar';
-import { ScriptRequest, ScriptRun } from '../../types/Result';
+import { ScriptRun } from '../../types/Result';
 import { RunOutput, RunResults } from './RunResults';
 import { Style } from '../../components/Style';
+import { ScriptRequest } from '../../services/ScriptRequest';
 
 interface RunScriptProps {
     hostID: string;
@@ -59,7 +60,7 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
             setRunningScript(false);
             setResults({
                 Result: {
-                    Success: false,
+                    success: false,
                 },
                 RunError: error,
             });
@@ -97,14 +98,14 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
     }
 
     let color: Style.Palette;
-    if (results && results.Result && !results.Result.Success) {
+    if (results && results.Result && !results.Result.success) {
         color = Style.Palette.Danger;
     }
 
     return (
         <Card.Card color={color}>
             <Card.Header>{host.Name}</Card.Header>
-            { content()}
+            {content()}
         </Card.Card>
     );
 };

@@ -60,6 +60,13 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h handle) RequestStream(request web.Request, conn web.WSConn) {
+	const (
+		requestResponseCodeOutput    = 100
+		requestResponseCodeKeepalive = 101
+		requestResponseCodeError     = 400
+		requestResponseCodeFinished  = 200
+	)
+
 	session := request.UserData.(*Session)
 	defer conn.Close()
 
@@ -79,7 +86,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 	r := requestParams{}
 	if err := conn.ReadJSON(&r); err != nil {
 		conn.WriteJSON(requestResponse{
-			Code:  400,
+			Code:  requestResponseCodeError,
 			Error: "Invalid request",
 		})
 		return
@@ -88,7 +95,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 	host := HostStore.HostWithID(r.HostID)
 	if host == nil {
 		conn.WriteJSON(requestResponse{
-			Code:  400,
+			Code:  requestResponseCodeError,
 			Error: fmt.Sprintf("No host with ID %s", r.HostID),
 		})
 		return
@@ -96,7 +103,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 
 	if !IsClientAction(r.Action) {
 		conn.WriteJSON(requestResponse{
-			Code:  400,
+			Code:  requestResponseCodeError,
 			Error: fmt.Sprintf("Unknown action %s", r.Action),
 		})
 		return
@@ -105,7 +112,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 	if r.Action == ClientActionPing {
 		if err := host.Ping(); err != nil {
 			conn.WriteJSON(requestResponse{
-				Code:  400,
+				Code:  requestResponseCodeError,
 				Error: fmt.Sprintf("Error pinging host %s", err.Error),
 			})
 			return
@@ -116,7 +123,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			conn.WriteJSON(requestResponse{
-				Code:  400,
+				Code:  requestResponseCodeError,
 				Error: fmt.Sprintf("No script with ID %s", r.ScriptID),
 			})
 			return
@@ -138,17 +145,29 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 				time.Sleep(5 * time.Millisecond)
 			}
 		}()
+		go func() {
+			lastKA := time.Now().AddDate(0, 0, -1)
+			for running {
+				if time.Since(lastKA) > 10*time.Second {
+					conn.WriteJSON(requestResponse{
+						Code: requestResponseCodeKeepalive,
+					})
+					lastKA = time.Now()
+				}
+				time.Sleep(5 * time.Millisecond)
+			}
+		}()
 
 		result, err := host.RunScript(script, func(stdout, stderr []byte) {
 			conn.WriteJSON(requestResponse{
-				Code:   100,
+				Code:   requestResponseCodeOutput,
 				Stdout: string(stdout),
 				Stderr: string(stderr),
 			})
 		}, cancel)
 		if err != nil {
 			conn.WriteJSON(requestResponse{
-				Code:  400,
+				Code:  requestResponseCodeError,
 				Error: err.Message,
 			})
 			running = false
@@ -157,17 +176,17 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 		conn.WriteJSON(requestResponse{
-			Code:   200,
+			Code:   requestResponseCodeFinished,
 			Result: result,
 		})
 		running = false
 		return
 	} else if r.Action == ClientActionExitClient {
 		if err := host.ExitClient(); err != nil {
-			conn.WriteJSON(requestResponse{Code: 200})
+			conn.WriteJSON(requestResponse{Code: requestResponseCodeFinished})
 			return
 		}
-		conn.WriteJSON(requestResponse{Code: 200})
+		conn.WriteJSON(requestResponse{Code: requestResponseCodeFinished})
 		return
 	}
 }
