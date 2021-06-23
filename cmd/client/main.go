@@ -21,8 +21,7 @@ func main() {
 
 	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
 	logtic.Log.Level = logtic.LevelWarn
-	env := envMap()
-	if _, verbose := env["OTTO_VERBOSE"]; verbose {
+	if os.Getenv("OTTO_VERBOSE") != "" {
 		logtic.Log.Level = logtic.LevelDebug
 	}
 

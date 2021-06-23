@@ -20,10 +20,8 @@ import (
 var registerProperties otto.RegisterRequestProperties
 
 func tryAutoRegister() {
-	env := envMap()
-
-	host, present := env["REGISTER_HOST"]
-	if !present {
+	host := os.Getenv("REGISTER_HOST")
+	if host == "" {
 		return
 	}
 
@@ -34,8 +32,8 @@ func tryAutoRegister() {
 	host = strings.TrimSuffix(host, "/")
 	hostNoProto := strings.ReplaceAll(strings.ReplaceAll(host, "http://", ""), "https://", "")
 
-	key, present := env["REGISTER_KEY"]
-	if !present {
+	key := os.Getenv("REGISTER_KEY")
+	if key == "" {
 		return
 	}
 	if key == "" {
@@ -43,18 +41,15 @@ func tryAutoRegister() {
 	}
 
 	// Disable TLS Verification
-	noTLSVerify := env["REGISTER_NO_TLS_VERIFY"] == "1"
+	noTLSVerify := os.Getenv("REGISTER_NO_TLS_VERIFY") == "1"
 
 	// Exit when Finished
-	exitWhenFinished := true
-	if _, p := env["REGISTER_DONT_EXIT_ON_FINISH"]; p {
-		exitWhenFinished = false
-	}
+	exitWhenFinished := os.Getenv("REGISTER_DONT_EXIT_ON_FINISH") == ""
 
 	// Client Port
 	port := uint32(12444)
-	portStr, present := env["OTTO_CLIENT_PORT"]
-	if present {
+	portStr := os.Getenv("OTTO_CLIENT_PORT")
+	if portStr != "" {
 		p, err := strconv.ParseUint(portStr, 10, 32)
 		if err != nil {
 			panic("Invalid value for variable OTTO_CLIENT_PORT")
@@ -138,7 +133,7 @@ func tryAutoRegister() {
 		LogPath:    ".",
 		DefaultUID: uid,
 		DefaultGID: gid,
-		Path:       env["PATH"],
+		Path:       os.Getenv("PATH"),
 		ListenAddr: listenAddr,
 		AllowFrom:  allowFrom,
 	}
@@ -179,16 +174,6 @@ func loadRegisterProperties() {
 		DistributionName:    info.Variant,
 		DistributionVersion: info.VariantVersion,
 	}
-}
-
-// envMap return a map of all environment variables
-func envMap() map[string]string {
-	results := map[string]string{}
-	for _, env := range os.Environ() {
-		components := strings.SplitN(env, "=", 2)
-		results[components[0]] = components[1]
-	}
-	return results
 }
 
 // getUIDandGID return the current users UID and primary group GID
