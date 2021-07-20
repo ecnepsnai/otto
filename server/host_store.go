@@ -145,8 +145,8 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	}
 
 	log.Info("Added new host '%s'", params.Name)
-	GroupCache.Update()
 	HostCache.Update()
+	GroupCache.Update()
 	return &host, nil
 }
 
@@ -200,8 +200,8 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	}
 
 	log.Info("Updating host '%s'", params.Name)
-	GroupCache.Update()
 	HostCache.Update()
+	GroupCache.Update()
 	return host, nil
 }
 
@@ -212,8 +212,8 @@ func (s *hostStoreObject) DeleteHost(host *Host) *Error {
 	}
 
 	heartbeatStore.CleanupHeartbeats()
-	GroupCache.Update()
 	HostCache.Update()
+	GroupCache.Update()
 	log.Info("Deleting host '%s'", host.Name)
 	return nil
 }
