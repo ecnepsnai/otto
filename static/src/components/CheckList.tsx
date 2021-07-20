@@ -6,6 +6,11 @@ import { Script, ScriptType } from '../types/Script';
 import { Host, HostType } from '../types/Host';
 import { Nothing } from './Nothing';
 
+interface ItemType {
+    key: string;
+    value: string;
+}
+
 interface CheckListProps {
     selectedKeys: string[],
     keys: string[],
@@ -18,6 +23,8 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         initialChecked[key] = true;
     });
     const [selected, setSelected] = React.useState<{ [id: string]: boolean }>(initialChecked);
+    const [Query, setQuery] = React.useState<string>('');
+    const [Items, setItems] = React.useState<ItemType[]>([]);
 
     React.useEffect(() => {
         const keys: string[] = [];
@@ -29,6 +36,30 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         props.onChange(keys);
     }, [selected]);
 
+    React.useEffect(() => {
+        if (!Query) {
+            setItems(props.keys.map((k, i) => {
+                return {
+                    key: k,
+                    value: props.labels[i],
+                };
+            }));
+            return;
+        }
+
+        const filteredItems: ItemType[] = [];
+        props.keys.forEach((k, i) => {
+            const value = props.labels[i].toLowerCase();
+            if (value.includes(Query.toLowerCase())) {
+                filteredItems.push({
+                    key: k,
+                    value: props.labels[i],
+                });
+            }
+        });
+        setItems(filteredItems);
+    }, [Query]);
+
     const changeKey = (key: string) => {
         return (checked: boolean) => {
             setSelected(selected => {
@@ -38,22 +69,35 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         };
     };
 
-    if (!props.keys || props.keys.length == 0) {
-        return (<div><Nothing /></div>);
-    }
-    return (
-        <div>
+    const onSearch = (query: string) => {
+        setQuery(query);
+    };
+
+
+    const checkList = () => {
+        if (Items.length == 0) {
+            return (<Nothing />);
+        }
+
+        return (<React.Fragment>
             {
-                props.keys.map((key, idx) => {
+                Items.map((item, idx) => {
                     return (
                         <Input.Checkbox
-                            label={props.labels[idx]}
-                            onChange={changeKey(key)}
-                            defaultValue={selected[key]}
+                            label={item.value}
+                            onChange={changeKey(item.key)}
+                            defaultValue={selected[item.key]}
                             key={idx} />
                     );
                 })
             }
+        </React.Fragment>);
+    };
+
+    return (
+        <div>
+            <Input.Text type="search" label="Filter" defaultValue={Query} onChange={onSearch} />
+            {checkList()}
         </div>
     );
 };

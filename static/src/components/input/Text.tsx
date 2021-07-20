@@ -12,7 +12,7 @@ interface TextProps {
     /**
      * The value used in the type attribute on the input node
      */
-    type: 'text' | 'password' | 'email';
+    type: 'text' | 'password' | 'email' | 'search';
     /**
      * Optional placeholder text for the input
      */
@@ -148,8 +148,8 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
         if (!props.prepend && !props.append) {
             return (
                 <React.Fragment>
-                    { input()}
-                    { validationError()}
+                    {input()}
+                    {validationError()}
                 </React.Fragment>
             );
         }
@@ -166,9 +166,9 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
         return (
             <div className="input-group">
                 {prepend}
-                { input()}
+                {input()}
                 {append}
-                { validationError()}
+                {validationError()}
             </div>
         );
     };
@@ -183,8 +183,8 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
     return (
         <FormGroup>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
-            { content()}
-            { helpText()}
+            {content()}
+            {helpText()}
         </FormGroup>
     );
 };
