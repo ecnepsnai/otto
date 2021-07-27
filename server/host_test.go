@@ -185,3 +185,51 @@ func TestRenameDuplicateHost(t *testing.T) {
 		t.Fatalf("Should return error")
 	}
 }
+
+func TestHostRemoveWithSchedule(t *testing.T) {
+	script, err := ScriptStore.NewScript(newScriptParameters{
+		Name:       "script",
+		Executable: "a",
+		Script:     "a",
+	})
+	if err != nil {
+		t.Fatalf("Error making new script: %s", err.Message)
+	}
+
+	group, err := GroupStore.NewGroup(newGroupParameters{
+		Name:      "group",
+		ScriptIDs: []string{script.ID},
+	})
+	if err != nil {
+		t.Fatalf("Error making new group: %s", err.Message)
+	}
+
+	host, err := HostStore.NewHost(newHostParameters{
+		Name:     "host",
+		Address:  "host",
+		Port:     12444,
+		PSK:      randomString(6),
+		GroupIDs: []string{group.ID},
+	})
+	if err != nil {
+		t.Fatalf("Error making new host: %s", err.Message)
+	}
+
+	_, err = ScheduleStore.NewSchedule(newScheduleParameters{
+		Name:     "schedule",
+		Pattern:  "* * * * *",
+		ScriptID: script.ID,
+		Scope: ScheduleScope{
+			HostIDs: []string{
+				host.ID,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error making new schedule: %s", err.Message)
+	}
+
+	if err := HostStore.DeleteHost(host); err == nil {
+		t.Errorf("No error seen when trying to delete host associated with schedule")
+	}
+}

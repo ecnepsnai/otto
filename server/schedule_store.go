@@ -190,6 +190,8 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 	}
 
 	log.Info("Added new schedule '%s'", schedule.ID)
+	ScheduleCache.Update()
+
 	return &schedule, nil
 }
 
@@ -238,6 +240,8 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 	}
 
 	log.Info("Updated schedule '%s'", schedule.ID)
+	ScheduleCache.Update()
+
 	return schedule, nil
 }
 
@@ -248,6 +252,8 @@ func (s *scheduleStoreObject) DeleteSchedule(schedule *Schedule) *Error {
 	}
 
 	log.Info("Deleted schedule '%s'", schedule.ID)
+	ScheduleCache.Update()
+
 	return nil
 }
 
@@ -257,5 +263,7 @@ func (s *scheduleStoreObject) updateLastRun(schedule Schedule) *Error {
 		log.Error("Error updating last run for schedule '%s': %s", schedule.ID, err.Error())
 		return ErrorFrom(err)
 	}
+	ScheduleCache.Update()
+
 	return nil
 }

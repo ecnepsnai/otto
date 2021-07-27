@@ -57,6 +57,10 @@ func (s ScheduleScope) Hosts() ([]Host, *Error) {
 	hosts := make([]Host, hostIDs.Length())
 	for i, hostID := range hostIDs.Values() {
 		host := HostStore.HostWithID(hostID)
+		if host == nil {
+			log.Warn("Schedule contains unknown host '%s'", hostID)
+			continue
+		}
 		hosts[i] = *host
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/ecnepsnai/secutil"
 	nanoid "github.com/matoous/go-nanoid"
@@ -19,6 +20,16 @@ func generateSessionSecret() string {
 func stringSliceContains(n string, h []string) bool {
 	for _, s := range h {
 		if s == n {
+			return true
+		}
+	}
+	return false
+}
+
+// stringSliceContainsFold does this slice of strings contain n? (cast insensitive)
+func stringSliceContainsFold(n string, h []string) bool {
+	for _, s := range h {
+		if strings.EqualFold(s, n) {
 			return true
 		}
 	}

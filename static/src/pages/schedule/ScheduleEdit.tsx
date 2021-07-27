@@ -51,7 +51,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
             let runOn: ('groups' | 'hosts') = 'groups';
             let patternTemplate = '';
 
-            if (!hosts || hosts.length === 0 || !scripts || scripts.length === 0) {
+            if (isNew && (!hosts || hosts.length === 0 || !scripts || scripts.length === 0)) {
                 setNoData(true);
                 return;
             }
@@ -227,12 +227,14 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
         });
     };
 
-    if (noData) return (<Page title="New Schedule">
-        <Alert.Danger>
-            <p>At least one script and host is required before you can create a schedule</p>
-            <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
-        </Alert.Danger>
-    </Page>);
+    if (isNew && noData) {
+        return (<Page title="New Schedule">
+            <Alert.Danger>
+                <p>At least one script and host is required before you can create a schedule</p>
+                <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
+            </Alert.Danger>
+        </Page>);
+    }
 
     if (loading) {
         return (<PageLoading />);

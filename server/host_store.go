@@ -206,6 +206,15 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 }
 
 func (s *hostStoreObject) DeleteHost(host *Host) *Error {
+	for _, schedule := range ScheduleCache.All() {
+		if len(schedule.Scope.HostIDs) == 0 {
+			continue
+		}
+		if stringSliceContainsFold(host.ID, schedule.Scope.HostIDs) {
+			return ErrorUser("Host belongs to schedule %s", schedule.Name)
+		}
+	}
+
 	if err := s.Table.Delete(*host); err != nil {
 		log.Error("Error deleting host '%s': %s", host.Name, err.Error())
 		return ErrorFrom(err)

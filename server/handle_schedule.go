@@ -7,7 +7,7 @@ import (
 )
 
 func (h *handle) ScheduleList(request web.Request) (interface{}, *web.Error) {
-	schedules := ScheduleStore.AllSchedules()
+	schedules := ScheduleCache.All()
 	sort.Slice(schedules, func(i int, j int) bool {
 		return schedules[i].Name < schedules[j].Name
 	})
