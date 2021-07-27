@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { Card } from '../../../components/Card';
-import { Icon } from '../../../components/Icon';
 import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 
@@ -30,23 +28,18 @@ export const OptionsAuthentication: React.FC<OptionsAuthenticationProps> = (prop
     };
 
     return (
-        <Card.Card>
-            <Card.Header>
-                <Icon.Label icon={<Icon.Key />} label="Authentication" />
-            </Card.Header>
-            <Card.Body>
-                <Input.Number
-                    label="Session Timeout"
-                    append="Minutes"
-                    helpText="The number of minutes of inactivity before a session is automatically ended"
-                    defaultValue={value.MaxAgeMinutes}
-                    onChange={changeMaxAgeMinutes} />
-                <Input.Checkbox
-                    label="Require HTTPS"
-                    helpText="If checked users must access the Otto web UI using HTTPS."
-                    defaultValue={value.SecureOnly}
-                    onChange={changeSecureOnly} />
-            </Card.Body>
-        </Card.Card>
+        <div>
+            <Input.Number
+                label="Session Timeout"
+                append="Minutes"
+                helpText="The number of minutes of inactivity before a session is automatically ended"
+                defaultValue={value.MaxAgeMinutes}
+                onChange={changeMaxAgeMinutes} />
+            <Input.Checkbox
+                label="Require HTTPS"
+                helpText="If checked users must access the Otto web UI using HTTPS."
+                defaultValue={value.SecureOnly}
+                onChange={changeSecureOnly} />
+        </div>
     );
 };

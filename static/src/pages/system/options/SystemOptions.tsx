@@ -8,6 +8,8 @@ import { OptionsAuthentication } from './OptionsAuthentication';
 import { OptionsNetwork } from './OptionsNetwork';
 import { Notification } from '../../../components/Notification';
 import { OptionsSecurity } from './OptionsSecurity';
+import { Tabs } from '../../../components/Tabs';
+import { Icon } from '../../../components/Icon';
 
 export const SystemOptions: React.FC = () => {
     const [loading, setLoading] = React.useState(false);
@@ -53,11 +55,20 @@ export const SystemOptions: React.FC = () => {
     return (
         <Page title="Options">
             <Form className="cards" showSaveButton onSubmit={onSubmit} loading={loading}>
-                <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral} />
-                <OptionsAuthentication defaultValue={options.Authentication} onUpdate={changeAuthentication} />
-                <OptionsNetwork defaultValue={options.Network} onUpdate={changeNetwork} />
-                <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity} />
-                <div className="mb-2"></div>
+                <Tabs.Tabs>
+                    <Tabs.Tab icon={<Icon.Wrench />} title="General">
+                        <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral} />
+                    </Tabs.Tab>
+                    <Tabs.Tab icon={<Icon.Key />} title="Authentication">
+                        <OptionsAuthentication defaultValue={options.Authentication} onUpdate={changeAuthentication} />
+                    </Tabs.Tab>
+                    <Tabs.Tab icon={<Icon.NetworkWired />} title="Network">
+                        <OptionsNetwork defaultValue={options.Network} onUpdate={changeNetwork} />
+                    </Tabs.Tab>
+                    <Tabs.Tab icon={<Icon.Shield />} title="Security">
+                        <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity} />
+                    </Tabs.Tab>
+                </Tabs.Tabs>
             </Form>
         </Page>
     );

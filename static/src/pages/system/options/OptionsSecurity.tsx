@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { Card } from '../../../components/Card';
-import { Icon } from '../../../components/Icon';
 import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 import { OptionsRotatePSK } from './OptionsRotatePSK';
@@ -31,19 +29,14 @@ export const OptionsSecurity: React.FC<OptionsSecurityProps> = (props: OptionsSe
     };
 
     return (
-        <Card.Card>
-            <Card.Header>
-                <Icon.Label icon={<Icon.Shield />} label="Security" />
-            </Card.Header>
-            <Card.Body>
-                <Input.Checkbox
-                    label="Include Client PSK Environment Variable"
-                    defaultValue={value.IncludePSKEnv}
-                    helpText="If checked the OTTO_CLIENT_PSK environment variable is included when scripts are run."
-                    onChange={changeIncludePSKEnv} />
-                <hr />
-                <OptionsRotatePSK defaultValue={value.RotatePSK} onUpdate={changeRotatePSK} />
-            </Card.Body>
-        </Card.Card>
+        <div>
+            <Input.Checkbox
+                label="Include Client PSK Environment Variable"
+                defaultValue={value.IncludePSKEnv}
+                helpText="If checked the OTTO_CLIENT_PSK environment variable is included when scripts are run."
+                onChange={changeIncludePSKEnv} />
+            <hr />
+            <OptionsRotatePSK defaultValue={value.RotatePSK} onUpdate={changeRotatePSK} />
+        </div>
     );
 };

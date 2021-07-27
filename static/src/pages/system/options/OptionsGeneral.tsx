@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { Card } from '../../../components/Card';
-import { Icon } from '../../../components/Icon';
 import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 import { EnvironmentVariableEdit } from '../../../components/EnvironmentVariableEdit';
@@ -52,26 +50,21 @@ export const OptionsGeneral: React.FC<OptionsGeneralProps> = (props: OptionsGene
     };
 
     return (
-        <Card.Card>
-            <Card.Header>
-                <Icon.Label icon={<Icon.Wrench />} label="General" />
-            </Card.Header>
-            <Card.Body>
-                <Input.Text
-                    type="text"
-                    label="Otto Server URL"
-                    placeholder="https://otto.example.com/"
-                    helpText="The absolute URL (Including protocol) where this otto server is accessed from"
-                    defaultValue={value.ServerURL}
-                    onChange={changeServerURL} />
-                {originWarning()}
-                <label className="form-label">Global Environment Variables</label>
-                <div>
-                    <EnvironmentVariableEdit
-                        variables={value.GlobalEnvironment || []}
-                        onChange={changeGlobalEnvironment} />
-                </div>
-            </Card.Body>
-        </Card.Card>
+        <div>
+            <Input.Text
+                type="text"
+                label="Otto Server URL"
+                placeholder="https://otto.example.com/"
+                helpText="The absolute URL (Including protocol) where this otto server is accessed from"
+                defaultValue={value.ServerURL}
+                onChange={changeServerURL} />
+            {originWarning()}
+            <label className="form-label">Global Environment Variables</label>
+            <div>
+                <EnvironmentVariableEdit
+                    variables={value.GlobalEnvironment || []}
+                    onChange={changeGlobalEnvironment} />
+            </div>
+        </div>
     );
 };
