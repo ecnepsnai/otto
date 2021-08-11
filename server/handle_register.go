@@ -27,7 +27,7 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	}
 
 	r := otto.RegisterRequest{}
-	if err := request.Decode(&r); err != nil {
+	if err := request.DecodeJSON(&r); err != nil {
 		return nil, err
 	}
 

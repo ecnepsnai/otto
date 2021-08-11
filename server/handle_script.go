@@ -97,7 +97,7 @@ func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) 
 	}
 
 	r := params{}
-	if err := request.Decode(&r); err != nil {
+	if err := request.DecodeJSON(&r); err != nil {
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func (h *handle) ScriptNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newScriptParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -148,7 +148,7 @@ func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 	}
 
 	params := editScriptParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

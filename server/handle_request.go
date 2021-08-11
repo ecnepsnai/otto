@@ -17,7 +17,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 	}
 
 	r := requestParams{}
-	if err := request.Decode(&r); err != nil {
+	if err := request.DecodeJSON(&r); err != nil {
 		return nil, err
 	}
 

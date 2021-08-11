@@ -31,7 +31,7 @@ func (h *handle) UserNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newUserParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +63,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 	}
 
 	params := editUserParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -115,7 +115,7 @@ func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error
 	}
 
 	params := changePasswordParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

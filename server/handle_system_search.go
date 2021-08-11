@@ -8,7 +8,7 @@ func (h *handle) SystemSearch(request web.Request) (interface{}, *web.Error) {
 	}
 
 	req := systemSearchRequest{}
-	if err := request.Decode(&req); err != nil {
+	if err := request.DecodeJSON(&req); err != nil {
 		return nil, err
 	}
 

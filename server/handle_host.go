@@ -111,7 +111,7 @@ func (h *handle) HostNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newHostParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +139,7 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 	}
 
 	params := editHostParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

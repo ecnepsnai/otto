@@ -12,10 +12,10 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: 'img/*.png', to: 'assets/', noErrorOnMissing: true},
-                { from: 'img/*.svg', to: 'assets/', noErrorOnMissing: true},
-                { from: 'img/*.jpg', to: 'assets/', noErrorOnMissing: true},
-                { from: 'img/*.ico', to: 'assets/', noErrorOnMissing: true},
+                { from: 'img/*.png', to: 'assets/', noErrorOnMissing: true },
+                { from: 'img/*.svg', to: 'assets/', noErrorOnMissing: true },
+                { from: 'img/*.jpg', to: 'assets/', noErrorOnMissing: true },
+                { from: 'img/*.ico', to: 'assets/', noErrorOnMissing: true },
             ]
         }),
         new ESLintPlugin({
@@ -41,9 +41,7 @@ module.exports = {
             },
             {
                 test: /\.(woff|woff2)$/,
-                use: {
-                    loader: 'url-loader',
-                },
+                type: 'asset/inline',
             },
             {
                 test: /\.s[ac]ss$/i,

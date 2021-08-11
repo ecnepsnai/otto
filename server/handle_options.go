@@ -15,7 +15,7 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 
 	options := OttoOptions{}
 
-	if err := request.Decode(&options); err != nil {
+	if err := request.DecodeJSON(&options); err != nil {
 		return nil, web.CommonErrors.BadRequest
 	}
 

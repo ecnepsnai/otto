@@ -10,7 +10,7 @@ func (h *handle) RegisterRuleNew(request web.Request) (interface{}, *web.Error) 
 	session := request.UserData.(*Session)
 
 	params := newRegisterRuleParams{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -43,7 +43,7 @@ func (h *handle) RegisterRuleEdit(request web.Request) (interface{}, *web.Error)
 
 	id := request.Params.ByName("id")
 	params := editRegisterRuleParams{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

@@ -91,7 +91,7 @@ func (h *handle) ScheduleNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newScheduleParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -119,7 +119,7 @@ func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.Error) {
 	}
 
 	params := editScheduleParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

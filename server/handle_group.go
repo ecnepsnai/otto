@@ -60,7 +60,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 	}
 
 	r := params{}
-	if err := request.Decode(&r); err != nil {
+	if err := request.DecodeJSON(&r); err != nil {
 		return nil, err
 	}
 
@@ -172,7 +172,7 @@ func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newGroupParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 
@@ -200,7 +200,7 @@ func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
 	}
 
 	params := editGroupParameters{}
-	if err := request.Decode(&params); err != nil {
+	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
 	}
 

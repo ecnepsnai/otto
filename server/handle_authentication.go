@@ -15,7 +15,7 @@ func (h *handle) Login(request web.Request) (interface{}, *web.Error) {
 	}
 
 	login := credentials{}
-	if err := request.Decode(&login); err != nil {
+	if err := request.DecodeJSON(&login); err != nil {
 		return nil, err
 	}
 	if err := limits.Check(&login); err != nil {
