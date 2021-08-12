@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { AddButton, Button } from '../../../components/Button';
 import { Card } from '../../../components/Card';
+import { ContextMenuItem } from '../../../components/ContextMenu';
 import { Input } from '../../../components/input/Input';
 import { Form } from '../../../components/Form';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
-import { Dropdown, Menu } from '../../../components/Menu';
 import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
 import { Notification } from '../../../components/Notification';
 import { Page } from '../../../components/Page';
@@ -238,18 +238,29 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
             }
         });
 
+        const contextMenu: (ContextMenuItem | 'separator')[] = [
+            {
+                title: 'Edit',
+                icon: (<Icon.Edit />),
+                onClick: () => {
+                    editRuleMenuClick(rule);
+                }
+            },
+            'separator',
+            {
+                title: 'Delete',
+                icon: (<Icon.Delete />),
+                onClick: () => {
+                    deleteRuleMenuClick(rule);
+                }
+            },
+        ];
+
         return (
-            <Table.Row key={Rand.ID()}>
+            <Table.Row key={Rand.ID()} menu={contextMenu}>
                 <td>{rule.Name}</td>
                 <td>{Formatter.ValueOrNothing(rule.Clauses.length)}</td>
                 <td>{groupName}</td>
-                <td>
-                    <Dropdown label={<Icon.Bars />}>
-                        <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editRuleMenuClick(rule)} />
-                        <Menu.Divider />
-                        <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteRuleMenuClick(rule)} />
-                    </Dropdown>
-                </td>
             </Table.Row>
         );
     };
@@ -262,7 +273,6 @@ export const RegisterRules: React.FC<RegisterRulesProps> = (props: RegisterRules
                     <Table.Column>Name</Table.Column>
                     <Table.Column>Clauses</Table.Column>
                     <Table.Column>Add To Group</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {props.rules.map(rule => {

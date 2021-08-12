@@ -251,8 +251,27 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
         }
     ];
 
+    const breadcrumbs = [
+        {
+            title: 'Schedules',
+            href: '/schedules',
+        },
+        {
+            title: 'New Schedule'
+        }
+    ];
+    if (!isNew) {
+        breadcrumbs[1] = {
+            title: schedule.Name,
+            href: '/schedules/schedule/' + schedule.ID
+        };
+        breadcrumbs.push({
+            title: 'Edit'
+        });
+    }
+
     return (
-        <Page title={isNew ? 'New Schedule' : 'Edit Schedule'}>
+        <Page title={breadcrumbs}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"

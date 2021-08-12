@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Table } from './Table';
 import { AddButton } from './Button';
 import { Icon } from './Icon';
-import { Dropdown, Menu } from './Menu';
 import { Modal, GlobalModalFrame, ModalForm } from './Modal';
 import { Input } from './input/Input';
 import { ValidationResult } from './Form';
 import { Variable } from '../types/Variable';
+import { ContextMenuItem } from './ContextMenu';
 
 interface EnvironmentVariableEditProps {
     variables: Variable[];
@@ -57,7 +57,6 @@ export const EnvironmentVariableEdit: React.FC<EnvironmentVariableEditProps> = (
                 <Table.Head>
                     <Table.Column>Key</Table.Column>
                     <Table.Column>Value</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {
@@ -84,20 +83,32 @@ interface EnvironmentVariableEditListItemProps {
 }
 const EnvironmentVariableEditListItem: React.FC<EnvironmentVariableEditListItemProps> = (props: EnvironmentVariableEditListItemProps) => {
     const content = props.variable.Secret ? '******' : props.variable.Value;
+
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            onClick: () => {
+                props.requestEdit();
+            }
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: () => {
+                props.requestDelete();
+            }
+        },
+    ];
+
     return (
-        <Table.Row>
+        <Table.Row menu={contextMenu}>
             <td>
                 {props.variable.Key}
             </td>
             <td>
                 <code>{content}</code>
-            </td>
-            <td>
-                <Dropdown label={<Icon.Bars />}>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={props.requestEdit} />
-                    <Menu.Divider />
-                    <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={props.requestDelete} />
-                </Dropdown>
             </td>
         </Table.Row>
     );

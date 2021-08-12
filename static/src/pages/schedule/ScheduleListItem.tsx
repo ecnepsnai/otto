@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Schedule, ScheduleType } from '../../types/Schedule';
 import { Link } from 'react-router-dom';
-import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { ScriptType } from '../../types/Script';
 import { EnabledBadge } from '../../components/Badge';
 import { SchedulePattern } from './SchedulePattern';
 import { DateLabel } from '../../components/DateLabel';
+import { ContextMenuItem } from '../../components/ContextMenu';
 
 interface ScheduleListItemProps {
     schedule: ScheduleType;
@@ -43,19 +43,28 @@ export const ScheduleListItem: React.FC<ScheduleListItemProps> = (props: Schedul
 
     const link = <Link to={'/schedules/schedule/' + props.schedule.ID}>{props.schedule.Name}</Link>;
 
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            href: '/schedules/schedule/' + props.schedule.ID + '/edit',
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteMenuClick,
+        },
+    ];
+
     return (
-        <Table.Row>
+        <Table.Row menu={contextMenu}>
             <td>{link}</td>
             <td>{props.script.Name}</td>
             <td><SchedulePattern pattern={props.schedule.Pattern} /></td>
             {enabledOnColumn()}
             <td><DateLabel date={props.schedule.LastRunTime} /></td>
             <td><EnabledBadge value={props.schedule.Enabled} /></td>
-            <Table.Menu>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/schedules/schedule/' + props.schedule.ID + '/edit'} />
-                <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
-            </Table.Menu>
         </Table.Row>
     );
 };

@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { ContextMenuItem } from '../../../components/ContextMenu';
 import { Icon } from '../../../components/Icon';
-import { Menu } from '../../../components/Menu';
 import { GlobalModalFrame } from '../../../components/Modal';
 import { Table } from '../../../components/Table';
 import { Formatter } from '../../../services/Formatter';
@@ -36,19 +36,32 @@ export const AttachmentListItem: React.FC<AttachmentListItemProps> = (props: Att
         return (<span>{props.attachment.Owner.UID + ':' + props.attachment.Owner.GID}</span>);
     };
 
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            onClick: editClick
+        },
+        {
+            title: 'Download',
+            icon: (<Icon.Download />),
+            href: '/api/attachments/attachment/' + props.attachment.ID + '/download'
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteClick,
+        },
+    ];
+
     return (
-        <Table.Row>
+        <Table.Row menu={contextMenu}>
             <td>{props.attachment.Path}</td>
             <td>{props.attachment.MimeType}</td>
             <td>{owner()}</td>
             <td>{props.attachment.Mode}</td>
             <td>{Formatter.Bytes(props.attachment.Size)}</td>
-            <Table.Menu>
-                <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editClick} />
-                <Menu.Anchor label="Download" icon={<Icon.Download />} href={'/api/attachments/attachment/' + props.attachment.ID + '/download'} />
-                <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteClick} />
-            </Table.Menu>
         </Table.Row>
     );
 };

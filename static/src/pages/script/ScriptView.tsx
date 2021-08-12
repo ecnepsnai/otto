@@ -6,7 +6,7 @@ import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
 import { Card } from '../../components/Card';
 import { URLParams } from '../../services/Params';
-import { Buttons, EditButton, DeleteButton, Button, SmallPlayButton, ButtonAnchor } from '../../components/Button';
+import { EditButton, DeleteButton, Button, SmallPlayButton, ButtonAnchor } from '../../components/Button';
 import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge } from '../../components/Badge';
 import { Icon } from '../../components/Icon';
@@ -155,13 +155,26 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <EditButton to={'/scripts/script/' + script.ID + '/edit'} />
+            <DeleteButton onClick={deleteClick} />
+            <Button color={Style.Palette.Success} outline onClick={executeClick}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
+        </React.Fragment>
+    );
+
+    const breadcrumbs = [
+        {
+            title: 'Scripts',
+            href: '/scripts'
+        },
+        {
+            title: script.Name
+        }
+    ];
+
     return (
-        <Page title="View Script">
-            <Buttons>
-                <EditButton to={'/scripts/script/' + script.ID + '/edit'} />
-                <DeleteButton onClick={deleteClick} />
-                <Button color={Style.Palette.Success} outline onClick={executeClick}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
-            </Buttons>
+        <Page title={breadcrumbs} toolbar={toolbar}>
             <Layout.Row>
                 <Layout.Column>
                     <Card.Card className="mb-3">

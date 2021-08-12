@@ -7,7 +7,7 @@ import { HostType } from '../../types/Host';
 import { ScriptType } from '../../types/Script';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
-import { Buttons, EditButton, DeleteButton } from '../../components/Button';
+import { EditButton, DeleteButton } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Redirect } from '../../components/Redirect';
 import { GroupType } from '../../types/Group';
@@ -95,7 +95,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
 
         return (
             <ListGroup.TextItem title="Groups">
-                { groups.map((group, idx) => {
+                {groups.map((group, idx) => {
                     return (
                         <div key={idx}>
                             <Icon.LayerGroup />
@@ -110,7 +110,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
     const hostsList = () => {
         return (
             <ListGroup.TextItem title="Hosts">
-                { hosts.map((host, idx) => {
+                {hosts.map((host, idx) => {
                     return (
                         <div key={idx}>
                             <Icon.Desktop />
@@ -128,7 +128,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
         }
 
         return (<ListGroup.List>
-            { reports.map((report, idx) => {
+            {reports.map((report, idx) => {
                 return (<ScheduleReportItem report={report} key={idx} />);
             })}
         </ListGroup.List>);
@@ -138,13 +138,26 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <EditButton to={'/schedules/schedule/' + schedule.ID + '/edit'} />
+            <DeleteButton onClick={deleteClick} />
+        </React.Fragment>
+    );
+
+    const breadcrumbs = [
+        {
+            title: 'Schedules',
+            href: '/schedules'
+        },
+        {
+            title: schedule.Name
+        }
+    ];
+
     return (
-        <Page title="View Schedule">
+        <Page title={breadcrumbs} toolbar={toolbar}>
             <Layout.Container>
-                <Buttons>
-                    <EditButton to={'/schedules/schedule/' + schedule.ID + '/edit'} />
-                    <DeleteButton onClick={deleteClick} />
-                </Buttons>
                 <Layout.Row>
                     <Layout.Column>
                         <Card.Card>

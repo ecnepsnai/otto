@@ -54,7 +54,7 @@ export const SystemOptions: React.FC = () => {
 
     return (
         <Page title="Options">
-            <Form className="cards" showSaveButton onSubmit={onSubmit} loading={loading}>
+            <Form showSaveButton onSubmit={onSubmit} loading={loading}>
                 <Tabs.Tabs>
                     <Tabs.Tab icon={<Icon.Wrench />} title="General">
                         <OptionsGeneral defaultValue={options.General} onUpdate={changeGeneral} />

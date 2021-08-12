@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Icon } from './Icon';
-import '../../css/loading.scss';
 import { Page } from './Page';
+import '../../css/loading.scss';
 
 export const Loading: React.FC = () => {
     return (
@@ -16,6 +16,6 @@ export const Loading: React.FC = () => {
 
 export const PageLoading: React.FC = () => {
     return (
-        <Page header={<Loading />} />
+        <Page loading />
     );
 };

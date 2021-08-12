@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Nothing } from './Nothing';
-import { Dropdown } from './Menu';
-import { Icon } from './Icon';
+import { ContextMenu, ContextMenuItem, GlobalContextMenuFrame } from './ContextMenu';
 import '../../css/table.scss';
 
 export namespace Table {
@@ -15,7 +14,9 @@ export namespace Table {
             className += ' ' + props.className;
         }
         return (
-            <table className={className}>{props.children}</table>
+            <div className="table-responsive">
+                <table className={className}>{props.children}</table>
+            </div>
         );
     };
 
@@ -39,7 +40,6 @@ export namespace Table {
             <th className={className}>{props.children}</th>
         );
     };
-    export const MenuColumn: React.FC<ColumnProps> = (props: ColumnProps) => Column({ className: 'table-th-menu', children: props.children });
 
     interface BodyProps {
         children?: React.ReactNode;
@@ -58,26 +58,25 @@ export namespace Table {
     interface RowProps {
         disabled?: boolean;
         children?: React.ReactNode;
+        menu?: (ContextMenuItem | 'separator')[];
     }
     export const Row: React.FC<RowProps> = (props: RowProps) => {
         let className = 'table-tr';
         if (props.disabled) {
             className += ' disabled';
         }
-        return (
-            <tr className={className}>{props.children}</tr>
-        );
-    };
 
-    interface MenuProps {
-        disabled?: boolean;
-        children?: React.ReactNode;
-    }
-    export const Menu: React.FC<MenuProps> = (props: MenuProps) => {
-        return (<td>
-            <Dropdown label={<Icon.Bars />}>
-                {props.children}
-            </Dropdown>
-        </td>);
+        const contextMenuActivate = (event: React.MouseEvent) => {
+            if (!props.menu) {
+                return;
+            }
+
+            event.preventDefault();
+            GlobalContextMenuFrame.showMenu(<ContextMenu x={event.clientX} y={event.clientY} items={props.menu} />);
+        };
+
+        return (
+            <tr className={className} onContextMenu={contextMenuActivate}>{props.children}</tr>
+        );
     };
 }

@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
 import { Link } from 'react-router-dom';
-import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { Formatter } from '../../services/Formatter';
+import { ContextMenuItem } from '../../components/ContextMenu';
 
 interface GroupListItemProps {
     group: GroupType;
@@ -23,25 +23,27 @@ export const GroupListItem: React.FC<GroupListItemProps> = (props: GroupListItem
 
     const link = <Link to={'/groups/group/' + props.group.ID}>{props.group.Name}</Link>;
 
-    let deleteMenuItem: JSX.Element = null;
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            href: '/groups/group/' + props.group.ID + '/edit',
+        },
+    ];
     if (props.numGroups > 1) {
-        deleteMenuItem = (
-            <React.Fragment>
-                <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
-            </React.Fragment>
-        );
+        contextMenu.push('separator');
+        contextMenu.push({
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteMenuClick,
+        });
     }
 
     return (
-        <Table.Row>
+        <Table.Row menu={contextMenu}>
             <td>{link}</td>
             <td>{Formatter.ValueOrNothing(props.hosts.length)}</td>
             <td>{Formatter.ValueOrNothing((props.group.ScriptIDs || []).length)}</td>
-            <Table.Menu>
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/groups/group/' + props.group.ID + '/edit'} />
-                {deleteMenuItem}
-            </Table.Menu>
         </Table.Row>
     );
 };

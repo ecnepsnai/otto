@@ -4,7 +4,6 @@ import { AddButton, Button, ConfirmButton } from '../../../components/Button';
 import { Input } from '../../../components/input/Input';
 import { Icon } from '../../../components/Icon';
 import { PageLoading } from '../../../components/Loading';
-import { Menu } from '../../../components/Menu';
 import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
 import { Page } from '../../../components/Page';
 import { Style } from '../../../components/Style';
@@ -12,6 +11,7 @@ import { Table } from '../../../components/Table';
 import { Rand } from '../../../services/Rand';
 import { StateManager } from '../../../services/StateManager';
 import { User, UserType } from '../../../types/User';
+import { ContextMenuItem } from '../../../components/ContextMenu';
 
 export class UserManager {
     public static EditCurrentUser(): Promise<UserType> {
@@ -80,23 +80,31 @@ export const SystemUsers: React.FC = () => {
     };
 
     const userRow = (user: UserType) => {
-        let deleteMenuItem: JSX.Element;
+        const contextMenu: (ContextMenuItem | 'separator')[] = [
+            {
+                title: 'Edit',
+                icon: (<Icon.Edit />),
+                onClick: () => {
+                    editUserMenuClick(user);
+                }
+            },
+        ];
         if (StateManager.Current().User.Username != user.Username) {
-            deleteMenuItem = (<React.Fragment>
-                <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteUserMenuClick(user)} />
-            </React.Fragment>);
+            contextMenu.push('separator');
+            contextMenu.push({
+                title: 'Delete',
+                icon: (<Icon.Delete />),
+                onClick: () => {
+                    deleteUserMenuClick(user);
+                }
+            });
         }
 
         return (
-            <Table.Row key={Rand.ID()}>
+            <Table.Row key={Rand.ID()} menu={contextMenu}>
                 <td>{user.Username}</td>
                 <td>{user.Email}</td>
                 <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
-                <Table.Menu>
-                    <Menu.Item label="Edit" icon={<Icon.Edit />} onClick={editUserMenuClick(user)} />
-                    {deleteMenuItem}
-                </Table.Menu>
             </Table.Row>
         );
     };
@@ -105,15 +113,19 @@ export const SystemUsers: React.FC = () => {
         return (<PageLoading />);
     }
 
-    return (
-        <Page title="Users">
+    const toolbar = (
+        <React.Fragment>
             <AddButton onClick={newUserClick} />
+        </React.Fragment>
+    );
+
+    return (
+        <Page title="Users" toolbar={toolbar}>
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Username</Table.Column>
                     <Table.Column>Email</Table.Column>
                     <Table.Column>Can Login</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {users.map(userRow)}
@@ -249,10 +261,10 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
                 defaultValue={user.Email}
                 onChange={changeEmail}
                 required />
-            { passwordField()}
-            { resetAPIKey()}
-            { canLogInCheckbox()}
-            { mustChangePasswordCheckbox()}
+            {passwordField()}
+            {resetAPIKey()}
+            {canLogInCheckbox()}
+            {mustChangePasswordCheckbox()}
         </ModalForm>
     );
 };

@@ -10,13 +10,13 @@ export namespace Layout {
     }
 
     export const Container: React.FC<LayoutProps> = (props: LayoutProps) => {
-        let className = 'container';
+        let className = 'container-fluid';
         if (props.className) {
             className += ' ' + props.className;
         }
         return (
             <div className={className}>
-                { props.children}
+                {props.children}
             </div>
         );
     };
@@ -28,7 +28,7 @@ export namespace Layout {
         }
         return (
             <div className={className}>
-                { props.children}
+                {props.children}
             </div>
         );
     };
@@ -37,7 +37,7 @@ export namespace Layout {
         const className = props.className || 'col-md';
         return (
             <div className={className}>
-                { props.children}
+                {props.children}
             </div>
         );
     };

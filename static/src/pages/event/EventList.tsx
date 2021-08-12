@@ -34,7 +34,6 @@ export const EventList: React.FC = () => {
                 <Table.Head>
                     <Table.Column>Event</Table.Column>
                     <Table.Column>Date</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {

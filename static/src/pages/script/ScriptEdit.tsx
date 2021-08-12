@@ -146,8 +146,27 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
         return (<PageLoading />);
     }
 
+    const breadcrumbs = [
+        {
+            title: 'Scripts',
+            href: '/scripts',
+        },
+        {
+            title: 'New Script'
+        }
+    ];
+    if (!isNew) {
+        breadcrumbs[1] = {
+            title: script.Name,
+            href: '/scripts/script/' + script.ID
+        };
+        breadcrumbs.push({
+            title: 'Edit'
+        });
+    }
+
     return (
-        <Page title={isNew ? 'New Script' : 'Edit Script'}>
+        <Page title={breadcrumbs}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"

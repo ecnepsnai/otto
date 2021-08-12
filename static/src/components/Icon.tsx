@@ -7,6 +7,7 @@ import {
     faBars,
     faCalendarAlt,
     faCheckCircle,
+    faChevronRight,
     faClipboard,
     faCog,
     faDesktop,
@@ -69,7 +70,7 @@ export namespace Icon {
     export const Label: React.FC<LabelProps> = (props: LabelProps) => {
         return (
             <span>
-                { props.icon}
+                {props.icon}
                 <span className="ms-1">{props.label}</span>
             </span>
         );
@@ -79,6 +80,7 @@ export namespace Icon {
     export const Bars: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBars, options: props });
     export const Calendar: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCalendarAlt, options: props });
     export const CheckCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCheckCircle, options: props });
+    export const ChevronRight: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faChevronRight, options: props });
     export const Clipboard: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faClipboard, options: props });
     export const Cog: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCog, options: props });
     export const Desktop: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faDesktop, options: props });

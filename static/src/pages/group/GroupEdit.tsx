@@ -90,8 +90,27 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
         return (<PageLoading />);
     }
 
+    const breadcrumbs = [
+        {
+            title: 'Groups',
+            href: '/groups',
+        },
+        {
+            title: 'New Group'
+        }
+    ];
+    if (!isNew) {
+        breadcrumbs[1] = {
+            title: group.Name,
+            href: '/groups/group/' + group.ID
+        };
+        breadcrumbs.push({
+            title: 'Edit'
+        });
+    }
+
     return (
-        <Page title={isNew ? 'New Group' : 'Edit Group'}>
+        <Page title={breadcrumbs}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"

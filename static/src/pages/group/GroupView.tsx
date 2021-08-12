@@ -7,7 +7,7 @@ import { HostType } from '../../types/Host';
 import { ScriptType } from '../../types/Script';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
-import { Buttons, EditButton, DeleteButton } from '../../components/Button';
+import { EditButton, DeleteButton } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
 import { Icon } from '../../components/Icon';
@@ -76,13 +76,26 @@ export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <EditButton to={'/groups/group/' + group.ID + '/edit'} />
+            <DeleteButton onClick={deleteClick} />
+        </React.Fragment>
+    );
+
+    const breadcrumbs = [
+        {
+            title: 'Groups',
+            href: '/groups'
+        },
+        {
+            title: group.Name
+        }
+    ];
+
     return (
-        <Page title="View Group">
+        <Page title={breadcrumbs} toolbar={toolbar}>
             <Layout.Container>
-                <Buttons>
-                    <EditButton to={'/groups/group/' + group.ID + '/edit'} />
-                    <DeleteButton onClick={deleteClick} />
-                </Buttons>
                 <Layout.Row>
                     <Layout.Column>
                         <Card.Card className="mb-3">

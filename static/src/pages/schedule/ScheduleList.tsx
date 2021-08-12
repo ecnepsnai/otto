@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Schedule, ScheduleType } from '../../types/Schedule';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Buttons, CreateButton } from '../../components/Button';
+import { CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { ScheduleListItem } from './ScheduleListItem';
 import { Script, ScriptType } from '../../types/Script';
@@ -42,11 +42,14 @@ export const ScheduleList: React.FC = () => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <CreateButton to="/schedules/schedule/" />
+        </React.Fragment>
+    );
+
     return (
-        <Page title="Schedules">
-            <Buttons>
-                <CreateButton to="/schedules/schedule/" />
-            </Buttons>
+        <Page title="Schedules" toolbar={toolbar}>
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Name</Table.Column>
@@ -55,7 +58,6 @@ export const ScheduleList: React.FC = () => {
                     <Table.Column>Scope</Table.Column>
                     <Table.Column>Last Run</Table.Column>
                     <Table.Column>Enabled</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {

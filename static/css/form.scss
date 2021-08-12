@@ -11,3 +11,9 @@ textarea.fixed-width {
 .invalid-feedback.force-show {
     display: block;
 }
+
+form.container {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+    padding: 0px !important;
+}

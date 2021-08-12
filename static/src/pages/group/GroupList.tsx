@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Buttons, CreateButton } from '../../components/Button';
+import { CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { GroupListItem } from './GroupListItem';
 
@@ -37,17 +37,19 @@ export const GroupList: React.FC = () => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <CreateButton to="/groups/group/" />
+        </React.Fragment>
+    );
+
     return (
-        <Page title="Groups">
-            <Buttons>
-                <CreateButton to="/groups/group/" />
-            </Buttons>
+        <Page title="Groups" toolbar={toolbar}>
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Name</Table.Column>
                     <Table.Column>Hosts</Table.Column>
                     <Table.Column>Scripts</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {

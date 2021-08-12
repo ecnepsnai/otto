@@ -19,9 +19,9 @@ interface FormProps {
      */
     onSubmit?: () => void;
     /**
-     * Optional class to add
+     * If the form should span the full width of the page
      */
-    className?: string;
+    fullWidth?: boolean;
     /**
      * If true the submit button is disabled
      */
@@ -107,12 +107,12 @@ export class Form extends React.Component<FormProps, FormState> {
     }
 
     render(): JSX.Element {
-        const className = this.props.className || '';
+        const className = this.props.fullWidth ? '' : 'container';
         return (
             <form onSubmit={this.onSubmit} ref={this.domRef} className={className}>
                 <fieldset>{this.props.children}</fieldset>
-                { this.saveButton()}
-                { this.error()}
+                {this.saveButton()}
+                {this.error()}
             </form>
         );
     }

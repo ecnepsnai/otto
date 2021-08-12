@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Script, ScriptType } from '../../types/Script';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Buttons, CreateButton } from '../../components/Button';
+import { CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { ScriptListItem } from './ScriptListItem';
 
@@ -25,17 +25,19 @@ export const ScriptList: React.FC = () => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <CreateButton to="/scripts/script/" />
+        </React.Fragment>
+    );
+
     return (
-        <Page title="Scripts">
-            <Buttons>
-                <CreateButton to="/scripts/script/" />
-            </Buttons>
+        <Page title="Scripts" toolbar={toolbar}>
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Name</Table.Column>
                     <Table.Column>Executable</Table.Column>
                     <Table.Column>Attachments</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {

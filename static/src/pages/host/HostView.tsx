@@ -4,7 +4,7 @@ import { Host, HostType, ScriptEnabledGroup } from '../../types/Host';
 import { GroupType } from '../../types/Group';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Buttons, EditButton, DeleteButton } from '../../components/Button';
+import { EditButton, DeleteButton } from '../../components/Button';
 import { Layout } from '../../components/Layout';
 import { match } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
@@ -89,13 +89,26 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <EditButton to={'/hosts/host/' + host.ID + '/edit'} />
+            <DeleteButton onClick={deleteClick} />
+        </React.Fragment>
+    );
+
+    const breadcrumbs = [
+        {
+            title: 'Hosts',
+            href: '/hosts'
+        },
+        {
+            title: host.Name
+        }
+    ];
+
     return (
-        <Page title="View Host">
+        <Page title={breadcrumbs} toolbar={toolbar}>
             <Layout.Container>
-                <Buttons>
-                    <EditButton to={'/hosts/host/' + host.ID + '/edit'} />
-                    <DeleteButton onClick={deleteClick} />
-                </Buttons>
                 <Layout.Row>
                     <Layout.Column>
                         <Card.Card className="mb-3">

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Host, HostType } from '../../types/Host';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
-import { Buttons, CreateButton } from '../../components/Button';
+import { CreateButton } from '../../components/Button';
 import { Table } from '../../components/Table';
 import { HostListItem } from './HostListItem';
 import { Heartbeat, HeartbeatType } from '../../types/Heartbeat';
@@ -38,11 +38,14 @@ export const HostList: React.FC = () => {
         return (<PageLoading />);
     }
 
+    const toolbar = (
+        <React.Fragment>
+            <CreateButton to="/hosts/host/" />
+        </React.Fragment>
+    );
+
     return (
-        <Page title="Hosts">
-            <Buttons>
-                <CreateButton to="/hosts/host/" />
-            </Buttons>
+        <Page title="Hosts" toolbar={toolbar}>
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Name</Table.Column>
@@ -50,7 +53,6 @@ export const HostList: React.FC = () => {
                     <Table.Column>Groups</Table.Column>
                     <Table.Column>Reachable</Table.Column>
                     <Table.Column>Version</Table.Column>
-                    <Table.MenuColumn />
                 </Table.Head>
                 <Table.Body>
                     {

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Script, ScriptType } from '../../types/Script';
 import { Link } from 'react-router-dom';
-import { Menu } from '../../components/Menu';
 import { Icon } from '../../components/Icon';
 import { Table } from '../../components/Table';
 import { GlobalModalFrame } from '../../components/Modal';
 import { Rand } from '../../services/Rand';
 import { RunModal } from '../run/RunModal';
 import { Formatter } from '../../services/Formatter';
+import { ContextMenuItem } from '../../components/ContextMenu';
 
 interface ScriptListItemProps {
     script: ScriptType;
@@ -30,31 +30,41 @@ export const ScriptListItem: React.FC<ScriptListItemProps> = (props: ScriptListI
         });
     };
 
-    const enableDisableMenu = () => {
-        if (props.script.Enabled) {
-            return (<Menu.Item icon={<Icon.TimesCircle />} onClick={toggleMenuClick} label="Disable" />);
-        }
-        return (<Menu.Item icon={<Icon.CheckCircle />} onClick={toggleMenuClick} label="Enable" />);
-    };
-
     const executeScriptMenuClick = () => {
         GlobalModalFrame.showModal(<RunModal scriptID={props.script.ID} key={Rand.ID()} />);
     };
 
     const link = <Link to={'/scripts/script/' + props.script.ID}>{props.script.Name}</Link>;
 
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
+        {
+            title: 'Run Script',
+            icon: (<Icon.PlayCircle />),
+            onClick: executeScriptMenuClick,
+        },
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            href: '/scripts/script/' + props.script.ID + '/edit',
+        },
+        {
+            title: props.script.Enabled ? 'Disable' : 'Enable',
+            icon: props.script.Enabled ? (<Icon.TimesCircle />) : (<Icon.CheckCircle />),
+            onClick: toggleMenuClick,
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteMenuClick,
+        },
+    ];
+
     return (
-        <Table.Row disabled={!props.script.Enabled}>
+        <Table.Row disabled={!props.script.Enabled} menu={contextMenu}>
             <td>{link}</td>
             <td>{props.script.Executable}</td>
             <td>{Formatter.ValueOrNothing((props.script.AttachmentIDs || []).length)}</td>
-            <Table.Menu>
-                <Menu.Item label="Run Script" icon={<Icon.PlayCircle />} onClick={executeScriptMenuClick} />
-                <Menu.Link label="Edit" icon={<Icon.Edit />} to={'/scripts/script/' + props.script.ID + '/edit'} />
-                {enableDisableMenu()}
-                <Menu.Divider />
-                <Menu.Item label="Delete" icon={<Icon.Delete />} onClick={deleteMenuClick} />
-            </Table.Menu>
         </Table.Row>
     );
 };

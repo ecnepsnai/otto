@@ -83,7 +83,6 @@ export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentL
                 <Table.Column>Owner</Table.Column>
                 <Table.Column>Permission</Table.Column>
                 <Table.Column>Size</Table.Column>
-                <Table.MenuColumn />
             </Table.Head>
             <Table.Body>
                 {

@@ -147,8 +147,27 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
         return (<PageLoading />);
     }
 
+    const breadcrumbs = [
+        {
+            title: 'Hosts',
+            href: '/hosts',
+        },
+        {
+            title: 'New Host'
+        }
+    ];
+    if (!isNew) {
+        breadcrumbs[1] = {
+            title: host.Name,
+            href: '/hosts/host/' + host.ID
+        };
+        breadcrumbs.push({
+            title: 'Edit'
+        });
+    }
+
     return (
-        <Page title={isNew ? 'New Host' : 'Edit Host'}>
+        <Page title={breadcrumbs}>
             <Form showSaveButton onSubmit={formSave}>
                 <Input.Text
                     label="Name"

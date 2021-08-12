@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { GlobalModalFrame } from './components/Modal';
 import { GlobalNotificationFrame } from './components/Notification';
 import { GlobalRedirectFrame } from './components/Redirect';
+import { GlobalContextMenuFrame } from './components/ContextMenu';
 import { Loading } from './components/Loading';
 import { Nav } from './components/Nav';
 import { HostEdit } from './pages/host/HostEdit';
@@ -70,6 +71,7 @@ export const App: React.FC = () => {
             <GlobalModalFrame />
             <GlobalNotificationFrame />
             <GlobalRedirectFrame />
+            <GlobalContextMenuFrame />
         </Router>
     </ErrorBoundary>);
 };
