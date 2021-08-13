@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Nothing } from './Nothing';
 import { ContextMenu, ContextMenuItem, GlobalContextMenuFrame } from './ContextMenu';
+import { ContextMenuHandler } from '../services/ContextMenuHandler';
 import '../../css/table.scss';
 
 export namespace Table {
@@ -61,22 +62,27 @@ export namespace Table {
         menu?: (ContextMenuItem | 'separator')[];
     }
     export const Row: React.FC<RowProps> = (props: RowProps) => {
+        const contextMenuHandler = new ContextMenuHandler((x: number, y: number) => {
+            if (!props.menu) {
+                return;
+            }
+
+            GlobalContextMenuFrame.showMenu(<ContextMenu x={x} y={y} items={props.menu} />);
+        });
+
         let className = 'table-tr';
         if (props.disabled) {
             className += ' disabled';
         }
 
-        const contextMenuActivate = (event: React.MouseEvent) => {
-            if (!props.menu) {
-                return;
-            }
-
-            event.preventDefault();
-            GlobalContextMenuFrame.showMenu(<ContextMenu x={event.clientX} y={event.clientY} items={props.menu} />);
-        };
-
         return (
-            <tr className={className} onContextMenu={contextMenuActivate}>{props.children}</tr>
+            <tr
+                className={className}
+                onContextMenu={contextMenuHandler.onContextMenu}
+                onTouchStart={contextMenuHandler.onTouchStart}
+                onTouchEnd={contextMenuHandler.onTouchEnd}
+                onTouchMove={contextMenuHandler.onTouchMove}
+            >{props.children}</tr>
         );
     };
 }

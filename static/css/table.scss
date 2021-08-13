@@ -13,6 +13,11 @@
     }
 
     tbody tr {
+        @media(max-width:767px) {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
         &.disabled {
             td:not(.table-menu-td) {
                 opacity: 0.25;
