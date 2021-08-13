@@ -9,18 +9,6 @@ export namespace Layout {
         children?: React.ReactNode;
     }
 
-    export const Container: React.FC<LayoutProps> = (props: LayoutProps) => {
-        let className = 'container-fluid';
-        if (props.className) {
-            className += ' ' + props.className;
-        }
-        return (
-            <div className={className}>
-                {props.children}
-            </div>
-        );
-    };
-
     export const Row: React.FC<LayoutProps> = (props: LayoutProps) => {
         let className = 'row';
         if (props.className) {

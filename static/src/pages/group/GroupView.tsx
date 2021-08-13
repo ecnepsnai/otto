@@ -95,27 +95,25 @@ export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
 
     return (
         <Page title={breadcrumbs} toolbar={toolbar}>
-            <Layout.Container>
-                <Layout.Row>
-                    <Layout.Column>
-                        <Card.Card className="mb-3">
-                            <Card.Header>Host Information</Card.Header>
-                            <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{group.Name}</ListGroup.TextItem>
-                            </ListGroup.List>
-                        </Card.Card>
-                        <EnvironmentVariableCard variables={group.Environment} className="mb-3" />
-                        <ScheduleListCard schedules={schedules} className="mb-3" />
-                    </Layout.Column>
-                    <Layout.Column>
-                        <Card.Card className="mb-3">
-                            <Card.Header>Hosts</Card.Header>
-                            <HostListCard hosts={hosts} />
-                        </Card.Card>
-                        <ScriptListCard scripts={scripts} hostIDs={hosts.map(h => h.ID)} className="mb-3" />
-                    </Layout.Column>
-                </Layout.Row>
-            </Layout.Container>
+            <Layout.Row>
+                <Layout.Column>
+                    <Card.Card className="mb-3">
+                        <Card.Header>Host Information</Card.Header>
+                        <ListGroup.List>
+                            <ListGroup.TextItem title="Name">{group.Name}</ListGroup.TextItem>
+                        </ListGroup.List>
+                    </Card.Card>
+                    <EnvironmentVariableCard variables={group.Environment} className="mb-3" />
+                    <ScheduleListCard schedules={schedules} className="mb-3" />
+                </Layout.Column>
+                <Layout.Column>
+                    <Card.Card className="mb-3">
+                        <Card.Header>Hosts</Card.Header>
+                        <HostListCard hosts={hosts} />
+                    </Card.Card>
+                    <ScriptListCard scripts={scripts} hostIDs={hosts.map(h => h.ID)} className="mb-3" />
+                </Layout.Column>
+            </Layout.Row>
         </Page>
     );
 };

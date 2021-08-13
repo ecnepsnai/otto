@@ -157,30 +157,28 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
 
     return (
         <Page title={breadcrumbs} toolbar={toolbar}>
-            <Layout.Container>
-                <Layout.Row>
-                    <Layout.Column>
-                        <Card.Card>
-                            <Card.Header>Schedule Information</Card.Header>
-                            <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{schedule.Name}</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Script"><Link to={'/scripts/script/' + schedule.ScriptID}>{script.Name}</Link></ListGroup.TextItem>
-                                <ListGroup.TextItem title="Frequency"><SchedulePattern pattern={schedule.Pattern} /></ListGroup.TextItem>
-                                <ListGroup.TextItem title="Last Run"><DateLabel date={schedule.LastRunTime} /></ListGroup.TextItem>
-                                <ListGroup.TextItem title="Enabled"><EnabledBadge value={schedule.Enabled} /></ListGroup.TextItem>
-                                {groupsList()}
-                                {hostsList()}
-                            </ListGroup.List>
-                        </Card.Card>
-                    </Layout.Column>
-                    <Layout.Column>
-                        <Card.Card>
-                            <Card.Header>History</Card.Header>
-                            {historyContent()}
-                        </Card.Card>
-                    </Layout.Column>
-                </Layout.Row>
-            </Layout.Container>
+            <Layout.Row>
+                <Layout.Column>
+                    <Card.Card>
+                        <Card.Header>Schedule Information</Card.Header>
+                        <ListGroup.List>
+                            <ListGroup.TextItem title="Name">{schedule.Name}</ListGroup.TextItem>
+                            <ListGroup.TextItem title="Script"><Link to={'/scripts/script/' + schedule.ScriptID}>{script.Name}</Link></ListGroup.TextItem>
+                            <ListGroup.TextItem title="Frequency"><SchedulePattern pattern={schedule.Pattern} /></ListGroup.TextItem>
+                            <ListGroup.TextItem title="Last Run"><DateLabel date={schedule.LastRunTime} /></ListGroup.TextItem>
+                            <ListGroup.TextItem title="Enabled"><EnabledBadge value={schedule.Enabled} /></ListGroup.TextItem>
+                            {groupsList()}
+                            {hostsList()}
+                        </ListGroup.List>
+                    </Card.Card>
+                </Layout.Column>
+                <Layout.Column>
+                    <Card.Card>
+                        <Card.Header>History</Card.Header>
+                        {historyContent()}
+                    </Card.Card>
+                </Layout.Column>
+            </Layout.Row>
         </Page>
     );
 };

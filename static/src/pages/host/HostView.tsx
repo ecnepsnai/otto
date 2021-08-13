@@ -108,28 +108,26 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
 
     return (
         <Page title={breadcrumbs} toolbar={toolbar}>
-            <Layout.Container>
-                <Layout.Row>
-                    <Layout.Column>
-                        <Card.Card className="mb-3">
-                            <Card.Header>Host Information</Card.Header>
-                            <ListGroup.List>
-                                <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
-                                <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
-                                <HostPSK host={host} didRotate={didRotatePSK} />
-                            </ListGroup.List>
-                        </Card.Card>
-                        <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />
-                        <EnvironmentVariableCard className="mb-3" variables={host.Environment} />
-                        <ScheduleListCard schedules={schedules} className="mb-3" />
-                    </Layout.Column>
-                    <Layout.Column>
-                        <GroupListCard groups={groups} className="mb-3" />
-                        <ScriptListCard scripts={scripts} hostIDs={[host.ID]} className="mb-3" />
-                    </Layout.Column>
-                </Layout.Row>
-            </Layout.Container>
+            <Layout.Row>
+                <Layout.Column>
+                    <Card.Card className="mb-3">
+                        <Card.Header>Host Information</Card.Header>
+                        <ListGroup.List>
+                            <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
+                            <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
+                            <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
+                            <HostPSK host={host} didRotate={didRotatePSK} />
+                        </ListGroup.List>
+                    </Card.Card>
+                    <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />
+                    <EnvironmentVariableCard className="mb-3" variables={host.Environment} />
+                    <ScheduleListCard schedules={schedules} className="mb-3" />
+                </Layout.Column>
+                <Layout.Column>
+                    <GroupListCard groups={groups} className="mb-3" />
+                    <ScriptListCard scripts={scripts} hostIDs={[host.ID]} className="mb-3" />
+                </Layout.Column>
+            </Layout.Row>
         </Page>
     );
 };
