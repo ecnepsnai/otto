@@ -4,6 +4,7 @@ import { Loading } from '../../components/Loading';
 import { Input } from '../../components/input/Input';
 import { Form } from '../../components/Form';
 import { Card } from '../../components/Card';
+import { Alert } from '../../components/Alert';
 
 interface SGroup {
     ID: string;
@@ -123,6 +124,13 @@ export const RunSetup: React.FC<RunSetupProps> = (props: RunSetupProps) => {
 
     if (loading) {
         return (<Loading />);
+    }
+
+    if ((hosts || []).length == 0) {
+        return (<Alert.Warning>
+            <h5>No Hosts Found</h5>
+            <p>There are no hosts in any of the groups associated with this script.</p>
+        </Alert.Warning>);
     }
 
     return (

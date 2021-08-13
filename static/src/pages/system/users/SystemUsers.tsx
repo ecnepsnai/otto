@@ -61,22 +61,18 @@ export const SystemUsers: React.FC = () => {
     };
 
     const editUserMenuClick = (user: UserType) => {
-        return () => {
-            GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={updateUser} />);
-        };
+        GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={updateUser} />);
     };
     const deleteUserMenuClick = (user: UserType) => {
-        return () => {
-            Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
-                if (!confirmed) {
-                    return;
-                }
+        Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
+            if (!confirmed) {
+                return;
+            }
 
-                User.Delete(user).then(() => {
-                    loadUsers();
-                });
+            User.Delete(user).then(() => {
+                loadUsers();
             });
-        };
+        });
     };
 
     const userRow = (user: UserType) => {
@@ -244,10 +240,8 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
         });
     };
 
-    const title = user.Username != '' ? 'Edit User' : 'New User';
-
     return (
-        <ModalForm title={title} onSubmit={onSubmit}>
+        <ModalForm title={isNew ? 'New User' : 'Edit User'} onSubmit={onSubmit}>
             <Input.Text
                 type="text"
                 label="Username"

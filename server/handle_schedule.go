@@ -18,7 +18,7 @@ func (h *handle) ScheduleList(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScheduleGet(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}
@@ -34,7 +34,7 @@ func (h *handle) ScheduleGetReports(request web.Request) (interface{}, *web.Erro
 func (h *handle) ScheduleGetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}
@@ -56,7 +56,7 @@ func (h *handle) ScheduleGetGroups(request web.Request) (interface{}, *web.Error
 func (h *handle) ScheduleGetHosts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}
@@ -78,7 +78,7 @@ func (h *handle) ScheduleGetHosts(request web.Request) (interface{}, *web.Error)
 func (h *handle) ScheduleGetScript(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}
@@ -113,7 +113,7 @@ func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}
@@ -141,7 +141,7 @@ func (h *handle) ScheduleDelete(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	schedule := ScheduleStore.ScheduleWithID(id)
+	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
 		return nil, web.ValidationError("No schedule with ID %s", id)
 	}

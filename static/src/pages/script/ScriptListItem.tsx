@@ -23,9 +23,9 @@ export const ScriptListItem: React.FC<ScriptListItemProps> = (props: ScriptListI
     };
 
     const toggleMenuClick = () => {
-        Script.Update(props.script, {
-            Enabled: !props.script.Enabled
-        }).then(() => {
+        const s = props.script;
+        s.Enabled = !s.Enabled;
+        Script.Save(s).then(() => {
             props.onReload();
         });
     };

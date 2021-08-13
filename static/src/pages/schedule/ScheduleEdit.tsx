@@ -9,7 +9,6 @@ import { Form } from '../../components/Form';
 import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Script, ScriptType } from '../../types/Script';
-import { Host } from '../../types/Host';
 import { GroupCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Alert } from '../../components/Alert';
@@ -43,15 +42,15 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     };
 
     const loadData = () => {
-        Promise.all([loadSchedule(), Script.List(), Host.List()]).then(results => {
+        Promise.all([loadSchedule(), Script.List()]).then(results => {
             const isNew = results[0].ID == undefined;
             const schedule = results[0];
             const scripts = results[1];
-            const hosts = results[2];
             let runOn: ('groups' | 'hosts') = 'groups';
             let patternTemplate = '';
 
-            if (isNew && (!hosts || hosts.length === 0 || !scripts || scripts.length === 0)) {
+            if (isNew && (!scripts || scripts.length === 0)) {
+                setIsNew(isNew);
                 setNoData(true);
                 return;
             }
@@ -230,7 +229,7 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     if (isNew && noData) {
         return (<Page title="New Schedule">
             <Alert.Danger>
-                <p>At least one script and host is required before you can create a schedule</p>
+                <p>At least one script is required before you can create a schedule</p>
                 <Link to="/schedules"><Icon.Label icon={<Icon.ArrowLeft />} label="Go Back" /></Link>
             </Alert.Danger>
         </Page>);

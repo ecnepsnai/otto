@@ -24,7 +24,7 @@ type Host struct {
 func (h Host) Groups() ([]Group, *Error) {
 	groups := make([]Group, len(h.GroupIDs))
 	for i, groupID := range h.GroupIDs {
-		group := GroupStore.GroupWithID(groupID)
+		group := GroupCache.ByID(groupID)
 		groups[i] = *group
 	}
 	return groups, nil

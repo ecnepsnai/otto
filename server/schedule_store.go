@@ -158,13 +158,13 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 	}
 
 	for _, groupID := range params.Scope.GroupIDs {
-		if group := GroupStore.GroupWithID(groupID); group == nil {
+		if group := GroupCache.ByID(groupID); group == nil {
 			return nil, ErrorUser("Unknown group ID '%s'", groupID)
 		}
 	}
 
 	for _, hostID := range params.Scope.HostIDs {
-		if host := HostStore.HostWithID(hostID); host == nil {
+		if host := HostCache.ByID(hostID); host == nil {
 			return nil, ErrorUser("Unknown host ID '%s'", hostID)
 		}
 	}
@@ -210,17 +210,23 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 		return nil, ErrorUser("Must specify at least one group or host")
 	}
 	if existing := s.ScheduleWithName(params.Name); existing != nil && existing.ID != schedule.ID {
+		log.PWarn("Schedule rename collission", map[string]interface{}{
+			"schedule_id":   schedule.ID,
+			"existing_id":   existing.ID,
+			"schedule_name": schedule.Name,
+			"existing_name": existing.Name,
+		})
 		return nil, ErrorUser("Schedule with name '%s' already exists", params.Name)
 	}
 
 	for _, groupID := range params.Scope.GroupIDs {
-		if group := GroupStore.GroupWithID(groupID); group == nil {
+		if group := GroupCache.ByID(groupID); group == nil {
 			return nil, ErrorUser("Unknown group ID '%s'", groupID)
 		}
 	}
 
 	for _, hostID := range params.Scope.HostIDs {
-		if host := HostStore.HostWithID(hostID); host == nil {
+		if host := HostCache.ByID(hostID); host == nil {
 			return nil, ErrorUser("Unknown host ID '%s'", hostID)
 		}
 	}

@@ -180,7 +180,7 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
-	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
+	if group := GroupCache.ByID(params.GroupID); group == nil {
 		return nil, ErrorUser("Unknown group ID")
 	}
 
@@ -228,7 +228,7 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
-	if group := GroupStore.GroupWithID(params.GroupID); group == nil {
+	if group := GroupCache.ByID(params.GroupID); group == nil {
 		return nil, ErrorUser("Unknown group ID")
 	}
 

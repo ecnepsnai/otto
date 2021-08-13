@@ -50,7 +50,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
     const running = () => {
         return (
             <div className="cards">
-                { selectedHostIDs.map(hostID => {
+                {selectedHostIDs.map(hostID => {
                     return (
                         <RunScript scriptID={props.scriptID} hostID={hostID} key={hostID} onFinished={scriptFinished(hostID)} />
                     );
@@ -74,6 +74,10 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
 
         return [
             {
+                label: 'Cancel',
+                color: Style.Palette.Secondary,
+            },
+            {
                 label: 'Start',
                 onClick: () => {
                     if (selectedHostIDs && selectedHostIDs.length > 0) {
@@ -96,7 +100,7 @@ export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
 
     return (
         <Modal title="Run Script" size={Style.Size.L} buttons={buttons()} static>
-            { content()}
+            {content()}
         </Modal>
     );
 };

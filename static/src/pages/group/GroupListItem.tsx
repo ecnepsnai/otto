@@ -42,7 +42,7 @@ export const GroupListItem: React.FC<GroupListItemProps> = (props: GroupListItem
     return (
         <Table.Row menu={contextMenu}>
             <td>{link}</td>
-            <td>{Formatter.ValueOrNothing(props.hosts.length)}</td>
+            <td>{Formatter.ValueOrNothing((props.hosts || []).length)}</td>
             <td>{Formatter.ValueOrNothing((props.group.ScriptIDs || []).length)}</td>
         </Table.Row>
     );

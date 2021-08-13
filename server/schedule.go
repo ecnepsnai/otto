@@ -25,10 +25,14 @@ type ScheduleScope struct {
 
 // Groups get the groups for this schedule
 func (s ScheduleScope) Groups() ([]Group, *Error) {
-	groups := make([]Group, len(s.GroupIDs))
-	for i, groupID := range s.GroupIDs {
-		group := GroupStore.GroupWithID(groupID)
-		groups[i] = *group
+	groups := []Group{}
+	for _, groupID := range s.GroupIDs {
+		group := GroupCache.ByID(groupID)
+		if group == nil {
+			log.Warn("Schedule contains unknown group %s", groupID)
+			continue
+		}
+		groups = append(groups, *group)
 	}
 
 	return groups, nil
@@ -54,14 +58,14 @@ func (s ScheduleScope) Hosts() ([]Host, *Error) {
 		return []Host{}, nil
 	}
 
-	hosts := make([]Host, hostIDs.Length())
-	for i, hostID := range hostIDs.Values() {
-		host := HostStore.HostWithID(hostID)
+	hosts := []Host{}
+	for _, hostID := range hostIDs.Values() {
+		host := HostCache.ByID(hostID)
 		if host == nil {
-			log.Warn("Schedule contains unknown host '%s'", hostID)
+			log.Warn("Schedule contains unknown host %s", hostID)
 			continue
 		}
-		hosts[i] = *host
+		hosts = append(hosts, *host)
 	}
 
 	return hosts, nil
@@ -98,7 +102,7 @@ func (s Schedule) RunNow() {
 	fail := 0
 
 	for _, hostID := range hosts.Values() {
-		host := HostStore.HostWithID(hostID)
+		host := HostCache.ByID(hostID)
 		if host == nil {
 			log.Error("Schedule for nonexistant host: schedule=%s host=%s", s.ID, hostID)
 			return

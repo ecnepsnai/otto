@@ -116,7 +116,7 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 
 	var groupIDs = make([]string, len(params.GroupIDs))
 	for i, groupID := range params.GroupIDs {
-		group := GroupStore.GroupWithID(groupID)
+		group := GroupCache.ByID(groupID)
 		if s == nil {
 			log.Warn("No group with ID '%s'", groupID)
 			return nil, ErrorUser("No group with ID '%s'", groupID)
@@ -174,7 +174,7 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 
 	var groupIDs = make([]string, len(params.GroupIDs))
 	for i, groupID := range params.GroupIDs {
-		group := GroupStore.GroupWithID(groupID)
+		group := GroupCache.ByID(groupID)
 		if s == nil {
 			log.Warn("No group with ID '%s'", groupID)
 			return nil, ErrorUser("No group with ID '%s'", groupID)

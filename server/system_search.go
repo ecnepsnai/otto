@@ -13,7 +13,7 @@ type SystemSearchResult struct {
 	URL   string
 }
 
-// SystemSearch search the furdl system
+// SystemSearch search the otto system
 func SystemSearch(q string) []SystemSearchResult {
 	if q == "" {
 		return []SystemSearchResult{}

@@ -99,7 +99,7 @@ func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error 
 	}
 
 	for groupID, enable := range groups {
-		group := GroupStore.GroupWithID(groupID)
+		group := GroupCache.ByID(groupID)
 		if group == nil {
 			return ErrorUser("No group with ID %s", groupID)
 		}

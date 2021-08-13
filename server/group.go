@@ -19,7 +19,7 @@ func (g Group) HostIDs() []string {
 func (g Group) Hosts() ([]Host, *Error) {
 	hosts := make([]Host, len(g.HostIDs()))
 	for i, hostID := range g.HostIDs() {
-		host := HostStore.HostWithID(hostID)
+		host := HostCache.ByID(hostID)
 		hosts[i] = *host
 	}
 	return hosts, nil

@@ -21,7 +21,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	host := HostStore.HostWithID(r.HostID)
+	host := HostCache.ByID(r.HostID)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", r.HostID)
 	}
@@ -92,7 +92,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		return
 	}
 
-	host := HostStore.HostWithID(r.HostID)
+	host := HostCache.ByID(r.HostID)
 	if host == nil {
 		conn.WriteJSON(requestResponse{
 			Code:  requestResponseCodeError,

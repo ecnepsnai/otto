@@ -18,7 +18,7 @@ func (h *handle) HostList(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -29,7 +29,7 @@ func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -63,7 +63,7 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 func (h *handle) HostRotatePSK(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -82,7 +82,7 @@ func (h *handle) HostRotatePSK(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -94,7 +94,7 @@ func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Er
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -133,7 +133,7 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}
@@ -161,7 +161,7 @@ func (h *handle) HostDelete(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	host := HostStore.HostWithID(id)
+	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, web.ValidationError("No host with ID %s", id)
 	}

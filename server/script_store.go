@@ -159,6 +159,12 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 }
 
 func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
+	for _, schedule := range ScheduleCache.All() {
+		if schedule.ScriptID == script.ID {
+			return ErrorUser("Script is used by schedule %s", schedule.Name)
+		}
+	}
+
 	if err := s.Table.Delete(*script); err != nil {
 		log.Error("Error deleting script '%s': %s", script.Name, err.Error())
 		return ErrorFrom(err)

@@ -22,7 +22,7 @@ func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.Erro
 func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
@@ -33,7 +33,7 @@ func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {
 func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
@@ -64,7 +64,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
@@ -88,7 +88,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 	log.Debug("Will remove hosts from group %s: %+v", id, removedHosts)
 
 	for _, hostID := range addedHosts {
-		host := HostStore.HostWithID(hostID)
+		host := HostCache.ByID(hostID)
 		if stringSliceContains(id, host.GroupIDs) {
 			continue
 		}
@@ -106,7 +106,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 		}
 	}
 	for _, hostID := range removedHosts {
-		host := HostStore.HostWithID(hostID)
+		host := HostCache.ByID(hostID)
 		if !stringSliceContains(id, host.GroupIDs) {
 			continue
 		}
@@ -138,7 +138,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
@@ -194,7 +194,7 @@ func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
@@ -222,7 +222,7 @@ func (h *handle) GroupDelete(request web.Request) (interface{}, *web.Error) {
 
 	id := request.Params.ByName("id")
 
-	group := GroupStore.GroupWithID(id)
+	group := GroupCache.ByID(id)
 	if group == nil {
 		return nil, web.ValidationError("No group with ID %s", id)
 	}
