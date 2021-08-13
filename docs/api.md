@@ -70,16 +70,41 @@ Otto sessions are automatically cleaned up, so logging out is not mandatory.
 
 Rotate the PSK used to connect to the client and return the new PSK
 
-Expected body:
-```json
-{}
-```
+Expected body: none
 
 Example response:
 ```json
 {
     "data": "example_psk",
     "error": null
+}
+```
+
+**POST /api/hosts/host/:id/heartbeat**
+
+Trigger a heartbeat on a host
+
+Expected body: none
+
+Example response:
+```json
+{
+    "error": {},
+    "code": 200,
+    "data": {
+        "IsReachable": true,
+        "LastAttempt": "2021-08-12T20:01:20.335900268-07:00",
+        "Version": "0.10.2",
+        "LastReply": "2021-08-12T20:01:20.335900134-07:00",
+        "Address": "192.168.0.1",
+        "Properties": {
+            "hostname": "example.host.foo.bar",
+            "kernel_version": "4.18.0-305.10.2.el8_4.x86_64",
+            "kernel_name": "Linux",
+            "distribution_version": "8.4 (Green Obsidian)",
+            "distribution_name": "Rocky Linux"
+        }
+    }
 }
 ```
 
@@ -238,6 +263,12 @@ Example response:
 **GET /api/attachments/attachment/:id**
 
 
+
+**GET /api/attachments/attachment/:id/download**
+
+Expected body: None.
+
+Download the attachment file. May return a binary stream, make sure to check the `Content-Type`.
 
 **POST /api/attachments/attachment/:id**
 
