@@ -25,8 +25,8 @@ func main() {
 		logtic.Log.Level = logtic.LevelDebug
 	}
 
-	logtic.Open()
-	log = logtic.Connect("otto")
+	logtic.Log.Open()
+	log = logtic.Log.Connect("otto")
 
 	l, err := net.Listen("tcp", config.ListenAddr)
 	if err != nil {

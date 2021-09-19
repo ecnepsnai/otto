@@ -37,10 +37,10 @@ func initLogtic(verbose bool) {
 		logtic.Log.Level = logtic.LevelDebug
 	}
 	logtic.Log.FilePath = path.Join(Directories.Logs, "otto.log")
-	if err := logtic.Open(); err != nil {
+	if err := logtic.Log.Open(); err != nil {
 		panic(err)
 	}
-	log = logtic.Connect("otto")
+	log = logtic.Log.Connect("otto")
 }
 
 func startup() {
@@ -57,5 +57,5 @@ func shutdown() {
 	State.Close()
 	dataStoreTeardown()
 	storeTeardown()
-	logtic.Close()
+	logtic.Log.Close()
 }

@@ -1,21 +1,23 @@
 package server
 
-// This file is was generated automatically by Codegen v1.6.0
+// This file is was generated automatically by Codegen v1.8.0
 // Do not make changes to this file as they will be lost
 
 import (
 	"bytes"
 	"encoding/gob"
+	"sync"
 
 	"github.com/ecnepsnai/store"
 )
 
-type stateObject struct {
+type cbgenStateObject struct {
 	store *store.Store
+	locks map[string]*sync.RWMutex
 }
 
 // State the global state object
-var State *stateObject
+var State *cbgenStateObject
 
 // stateSetup load the saved state
 func stateSetup() {
@@ -23,19 +25,34 @@ func stateSetup() {
 	if err != nil {
 		log.Fatal("Error opening state store: %s", err.Error())
 	}
-	state := stateObject{
+	state := cbgenStateObject{
 		store: s,
+		locks: map[string]*sync.RWMutex{
+
+			"TableVersion": {},
+		},
 	}
 	State = &state
 }
 
 // Close closes the state session
-func (s *stateObject) Close() {
+func (s *cbgenStateObject) Close() {
 	s.store.Close()
 }
 
+// GetAll will return a map of all current state values
+func (s *cbgenStateObject) GetAll() map[string]interface{} {
+	return map[string]interface{}{
+
+		"TableVersion": s.GetTableVersion(),
+	}
+}
+
 // GetTableVersion get the TableVersion value
-func (s *stateObject) GetTableVersion() int {
+func (s *cbgenStateObject) GetTableVersion() int {
+	s.locks["TableVersion"].RLock()
+	defer s.locks["TableVersion"].RUnlock()
+
 	d := s.store.Get("TableVersion")
 	if d == nil {
 		return 0
@@ -50,7 +67,10 @@ func (s *stateObject) GetTableVersion() int {
 }
 
 // SetTableVersion set the TableVersion value
-func (s *stateObject) SetTableVersion(value int) {
+func (s *cbgenStateObject) SetTableVersion(value int) {
+	s.locks["TableVersion"].Lock()
+	defer s.locks["TableVersion"].Unlock()
+
 	b, err := cbgenStateEncodeint(value)
 	if err != nil {
 		log.Error("Error encoding %s value for %s: %s", "int", "TableVersion", err.Error())
@@ -61,12 +81,12 @@ func (s *stateObject) SetTableVersion(value int) {
 }
 
 // DefaultTableVersion get the default value for TableVersion
-func (s *stateObject) DefaultTableVersion() int {
+func (s *cbgenStateObject) DefaultTableVersion() int {
 	return 0
 }
 
 // ResetTableVersion resets TableVersion to the default value
-func (s *stateObject) ResetTableVersion() {
+func (s *cbgenStateObject) ResetTableVersion() {
 	s.SetTableVersion(s.DefaultTableVersion())
 }
 

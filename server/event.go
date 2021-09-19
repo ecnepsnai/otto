@@ -9,7 +9,7 @@ import (
 	"github.com/ecnepsnai/otto"
 )
 
-var eventLog = logtic.Connect("event")
+var eventLog = logtic.Log.Connect("event")
 
 // Event describes an Otto server event
 type Event struct {

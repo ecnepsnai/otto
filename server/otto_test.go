@@ -54,7 +54,7 @@ func testTeardown() {
 	State.Close()
 	dataStoreTeardown()
 	storeTeardown()
-	logtic.Close()
+	logtic.Log.Close()
 	if tmpDir != nil {
 		os.RemoveAll(*tmpDir)
 	}

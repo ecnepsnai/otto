@@ -21,7 +21,7 @@ func CronSetup() {
 			Pattern: "1 0 * * *",
 			Name:    "RotateLogs",
 			Exec: func() {
-				logtic.Rotate()
+				logtic.Log.Rotate()
 			},
 		},
 		{

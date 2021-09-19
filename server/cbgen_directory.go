@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.6.0
+// This file is was generated automatically by Codegen v1.8.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -85,10 +85,11 @@ func DirectoryExists(directoryPath string) bool {
 }
 
 // MakeDirectoryIfNotExist make the given directory if it does not exist
-func MakeDirectoryIfNotExist(directoryPath string) {
+func MakeDirectoryIfNotExist(directoryPath string) error {
 	if !DirectoryExists(directoryPath) {
-		os.MkdirAll(directoryPath, 0755)
+		return os.MkdirAll(directoryPath, 0755)
 	}
+	return nil
 }
 
 // FileExists does the given file exist

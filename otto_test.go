@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	for _, arg := range os.Args {
 		if arg == "-test.v=true" {
 			logtic.Log.Level = logtic.LevelDebug
-			logtic.Open()
+			logtic.Log.Open()
 		}
 	}
 
@@ -164,7 +164,7 @@ func TestMalrforedMessageWithEncryptedData(t *testing.T) {
 	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
 	buf.Write(versionBuf)
 	lengthBuf := make([]byte, 4)
-	encryptedData, err := secutil.Encrypt(secutil.RandomBytes(128), psk)
+	encryptedData, err := secutil.Encryption.AES_256_GCM.Encrypt(secutil.RandomBytes(128), psk)
 	if err != nil {
 		panic(err)
 	}

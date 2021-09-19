@@ -18,7 +18,7 @@ import (
 	"github.com/ecnepsnai/secutil"
 )
 
-var log = logtic.Connect("libotto")
+var log = logtic.Log.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
 const ProtocolVersion = uint32(2)
@@ -215,7 +215,7 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := secutil.Decrypt(encryptedData, psk)
+	data, err := secutil.Encryption.AES_256_GCM.Decrypt(encryptedData, psk)
 	if err != nil {
 		log.Error("Error decrypting data: %s", err.Error())
 		return nil, err
@@ -282,7 +282,7 @@ func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk stri
 }
 
 func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
-	encryptedData, err := secutil.Encrypt(data, psk)
+	encryptedData, err := secutil.Encryption.AES_256_GCM.Encrypt(data, psk)
 	if err != nil {
 		log.Error("Error encrypting data: %s", err.Error())
 		return nil
