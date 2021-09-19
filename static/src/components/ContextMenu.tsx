@@ -89,7 +89,12 @@ export class GlobalContextMenuFrame extends React.Component<unknown, GlobalConte
     public static showMenu(menu: JSX.Element): void {
         const menuBackdrop = document.createElement('div');
         menuBackdrop.id = 'menu-backdrop';
-        menuBackdrop.onclick = () => {
+        menuBackdrop.onclick = (e: MouseEvent) => {
+            e.preventDefault();
+            this.removeMenu();
+        };
+        menuBackdrop.oncontextmenu = (e: MouseEvent) => {
+            e.preventDefault();
             this.removeMenu();
         };
         document.body.appendChild(menuBackdrop);

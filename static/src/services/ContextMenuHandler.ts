@@ -21,7 +21,7 @@ export class ContextMenuHandler {
      */
     public readonly onContextMenu = (event: React.MouseEvent): void => {
         event.preventDefault();
-        this.callback(event.clientX, event.clientY);
+        this.callback(event.pageX, event.pageY);
     }
 
     /**
@@ -34,7 +34,7 @@ export class ContextMenuHandler {
         }
 
         this.longPressTimeout = setTimeout(() => {
-            this.callback(event.touches[0].clientX, event.touches[0].clientY);
+            this.callback(event.touches[0].pageX, event.touches[0].pageY);
         }, this.longPressDurationMS);
     }
 
