@@ -76,6 +76,9 @@ for ARCH in 'amd64' 'arm64'; do
         build_server ${OS} ${ARCH} ${PRODUCT_NAME}
     done
 done
+
+cd ${OTTO_PATH}
+git checkout -- cmd/client/cbgen_version.go server/cbgen_version.go || true
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
 cd scripts/
