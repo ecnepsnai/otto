@@ -5,6 +5,7 @@ import (
 
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
+	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
@@ -95,13 +96,12 @@ func (s *hostStoreObject) AllHosts() []Host {
 }
 
 type newHostParameters struct {
-	Name          string
-	Address       string
-	Port          uint32
-	PSK           string
-	LastPSKRotate time.Time
-	GroupIDs      []string
-	Environment   []environ.Variable
+	Name           string
+	Address        string
+	Port           uint32
+	ClientIdentity string
+	GroupIDs       []string
+	Environment    []environ.Variable
 }
 
 func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
@@ -125,24 +125,43 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	}
 
 	host := Host{
-		ID:            newID(),
-		Name:          params.Name,
-		Address:       params.Address,
-		Port:          params.Port,
-		PSK:           params.PSK,
-		LastPSKRotate: params.LastPSKRotate,
-		Enabled:       true,
-		GroupIDs:      groupIDs,
-		Environment:   params.Environment,
+		ID:          newID(),
+		Name:        params.Name,
+		Address:     params.Address,
+		Port:        params.Port,
+		Trust:       HostTrust{},
+		Enabled:     true,
+		GroupIDs:    groupIDs,
+		Environment: params.Environment,
 	}
 	if err := limits.Check(host); err != nil {
 		return nil, ErrorUser(err.Error())
+	}
+	if params.ClientIdentity != "" {
+		host.Trust.TrustedIdentity = params.ClientIdentity
+		host.Trust.LastTrustUpdate = time.Now()
+	}
+
+	serverId, err := otto.NewIdentity()
+	if err != nil {
+		log.PError("Error generating identity for host", map[string]interface{}{
+			"host_name": params.Name,
+			"error":     err.Error(),
+		})
+		return nil, ErrorFrom(err)
 	}
 
 	if err := s.Table.Add(host); err != nil {
 		log.Error("Error adding new host '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
+	IdentityStore.Set(host.ID, serverId)
+
+	log.PInfo("Registered new host", map[string]interface{}{
+		"name":    host.Name,
+		"address": host.Address,
+		"port":    host.Port,
+	})
 
 	log.Info("Added new host '%s'", params.Name)
 	HostCache.Update()
@@ -151,14 +170,12 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 }
 
 type editHostParameters struct {
-	Name          string
-	Address       string
-	Port          uint32
-	PSK           string
-	LastPSKRotate time.Time
-	Enabled       bool
-	GroupIDs      []string
-	Environment   []environ.Variable
+	Name        string
+	Address     string
+	Port        uint32
+	Enabled     bool
+	GroupIDs    []string
+	Environment []environ.Variable
 }
 
 func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host, *Error) {
@@ -185,8 +202,6 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	host.Name = params.Name
 	host.Address = params.Address
 	host.Port = params.Port
-	host.PSK = params.PSK
-	host.LastPSKRotate = params.LastPSKRotate
 	host.Enabled = params.Enabled
 	host.GroupIDs = groupIDs
 	host.Environment = params.Environment
@@ -203,6 +218,24 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 	HostCache.Update()
 	GroupCache.Update()
 	return host, nil
+}
+
+func (s *hostStoreObject) UpdateHostTrust(hostID string, trust HostTrust) *Error {
+	host := s.HostWithID(hostID)
+	if host == nil {
+		return ErrorServer("no host with ID %s", hostID)
+	}
+
+	host.Trust = trust
+	if err := s.Table.Update(*host); err != nil {
+		log.Error("Error updating host '%s': %s", host.Name, err.Error())
+		return ErrorFrom(err)
+	}
+
+	log.Info("Updating host trust '%s'", host.Name)
+	HostCache.Update()
+	GroupCache.Update()
+	return nil
 }
 
 func (s *hostStoreObject) DeleteHost(host *Host) *Error {

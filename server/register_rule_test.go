@@ -1,12 +1,25 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"testing"
 
 	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
 )
+
+func encryptRegistrationRequest(request otto.RegisterRequest, key string) ([]byte, error) {
+	decryptedData, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	return secutil.Encryption.AES_256_GCM.Encrypt(decryptedData, key)
+}
 
 func TestAddGetRegisterRule(t *testing.T) {
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -195,18 +208,29 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	o.Register.Key = Key
 	o.Save()
 
-	mockRequest := func(remoteAddr string, params otto.RegisterRequest) web.Request {
-		request := web.MockRequest(nil, map[string]string{}, params)
-		request.HTTP.Header.Add("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
-		request.HTTP.RemoteAddr = remoteAddr
-		return request
+	mockRequest := func(remoteAddr string, key string, params otto.RegisterRequest) web.Request {
+		encryptedData, err := encryptRegistrationRequest(params, key)
+		if err != nil {
+			panic(err)
+		}
+
+		h := http.Header{}
+		h.Set("User-Agent", "go test")
+		h.Set("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
+
+		return web.Request{
+			HTTP: &http.Request{
+				Body:       io.NopCloser(bytes.NewReader(encryptedData)),
+				Header:     h,
+				RemoteAddr: remoteAddr,
+			},
+		}
 	}
 
 	// Test that a host that doesn't match any rules gets added to the default group
 	defaultAddress := randomString(6)
-	h := handle{}
-	_, webErr := h.Register(mockRequest(defaultAddress, otto.RegisterRequest{
-		Key:  Key,
+	v := view{}
+	if webReply := v.Register(mockRequest(defaultAddress, Key, otto.RegisterRequest{
 		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -215,9 +239,8 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    randomString(6),
 			DistributionVersion: randomString(6),
 		},
-	}))
-	if webErr != nil {
-		t.Errorf("Unexpected error trying to register valid host")
+	}), web.Writer{}); webReply.Status != 200 {
+		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(defaultAddress) == nil {
 		t.Errorf("Host was not registered")
@@ -225,8 +248,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 
 	// Test that a host that matches a rule gets added to the correct group
 	centos8address := randomString(6)
-	_, webErr = h.Register(mockRequest(centos8address, otto.RegisterRequest{
-		Key:  Key,
+	if webReply := v.Register(mockRequest(centos8address, Key, otto.RegisterRequest{
 		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -235,9 +257,8 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    "CentOS Linux",
 			DistributionVersion: "8",
 		},
-	}))
-	if webErr != nil {
-		t.Errorf("Unexpected error trying to register valid host")
+	}), web.Writer{}); webReply.Status != 200 {
+		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(centos8address) == nil {
 		t.Errorf("Host was not registered")
@@ -248,8 +269,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 
 	// Test that an incorrect Key does not get registered
 	incorrectKeyAddress := randomString(6)
-	_, webErr = h.Register(mockRequest(incorrectKeyAddress, otto.RegisterRequest{
-		Key:  randomString(6),
+	if webReply := v.Register(mockRequest(incorrectKeyAddress, randomString(12), otto.RegisterRequest{
 		Port: 12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
@@ -258,9 +278,8 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    "CentOS Linux",
 			DistributionVersion: "8",
 		},
-	}))
-	if webErr == nil {
-		t.Errorf("No error seen when one expected")
+	}), web.Writer{}); webReply.Status == 200 {
+		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(incorrectKeyAddress) != nil {
 		t.Errorf("Host was registered when one was not expected")

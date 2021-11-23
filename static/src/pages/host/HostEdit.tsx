@@ -67,13 +67,6 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
         });
     };
 
-    const changePSK = (PSK: string) => {
-        setHost(host => {
-            host.PSK = PSK;
-            return { ...host };
-        });
-    };
-
     const enabledCheckbox = () => {
         if (isNew) {
             return null;
@@ -181,11 +174,6 @@ export const HostEdit: React.FC<HostEditProps> = (props: HostEditProps) => {
                     label="Port"
                     defaultValue={host.Port}
                     onChange={changePort}
-                    required />
-                <Input.Password
-                    label="Pre-Shared Key"
-                    defaultValue={host.PSK}
-                    onChange={changePSK}
                     required />
                 {enabledCheckbox()}
                 <Card.Card className="mt-3">

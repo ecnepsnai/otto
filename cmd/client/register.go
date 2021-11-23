@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	rlog "log"
 	"net"
 	"net/http"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/ecnepsnai/osquery"
 	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/secutil"
 )
 
 var registerProperties otto.RegisterRequestProperties
@@ -68,20 +71,33 @@ func tryAutoRegister() {
 	// Get the current uid and gid for the defaults
 	uid, gid := getUIDandGID()
 
+	if err := generateIdentity(); err != nil {
+		panic("Error generating client identity: " + err.Error())
+	}
+	signer, err := loadClientIdentity()
+	if err != nil {
+		panic("Error reading client identity: " + err.Error())
+	}
+	rlog.Printf("Client identity: %s", base64.RawURLEncoding.EncodeToString(signer.PublicKey().Marshal()))
+
 	// Make the request
 	request := otto.RegisterRequest{
-		Key:        key,
-		Port:       port,
-		Properties: registerProperties,
+		ClientIdentity: base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()),
+		Port:           port,
+		Properties:     registerProperties,
 	}
 	data, err := json.Marshal(request)
 	if err != nil {
 		panic("Error forming JSON request")
 	}
+	encryptedData, err := secutil.Encryption.AES_256_GCM.Encrypt(data, key)
+	if err != nil {
+		panic("Error encrypting request")
+	}
 
 	// Prepare the request
 	url := fmt.Sprintf("%s/api/register", host)
-	req, err := http.NewRequest("PUT", url, bytes.NewReader(data))
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(encryptedData))
 	if err != nil {
 		panic("Error forming HTTP request")
 	}
@@ -107,17 +123,23 @@ func tryAutoRegister() {
 		rlog.Fatalf("HTTP Error %d from otto server. Response: %s", response.StatusCode, buf.String())
 	}
 
-	// Parse the response
-	type responseType struct {
-		Data otto.RegisterResponse `json:"data"`
+	registerResponse := otto.RegisterResponse{}
+
+	encryptedResponse, err := io.ReadAll(response.Body)
+	if err != nil {
+		panic("Error reading reply")
 	}
-	registerResponse := responseType{}
-	if err := json.NewDecoder(response.Body).Decode(&registerResponse); err != nil {
+	decryptedResponse, err := secutil.Encryption.AES_256_GCM.Decrypt(encryptedResponse, key)
+	if err != nil {
+		panic("Error decrypting reply")
+	}
+	if err := json.Unmarshal(decryptedResponse, &registerResponse); err != nil {
 		rlog.Fatalf("Error decoding response body: %s", err.Error())
 	}
-	if registerResponse.Data.PSK == "" {
-		rlog.Fatalf("No PSK returned from otto server")
+	if registerResponse.ServerIdentity == "" {
+		rlog.Fatalf("No server identity returned from otto server")
 	}
+	rlog.Printf("Server identity: %s", registerResponse.ServerIdentity)
 
 	var listenAddr = fmt.Sprintf("0.0.0.0:%d", port)
 	var allowFrom = "0.0.0.0/0"
@@ -129,13 +151,14 @@ func tryAutoRegister() {
 
 	// Save the config
 	conf := clientConfig{
-		PSK:        registerResponse.Data.PSK,
-		LogPath:    ".",
-		DefaultUID: uid,
-		DefaultGID: gid,
-		Path:       os.Getenv("PATH"),
-		ListenAddr: listenAddr,
-		AllowFrom:  allowFrom,
+		IdentityPath:   otto_IDENTITY_FILE_NAME,
+		ServerIdentity: registerResponse.ServerIdentity,
+		LogPath:        ".",
+		DefaultUID:     uid,
+		DefaultGID:     gid,
+		Path:           os.Getenv("PATH"),
+		ListenAddr:     listenAddr,
+		AllowFrom:      allowFrom,
 	}
 	config = &conf
 	if err := saveNewConfig(conf); err != nil {
@@ -143,11 +166,9 @@ func tryAutoRegister() {
 	}
 	rlog.Printf("Successfully registered with otto server '%s', configuration: %+v", host, conf)
 
-	for _, script := range registerResponse.Data.Scripts {
+	for _, script := range registerResponse.Scripts {
 		rlog.Printf("Executing first-run script: %s", script.Name)
-		devNull, _ := os.OpenFile(os.DevNull, os.O_WRONLY, os.ModePerm)
-		runScript(devNull, script, nil)
-		devNull.Close()
+		runScript(nil, script, nil)
 	}
 
 	if exitWhenFinished {

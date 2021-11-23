@@ -95,7 +95,6 @@ func postBootstrapArgs() {
 				Name:     "el7-host.example.com",
 				Address:  "el7-host.example.com",
 				Port:     12444,
-				PSK:      "password1234",
 				GroupIDs: []string{el7.ID},
 			})
 			if err != nil {
@@ -105,7 +104,6 @@ func postBootstrapArgs() {
 				Name:     "el8-host.example.com",
 				Address:  "el8-host.example.com",
 				Port:     12444,
-				PSK:      "password1234",
 				GroupIDs: []string{el8.ID},
 			})
 			if err != nil {

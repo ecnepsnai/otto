@@ -8,7 +8,7 @@ about the client.
 To enable client registration, check "Allow Hosts to Register Themselves" in the options page of the Otto web UI.
 
 A register key must be specified. This key must be specified when telling the client to register itself with the Otto
-server.
+server. This key is used to encrypt the registration request and response, using AES-265-GCM.
 
 Registration rules can be added to automatically assign hosts to specific groups based off of information about the
 operating system of the host. Each rule must have at least one clause, which is a simple regex test against a predefined

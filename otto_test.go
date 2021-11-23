@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto"
@@ -12,7 +13,25 @@ import (
 	fuzz "github.com/google/gofuzz"
 )
 
-const psk = "example_psk_please_dont_use_this"
+func MockOttoConnection(buf *bytes.Buffer) *otto.Connection {
+	return otto.MockConnection(mockConnectionType{buf})
+}
+
+type mockConnectionType struct {
+	buf *bytes.Buffer
+}
+
+func (m mockConnectionType) Read(p []byte) (n int, err error) {
+	return m.buf.Read(p)
+}
+
+func (m mockConnectionType) Write(p []byte) (n int, err error) {
+	return m.buf.Write(p)
+}
+
+func (m mockConnectionType) Close() error {
+	return nil
+}
 
 func TestMain(m *testing.M) {
 	for _, arg := range os.Args {
@@ -31,13 +50,14 @@ func TestHeartbeat(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
 
 	heartbeatRequest := otto.MessageHeartbeatRequest{ServerVersion: "foo"}
-	if err := otto.WriteMessage(otto.MessageTypeHeartbeatRequest, heartbeatRequest, buf, psk); err != nil {
+	if err := conn.WriteMessage(otto.MessageTypeHeartbeatRequest, heartbeatRequest); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
 
-	rMessageType, rHeartbeatRequest, err := otto.ReadMessage(buf, psk)
+	rMessageType, rHeartbeatRequest, err := conn.ReadMessage()
 	if err != nil {
 		t.Fatalf("Error reading heartbeat message: %s", err.Error())
 	}
@@ -56,11 +76,13 @@ func TestUnsupportedProtocolVersion(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	versionBuf := make([]byte, 4)
 	binary.PutVarint(versionBuf, -1)
 	buf.Write(versionBuf)
 	buf.Write(secutil.RandomBytes(128))
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message data")
 	}
@@ -73,15 +95,17 @@ func TestMalformedMessageType(t *testing.T) {
 	f := fuzz.New()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	var messageType uint32
 	f.Fuzz(&messageType)
 
 	heartbeatRequest := otto.MessageHeartbeatRequest{ServerVersion: "foo"}
-	if err := otto.WriteMessage(messageType, heartbeatRequest, buf, psk); err != nil {
+	if err := conn.WriteMessage(messageType, heartbeatRequest); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
 
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message type")
 	}
@@ -94,14 +118,16 @@ func TestMalformedMessageData(t *testing.T) {
 	f := fuzz.New()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	var messageData map[string]string
 	f.Fuzz(&messageData)
 
-	if err := otto.WriteMessage(otto.MessageTypeHeartbeatRequest, messageData, buf, psk); err != nil {
+	if err := conn.WriteMessage(otto.MessageTypeHeartbeatRequest, messageData); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
 
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message data")
 	}
@@ -112,8 +138,10 @@ func TestMalformedMessageEntireMessage(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	buf.Write(secutil.RandomBytes(128))
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message data")
 	}
@@ -125,11 +153,13 @@ func TestMalformedMessageWithProtocolVersion(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	versionBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
 	buf.Write(versionBuf)
 	buf.Write(secutil.RandomBytes(128))
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message data")
 	}
@@ -141,6 +171,8 @@ func TestMalformedMessageWithProtocolAndLength(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	versionBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
 	buf.Write(versionBuf)
@@ -148,30 +180,7 @@ func TestMalformedMessageWithProtocolAndLength(t *testing.T) {
 	binary.BigEndian.PutUint32(lengthBuf, 128)
 	buf.Write(lengthBuf)
 	buf.Write(secutil.RandomBytes(128))
-	_, _, err := otto.ReadMessage(buf, psk)
-	if err == nil {
-		t.Fatalf("No error seen when one expected for fuzzed message data")
-	}
-}
-
-// Test that otto behaves in an expected mannor when it receives a message that has a valid protocol version number,
-// valid data length, and properly encrypted data but that data is fuzzed.
-func TestMalrforedMessageWithEncryptedData(t *testing.T) {
-	t.Parallel()
-
-	buf := &bytes.Buffer{}
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
-	buf.Write(versionBuf)
-	lengthBuf := make([]byte, 4)
-	encryptedData, err := secutil.Encryption.AES_256_GCM.Encrypt(secutil.RandomBytes(128), psk)
-	if err != nil {
-		panic(err)
-	}
-	binary.BigEndian.PutUint32(lengthBuf, uint32(len(encryptedData)))
-	buf.Write(lengthBuf)
-	buf.Write(encryptedData)
-	_, _, err = otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for fuzzed message data")
 	}
@@ -182,8 +191,10 @@ func TestSingleByteMessage(t *testing.T) {
 	t.Parallel()
 
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	buf.Write([]byte{'1'})
-	_, _, err := otto.ReadMessage(buf, psk)
+	_, _, err := conn.ReadMessage()
 	if err == nil {
 		t.Fatalf("No error seen when one expected for single byte message")
 	}
@@ -196,6 +207,8 @@ func TestIncorrectDataLength(t *testing.T) {
 
 	// Reported length is shorter than actual
 	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
 	versionBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
 	buf.Write(versionBuf)
@@ -203,12 +216,14 @@ func TestIncorrectDataLength(t *testing.T) {
 	binary.BigEndian.PutUint32(lengthBuf, 32)
 	buf.Write(lengthBuf)
 	buf.Write(secutil.RandomBytes(128))
-	if _, _, err := otto.ReadMessage(buf, psk); err == nil {
+	if _, _, err := conn.ReadMessage(); err == nil {
 		t.Fatalf("No error seen when one expected for false message length")
 	}
 
 	// Reported length is larger than actual
 	buf = &bytes.Buffer{}
+	conn = MockOttoConnection(buf)
+
 	versionBuf = make([]byte, 4)
 	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
 	buf.Write(versionBuf)
@@ -216,7 +231,54 @@ func TestIncorrectDataLength(t *testing.T) {
 	binary.BigEndian.PutUint32(lengthBuf, 128)
 	buf.Write(lengthBuf)
 	buf.Write(secutil.RandomBytes(6))
-	if _, _, err := otto.ReadMessage(buf, psk); err == nil {
+	if _, _, err := conn.ReadMessage(); err == nil {
 		t.Fatalf("No error seen when one expected for false message length")
 	}
+}
+
+func TestConnection(t *testing.T) {
+	listenerIdentity, err := otto.NewIdentity()
+	if err != nil {
+		panic(err)
+	}
+	dialerIdentity, err := otto.NewIdentity()
+	if err != nil {
+		panic(err)
+	}
+
+	go otto.Listen(otto.ListenOptions{
+		Address:          "127.0.0.1:12400",
+		Identity:         listenerIdentity.Signer(),
+		TrustedPublicKey: dialerIdentity.PublicKeyString(),
+	}, func(c *otto.Connection) {
+		messageType, _, err := c.ReadMessage()
+		if err != nil {
+			t.Errorf("Error reading message: %s", err.Error())
+		}
+		if messageType != otto.MessageTypeHeartbeatRequest {
+			t.Errorf("Unexpected message type")
+		}
+		c.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{})
+	})
+	time.Sleep(5 * time.Millisecond)
+
+	c, err := otto.Dial(otto.DialOptions{
+		Network:          "tcp",
+		Address:          "127.0.0.1:12400",
+		Identity:         dialerIdentity.Signer(),
+		TrustedPublicKey: listenerIdentity.PublicKeyString(),
+	})
+	if err != nil {
+		t.Fatalf("Error dialing: %s", err.Error())
+	}
+
+	c.WriteMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{})
+	messageType, _, err := c.ReadMessage()
+	if err != nil {
+		t.Errorf("Error reading message: %s", err.Error())
+	}
+	if messageType != otto.MessageTypeHeartbeatResponse {
+		t.Errorf("Unexpected message type")
+	}
+	c.Close()
 }

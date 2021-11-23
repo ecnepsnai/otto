@@ -7,15 +7,20 @@ package otto
 
 import (
 	"bytes"
+	"crypto/ed25519"
+	"crypto/rand"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
 	"io"
+	"net"
 	"strings"
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/secutil"
+	"golang.org/x/crypto/ssh"
 )
 
 var log = logtic.Log.Connect("libotto")
@@ -65,7 +70,6 @@ type MessageTriggerAction struct {
 	Action uint32 `json:"action"`
 	Script Script `json:"script"`
 	File   File   `json:"file"`
-	NewPSK string `json:"new_psk"`
 }
 
 // MessageCancelAction describes a request to cancel an action
@@ -99,7 +103,7 @@ const (
 	ActionExit
 	ActionReboot
 	ActionShutdown
-	ActionUpdatePSK
+	ActionUpdateIdentity
 )
 
 // Script describes a script
@@ -151,9 +155,9 @@ type File struct {
 
 // RegisterRequest describes a register request
 type RegisterRequest struct {
-	Key        string                    `json:"key"`
-	Port       uint32                    `json:"port"`
-	Properties RegisterRequestProperties `json:"properties"`
+	ClientIdentity string                    `json:"identity"`
+	Port           uint32                    `json:"port"`
+	Properties     RegisterRequestProperties `json:"properties"`
 }
 
 // RegisterRequestProperties describes properties for a register request
@@ -167,11 +171,11 @@ type RegisterRequestProperties struct {
 
 // RegisterResponse describes the response to a register request
 type RegisterResponse struct {
-	PSK     string   `json:"psk"`
-	Scripts []Script `json:"scripts,omitempty"`
+	ServerIdentity string   `json:"identity"`
+	Scripts        []Script `json:"scripts,omitempty"`
 }
 
-func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
+func readFrame(r io.Reader) ([]byte, error) {
 	versionBuf := make([]byte, 4)
 	if _, err := io.ReadFull(r, versionBuf); err != nil {
 		if err == io.EOF {
@@ -201,8 +205,8 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	encryptedData := make([]byte, dataLength)
-	readLength, err := io.ReadFull(r, encryptedData)
+	data := make([]byte, dataLength)
+	readLength, err := io.ReadFull(r, data)
 	if err != nil {
 		if err == io.ErrUnexpectedEOF {
 			log.PError("Incorrect data length", map[string]interface{}{
@@ -211,13 +215,7 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 			})
 			return nil, fmt.Errorf("bad request length")
 		}
-		log.Error("Error reading encrypted data: %s", err.Error())
-		return nil, err
-	}
-
-	data, err := secutil.Encryption.AES_256_GCM.Decrypt(encryptedData, psk)
-	if err != nil {
-		log.Error("Error decrypting data: %s", err.Error())
+		log.Error("Error reading data: %s", err.Error())
 		return nil, err
 	}
 
@@ -225,10 +223,10 @@ func readEncryptedFrame(r io.Reader, psk string) ([]byte, error) {
 }
 
 // ReadMessage try to read a message from the given reader. Returns the message type, the message data, or an error
-func ReadMessage(r io.Reader, psk string) (uint32, interface{}, error) {
-	data, err := readEncryptedFrame(r, psk)
+func (c *Connection) ReadMessage() (uint32, interface{}, error) {
+	data, err := readFrame(c.w)
 	if err != nil {
-		log.Error("Error reading encrypted data: %s", err.Error())
+		log.Error("Error reading data: %s", err.Error())
 		return 0, nil, err
 	}
 	if data == nil {
@@ -250,7 +248,7 @@ func ReadMessage(r io.Reader, psk string) (uint32, interface{}, error) {
 }
 
 // WriteMessage try to write a message to the given writer.
-func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk string) error {
+func (c *Connection) WriteMessage(messageType uint32, message interface{}) error {
 	messageData, err := EncodeMessage(messageType, message)
 	if err != nil {
 		log.Error("Error encoding message: %s", err.Error())
@@ -278,20 +276,14 @@ func WriteMessage(messageType uint32, message interface{}, w io.Writer, psk stri
 		"message_data_length": messageDataLength,
 		"total_length":        dataLength,
 	})
-	return writeEncryptedFrame(data, psk, w)
+	return writeFrame(data, c.w)
 }
 
-func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
-	encryptedData, err := secutil.Encryption.AES_256_GCM.Encrypt(data, psk)
-	if err != nil {
-		log.Error("Error encrypting data: %s", err.Error())
-		return nil
-	}
-
+func writeFrame(data []byte, w io.Writer) error {
 	versionBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(versionBuf, ProtocolVersion)
 
-	dataLength := len(encryptedData)
+	dataLength := len(data)
 	lenBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(lenBuf, uint32(dataLength))
 
@@ -306,23 +298,23 @@ func writeEncryptedFrame(data []byte, psk string, w io.Writer) error {
 		replyBuf[i] = b
 		i++
 	}
-	for _, b := range encryptedData {
+	for _, b := range data {
 		replyBuf[i] = b
 		i++
 	}
 
 	wrote, err := w.Write(replyBuf)
 	log.PDebug("Wrote frame", map[string]interface{}{
-		"encrypted_length": dataLength,
-		"version":          ProtocolVersion,
-		"total":            wrote,
+		"data_length": dataLength,
+		"version":     ProtocolVersion,
+		"total":       wrote,
 	})
 	if wrote != replyLength {
 		log.Error("Unable to write all of reply: wrote=%d total=%d", wrote, replyLength)
 		return fmt.Errorf("out of space")
 	}
 	if err != nil {
-		log.Error("Error writing encrypted data: %s", err.Error())
+		log.Error("Error writing data: %s", err.Error())
 		return err
 	}
 	return nil
@@ -394,4 +386,235 @@ func EncodeMessage(messageType uint32, message interface{}) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (c *Connection) Close() error {
+	return c.w.Close()
+}
+
+// Identity is DER encoded private key
+type Identity []byte
+
+// NewIdentity will generate a new ed25519 identity
+func NewIdentity() (Identity, error) {
+	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		return nil, err
+	}
+
+	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return privateKeyBytes, nil
+}
+
+// ParseIdentity will parse the data as an identity
+func ParseIdentity(data []byte) (Identity, error) {
+	pkey, err := x509.ParsePKCS8PrivateKey(data)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := ssh.NewSignerFromKey(pkey); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// Signer return the SSH signer for the identity
+func (i Identity) Signer() ssh.Signer {
+	privateKey, err := x509.ParsePKCS8PrivateKey(i)
+	if err != nil {
+		panic(err)
+	}
+
+	signer, err := ssh.NewSignerFromKey(privateKey)
+	if err != nil {
+		panic(err)
+	}
+
+	return signer
+}
+
+// PublicKey will return a DER-encoded representation of the public key for this identity
+func (i Identity) PublicKey() ssh.PublicKey {
+	return i.Signer().PublicKey()
+}
+
+// String will return a base64-encoded representation of the identity
+func (i Identity) String() string {
+	return base64.StdEncoding.EncodeToString(i)
+}
+
+// PublicKey will return a base64-encoded representation of the public key for this identity
+func (i Identity) PublicKeyString() string {
+	return base64.StdEncoding.EncodeToString(i.PublicKey().Marshal())
+}
+
+const sshChannelName = "otto"
+
+// Connection describes a connection between the Otto Server and Otto Host
+type Connection struct {
+	w          io.ReadWriteCloser
+	remoteAddr net.Addr
+	localAddr  net.Addr
+}
+
+func MockConnection(w io.ReadWriteCloser) *Connection {
+	return &Connection{
+		w: w,
+	}
+}
+
+func (c *Connection) RemoteAddr() net.Addr {
+	return c.remoteAddr
+}
+
+func (c *Connection) LocalAddr() net.Addr {
+	return c.localAddr
+}
+
+// ListenOptions describes options for listening
+type ListenOptions struct {
+	Address          string
+	AllowFrom        *net.IPNet
+	Identity         ssh.Signer
+	TrustedPublicKey string
+}
+
+// Listen will start a SSH server as defined by the options. After a successful handshake, connections are passed to
+// handle.
+func Listen(options ListenOptions, handle func(conn *Connection)) {
+	sshConfig := &ssh.ServerConfig{
+		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
+			log.PDebug("Handshake", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+			})
+			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
+				log.Debug("Recognized public key")
+				return &ssh.Permissions{
+					Extensions: map[string]string{
+						"pubkey-fp": ssh.FingerprintSHA256(pubKey),
+					},
+				}, nil
+			}
+			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+			})
+			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
+		},
+	}
+	sshConfig.AddHostKey(options.Identity)
+
+	l, err := net.Listen("tcp", options.Address)
+	if err != nil {
+		panic(err)
+	}
+	log.Info("Otto client listening on %s", options.Address)
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			continue
+		}
+
+		if options.AllowFrom != nil && !options.AllowFrom.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
+			log.Warn("Rejecting connection from server outside of allowed network: %s", c.RemoteAddr().String())
+			c.Close()
+			continue
+		}
+
+		_, chans, reqs, err := ssh.NewServerConn(c, sshConfig)
+		if err != nil {
+			log.PError("SSH handshake error", map[string]interface{}{
+				"remote_addr": c.RemoteAddr().String(),
+				"error":       err.Error(),
+			})
+			c.Close()
+			continue
+		}
+
+		go ssh.DiscardRequests(reqs)
+
+		for newChannel := range chans {
+			if newChannel.ChannelType() != sshChannelName {
+				log.PError("Unknown SSH channel", map[string]interface{}{
+					"channel_type": newChannel.ChannelType(),
+					"remote_addr":  c.RemoteAddr().String(),
+				})
+				newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+				continue
+			}
+			channel, _, err := newChannel.Accept()
+			if err != nil {
+				log.PError("SSH channel error", map[string]interface{}{
+					"remote_addr": c.RemoteAddr().String(),
+					"error":       err.Error(),
+				})
+				break
+			}
+			go handle(&Connection{
+				w:          channel,
+				remoteAddr: c.RemoteAddr(),
+				localAddr:  c.LocalAddr(),
+			})
+		}
+	}
+}
+
+// DialOptions describes options for dialing to a host
+type DialOptions struct {
+	Network          string
+	Address          string
+	Identity         ssh.Signer
+	TrustedPublicKey string
+	Timeout          time.Duration
+}
+
+// Dial will dial the host specified by the options and perform a SSH handshake with it.
+func Dial(options DialOptions) (*Connection, error) {
+	clientConfig := &ssh.ClientConfig{
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(options.Identity),
+		},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			log.PDebug("Handshake", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
+			})
+			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(key.Marshal()) {
+				log.Debug("Recognized public key")
+				return nil
+			}
+			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
+			})
+			return fmt.Errorf("unknown public key %x", key.Marshal())
+		},
+		Timeout: options.Timeout,
+	}
+
+	client, err := ssh.Dial(options.Network, options.Address, clientConfig)
+	if err != nil {
+		log.PError("Error connecting to host", map[string]interface{}{
+			"address": options.Address,
+			"error":   err.Error(),
+		})
+		return nil, err
+	}
+
+	channel, _, err := client.OpenChannel(sshChannelName, nil)
+	if err != nil {
+		log.PError("Error connecting to host", map[string]interface{}{
+			"address": options.Address,
+			"error":   err.Error(),
+		})
+		return nil, err
+	}
+	log.Debug("Connected to host %s", options.Address)
+
+	return &Connection{
+		w:          channel,
+		remoteAddr: client.RemoteAddr(),
+		localAddr:  client.LocalAddr(),
+	}, nil
 }

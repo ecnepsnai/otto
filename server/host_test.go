@@ -12,7 +12,6 @@ func TestAddGetHost(t *testing.T) {
 		Name:    name,
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -40,7 +39,6 @@ func TestEditHost(t *testing.T) {
 		Name:    name,
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -53,7 +51,6 @@ func TestEditHost(t *testing.T) {
 		Name:    randomString(6),
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 		Enabled: true,
 	})
 	if err != nil {
@@ -77,7 +74,6 @@ func TestDeleteHost(t *testing.T) {
 		Name:    name,
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -105,7 +101,6 @@ func TestAddDuplicateHost(t *testing.T) {
 		Name:    name,
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -118,7 +113,6 @@ func TestAddDuplicateHost(t *testing.T) {
 		Name:    name,
 		Address: randomString(6),
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -128,7 +122,6 @@ func TestAddDuplicateHost(t *testing.T) {
 		Name:    randomString(6),
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -143,7 +136,6 @@ func TestRenameDuplicateHost(t *testing.T) {
 		Name:    name,
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -156,7 +148,6 @@ func TestRenameDuplicateHost(t *testing.T) {
 		Name:    randomString(6),
 		Address: randomString(6),
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -169,7 +160,6 @@ func TestRenameDuplicateHost(t *testing.T) {
 		Name:    name,
 		Address: randomString(6),
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -179,7 +169,6 @@ func TestRenameDuplicateHost(t *testing.T) {
 		Name:    randomString(6),
 		Address: address,
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -208,7 +197,6 @@ func TestHostRemoveWithSchedule(t *testing.T) {
 		Name:     "host",
 		Address:  "host",
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {

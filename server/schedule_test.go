@@ -44,7 +44,6 @@ func TestAddGetScheduleGroup(t *testing.T) {
 		Name:     randomString(6),
 		Address:  randomString(6),
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {
@@ -105,7 +104,6 @@ func TestAddGetScheduleHost(t *testing.T) {
 		Name:    randomString(6),
 		Address: randomString(6),
 		Port:    12444,
-		PSK:     randomString(6),
 	})
 	if err != nil {
 		t.Fatalf("Error making new host: %s", err.Message)
@@ -176,7 +174,6 @@ func TestEditSchedule(t *testing.T) {
 		Name:     randomString(6),
 		Address:  randomString(6),
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {
@@ -257,7 +254,6 @@ func TestDeleteSchedule(t *testing.T) {
 		Name:     randomString(6),
 		Address:  randomString(6),
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {
@@ -329,7 +325,6 @@ func TestAddDuplicateSchedule(t *testing.T) {
 		Name:     randomString(6),
 		Address:  randomString(6),
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {
@@ -405,7 +400,6 @@ func TestRenameDuplicateSchedule(t *testing.T) {
 		Name:     randomString(6),
 		Address:  randomString(6),
 		Port:     12444,
-		PSK:      randomString(6),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {

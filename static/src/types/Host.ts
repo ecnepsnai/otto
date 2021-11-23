@@ -11,11 +11,16 @@ export interface HostType {
     Name?: string;
     Address?: string;
     Port?: number;
-    PSK?: string;
-    LastPSKRotate?: string;
+    Trust?: TrustType;
     Enabled?: boolean;
     GroupIDs?: string[];
     Environment?: Variable[];
+}
+
+export interface TrustType {
+    TrustedIdentity?: string;
+    UntrustedIdentity?: string;
+    LastTrustUpdate?: string;
 }
 
 export class Host {
@@ -27,7 +32,6 @@ export class Host {
             Name: '',
             Address: '',
             Port: 12444,
-            PSK: '',
             Enabled: true,
             GroupIDs: [],
             Environment: [],

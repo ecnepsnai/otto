@@ -50,9 +50,9 @@
                 "value": "\"shutdown\""
             },
             {
-                "key": "UpdatePSK",
-                "description": "Update the client PSK",
-                "value": "\"update_psk\""
+                "key": "UpdateIdentity",
+                "description": "Update the server identity on the client",
+                "value": "\"update_identity\""
             }
         ]
     },

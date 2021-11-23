@@ -2,6 +2,7 @@ package server
 
 import (
 	"sort"
+	"time"
 
 	"github.com/ecnepsnai/web"
 )
@@ -60,25 +61,6 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 	return schedules, nil
 }
 
-func (h *handle) HostRotatePSK(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
-
-	host := HostCache.ByID(id)
-	if host == nil {
-		return nil, web.ValidationError("No host with ID %s", id)
-	}
-
-	newPSK, err := host.RotatePSKNow()
-	if err != nil {
-		if err.Server {
-			return nil, web.CommonErrors.ServerError
-		}
-		return nil, web.ValidationError(err.Message)
-	}
-
-	return newPSK, nil
-}
-
 func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
@@ -89,6 +71,50 @@ func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Er
 
 	host.Ping()
 	return heartbeatStore.LastHeartbeat(host), nil
+}
+
+func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) {
+	id := request.Params.ByName("id")
+
+	host := HostCache.ByID(id)
+	if host == nil {
+		return nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	type hostTrustUpdateRequest struct {
+		Action    string
+		PublicKey string
+	}
+
+	trustUpdateRequest := hostTrustUpdateRequest{}
+	if err := request.DecodeJSON(&trustUpdateRequest); err != nil {
+		return nil, err
+	}
+
+	if trustUpdateRequest.Action != "permit" && trustUpdateRequest.Action != "deny" {
+		return nil, web.ValidationError("invalid action")
+	}
+
+	if trustUpdateRequest.Action == "permit" {
+		if trustUpdateRequest.PublicKey != "" {
+			host.Trust.TrustedIdentity = trustUpdateRequest.PublicKey
+			host.Trust.UntrustedIdentity = ""
+		} else {
+			host.Trust.TrustedIdentity = host.Trust.UntrustedIdentity
+		}
+	} else if trustUpdateRequest.Action == "deny" {
+		host.Trust.TrustedIdentity = ""
+	}
+	host.Trust.LastTrustUpdate = time.Now()
+
+	if err := HostStore.UpdateHostTrust(id, host.Trust); err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	return host, nil
 }
 
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {

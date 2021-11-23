@@ -11,7 +11,7 @@ import (
 	"github.com/ecnepsnai/otto"
 )
 
-func runScript(c io.Writer, script otto.Script, cancel chan bool) otto.ScriptResult {
+func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto.ScriptResult {
 	var proc *os.Process
 	canCancel := true
 	go func() {
@@ -132,13 +132,13 @@ func runScript(c io.Writer, script otto.Script, cancel chan bool) otto.ScriptRes
 			if outputLength > lastLen {
 				lastLen = outputLength
 				log.Debug("Read %dB from stdout & stderr", outputLength)
-				otto.WriteMessage(otto.MessageTypeActionOutput, otto.MessageActionOutput{
+				conn.WriteMessage(otto.MessageTypeActionOutput, otto.MessageActionOutput{
 					Stdout: stdout.Bytes(),
 					Stderr: stderr.Bytes(),
-				}, c, config.PSK)
+				})
 			}
 			if time.Since(lastKA) > 10*time.Second {
-				otto.WriteMessage(otto.MessageTypeKeepalive, nil, c, config.PSK)
+				conn.WriteMessage(otto.MessageTypeKeepalive, nil)
 				lastKA = time.Now()
 			}
 			time.Sleep(50 * time.Millisecond)

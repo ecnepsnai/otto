@@ -17,7 +17,6 @@ import { ScheduleType } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
-import { HostPSK } from './HostPSK';
 import { HostHeartbeat } from './HostHeartbeat';
 
 interface HostViewProps {
@@ -78,13 +77,6 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
         });
     };
 
-    const didRotatePSK = (newPSK: string) => {
-        setHost(value => {
-            value.PSK = newPSK;
-            return { ...value };
-        });
-    };
-
     if (loading) {
         return (<PageLoading />);
     }
@@ -116,7 +108,6 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                             <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
-                            <HostPSK host={host} didRotate={didRotatePSK} />
                         </ListGroup.List>
                     </Card.Card>
                     <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />

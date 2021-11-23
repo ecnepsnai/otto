@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"io"
-	"net"
 	"strings"
 	"time"
 
@@ -22,17 +21,18 @@ type ScriptResult struct {
 }
 
 var clientActionMap = map[string]uint32{
-	ClientActionRunScript:  otto.ActionRunScript,
-	ClientActionExitClient: otto.ActionExit,
-	ClientActionReboot:     otto.ActionReboot,
-	ClientActionShutdown:   otto.ActionShutdown,
-	ClientActionUpdatePSK:  otto.ActionUpdatePSK,
+	ClientActionRunScript:      otto.ActionRunScript,
+	ClientActionExitClient:     otto.ActionExit,
+	ClientActionReboot:         otto.ActionReboot,
+	ClientActionShutdown:       otto.ActionShutdown,
+	ClientActionUpdateIdentity: otto.ActionUpdateIdentity,
 }
 
 type hostConnection struct {
-	Host    *Host
-	Address string
-	c       net.Conn
+	Host     *Host
+	Address  string
+	Identity otto.Identity
+	Conn     *otto.Connection
 }
 
 // connect will open a connection to the Otto client on the host
@@ -48,24 +48,34 @@ func (host *Host) connect() (*hostConnection, error) {
 		network = "tcp6"
 	}
 
-	c, err := net.DialTimeout(network, address, timeout)
+	id := IdentityStore.Get(host.ID)
+	if id == nil {
+		return nil, fmt.Errorf("no identity")
+	}
+
+	connection, err := otto.Dial(otto.DialOptions{
+		Network:          network,
+		Address:          address,
+		Identity:         id.Signer(),
+		TrustedPublicKey: host.Trust.TrustedIdentity,
+		Timeout:          timeout,
+	})
 	if err != nil {
 		heartbeatStore.UpdateHostReachability(host, false)
 		log.Error("Error connecting to host '%s': %s", address, err.Error())
 		return nil, err
 	}
-
-	log.Debug("Connected to host %s", address)
 	return &hostConnection{
-		Host:    host,
-		Address: fmt.Sprintf("%s:%d", host.Address, host.Port),
-		c:       c,
+		Host:     host,
+		Address:  fmt.Sprintf("%s:%d", host.Address, host.Port),
+		Identity: id,
+		Conn:     connection,
 	}, nil
 }
 
 // SendMessage will send the given Otto message to the host
 func (hc *hostConnection) SendMessage(messageType uint32, message interface{}) error {
-	if err := otto.WriteMessage(messageType, message, hc.c, hc.Host.PSK); err != nil {
+	if err := hc.Conn.WriteMessage(messageType, message); err != nil {
 		log.Error("Error sending message to host '%s': %s", hc.Address, err.Error())
 		return err
 	}
@@ -75,12 +85,12 @@ func (hc *hostConnection) SendMessage(messageType uint32, message interface{}) e
 
 // ReadMessage will try and read a message from the Otto host.
 func (hc *hostConnection) ReadMessage() (uint32, interface{}, error) {
-	return otto.ReadMessage(hc.c, hc.Host.PSK)
+	return hc.Conn.ReadMessage()
 }
 
 // Close will close the connection to the Otto host
 func (hc *hostConnection) Close() {
-	hc.c.Close()
+	hc.Conn.Close()
 }
 
 // TriggerAction will trigger the given action on the host
@@ -193,10 +203,6 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		environ.New("OTTO_HOST_ADDRESS", host.Address),
 		environ.New("OTTO_HOST_PORT", fmt.Sprintf("%d", host.Port)),
 	})
-
-	if Options.Security.IncludePSKEnv {
-		variables = append(variables, environ.Variable{Key: "OTTO_HOST_PSK", Value: host.PSK, Secret: true})
-	}
 
 	// 1. Global environment variables
 	variables = environ.Merge(variables, Options.General.GlobalEnvironment)

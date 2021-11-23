@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.8.0
+// This file is was generated automatically by Codegen v1.8.1
 // Do not make changes to this file as they will be lost
 
 const (
@@ -20,8 +20,8 @@ const (
 	// ClientActionShutdown Power off the host
 	ClientActionShutdown = "shutdown"
 
-	// ClientActionUpdatePSK Update the client PSK
-	ClientActionUpdatePSK = "update_psk"
+	// ClientActionUpdateIdentity Update the server identity on the client
+	ClientActionUpdateIdentity = "update_identity"
 )
 
 // AllClientAction all ClientAction values
@@ -37,7 +37,7 @@ var AllClientAction = []string{
 
 	ClientActionShutdown,
 
-	ClientActionUpdatePSK,
+	ClientActionUpdateIdentity,
 }
 
 // ClientActionMap map ClientAction keys to values
@@ -53,7 +53,7 @@ var ClientActionMap = map[string]string{
 
 	ClientActionShutdown: "shutdown",
 
-	ClientActionUpdatePSK: "update_psk",
+	ClientActionUpdateIdentity: "update_identity",
 }
 
 // ClientActionNameMap map ClientAction keys to values
@@ -69,7 +69,7 @@ var ClientActionNameMap = map[string]string{
 
 	"Shutdown": "shutdown",
 
-	"UpdatePSK": "update_psk",
+	"UpdateIdentity": "update_identity",
 }
 
 // IsClientAction is the provided value a valid ClientAction
@@ -112,9 +112,9 @@ var ClientActionSchema = []map[string]interface{}{
 	},
 
 	{
-		"name":        "UpdatePSK",
-		"description": "Update the client PSK",
-		"value":       "update_psk",
+		"name":        "UpdateIdentity",
+		"description": "Update the server identity on the client",
+		"value":       "update_identity",
 	},
 }
 

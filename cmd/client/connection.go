@@ -12,51 +12,56 @@ import (
 	"github.com/ecnepsnai/otto"
 )
 
-type serverConnection struct {
-	c             net.Conn
-	remoteAddress string
-}
-
-func newServerConnection(c net.Conn) *serverConnection {
-	sc := serverConnection{
-		c:             c,
-		remoteAddress: c.RemoteAddr().String(),
+func listen() {
+	_, network, err := net.ParseCIDR(config.AllowFrom)
+	if err != nil {
+		panic("invalid CIDR address in property allow_from")
 	}
-	return &sc
+
+	otto.Listen(otto.ListenOptions{
+		Address:          config.ListenAddr,
+		AllowFrom:        network,
+		Identity:         clientIdentity,
+		TrustedPublicKey: config.ServerIdentity,
+	}, func(c *otto.Connection) {
+		handle(c)
+	})
 }
 
-func (sc *serverConnection) Start() {
-	log.Info("New connection from %s", sc.remoteAddress)
-	defer sc.c.Close()
+func handle(conn *otto.Connection) {
+	log.PInfo("Connection established", map[string]interface{}{
+		"remote_addr": conn.RemoteAddr().String(),
+	})
+	defer conn.Close()
 
 	cancel := make(chan bool)
 
 	for {
-		messageType, message, err := otto.ReadMessage(sc.c, config.PSK)
+		messageType, message, err := conn.ReadMessage()
 		if err == io.EOF || messageType == 0 {
 			break
 		}
 		if err != nil {
-			log.Error("Error reading message from server '%s': %s", sc.remoteAddress, err.Error())
+			log.Error("Error reading message from server '%s': %s", conn.RemoteAddr().String(), err.Error())
 			break
 		}
-		log.Debug("Message from %s: %d", sc.remoteAddress, messageType)
+		log.Debug("Message from %s: %d", conn.RemoteAddr().String(), messageType)
 
 		switch messageType {
 		case otto.MessageTypeHeartbeatRequest:
-			handleHeartbeatRequest(sc.c, message.(otto.MessageHeartbeatRequest))
+			handleHeartbeatRequest(conn, message.(otto.MessageHeartbeatRequest))
 		case otto.MessageTypeTriggerAction:
-			go handleTriggerAction(sc.c, message.(otto.MessageTriggerAction), cancel)
+			go handleTriggerAction(conn, message.(otto.MessageTriggerAction), cancel)
 		case otto.MessageTypeCancelAction:
 			cancel <- true
 		default:
-			log.Warn("Unexpected message with type %d from %s", messageType, sc.remoteAddress)
+			log.Warn("Unexpected message with type %d from %s", messageType, conn.RemoteAddr().String())
 		}
 	}
 }
 
-func handleHeartbeatRequest(c net.Conn, message otto.MessageHeartbeatRequest) {
-	log.Info("Heartbeat from %s (v%s)", c.RemoteAddr().String(), message.ServerVersion)
+func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeatRequest) {
+	log.Info("Heartbeat from %s (v%s)", conn.RemoteAddr().String(), message.ServerVersion)
 
 	properties := map[string]string{
 		"hostname":             registerProperties.Hostname,
@@ -71,12 +76,12 @@ func handleHeartbeatRequest(c net.Conn, message otto.MessageHeartbeatRequest) {
 		Properties:    properties,
 	}
 
-	if err := otto.WriteMessage(otto.MessageTypeHeartbeatResponse, response, c, config.PSK); err != nil {
-		log.Error("Error writing heartbeat response to '%s': %s", c.RemoteAddr().String(), err.Error())
+	if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, response); err != nil {
+		log.Error("Error writing heartbeat response to '%s': %s", conn.RemoteAddr().String(), err.Error())
 	}
 }
 
-func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel chan bool) {
+func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerAction, cancel chan bool) {
 	reply := otto.MessageActionResult{
 		ClientVersion: MainVersion,
 	}
@@ -89,17 +94,17 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 			reply.Error = err
 		}
 	case otto.ActionRunScript:
-		reply.ScriptResult = runScript(c, message.Script, cancel)
+		reply.ScriptResult = runScript(conn, message.Script, cancel)
 	case otto.ActionUploadFile, otto.ActionUploadFileAndExit:
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err
 		}
-	case otto.ActionUpdatePSK:
-		newPSK := message.NewPSK
-		if newPSK == "" {
-			reply.Error = fmt.Errorf("no psk provided")
+	case otto.ActionUpdateIdentity:
+		newIdentity := string(message.File.Data)
+		if newIdentity == "" {
+			reply.Error = fmt.Errorf("no identity provided")
 		} else {
-			if err := updatePSK(newPSK); err != nil {
+			if err := updateServerIdentity(newIdentity); err != nil {
 				reply.Error = err
 			}
 		}
@@ -109,28 +114,28 @@ func handleTriggerAction(c net.Conn, message otto.MessageTriggerAction, cancel c
 	}
 
 	log.Debug("Trigger complete, writing reply")
-	if err := otto.WriteMessage(otto.MessageTypeActionResult, reply, c, config.PSK); err != nil {
-		log.Error("Error writing reply to '%s': %s", c.RemoteAddr().String(), err.Error())
+	if err := conn.WriteMessage(otto.MessageTypeActionResult, reply); err != nil {
+		log.Error("Error writing reply to '%s': %s", conn.RemoteAddr().String(), err.Error())
 		return
 	}
 
-	if message.Action == otto.ActionUpdatePSK {
+	if message.Action == otto.ActionUpdateIdentity {
 		loadConfig()
 	}
 
 	if message.Action == otto.ActionUploadFileAndExit || message.Action == otto.ActionExit {
-		c.Close()
-		log.Warn("Exiting at request of '%s'", c.RemoteAddr().String())
+		conn.Close()
+		log.Warn("Exiting at request of '%s'", conn.RemoteAddr().String())
 		os.Exit(1)
 	}
 
 	if message.Action == otto.ActionReboot {
-		c.Close()
-		log.Warn("Rebooting at request of '%s'", c.RemoteAddr().String())
+		conn.Close()
+		log.Warn("Rebooting at request of '%s'", conn.RemoteAddr().String())
 		exec.Command("/usr/sbin/reboot").Run()
 	} else if message.Action == otto.ActionShutdown {
-		c.Close()
-		log.Warn("Shutting down at request of '%s'", c.RemoteAddr().String())
+		conn.Close()
+		log.Warn("Shutting down at request of '%s'", conn.RemoteAddr().String())
 		exec.Command("/usr/sbin/halt").Run()
 	}
 }

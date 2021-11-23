@@ -95,10 +95,6 @@ func newAPIKey() string {
 	return "otto_" + id
 }
 
-func newHostPSK() string {
-	return secutil.RandomString(32)
-}
-
 func stripPortFromRemoteAddr(remoteAddr string) string {
 	pattern := regexp.MustCompile(`\:[0-9]+$`)
 	ip := pattern.ReplaceAllString(remoteAddr, "")

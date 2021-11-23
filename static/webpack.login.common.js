@@ -68,6 +68,7 @@ module.exports = {
 
     output: {
         path: path.resolve(__dirname, 'build'),
+        hashFunction: 'xxhash64',
         filename: 'login.js'
     },
 };

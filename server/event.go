@@ -177,14 +177,9 @@ func (s *eventStoreObject) HostRegisterSuccess(host *Host, request otto.Register
 	event.Save()
 }
 
-func (s *eventStoreObject) HostRegisterIncorrectKey(remoteAddr string, request otto.RegisterRequest) {
+func (s *eventStoreObject) HostRegisterIncorrectKey(remoteAddr string) {
 	event := newEvent(EventTypeHostRegisterIncorrectKey, map[string]string{
-		"remote_addr":          remoteAddr,
-		"hostname":             request.Properties.Hostname,
-		"kernel_name":          request.Properties.KernelName,
-		"kernel_version":       request.Properties.KernelVersion,
-		"distribution_name":    request.Properties.DistributionName,
-		"distribution_version": request.Properties.DistributionVersion,
+		"remote_addr": remoteAddr,
 	})
 
 	event.Save()

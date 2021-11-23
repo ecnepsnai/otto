@@ -5,23 +5,30 @@ import (
 	"fmt"
 	"net"
 	"os"
+
+	"github.com/ecnepsnai/otto"
+	"golang.org/x/crypto/ssh"
 )
 
 type clientConfig struct {
-	ListenAddr string `json:"listen_addr"`
-	PSK        string `json:"psk"`
-	LogPath    string `json:"log_path"`
-	DefaultUID uint32 `json:"default_uid"`
-	DefaultGID uint32 `json:"default_gid"`
-	Path       string `json:"path"`
-	AllowFrom  string `json:"allow_from"`
+	ListenAddr     string `json:"listen_addr"`
+	IdentityPath   string `json:"identity_path"`
+	ServerIdentity string `json:"server_identity"`
+	LogPath        string `json:"log_path"`
+	DefaultUID     uint32 `json:"default_uid"`
+	DefaultGID     uint32 `json:"default_gid"`
+	Path           string `json:"path"`
+	AllowFrom      string `json:"allow_from"`
 }
 
 var config *clientConfig
+var clientIdentity ssh.Signer
 
 const (
-	otto_CONFIG_FILE_NAME        = "otto_client.conf"
-	otto_CONFIG_ATOMIC_FILE_NAME = ".otto_client.conf.tmp"
+	otto_CONFIG_FILE_NAME          = "otto_client.conf"
+	otto_CONFIG_ATOMIC_FILE_NAME   = ".otto_client.conf.tmp"
+	otto_IDENTITY_FILE_NAME        = ".otto_id.der"
+	otto_IDENTITY_ATOMIC_FILE_NAME = ".otto_id.der.tmp"
 )
 
 func loadConfig() error {
@@ -42,8 +49,12 @@ func loadConfig() error {
 	}
 	config = &c
 
-	if config.PSK == "" {
-		return fmt.Errorf("empty PSK prohibited")
+	if config.IdentityPath == "" {
+		return fmt.Errorf("empty identity path prohibited")
+	}
+
+	if config.ServerIdentity == "" {
+		return fmt.Errorf("empty server identity prohibited")
 	}
 
 	if config.ListenAddr == "" {
@@ -61,6 +72,100 @@ func mustLoadConfig() {
 	if err := loadConfig(); err != nil {
 		panic(err)
 	}
+}
+
+func generateIdentity() error {
+	id, err := otto.NewIdentity()
+	if err != nil {
+		log.PError("Error generating identity", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+
+	f, err := os.OpenFile(otto_IDENTITY_ATOMIC_FILE_NAME, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		log.PError("Error opening identity file for writing", map[string]interface{}{
+			"file_path": otto_IDENTITY_ATOMIC_FILE_NAME,
+			"error":     err.Error(),
+		})
+		return err
+	}
+
+	if _, err := f.Write(id); err != nil {
+		log.PError("Error writing identity file", map[string]interface{}{
+			"file_path": otto_IDENTITY_ATOMIC_FILE_NAME,
+			"error":     err.Error(),
+		})
+		f.Close()
+		return err
+	}
+	f.Close()
+
+	if err := os.Rename(otto_IDENTITY_ATOMIC_FILE_NAME, otto_IDENTITY_FILE_NAME); err != nil {
+		log.PError("Error renaming identity file", map[string]interface{}{
+			"old_name": otto_IDENTITY_ATOMIC_FILE_NAME,
+			"new_name": otto_IDENTITY_FILE_NAME,
+			"error":    err.Error(),
+		})
+		return err
+	}
+
+	return nil
+}
+
+func loadOrGenerateClientIdentity() (ssh.Signer, error) {
+	_, err := os.Stat(otto_IDENTITY_FILE_NAME)
+	if err != nil && os.IsNotExist(err) {
+		if err := generateIdentity(); err != nil {
+			return nil, err
+		}
+		return loadClientIdentity()
+	}
+	return loadClientIdentity()
+}
+
+func loadClientIdentity() (ssh.Signer, error) {
+	info, err := os.Stat(otto_IDENTITY_FILE_NAME)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.PError("Error reading identity file", map[string]interface{}{
+				"file_path": otto_IDENTITY_FILE_NAME,
+				"error":     err.Error(),
+			})
+		}
+		return nil, err
+	}
+
+	mode := info.Mode()
+	if mode&32 != 0 || mode&16 != 0 || mode&8 != 0 || mode&4 != 0 || mode&2 != 0 || mode&1 != 0 {
+		fmt.Fprintf(os.Stderr, "The client identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the client, then re-trust the host on the Otto server.\n", otto_IDENTITY_FILE_NAME)
+		os.Exit(1)
+	}
+
+	data, err := os.ReadFile(otto_IDENTITY_FILE_NAME)
+	if err != nil {
+		log.PError("Error reading identity file", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	id, err := otto.ParseIdentity(data)
+	if err != nil {
+		log.PError("Error reading identity file", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	return id.Signer(), nil
+}
+
+func mustLoadIdentity() {
+	signer, err := loadOrGenerateClientIdentity()
+	if err != nil {
+		panic(err)
+	}
+	clientIdentity = signer
 }
 
 func saveNewConfig(c clientConfig) error {
@@ -96,10 +201,10 @@ func saveNewConfig(c clientConfig) error {
 	return nil
 }
 
-func updatePSK(newPSK string) error {
+func updateServerIdentity(newPublicKey string) error {
 	f, err := os.OpenFile(otto_CONFIG_FILE_NAME, os.O_RDONLY, 0644)
 	if err != nil {
-		log.PError("Error updating PSK", map[string]interface{}{
+		log.PError("Error updating server identity", map[string]interface{}{
 			"where": "reading existing config file",
 			"error": err.Error(),
 		})
@@ -110,33 +215,34 @@ func updatePSK(newPSK string) error {
 	err = json.NewDecoder(f).Decode(&c)
 	f.Close()
 	if err != nil {
-		log.PError("Error updating PSK", map[string]interface{}{
+		log.PError("Error updating server identity", map[string]interface{}{
 			"where": "decoding existing config file",
 			"error": err.Error(),
 		})
 		return err
 	}
 
-	c.PSK = newPSK
+	c.ServerIdentity = newPublicKey
 
 	if err := saveNewConfig(c); err != nil {
-		log.PError("Error updating PSK", map[string]interface{}{
+		log.PError("Error updating server identity", map[string]interface{}{
 			"where": "saving config file",
 			"error": err.Error(),
 		})
 		return err
 	}
 
-	log.Warn("PSK updated")
+	log.Warn("server identity updated")
 	return nil
 }
 
 func defaultConfig() clientConfig {
 	return clientConfig{
-		ListenAddr: "0.0.0.0:12444",
-		LogPath:    ".",
-		DefaultUID: 0,
-		DefaultGID: 0,
-		AllowFrom:  "0.0.0.0/0",
+		ListenAddr:   "0.0.0.0:12444",
+		IdentityPath: otto_IDENTITY_FILE_NAME,
+		LogPath:      ".",
+		DefaultUID:   0,
+		DefaultGID:   0,
+		AllowFrom:    "0.0.0.0/0",
 	}
 }

@@ -1,20 +1,25 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"time"
+	"io"
 
 	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
+func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 	if !Options.Register.Enabled {
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"remote_addr": request.HTTP.RemoteAddr,
 			"reason":      "registration disabled",
 		})
-		return nil, web.CommonErrors.NotFound
+		return web.Response{
+			Status: 404,
+		}
 	}
 
 	if requestProtocolVersion := request.HTTP.Header.Get("X-OTTO-PROTO-VERSION"); fmt.Sprintf("%d", otto.ProtocolVersion) != requestProtocolVersion {
@@ -23,21 +28,34 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 			"reason":                  "unsupported otto protocol version",
 			"client_protocol_version": requestProtocolVersion,
 		})
-		return nil, web.ValidationError("Unsupported protocol version %s", requestProtocolVersion)
+		return web.Response{
+			Status: 400,
+		}
 	}
 
-	r := otto.RegisterRequest{}
-	if err := request.DecodeJSON(&r); err != nil {
-		return nil, err
+	encryptedData, erro := io.ReadAll(request.HTTP.Body)
+	if erro != nil {
+		return web.Response{
+			Status: 400,
+		}
 	}
-
-	if Options.Register.Key != r.Key {
-		EventStore.HostRegisterIncorrectKey(request.HTTP.RemoteAddr, r)
+	decryptedData, erro := secutil.Encryption.AES_256_GCM.Decrypt(encryptedData, Options.Register.Key)
+	if erro != nil {
+		EventStore.HostRegisterIncorrectKey(request.HTTP.RemoteAddr)
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"remote_addr": request.HTTP.RemoteAddr,
 			"reason":      "incorrect register key",
 		})
-		return nil, web.CommonErrors.Unauthorized
+		return web.Response{
+			Status: 403,
+		}
+	}
+
+	r := otto.RegisterRequest{}
+	if err := json.Unmarshal(decryptedData, &r); err != nil {
+		return web.Response{
+			Status: 400,
+		}
 	}
 
 	existing := HostStore.HostWithAddress(r.Properties.Hostname)
@@ -47,7 +65,9 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 			"reason":      "duplicate hostname",
 			"hostname":    r.Properties.Hostname,
 		})
-		return nil, web.ValidationError("Host with address '%s' already registered", r.Properties.Hostname)
+		return web.Response{
+			Status: 400,
+		}
 	}
 
 	groupID := Options.Register.DefaultGroupID
@@ -65,15 +85,12 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 	// Use the address that sent this request as the address for the new host, but first strip the port
 	// RemoteAddr will always have a port, but may be a wrapped IPv6 address
 	address := stripPortFromRemoteAddr(request.HTTP.RemoteAddr)
-
-	psk := newHostPSK()
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:          r.Properties.Hostname,
-		Address:       address,
-		Port:          r.Port,
-		PSK:           psk,
-		LastPSKRotate: time.Now(),
-		GroupIDs:      []string{groupID},
+		Name:           r.Properties.Hostname,
+		Address:        address,
+		Port:           r.Port,
+		ClientIdentity: r.ClientIdentity,
+		GroupIDs:       []string{groupID},
 	})
 	if err != nil {
 		log.PError("Error adding new host", map[string]interface{}{
@@ -81,14 +98,21 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 			"address":  address,
 			"error":    err.Message,
 		})
-		return nil, web.CommonErrors.ServerError
+		return web.Response{
+			Status: 500,
+		}
 	}
-	log.PInfo("Registered new host", map[string]interface{}{
-		"name":    host.Name,
-		"address": host.Address,
-		"port":    host.Port,
-	})
 	EventStore.HostRegisterSuccess(host, r, matchedRule)
+
+	serverId := IdentityStore.Get(host.ID)
+	if serverId == nil {
+		log.PError("No identity for Otto host", map[string]interface{}{
+			"host_id": host.ID,
+		})
+		return web.Response{
+			Status: 500,
+		}
+	}
 
 	scripts := []otto.Script{}
 	if Options.Register.RunScriptsOnRegister {
@@ -102,8 +126,28 @@ func (h *handle) Register(request web.Request) (interface{}, *web.Error) {
 		}
 	}
 
-	return otto.RegisterResponse{
-		PSK:     psk,
-		Scripts: scripts,
-	}, nil
+	responseData, erro := json.Marshal(otto.RegisterResponse{
+		ServerIdentity: serverId.PublicKeyString(),
+		Scripts:        scripts,
+	})
+	if erro != nil {
+		return web.Response{
+			Status: 500,
+		}
+	}
+	encryptedResponse, erro := secutil.Encryption.AES_256_GCM.Encrypt(responseData, Options.Register.Key)
+	if erro != nil {
+		return web.Response{
+			Status: 500,
+		}
+	}
+	return web.Response{
+		Status:      200,
+		Reader:      io.NopCloser(bytes.NewReader(encryptedResponse)),
+		ContentType: "application/octet-stream",
+		Headers: map[string]string{
+			"Content-Length":       fmt.Sprintf("%d", len(encryptedResponse)),
+			"X-OTTO-PROTO-VERSION": fmt.Sprintf("%d", otto.ProtocolVersion),
+		},
+	}
 }
