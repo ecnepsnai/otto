@@ -106,9 +106,7 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 
 	serverId := IdentityStore.Get(host.ID)
 	if serverId == nil {
-		log.PError("No identity for Otto host", map[string]interface{}{
-			"host_id": host.ID,
-		})
+		log.PError("No server identity for host", map[string]interface{}{"host_id": host.ID})
 		return web.Response{
 			Status: 500,
 		}

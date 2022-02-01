@@ -18,6 +18,7 @@ import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 import { HostHeartbeat } from './HostHeartbeat';
+import { HostTrust } from './HostTrust';
 
 interface HostViewProps {
     match: match;
@@ -108,6 +109,7 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
                             <ListGroup.TextItem title="Name">{host.Name}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Address">{host.Address}:{host.Port}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Status"><EnabledBadge value={host.Enabled} /></ListGroup.TextItem>
+                            <ListGroup.TextItem title="Trust"><HostTrust host={host} onReload={loadHost} /></ListGroup.TextItem>
                         </ListGroup.List>
                     </Card.Card>
                     <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />

@@ -57,6 +57,7 @@ func RouterSetup() {
 	server.API.GET("/api/hosts/host/:id/scripts", h.HostGetScripts, authenticatedOptions(false))
 	server.API.GET("/api/hosts/host/:id/groups", h.HostGetGroups, authenticatedOptions(false))
 	server.API.GET("/api/hosts/host/:id/schedules", h.HostGetSchedules, authenticatedOptions(false))
+	server.API.GET("/api/hosts/host/:id/id", h.HostGetServerID, authenticatedOptions(false))
 	server.API.POST("/api/hosts/host/:id/heartbeat", h.HostTriggerHeartbeat, authenticatedOptions(false))
 	server.API.POST("/api/hosts/host/:id/trust", h.HostUpdateTrust, authenticatedOptions(false))
 	server.API.POST("/api/hosts/host/:id", h.HostEdit, authenticatedOptions(false))

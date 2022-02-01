@@ -7,12 +7,13 @@ import '../../css/badge.scss';
 interface BadgeProps {
     color: Style.Palette;
     pill?: boolean;
+    outline?: boolean;
     className?: string;
     children?: React.ReactNode;
 }
 export const Badge: React.FC<BadgeProps> = (props: BadgeProps) => {
     let className = 'badge ';
-    className += 'bg-' + props.color.toString();
+    className += (props.outline ? 'badge-outline-' : 'badge-') + props.color.toString();
     if (props.pill) {
         className += ' rounded-pill';
     }
@@ -49,6 +50,7 @@ export const EnabledBadge: React.FC<EnabledBadgeProps> = (props: EnabledBadgePro
 
 interface HeartbeatBadgeProps {
     heartbeat: HeartbeatType;
+    outline?: boolean;
 }
 export const HeartbeatBadge: React.FC<HeartbeatBadgeProps> = (props: HeartbeatBadgeProps) => {
     const color = (): Style.Palette => {
@@ -85,7 +87,7 @@ export const HeartbeatBadge: React.FC<HeartbeatBadgeProps> = (props: HeartbeatBa
     };
 
     return (
-        <Badge color={color()} pill>
+        <Badge color={color()} pill outline={props.outline}>
             <Icon.Label icon={icon()} label={text()} />
         </Badge>
     );

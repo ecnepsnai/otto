@@ -205,7 +205,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
      * @param body The body of the dialog
      * @returns A promise that is resolved with wether or not the user clicked the 'Confirm' button
      */
-    public static confirm(title: string, body: string): Promise<boolean> {
+    public static confirm(title: string, body: string|JSX.Element): Promise<boolean> {
         return new Promise(resolve => {
             const buttonClick = (confirm: boolean): () => (void) => {
                 return () => {
@@ -229,7 +229,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             ];
             GlobalModalFrame.showModal(
                 <Modal title={title} buttons={buttons} dismissed={dismissed}>
-                    <p>{body}</p>
+                    {typeof body === 'string' ? (<p>{body}</p>) : body}
                 </Modal>
             );
         });

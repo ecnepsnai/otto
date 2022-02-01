@@ -51,6 +51,7 @@ export const HostList: React.FC = () => {
                     <Table.Column>Name</Table.Column>
                     <Table.Column>Address</Table.Column>
                     <Table.Column>Groups</Table.Column>
+                    <Table.Column>Trust</Table.Column>
                     <Table.Column>Reachable</Table.Column>
                     <Table.Column>Version</Table.Column>
                 </Table.Head>

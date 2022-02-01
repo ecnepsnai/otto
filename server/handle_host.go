@@ -61,6 +61,18 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 	return schedules, nil
 }
 
+func (h *handle) HostGetServerID(request web.Request) (interface{}, *web.Error) {
+	hostID := request.Params.ByName("id")
+
+	identity := IdentityStore.Get(hostID)
+	if identity == nil {
+		log.PError("No server identity for host", map[string]interface{}{"host_id": hostID})
+		return nil, web.ValidationError("No host with ID %s", hostID)
+	}
+
+	return identity.PublicKeyString(), nil
+}
+
 func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Error) {
 	id := request.Params.ByName("id")
 
@@ -101,6 +113,7 @@ func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) 
 			host.Trust.UntrustedIdentity = ""
 		} else {
 			host.Trust.TrustedIdentity = host.Trust.UntrustedIdentity
+			host.Trust.UntrustedIdentity = ""
 		}
 	} else if trustUpdateRequest.Action == "deny" {
 		host.Trust.TrustedIdentity = ""

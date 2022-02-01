@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.8.1
+// This file is was generated automatically by Codegen v1.9.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -28,7 +28,6 @@ func stateSetup() {
 	state := cbgenStateObject{
 		store: s,
 		locks: map[string]*sync.RWMutex{
-
 			"TableVersion": {},
 		},
 	}
@@ -43,7 +42,6 @@ func (s *cbgenStateObject) Close() {
 // GetAll will return a map of all current state values
 func (s *cbgenStateObject) GetAll() map[string]interface{} {
 	return map[string]interface{}{
-
 		"TableVersion": s.GetTableVersion(),
 	}
 }

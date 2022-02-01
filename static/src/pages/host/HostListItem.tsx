@@ -8,6 +8,7 @@ import { HeartbeatType } from '../../types/Heartbeat';
 import { Formatter } from '../../services/Formatter';
 import { ClientVersion } from '../../components/ClientVersion';
 import { ContextMenuItem } from '../../components/ContextMenu';
+import { HostTrust } from './HostTrust';
 
 interface HostListItemProps {
     host: HostType;
@@ -43,7 +44,8 @@ export const HostListItem: React.FC<HostListItemProps> = (props: HostListItemPro
             <td>{link}</td>
             <td>{props.host.Address}</td>
             <td>{Formatter.ValueOrNothing(props.host.GroupIDs.length)}</td>
-            <td><HeartbeatBadge heartbeat={props.heartbeat} /></td>
+            <td><HostTrust host={props.host} badgeOnly outline /></td>
+            <td><HeartbeatBadge heartbeat={props.heartbeat} outline /></td>
             <td><ClientVersion heartbeat={props.heartbeat} /></td>
         </Table.Row>
     );

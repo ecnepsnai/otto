@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.8.1
+// This file is was generated automatically by Codegen v1.9.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -20,35 +20,24 @@ type shadowStoreObject struct {
 }
 
 // IdentityStore the global identity store
-var IdentityStore = identityStoreObject{
-	Lock: &sync.Mutex{},
-}
+var IdentityStore = identityStoreObject{Lock: &sync.Mutex{}}
 
 // ShadowStore the global shadow store
-var ShadowStore = shadowStoreObject{
-	Lock: &sync.Mutex{},
-}
+var ShadowStore = shadowStoreObject{Lock: &sync.Mutex{}}
 
 // storeSetup sets up all stores
 func storeSetup() {
-
 	IdentityStore.Store = cbgenStoreNewStore("identity")
-
 	ShadowStore.Store = cbgenStoreNewStore("shadow")
-
 	cbgenStoreRegisterGobTypes()
 }
 func cbgenStoreRegisterGobTypes() {
-
 }
 
 // storeTeardown tears down all stores
 func storeTeardown() {
-
 	IdentityStore.Store.Close()
-
 	ShadowStore.Store.Close()
-
 }
 
 func cbgenStoreNewStore(storeName string) *store.Store {

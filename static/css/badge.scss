@@ -1,3 +1,82 @@
+@use "sass:map";
+@import "bootstrap/scss/bootstrap";
+
 .badges .badge {
     margin-right: .5em;
+}
+
+.badge {
+    &.badge-primary {
+        background-color: map.get($theme-colors, 'primary');
+    }
+    &.badge-secondary {
+        background-color: map.get($theme-colors, 'secondary');
+    }
+    &.badge-success {
+        background-color: map.get($theme-colors, 'success');
+    }
+    &.badge-danger {
+        background-color: map.get($theme-colors, 'danger');
+    }
+    &.badge-warning {
+        background-color: map.get($theme-colors, 'warning');
+    }
+    &.badge-info {
+        background-color: map.get($theme-colors, 'info');
+    }
+    &.badge-light {
+        background-color: map.get($theme-colors, 'light');
+    }
+    &.badge-dark {
+        background-color: map.get($theme-colors, 'dark');
+    }
+    
+    &.badge-outline-primary {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'primary');
+        color: map.get($theme-colors, 'primary');
+    }
+    &.badge-outline-secondary {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'secondary');
+        color: map.get($theme-colors, 'secondary');
+    }
+    &.badge-outline-success {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'success');
+        color: map.get($theme-colors, 'success');
+    }
+    &.badge-outline-danger {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'danger');
+        color: map.get($theme-colors, 'danger');
+    }
+    &.badge-outline-warning {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'warning');
+        color: map.get($theme-colors, 'warning');
+    }
+    &.badge-outline-info {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'info');
+        color: map.get($theme-colors, 'info');
+    }
+    &.badge-outline-light {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'light');
+        color: map.get($theme-colors, 'light');
+    }
+    &.badge-outline-dark {
+        border-width: 1px;
+        border-style: solid;
+        border-color: map.get($theme-colors, 'dark');
+        color: map.get($theme-colors, 'dark');
+    }
 }

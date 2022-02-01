@@ -144,6 +144,25 @@ export class Host {
         const data = await API.POST('/api/hosts/host/' + id + '/heartbeat', null);
         return data as HeartbeatType;
     }
+
+    /**
+     * Update the trust for this host
+     */
+     public static async UpdateTrust(id: string, action: ('permit'|'deny'), publicKey?: string): Promise<HeartbeatType> {
+        const data = await API.POST('/api/hosts/host/' + id + '/trust', {
+            Action: action,
+            PublicKey: publicKey,
+        });
+        return data as HeartbeatType;
+    }
+
+    /**
+     * Get the server ID for this host
+     */
+     public static async ServerID(id: string): Promise<string> {
+        const data = await API.GET('/api/hosts/host/' + id + '/id');
+        return data as string;
+    }
 }
 
 export interface NewHostParameters {

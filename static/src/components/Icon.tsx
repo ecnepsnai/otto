@@ -22,6 +22,7 @@ import {
     faLayerGroup,
     faLevelDownAlt,
     faListAlt,
+    faLock,
     faMagic,
     faMinus,
     faNetworkWired,
@@ -39,6 +40,7 @@ import {
     faTimesCircle,
     faTrashAlt,
     faUndo,
+    faUnlock,
     faUser,
     faUserEdit,
     faUsers,
@@ -95,6 +97,7 @@ export namespace Icon {
     export const LayerGroup: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faLayerGroup, options: props });
     export const LevelDown: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faLevelDownAlt, options: props });
     export const List: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faListAlt, options: props });
+    export const Lock: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faLock, options: props });
     export const Magic: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faMagic, options: props });
     export const Minus: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faMinus, options: props });
     export const NetworkWired: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faNetworkWired, options: props });
@@ -112,6 +115,7 @@ export namespace Icon {
     export const TimesCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTimesCircle, options: props });
     export const Delete: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTrashAlt, options: props });
     export const Undo: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUndo, options: props });
+    export const Unlock: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUnlock, options: props });
     export const User: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUser, options: props });
     export const UserEdit: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUserEdit, options: props });
     export const Users: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUsers, options: props });

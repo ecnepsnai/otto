@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.8.1
+// This file is was generated automatically by Codegen v1.9.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -9,27 +9,20 @@ import (
 	"github.com/ecnepsnai/ds"
 )
 
-type attachmentStoreObject struct {
-	Table *ds.Table
-}
+type attachmentStoreObject struct{ Table *ds.Table }
 
 // AttachmentStore the global attachment store
 var AttachmentStore = attachmentStoreObject{}
 
 func cbgenDataStoreRegisterAttachmentStore() {
-	table, err := ds.Register(Attachment{}, path.Join(Directories.Data, "attachment.db"), &ds.Options{
-
-		DisableSorting: true,
-	})
+	table, err := ds.Register(Attachment{}, path.Join(Directories.Data, "attachment.db"), &ds.Options{DisableSorting: true})
 	if err != nil {
 		log.Fatal("Error registering attachment store: %s", err.Error())
 	}
 	AttachmentStore.Table = table
 }
 
-type eventStoreObject struct {
-	Table *ds.Table
-}
+type eventStoreObject struct{ Table *ds.Table }
 
 // EventStore the global event store
 var EventStore = eventStoreObject{}
@@ -42,9 +35,7 @@ func cbgenDataStoreRegisterEventStore() {
 	EventStore.Table = table
 }
 
-type groupStoreObject struct {
-	Table *ds.Table
-}
+type groupStoreObject struct{ Table *ds.Table }
 
 // GroupStore the global group store
 var GroupStore = groupStoreObject{}
@@ -57,9 +48,7 @@ func cbgenDataStoreRegisterGroupStore() {
 	GroupStore.Table = table
 }
 
-type hostStoreObject struct {
-	Table *ds.Table
-}
+type hostStoreObject struct{ Table *ds.Table }
 
 // HostStore the global host store
 var HostStore = hostStoreObject{}
@@ -72,9 +61,7 @@ func cbgenDataStoreRegisterHostStore() {
 	HostStore.Table = table
 }
 
-type registerruleStoreObject struct {
-	Table *ds.Table
-}
+type registerruleStoreObject struct{ Table *ds.Table }
 
 // RegisterRuleStore the global registerrule store
 var RegisterRuleStore = registerruleStoreObject{}
@@ -87,9 +74,7 @@ func cbgenDataStoreRegisterRegisterRuleStore() {
 	RegisterRuleStore.Table = table
 }
 
-type scheduleStoreObject struct {
-	Table *ds.Table
-}
+type scheduleStoreObject struct{ Table *ds.Table }
 
 // ScheduleStore the global schedule store
 var ScheduleStore = scheduleStoreObject{}
@@ -102,9 +87,7 @@ func cbgenDataStoreRegisterScheduleStore() {
 	ScheduleStore.Table = table
 }
 
-type schedulereportStoreObject struct {
-	Table *ds.Table
-}
+type schedulereportStoreObject struct{ Table *ds.Table }
 
 // ScheduleReportStore the global schedulereport store
 var ScheduleReportStore = schedulereportStoreObject{}
@@ -117,9 +100,7 @@ func cbgenDataStoreRegisterScheduleReportStore() {
 	ScheduleReportStore.Table = table
 }
 
-type scriptStoreObject struct {
-	Table *ds.Table
-}
+type scriptStoreObject struct{ Table *ds.Table }
 
 // ScriptStore the global script store
 var ScriptStore = scriptStoreObject{}
@@ -132,9 +113,7 @@ func cbgenDataStoreRegisterScriptStore() {
 	ScriptStore.Table = table
 }
 
-type userStoreObject struct {
-	Table *ds.Table
-}
+type userStoreObject struct{ Table *ds.Table }
 
 // UserStore the global user store
 var UserStore = userStoreObject{}
@@ -149,64 +128,44 @@ func cbgenDataStoreRegisterUserStore() {
 
 // dataStoreSetup set up the data store
 func dataStoreSetup() {
-
 	cbgenDataStoreRegisterAttachmentStore()
-
 	cbgenDataStoreRegisterEventStore()
-
 	cbgenDataStoreRegisterGroupStore()
-
 	cbgenDataStoreRegisterHostStore()
-
 	cbgenDataStoreRegisterRegisterRuleStore()
-
 	cbgenDataStoreRegisterScheduleStore()
-
 	cbgenDataStoreRegisterScheduleReportStore()
-
 	cbgenDataStoreRegisterScriptStore()
-
 	cbgenDataStoreRegisterUserStore()
-
 }
 
 // dataStoreTeardown tear down the data store
 func dataStoreTeardown() {
-
 	if AttachmentStore.Table != nil {
 		AttachmentStore.Table.Close()
 	}
-
 	if EventStore.Table != nil {
 		EventStore.Table.Close()
 	}
-
 	if GroupStore.Table != nil {
 		GroupStore.Table.Close()
 	}
-
 	if HostStore.Table != nil {
 		HostStore.Table.Close()
 	}
-
 	if RegisterRuleStore.Table != nil {
 		RegisterRuleStore.Table.Close()
 	}
-
 	if ScheduleStore.Table != nil {
 		ScheduleStore.Table.Close()
 	}
-
 	if ScheduleReportStore.Table != nil {
 		ScheduleReportStore.Table.Close()
 	}
-
 	if ScriptStore.Table != nil {
 		ScriptStore.Table.Close()
 	}
-
 	if UserStore.Table != nil {
 		UserStore.Table.Close()
 	}
-
 }
