@@ -600,7 +600,7 @@ func Dial(options DialOptions) (*Connection, error) {
 			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
 				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
 			})
-			return fmt.Errorf("unknown public key %x", key.Marshal())
+			return fmt.Errorf("unknown public key: %x", key.Marshal())
 		},
 		Timeout: options.Timeout,
 	}

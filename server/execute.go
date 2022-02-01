@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"strings"
@@ -50,6 +52,7 @@ func (host *Host) connect() (*hostConnection, error) {
 
 	id := IdentityStore.Get(host.ID)
 	if id == nil {
+		log.PError("No server identity for host", map[string]interface{}{"host_id": host.ID})
 		return nil, fmt.Errorf("no identity")
 	}
 
@@ -61,6 +64,22 @@ func (host *Host) connect() (*hostConnection, error) {
 		Timeout:          timeout,
 	})
 	if err != nil {
+		if strings.Contains(err.Error(), "unknown public key:") {
+			parts := strings.Split(err.Error(), " ")
+			keyHex := parts[len(parts)-1]
+			key, herr := hex.DecodeString(keyHex)
+			if herr != nil {
+				return nil, err
+			}
+			pendingKey := base64.RawStdEncoding.EncodeToString(key)
+			host.Trust.UntrustedIdentity = pendingKey
+			HostStore.UpdateHostTrust(host.ID, host.Trust)
+			log.PInfo("Recorded new identity from client", map[string]interface{}{
+				"client":   host.ID,
+				"identity": pendingKey,
+			})
+		}
+
 		heartbeatStore.UpdateHostReachability(host, false)
 		log.Error("Error connecting to host '%s': %s", address, err.Error())
 		return nil, err
