@@ -11,14 +11,14 @@ import (
 )
 
 type clientConfig struct {
-	ListenAddr     string `json:"listen_addr"`
-	IdentityPath   string `json:"identity_path"`
-	ServerIdentity string `json:"server_identity"`
-	LogPath        string `json:"log_path"`
-	DefaultUID     uint32 `json:"default_uid"`
-	DefaultGID     uint32 `json:"default_gid"`
-	Path           string `json:"path"`
-	AllowFrom      string `json:"allow_from"`
+	ListenAddr     string   `json:"listen_addr"`
+	IdentityPath   string   `json:"identity_path"`
+	ServerIdentity string   `json:"server_identity"`
+	LogPath        string   `json:"log_path"`
+	DefaultUID     uint32   `json:"default_uid"`
+	DefaultGID     uint32   `json:"default_gid"`
+	Path           string   `json:"path"`
+	AllowFrom      []string `json:"allow_from"`
 }
 
 var config *clientConfig
@@ -61,8 +61,10 @@ func loadConfig() error {
 		return fmt.Errorf("empty listen address prohibited")
 	}
 
-	if _, _, err := net.ParseCIDR(c.AllowFrom); err != nil {
-		return fmt.Errorf("invalid allow_from CIDR '%s': %s", c.AllowFrom, err.Error())
+	for i, a := range c.AllowFrom {
+		if _, _, err := net.ParseCIDR(a); err != nil {
+			return fmt.Errorf("invalid allow_from CIDR '%s' at index %d: %s", a, i, err.Error())
+		}
 	}
 
 	return nil
@@ -243,6 +245,18 @@ func defaultConfig() clientConfig {
 		LogPath:      ".",
 		DefaultUID:   0,
 		DefaultGID:   0,
-		AllowFrom:    "0.0.0.0/0",
+		AllowFrom:    []string{"0.0.0.0/0", "::/0"},
 	}
+}
+
+func getAllowFroms() []net.IPNet {
+	nets := make([]net.IPNet, len(config.AllowFrom))
+	for i, a := range config.AllowFrom {
+		_, network, err := net.ParseCIDR(a)
+		if err != nil {
+			panic("invalid CIDR address in property allow_from")
+		}
+		nets[i] = *network
+	}
+	return nets
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"net"
 	"os"
 	"os/exec"
 	"os/user"
@@ -13,14 +12,9 @@ import (
 )
 
 func listen() {
-	_, network, err := net.ParseCIDR(config.AllowFrom)
-	if err != nil {
-		panic("invalid CIDR address in property allow_from")
-	}
-
 	otto.Listen(otto.ListenOptions{
 		Address:          config.ListenAddr,
-		AllowFrom:        network,
+		AllowFrom:        getAllowFroms(),
 		Identity:         clientIdentity,
 		TrustedPublicKey: config.ServerIdentity,
 	}, func(c *otto.Connection) {

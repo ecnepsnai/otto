@@ -44,7 +44,7 @@ func tryGuidedSetup() {
 
 	config.ListenAddr = getConfigValue("Listen Address", config.ListenAddr)
 	config.ServerIdentity = getConfigValue("Server Identity (Copy from Otto Server)", "")
-	config.AllowFrom = getConfigValue("Allow Connections From", config.AllowFrom)
+	config.AllowFrom = strings.Split(getConfigValue("Allow Connections From (comma-separated list of CIDR addresses)", strings.Join(config.AllowFrom, ",")), ",")
 	fmt.Printf("Client identity: %s\n", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
 
 	saveNewConfig(config)

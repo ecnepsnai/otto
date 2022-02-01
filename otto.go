@@ -478,7 +478,7 @@ func (c *Connection) LocalAddr() net.Addr {
 // ListenOptions describes options for listening
 type ListenOptions struct {
 	Address          string
-	AllowFrom        *net.IPNet
+	AllowFrom        []net.IPNet
 	Identity         ssh.Signer
 	TrustedPublicKey string
 }
@@ -518,10 +518,22 @@ func Listen(options ListenOptions, handle func(conn *Connection)) {
 			continue
 		}
 
-		if options.AllowFrom != nil && !options.AllowFrom.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
-			log.Warn("Rejecting connection from server outside of allowed network: %s", c.RemoteAddr().String())
-			c.Close()
-			continue
+		if len(options.AllowFrom) > 0 {
+			allow := false
+			for _, allowNet := range options.AllowFrom {
+				if allowNet.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
+					allow = true
+					break
+				}
+			}
+			if !allow {
+				log.PWarn("Rejecting connection from server outside of allowed network", map[string]interface{}{
+					"remote_addr":  c.RemoteAddr().String(),
+					"allowed_addr": options.AllowFrom,
+				})
+				c.Close()
+				continue
+			}
 		}
 
 		_, chans, reqs, err := ssh.NewServerConn(c, sshConfig)

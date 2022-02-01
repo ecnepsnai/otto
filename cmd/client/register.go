@@ -142,11 +142,9 @@ func tryAutoRegister() {
 	rlog.Printf("Server identity: %s", registerResponse.ServerIdentity)
 
 	var listenAddr = fmt.Sprintf("0.0.0.0:%d", port)
-	var allowFrom = "0.0.0.0/0"
 	// Check if we connected to the server using IPv6
 	if len(getOutboundIP(hostNoProto)) == 16 {
 		listenAddr = fmt.Sprintf("[::]:%d", port)
-		allowFrom = "::/0"
 	}
 
 	// Save the config
@@ -158,7 +156,7 @@ func tryAutoRegister() {
 		DefaultGID:     gid,
 		Path:           os.Getenv("PATH"),
 		ListenAddr:     listenAddr,
-		AllowFrom:      allowFrom,
+		AllowFrom:      defaultConfig().AllowFrom,
 	}
 	config = &conf
 	if err := saveNewConfig(conf); err != nil {
