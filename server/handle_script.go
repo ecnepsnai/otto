@@ -16,7 +16,7 @@ func (h *handle) ScriptList(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) ScriptGet(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
@@ -27,7 +27,7 @@ func (h *handle) ScriptGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) ScriptGetGroups(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
@@ -42,7 +42,7 @@ func (h *handle) ScriptGetGroups(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
@@ -57,7 +57,7 @@ func (h *handle) ScriptGetHosts(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedules := ScheduleStore.AllSchedulesForScript(id)
 	sort.Slice(schedules, func(i int, j int) bool {
@@ -68,7 +68,7 @@ func (h *handle) ScriptGetSchedules(request web.Request) (interface{}, *web.Erro
 }
 
 func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
@@ -90,7 +90,7 @@ func (h *handle) ScriptGetAttachments(request web.Request) (interface{}, *web.Er
 }
 
 func (h *handle) ScriptSetGroups(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	type params struct {
 		Groups []string
@@ -140,7 +140,7 @@ func (h *handle) ScriptNew(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {
@@ -168,7 +168,7 @@ func (h *handle) ScriptEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScriptDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	script := ScriptStore.ScriptWithID(id)
 	if script == nil {

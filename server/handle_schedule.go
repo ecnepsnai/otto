@@ -16,7 +16,7 @@ func (h *handle) ScheduleList(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) ScheduleGet(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -27,12 +27,12 @@ func (h *handle) ScheduleGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) ScheduleGetReports(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 	return ScheduleReportStore.GetReportsForSchedule(id), nil
 }
 
 func (h *handle) ScheduleGetGroups(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -54,7 +54,7 @@ func (h *handle) ScheduleGetGroups(request web.Request) (interface{}, *web.Error
 }
 
 func (h *handle) ScheduleGetHosts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -76,7 +76,7 @@ func (h *handle) ScheduleGetHosts(request web.Request) (interface{}, *web.Error)
 }
 
 func (h *handle) ScheduleGetScript(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -111,7 +111,7 @@ func (h *handle) ScheduleNew(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -139,7 +139,7 @@ func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) ScheduleDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {

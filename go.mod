@@ -12,15 +12,14 @@ require (
 	github.com/ecnepsnai/secutil v1.0.3
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/store v1.2.2
-	github.com/ecnepsnai/web v1.7.1
+	github.com/ecnepsnai/web v1.8.0
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
-	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871
+	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
 )
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/lithammer/fuzzysearch v1.1.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/sys v0.0.0-20210819135213-f52c844e1c1c // indirect

@@ -20,7 +20,7 @@ func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.Erro
 }
 
 func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
@@ -31,7 +31,7 @@ func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
@@ -53,7 +53,7 @@ func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	type params struct {
 		Hosts []string
@@ -134,7 +134,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
@@ -156,7 +156,7 @@ func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedules := ScheduleStore.AllSchedulesForGroup(id)
 	sort.Slice(schedules, func(i int, j int) bool {
@@ -190,7 +190,7 @@ func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
 func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
@@ -218,7 +218,7 @@ func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) GroupDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {

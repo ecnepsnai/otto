@@ -17,7 +17,7 @@ func (h *handle) HostList(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -28,7 +28,7 @@ func (h *handle) HostGet(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -51,7 +51,7 @@ func (h *handle) HostGetGroups(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	schedules := ScheduleStore.AllSchedulesForHost(id)
 	sort.Slice(schedules, func(i int, j int) bool {
@@ -62,7 +62,7 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 }
 
 func (h *handle) HostGetServerID(request web.Request) (interface{}, *web.Error) {
-	hostID := request.Params.ByName("id")
+	hostID := request.Parameters["id"]
 
 	identity := IdentityStore.Get(hostID)
 	if identity == nil {
@@ -74,7 +74,7 @@ func (h *handle) HostGetServerID(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -86,7 +86,7 @@ func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Er
 }
 
 func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -131,7 +131,7 @@ func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -170,7 +170,7 @@ func (h *handle) HostNew(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -198,7 +198,7 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) HostDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	host := HostCache.ByID(id)
 	if host == nil {

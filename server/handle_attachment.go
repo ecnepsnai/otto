@@ -68,12 +68,12 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 }
 
 func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
-	attachmentID := request.Params.ByName("id")
+	attachmentID := request.Parameters["id"]
 	return AttachmentStore.AttachmentWithID(attachmentID), nil
 }
 
 func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.Response) {
-	attachmentID := request.Params.ByName("id")
+	attachmentID := request.Parameters["id"]
 
 	attachment := AttachmentStore.AttachmentWithID(attachmentID)
 	f, err := os.OpenFile(attachment.FilePath(), os.O_RDONLY, 0644)
@@ -92,7 +92,7 @@ func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (respo
 func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	attachmentID := request.Params.ByName("id")
+	attachmentID := request.Parameters["id"]
 
 	pathStr := request.HTTP.FormValue("Path")
 	inheritStr := request.HTTP.FormValue("Inherit")
@@ -153,7 +153,7 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) AttachmentDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	attachmentID := request.Params.ByName("id")
+	attachmentID := request.Parameters["id"]
 
 	if err := AttachmentStore.DeleteAttachment(attachmentID); err != nil {
 		if err.Server {

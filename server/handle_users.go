@@ -17,7 +17,7 @@ func (h *handle) UserList(request web.Request) (interface{}, *web.Error) {
 }
 
 func (h *handle) UserGet(request web.Request) (interface{}, *web.Error) {
-	username := request.Params.ByName("username")
+	username := request.Parameters["username"]
 
 	user := UserStore.UserWithUsername(username)
 	if user == nil {
@@ -55,7 +55,7 @@ func (h *handle) UserNew(request web.Request) (interface{}, *web.Error) {
 func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	username := request.Params.ByName("username")
+	username := request.Parameters["username"]
 
 	user := UserStore.UserWithUsername(username)
 	if user == nil {
@@ -93,7 +93,7 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.Error) {
 func (h *handle) UserResetAPIKey(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	username := request.Params.ByName("username")
+	username := request.Parameters["username"]
 
 	apiKey, err := UserStore.ResetAPIKey(username)
 	if err != nil {
@@ -137,7 +137,7 @@ func (h *handle) UserResetPassword(request web.Request) (interface{}, *web.Error
 }
 
 func (h *handle) UserDelete(request web.Request) (interface{}, *web.Error) {
-	username := request.Params.ByName("username")
+	username := request.Parameters["username"]
 	session := request.UserData.(*Session)
 	if username == session.Username {
 		return nil, web.ValidationError("Cannot delete own user")

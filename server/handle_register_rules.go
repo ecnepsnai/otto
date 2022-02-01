@@ -28,7 +28,7 @@ func (h *handle) RegisterRuleNew(request web.Request) (interface{}, *web.Error) 
 }
 
 func (h *handle) RegisterRuleGet(request web.Request) (interface{}, *web.Error) {
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 
 	rule := RegisterRuleStore.RuleWithID(id)
 	if rule == nil {
@@ -41,7 +41,7 @@ func (h *handle) RegisterRuleGet(request web.Request) (interface{}, *web.Error) 
 func (h *handle) RegisterRuleEdit(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 	params := editRegisterRuleParams{}
 	if err := request.DecodeJSON(&params); err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (h *handle) RegisterRuleEdit(request web.Request) (interface{}, *web.Error)
 func (h *handle) RegisterRuleDelete(request web.Request) (interface{}, *web.Error) {
 	session := request.UserData.(*Session)
 
-	id := request.Params.ByName("id")
+	id := request.Parameters["id"]
 	rule, err := RegisterRuleStore.DeleteRule(id)
 	if err != nil {
 		if err.Server {
