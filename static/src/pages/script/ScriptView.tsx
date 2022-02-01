@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Script, ScriptType, ScriptEnabledHost } from '../../types/Script';
-import { match, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
@@ -30,10 +30,8 @@ interface DedupedScriptEnabledHost {
     Hosts: ScriptEnabledHost[];
 }
 
-interface ScriptViewProps {
-    match: match;
-}
-export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) => {
+export const ScriptView: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState<boolean>(true);
     const [script, setScript] = React.useState<ScriptType>();
     const [hosts, setHosts] = React.useState<DedupedScriptEnabledHost[]>();
@@ -45,8 +43,7 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
     }, []);
 
     const loadHosts = async () => {
-        const scriptID = (props.match.params as URLParams).id;
-        const scriptHosts = await Script.Hosts(scriptID);
+        const scriptHosts = await Script.Hosts(id);
 
         const groupMap: { [id: string]: ScriptEnabledHost[] } = {};
         const groupNameMap: { [id: string]: string } = {};
@@ -72,18 +69,15 @@ export const ScriptView: React.FC<ScriptViewProps> = (props: ScriptViewProps) =>
     };
 
     const loadScript = async () => {
-        const scriptID = (props.match.params as URLParams).id;
-        setScript(await Script.Get(scriptID));
+        setScript(await Script.Get(id));
     };
 
     const loadAttachments = async () => {
-        const scriptID = (props.match.params as URLParams).id;
-        setAttachments(await Script.Attachments(scriptID));
+        setAttachments(await Script.Attachments(id));
     };
 
     const loadSchedules = async () => {
-        const scriptID = (props.match.params as URLParams).id;
-        setSchedules(await Script.Schedules(scriptID));
+        setSchedules(await Script.Schedules(id));
     };
 
     const loadData = () => {

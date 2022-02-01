@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
-import { match } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -13,10 +13,8 @@ import { Notification } from '../../components/Notification';
 import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 
-interface GroupEditProps {
-    match: match
-}
-export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
+export const GroupEdit: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState(true);
     const [group, setGroup] = React.useState<GroupType>();
     const [isNew, setIsNew] = React.useState<boolean>();
@@ -27,7 +25,6 @@ export const GroupEdit: React.FC<GroupEditProps> = (props: GroupEditProps) => {
     }, []);
 
     const loadGroup = () => {
-        const id = (props.match.params as URLParams).id;
         if (id == null) {
             setIsNew(true);
             setGroup(Group.Blank());

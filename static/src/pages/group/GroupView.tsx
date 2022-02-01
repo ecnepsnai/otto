@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
-import { match, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { HostType } from '../../types/Host';
@@ -18,10 +18,8 @@ import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 
-interface GroupViewProps {
-    match: match;
-}
-export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
+export const GroupView: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState(true);
     const [group, setGroup] = React.useState<GroupType>();
     const [hosts, setHosts] = React.useState<HostType[]>();
@@ -33,26 +31,22 @@ export const GroupView: React.FC<GroupViewProps> = (props: GroupViewProps) => {
     }, []);
 
     const loadGroup = async () => {
-        const groupID = (props.match.params as URLParams).id;
-        const group = await Group.Get(groupID);
+        const group = await Group.Get(id);
         setGroup(group);
     };
 
     const loadHosts = async () => {
-        const groupID = (props.match.params as URLParams).id;
-        const hosts = await Group.Hosts(groupID);
+        const hosts = await Group.Hosts(id);
         setHosts(hosts);
     };
 
     const loadScripts = async () => {
-        const groupID = (props.match.params as URLParams).id;
-        const scripts = await Group.Scripts(groupID);
+        const scripts = await Group.Scripts(id);
         setScripts(scripts);
     };
 
     const loadSchedules = async () => {
-        const groupID = (props.match.params as URLParams).id;
-        const schedules = await Group.Schedules(groupID);
+        const schedules = await Group.Schedules(id);
         setSchedules(schedules);
     };
 

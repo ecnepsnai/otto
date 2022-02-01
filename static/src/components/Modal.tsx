@@ -96,7 +96,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     };
     private closeButtonClick = () => {
         this.state.bsModal.hide();
-    }
+    };
     private closeButton = () => {
         if (this.props.static) {
             return null;
@@ -104,7 +104,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
         return (
             <button type="button" onClick={this.closeButtonClick} className="btn-close" data-dismiss="modal" aria-label="Close"></button>
         );
-    }
+    };
     private header = () => {
         if (this.props.title) {
             return (
@@ -117,7 +117,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             return this.props.header;
         }
         return null;
-    }
+    };
     private footer = () => {
         if (!this.props.buttons || this.props.buttons.length == 0) {
             return null;
@@ -133,7 +133,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                 }
             </div>
         );
-    }
+    };
     render(): JSX.Element {
         let className = 'modal-dialog';
         if (this.props.size) {

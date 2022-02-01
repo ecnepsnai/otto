@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Schedule, ScheduleType } from '../../types/Schedule';
-import { Link, match } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -16,10 +16,8 @@ import { Icon } from '../../components/Icon';
 import { Checkbox } from '../../components/input/Checkbox';
 import { RadioChoice } from '../../components/input/Radio';
 
-interface ScheduleEditProps {
-    match: match
-}
-export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditProps) => {
+export const ScheduleEdit: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [noData, setNoData] = React.useState<boolean>();
     const [loading, setLoading] = React.useState(true);
     const [schedule, setSchedule] = React.useState<ScheduleType>();
@@ -33,7 +31,6 @@ export const ScheduleEdit: React.FC<ScheduleEditProps> = (props: ScheduleEditPro
     }, []);
 
     const loadSchedule = () => {
-        const id = (props.match.params as URLParams).id;
         if (id == null) {
             return Promise.resolve(Schedule.Blank());
         } else {

@@ -13,7 +13,7 @@ interface NotificationProps {
 export class Notification extends React.Component<NotificationProps, unknown> {
     private onClose = () => {
         GlobalNotificationFrame.removeNotification(this.props.id);
-    }
+    };
     componentDidMount(): void {
         setTimeout(() => {
             this.onClose();

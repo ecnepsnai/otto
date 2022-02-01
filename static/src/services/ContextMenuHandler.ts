@@ -22,7 +22,7 @@ export class ContextMenuHandler {
     public readonly onContextMenu = (event: React.MouseEvent): void => {
         event.preventDefault();
         this.callback(event.pageX, event.pageY);
-    }
+    };
 
     /**
      * Event handler for onTouchStart
@@ -36,19 +36,19 @@ export class ContextMenuHandler {
         this.longPressTimeout = setTimeout(() => {
             this.callback(event.touches[0].pageX, event.touches[0].pageY);
         }, this.longPressDurationMS);
-    }
+    };
 
     /**
      * Event handler for onTouchEnd
      */
     public readonly onTouchEnd = (): void => {
         clearTimeout(this.longPressTimeout);
-    }
+    };
 
     /**
      * Event handler for onTouchMove
      */
     public readonly onTouchMove = (): void => {
         clearTimeout(this.longPressTimeout);
-    }
+    };
 }

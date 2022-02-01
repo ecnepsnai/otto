@@ -12,7 +12,7 @@ export class Input {
     /**
      * A checkbox and a label.
      */
-    public static Checkbox = Checkbox
+    public static Checkbox = Checkbox;
     /**
      * A file chooser
      */
@@ -21,29 +21,29 @@ export class Input {
      * An input node for number type inputs. Suitable for integer and floating points, but not suitable
      * for hexadecimal or scientific-notation values.
      */
-    public static Number = Number
+    public static Number = Number;
     /**
      * A group of radio buttons with associated labels and values.
      */
-    public static Radio = Radio
+    public static Radio = Radio;
     /**
      * A dropdown menu with associated labels and values.
      */
-    public static Select = Select
+    public static Select = Select;
     /**
      * A text input box. Suitable for plain-text or passwords.
      */
-    public static Text = Text
+    public static Text = Text;
     /**
      * A multi-line text box.
      */
-    public static Textarea = Textarea
+    public static Textarea = Textarea;
     /**
      * An input for specifying a UID and GID pair
      */
-    public static RunAsInput = RunAsInput
+    public static RunAsInput = RunAsInput;
     /**
      * An input for a password with a generate random button
      */
-    public static Password = Password
+    public static Password = Password;
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RunAs, Script, ScriptType } from '../../types/Script';
-import { match } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -14,10 +14,8 @@ import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 import { AttachmentList } from './attachment/AttachmentList';
 
-interface ScriptEditProps {
-    match: match
-}
-export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) => {
+export const ScriptEdit: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState<boolean>(true);
     const [script, setScript] = React.useState<ScriptType>();
     const [isNew, setIsNew] = React.useState<boolean>();
@@ -28,7 +26,6 @@ export const ScriptEdit: React.FC<ScriptEditProps> = (props: ScriptEditProps) =>
     }, []);
 
     const loadScript = () => {
-        const id = (props.match.params as URLParams).id;
         if (id == null) {
             setScript(Script.Blank());
             setIsNew(true);

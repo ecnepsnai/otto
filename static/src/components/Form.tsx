@@ -56,16 +56,16 @@ export class Form extends React.Component<FormProps, FormState> {
             return false;
         }
         return true;
-    }
+    };
 
     private onClick = () => {
         this.submitForm();
-    }
+    };
 
     private onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         this.submitForm();
-    }
+    };
 
     private submitForm = () => {
         this.validateForm();
@@ -73,7 +73,7 @@ export class Form extends React.Component<FormProps, FormState> {
         if (this.props.onSubmit) {
             this.props.onSubmit();
         }
-    }
+    };
 
     private saveButton = () => {
         if (!this.props.showSaveButton) {
@@ -92,7 +92,7 @@ export class Form extends React.Component<FormProps, FormState> {
                 </Button>
             </div>
         );
-    }
+    };
 
     private error = () => {
         if (!this.state.invalid) {
@@ -104,7 +104,7 @@ export class Form extends React.Component<FormProps, FormState> {
                 <Icon.Label icon={<Icon.TimesCircle color={Style.Palette.Danger} />} label="Correct Errors Before Continuing" />
             </div>
         );
-    }
+    };
 
     render(): JSX.Element {
         const className = this.props.fullWidth ? '' : 'container';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Schedule, ScheduleReport, ScheduleType } from '../../types/Schedule';
-import { match, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { HostType } from '../../types/Host';
@@ -19,10 +19,8 @@ import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
 import { Nothing } from '../../components/Nothing';
 
-interface ScheduleViewProps {
-    match: match;
-}
-export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewProps) => {
+export const ScheduleView: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState<boolean>(true);
     const [schedule, setSchedule] = React.useState<ScheduleType>();
     const [reports, setReports] = React.useState<ScheduleReport[]>();
@@ -35,28 +33,23 @@ export const ScheduleView: React.FC<ScheduleViewProps> = (props: ScheduleViewPro
     }, []);
 
     const loadSchedule = () => {
-        const scheduleID = (props.match.params as URLParams).id;
-        return Schedule.Get(scheduleID);
+        return Schedule.Get(id);
     };
 
     const loadReports = () => {
-        const scheduleID = (props.match.params as URLParams).id;
-        return Schedule.Reports(scheduleID);
+        return Schedule.Reports(id);
     };
 
     const loadScript = () => {
-        const scheduleID = (props.match.params as URLParams).id;
-        return Schedule.Script(scheduleID);
+        return Schedule.Script(id);
     };
 
     const loadGroups = () => {
-        const scheduleID = (props.match.params as URLParams).id;
-        return Schedule.Groups(scheduleID);
+        return Schedule.Groups(id);
     };
 
     const loadHosts = () => {
-        const scheduleID = (props.match.params as URLParams).id;
-        return Schedule.Hosts(scheduleID);
+        return Schedule.Hosts(id);
     };
 
     const loadData = () => {

@@ -6,7 +6,7 @@ import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { EditButton, DeleteButton } from '../../components/Button';
 import { Layout } from '../../components/Layout';
-import { match } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
@@ -20,10 +20,8 @@ import { ScheduleListCard } from '../../components/ScheduleListCard';
 import { HostHeartbeat } from './HostHeartbeat';
 import { HostTrust } from './HostTrust';
 
-interface HostViewProps {
-    match: match;
-}
-export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
+export const HostView: React.FC = () => {
+    const { id } = useParams() as URLParams;
     const [loading, setLoading] = React.useState(true);
     const [host, setHost] = React.useState<HostType>();
     const [heartbeat, setHeartbeat] = React.useState<HeartbeatType>();
@@ -36,8 +34,7 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
     }, []);
 
     const loadHost = async () => {
-        const hostID = (props.match.params as URLParams).id;
-        const host = await Host.Get(hostID);
+        const host = await Host.Get(id);
         setHost(host);
 
         const heartbeats = await Heartbeat.List();
@@ -49,19 +46,16 @@ export const HostView: React.FC<HostViewProps> = (props: HostViewProps) => {
     };
 
     const loadScripts = async () => {
-        const hostID = (props.match.params as URLParams).id;
-        setScripts(await Host.Scripts(hostID));
+        setScripts(await Host.Scripts(id));
     };
 
     const loadGroups = async () => {
-        const hostID = (props.match.params as URLParams).id;
-        const groups = await Host.Groups(hostID);
+        const groups = await Host.Groups(id);
         setGroups(groups);
     };
 
     const loadSchedules = async () => {
-        const hostID = (props.match.params as URLParams).id;
-        setSchedules(await Host.Schedules(hostID));
+        setSchedules(await Host.Schedules(id));
     };
 
     const loadData = () => {
