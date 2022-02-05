@@ -24,7 +24,7 @@ type ScriptResult struct {
 
 var clientActionMap = map[string]uint32{
 	ClientActionRunScript:      otto.ActionRunScript,
-	ClientActionExitClient:     otto.ActionExit,
+	ClientActionExitClient:     otto.ActionUploadFileAndExitClient,
 	ClientActionReboot:         otto.ActionReboot,
 	ClientActionShutdown:       otto.ActionShutdown,
 	ClientActionUpdateIdentity: otto.ActionUpdateIdentity,
@@ -63,6 +63,7 @@ func (host *Host) connect() (*hostConnection, error) {
 		TrustedPublicKey: host.Trust.TrustedIdentity,
 		Timeout:          timeout,
 	})
+	log.Debug("dialed host %s", host.ID)
 	if err != nil {
 		if strings.Contains(err.Error(), "unknown public key:") {
 			parts := strings.Split(err.Error(), " ")
@@ -113,7 +114,7 @@ func (hc *hostConnection) Close() {
 }
 
 // TriggerAction will trigger the given action on the host
-func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.ScriptResult, *Error) {
+func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.MessageActionResult, *Error) {
 	conn, err := host.connect()
 	if err != nil {
 		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
@@ -153,7 +154,7 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 			scriptResult := &result.ScriptResult
 			heartbeatStore.UpdateHostReachability(host, true)
 			log.Debug("Action completed with result: %s", scriptResult.String())
-			return scriptResult, nil
+			return &result, nil
 		case otto.MessageTypeGeneralFailure:
 			result := message.(otto.MessageGeneralFailure)
 			generalError := result.Error
@@ -276,7 +277,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		}, nil
 	}
 
-	if result.Success {
+	if result.ScriptResult.Success {
 		if script.AfterExecution != "" {
 			clientAction, ok := clientActionMap[script.AfterExecution]
 			if !ok {
@@ -300,7 +301,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 				Action: clientAction,
 			}, nil, cancel)
 			if err != nil {
-				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ExecError)
+				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ScriptResult.ExecError)
 				return &ScriptResult{
 					ScriptID:    script.ID,
 					Duration:    time.Since(start),
@@ -313,25 +314,77 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 			}
 		}
 	} else {
-		log.Error("Error running script '%s' on host '%s': %s", script.Name, host.Address, result.ExecError)
+		log.Error("Error running script '%s' on host '%s': %s", script.Name, host.Address, result.ScriptResult.ExecError)
 	}
 
 	return &ScriptResult{
 		ScriptID:    script.ID,
 		Duration:    time.Since(start),
 		Environment: variables,
-		Result:      *result,
+		Result:      result.ScriptResult,
 	}, nil
 }
 
 // ExitClient exit the otto client on the host
 func (host *Host) ExitClient() *Error {
 	_, err := host.TriggerAction(otto.MessageTriggerAction{
-		Action: otto.ActionExit,
+		Action: otto.ActionExitClient,
 	}, nil, nil)
 	if err != nil {
 		log.Error("Error exiting otto client on host '%s': %s", host.Address, err.Message)
 		return err
 	}
 	return nil
+}
+
+func (host *Host) RotateIdentity() (string, string, *Error) {
+	serverId, iderr := otto.NewIdentity()
+	if iderr != nil {
+		log.PError("Error generating new identity", map[string]interface{}{
+			"error": iderr.Error(),
+		})
+		return "", "", ErrorFrom(iderr)
+	}
+
+	result, err := host.TriggerAction(otto.MessageTriggerAction{
+		Action: otto.ActionUpdateIdentity,
+		File: otto.File{
+			Data: []byte(serverId.PublicKeyString()),
+		},
+	}, nil, nil)
+	if err != nil {
+		log.PError("Error requesting client update identity", map[string]interface{}{
+			"host":  host.ID,
+			"error": err.Message,
+		})
+		return "", "", err
+	}
+	if result.File.Data == nil {
+		log.PError("Client did not return new identity", map[string]interface{}{
+			"host":  host.ID,
+			"error": err.Message,
+		})
+		return "", "", err
+	}
+
+	IdentityStore.Set(host.ID, serverId)
+	err = HostStore.UpdateHostTrust(host.ID, HostTrust{
+		TrustedIdentity: string(result.File.Data),
+		LastTrustUpdate: time.Now(),
+	})
+	if err != nil {
+		log.PError("Error updating host trust", map[string]interface{}{
+			"host":  host.ID,
+			"error": err.Message,
+		})
+		return "", "", err
+	}
+
+	log.PInfo("Rotated host identities", map[string]interface{}{
+		"host_id":    host.ID,
+		"host_name":  host.Name,
+		"server_pub": serverId.PublicKeyString(),
+		"client_pub": string(result.File.Data),
+	})
+	return serverId.PublicKeyString(), string(result.File.Data), nil
 }

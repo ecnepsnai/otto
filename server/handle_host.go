@@ -87,6 +87,7 @@ func (h *handle) HostTriggerHeartbeat(request web.Request) (interface{}, *web.Er
 
 func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) {
 	id := request.Parameters["id"]
+	session := request.UserData.(*Session)
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -111,12 +112,15 @@ func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) 
 		if trustUpdateRequest.PublicKey != "" {
 			host.Trust.TrustedIdentity = trustUpdateRequest.PublicKey
 			host.Trust.UntrustedIdentity = ""
+			host.Trust.LastTrustUpdate = time.Now()
 		} else {
 			host.Trust.TrustedIdentity = host.Trust.UntrustedIdentity
 			host.Trust.UntrustedIdentity = ""
+			host.Trust.LastTrustUpdate = time.Now()
 		}
 	} else if trustUpdateRequest.Action == "deny" {
 		host.Trust.TrustedIdentity = ""
+		host.Trust.LastTrustUpdate = time.Now()
 	}
 	host.Trust.LastTrustUpdate = time.Now()
 
@@ -127,7 +131,31 @@ func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.Error) 
 		return nil, web.ValidationError(err.Message)
 	}
 
+	EventStore.HostTrustModified(host, session.Username)
+
 	return host, nil
+}
+
+func (h *handle) HostRotateID(request web.Request) (interface{}, *web.Error) {
+	id := request.Parameters["id"]
+	session := request.UserData.(*Session)
+
+	host := HostCache.ByID(id)
+	if host == nil {
+		return nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	serverKey, hostKey, err := host.RotateIdentity()
+	if err != nil {
+		if err.Server {
+			return nil, web.CommonErrors.ServerError
+		}
+		return nil, web.ValidationError(err.Message)
+	}
+
+	EventStore.HostIdentityRotated(host, hostKey, serverKey, session.Username)
+
+	return true, nil
 }
 
 func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.Error) {

@@ -67,3 +67,24 @@ func (h Host) Scripts() []ScriptEnabledGroup {
 	}
 	return hostScripts
 }
+
+func (h *Host) RotateIdentityIfNeeded() *Error {
+	daysSinceLastUpdate := uint(time.Since(h.Trust.LastTrustUpdate).Hours() / 24)
+
+	if daysSinceLastUpdate < Options.Security.RotateID.FrequencyDays {
+		return nil
+	}
+
+	serverID, hostID, err := h.RotateIdentity()
+	if err != nil {
+		log.PError("Error automatically rotating client identity", map[string]interface{}{
+			"host_id":   h.ID,
+			"host_name": h.Name,
+			"error":     err.Error,
+		})
+		return err
+	}
+
+	EventStore.HostIdentityRotated(h, hostID, serverID, systemUsername)
+	return nil
+}

@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
-import { OptionsRotatePSK } from './OptionsRotatePSK';
+import { OptionsRotateID } from './OptionsRotateID';
 
 interface OptionsSecurityProps {
     defaultValue: Options.Security;
@@ -14,29 +13,16 @@ export const OptionsSecurity: React.FC<OptionsSecurityProps> = (props: OptionsSe
         props.onUpdate(value);
     }, [value]);
 
-    const changeIncludePSKEnv = (IncludePSKEnv: boolean) => {
+    const changeRotateID = (RotateID: Options.RotateID) => {
         setValue(value => {
-            value.IncludePSKEnv = IncludePSKEnv;
-            return { ...value };
-        });
-    };
-
-    const changeRotatePSK = (RotatePSK: Options.RotatePSK) => {
-        setValue(value => {
-            value.RotatePSK = RotatePSK;
+            value.RotateID = RotateID;
             return { ...value };
         });
     };
 
     return (
         <div>
-            <Input.Checkbox
-                label="Include Client PSK Environment Variable"
-                defaultValue={value.IncludePSKEnv}
-                helpText="If checked the OTTO_CLIENT_PSK environment variable is included when scripts are run."
-                onChange={changeIncludePSKEnv} />
-            <hr />
-            <OptionsRotatePSK defaultValue={value.RotatePSK} onUpdate={changeRotatePSK} />
+            <OptionsRotateID defaultValue={value.RotateID} onUpdate={changeRotateID} />
         </div>
     );
 };

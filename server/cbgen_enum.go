@@ -115,6 +115,10 @@ const (
 	EventTypeHostRegisterSuccess = "HostRegisterSuccess"
 	// EventTypeHostRegisterIncorrectKey HostRegisterIncorrectKey event
 	EventTypeHostRegisterIncorrectKey = "HostRegisterIncorrectKey"
+	// EventTypeHostTrustModified HostTrustModified event
+	EventTypeHostTrustModified = "HostTrustModified"
+	// EventTypeHostIdentityRotated HostIdentityRotated event
+	EventTypeHostIdentityRotated = "HostIdentityRotated"
 	// EventTypeGroupAdded GroupAdded event
 	EventTypeGroupAdded = "GroupAdded"
 	// EventTypeGroupModified GroupModified event
@@ -168,6 +172,8 @@ var AllEventType = []string{
 	EventTypeHostDeleted,
 	EventTypeHostRegisterSuccess,
 	EventTypeHostRegisterIncorrectKey,
+	EventTypeHostTrustModified,
+	EventTypeHostIdentityRotated,
 	EventTypeGroupAdded,
 	EventTypeGroupModified,
 	EventTypeGroupDeleted,
@@ -203,6 +209,8 @@ var EventTypeMap = map[string]string{
 	EventTypeHostDeleted:              "HostDeleted",
 	EventTypeHostRegisterSuccess:      "HostRegisterSuccess",
 	EventTypeHostRegisterIncorrectKey: "HostRegisterIncorrectKey",
+	EventTypeHostTrustModified:        "HostTrustModified",
+	EventTypeHostIdentityRotated:      "HostIdentityRotated",
 	EventTypeGroupAdded:               "GroupAdded",
 	EventTypeGroupModified:            "GroupModified",
 	EventTypeGroupDeleted:             "GroupDeleted",
@@ -238,6 +246,8 @@ var EventTypeNameMap = map[string]string{
 	"HostDeleted":              "HostDeleted",
 	"HostRegisterSuccess":      "HostRegisterSuccess",
 	"HostRegisterIncorrectKey": "HostRegisterIncorrectKey",
+	"HostTrustModified":        "HostTrustModified",
+	"HostIdentityRotated":      "HostIdentityRotated",
 	"GroupAdded":               "GroupAdded",
 	"GroupModified":            "GroupModified",
 	"GroupDeleted":             "GroupDeleted",
@@ -330,6 +340,16 @@ var EventTypeSchema = []map[string]interface{}{
 		"name":        "HostRegisterIncorrectKey",
 		"description": "HostRegisterIncorrectKey event",
 		"value":       "HostRegisterIncorrectKey",
+	},
+	{
+		"name":        "HostTrustModified",
+		"description": "HostTrustModified event",
+		"value":       "HostTrustModified",
+	},
+	{
+		"name":        "HostIdentityRotated",
+		"description": "HostIdentityRotated event",
+		"value":       "HostIdentityRotated",
 	},
 	{
 		"name":        "GroupAdded",

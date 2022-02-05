@@ -130,14 +130,6 @@ export class Host {
     }
 
     /**
-     * Rotate the PSK for a host, returning the new PSK
-     */
-    public static async RotatePSK(id: string): Promise<string> {
-        const data = await API.POST('/api/hosts/host/' + id + '/psk', null);
-        return data as string;
-    }
-
-    /**
      * Trigger a heartbeat for this host
      */
     public static async Heartbeat(id: string): Promise<HeartbeatType> {
@@ -149,11 +141,19 @@ export class Host {
      * Update the trust for this host
      */
      public static async UpdateTrust(id: string, action: ('permit'|'deny'), publicKey?: string): Promise<HeartbeatType> {
-        const data = await API.POST('/api/hosts/host/' + id + '/trust', {
+        const data = await API.POST('/api/hosts/host/' + id + '/id/trust', {
             Action: action,
             PublicKey: publicKey,
         });
         return data as HeartbeatType;
+    }
+
+    /**
+     * Rotate the identity for this host
+     */
+     public static async RotateID(id: string): Promise<unknown> {
+        const data = await API.POST('/api/hosts/host/' + id + '/id/rotate', null);
+        return data;
     }
 
     /**
@@ -169,7 +169,6 @@ export interface NewHostParameters {
     Name: string;
     Address: string;
     Port: number;
-    PSK: string;
     GroupIDs: string[];
     Environment: Variable[];
 }
@@ -178,8 +177,6 @@ export interface EditHostParameters {
     Name: string;
     Address: string;
     Port: number;
-    PSK: string;
-    LastPSKRotate: string;
     GroupIDs: string[];
     Enabled: boolean;
     Environment: Variable[];

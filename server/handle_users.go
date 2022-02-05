@@ -35,7 +35,7 @@ func (h *handle) UserNew(request web.Request) (interface{}, *web.Error) {
 		return nil, err
 	}
 
-	if params.Username == "system" {
+	if params.Username == systemUsername {
 		return nil, web.ValidationError("Username is reserved")
 	}
 

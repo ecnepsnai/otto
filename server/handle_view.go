@@ -12,7 +12,7 @@ func (v *view) Login(request web.Request, writer web.Writer) (response web.Respo
 	session := sessionForHTTPRequest(request.HTTP, false)
 	if session != nil {
 		response.Headers = map[string]string{
-			"Location": "/hosts/",
+			"Location": "/hosts",
 		}
 		response.Status = 307
 		return
@@ -62,7 +62,7 @@ func (v *view) Redirect(request web.Request, writer web.Writer) (response web.Re
 
 	session := sessionForHTTPRequest(request.HTTP, false)
 	if session != nil && !session.Partial {
-		redirectLocation = "/hosts/"
+		redirectLocation = "/hosts"
 	} else {
 		redirectLocation = "/login"
 	}

@@ -66,17 +66,16 @@ Otto sessions are automatically cleaned up, so logging out is not mandatory.
 
 
 
-**POST /api/hosts/host/:id/psk**
+**GET /api/hosts/host/:id/id**
 
-Rotate the PSK used to connect to the client and return the new PSK
-
-Expected body: none
+Get the server public key for this host.
 
 Example response:
 ```json
 {
-    "data": "example_psk",
-    "error": null
+    "error": {},
+    "code": 200,
+    "data": "AAAAC3NzaC1lZDI1NTE5AAAAIOlJYnMAeyFwKSLy3zCy4QCAcnYahCJd12sFAQETOUK3"
 }
 ```
 
@@ -105,6 +104,60 @@ Example response:
             "distribution_name": "Rocky Linux"
         }
     }
+}
+```
+
+**POST /api/hosts/host/:id/id/trust**
+
+Modify the trust for this host.
+
+Expected body:
+```json
+{
+	"Action": "permit",
+	"PublicKey": "AAAAC3NzaC1lZDI1NTE5AAAAIOlJYnMAeyFwKSLy3zCy4QCAcnYahCJd12sFAQETOUK3"
+}
+```
+
+`Action` must be either `permit` or `deny`. The `PublicKey` property is only used when the action is `permit`. If it is
+omitted or an empty string, the pending public key is trusted.
+
+Example response:
+```json
+{
+    "code": 200,
+    "error": {},
+    "data": {
+        "ID": "rea_UKwyyQBX",
+        "Name": "example",
+        "Address": "127.0.0.1",
+        "Port": 12444,
+        "Enabled": true,
+        "Trust": {
+            "TrustedIdentity": "AAAAC3NzaC1lZDI1NTE5AAAAIOlJYnMAeyFwKSLy3zCy4QCAcnYahCJd12sFAQETOUK3",
+            "UntrustedIdentity": "",
+            "LastTrustUpdate": "2022-02-04T19:03:25.322461409-08:00"
+        },
+        "GroupIDs": [
+            "y910Mb38cmud"
+        ],
+        "Environment": null
+    }
+}
+```
+
+**POST /api/hosts/host/:id/id/rotate**
+
+Rotate the identities for this host.
+
+Expected body: none.
+
+Example response:
+```json
+{
+    "code": 200,
+    "error": {},
+    "data": true
 }
 ```
 

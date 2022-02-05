@@ -6,6 +6,8 @@ import (
 	"github.com/ecnepsnai/secutil"
 )
 
+const systemUsername = "system"
+
 func (s *userStoreObject) UserWithUsername(username string) *User {
 	user, present := UserCache.ByUsername(username)
 	if !present {

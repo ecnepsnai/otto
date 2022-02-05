@@ -28,7 +28,7 @@ func checkFirstRun() {
 		if err != nil {
 			log.Fatal("Unable to make default user: %s", err.Message)
 		}
-		EventStore.UserAdded(user, "system")
+		EventStore.UserAdded(user, systemUsername)
 	}
 
 	if !atLeastOneGroup() {
@@ -37,7 +37,7 @@ func checkFirstRun() {
 		if err != nil {
 			log.Fatal("Unable to make default group: %s", err.Message)
 		}
-		EventStore.GroupAdded(group, "system")
+		EventStore.GroupAdded(group, systemUsername)
 		if Options.Register.DefaultGroupID == "" {
 			o := Options
 			o.Register.DefaultGroupID = group.ID

@@ -35,12 +35,11 @@ type OptionsAuthentication struct {
 
 // OptionsSecurity describes security options
 type OptionsSecurity struct {
-	IncludePSKEnv bool
-	RotatePSK     OptionsPSKRotate
+	RotateID OptionsRotateID
 }
 
-// OptionsPSKRotate describes PSK rotation options
-type OptionsPSKRotate struct {
+// OptionsRotateID describes identity rotation options
+type OptionsRotateID struct {
 	Enabled       bool
 	FrequencyDays uint
 }
@@ -84,8 +83,7 @@ func LoadOptions() {
 			Enabled: false,
 		},
 		Security: OptionsSecurity{
-			IncludePSKEnv: false,
-			RotatePSK: OptionsPSKRotate{
+			RotateID: OptionsRotateID{
 				Enabled:       true,
 				FrequencyDays: 7,
 			},
@@ -172,9 +170,9 @@ func (o *OttoOptions) Validate() error {
 			return fmt.Errorf("a register key is required if auto registration is enabled")
 		}
 	}
-	if o.Security.RotatePSK.Enabled {
-		if o.Security.RotatePSK.FrequencyDays == 0 {
-			return fmt.Errorf("psk rotation frequency must be greater than 0")
+	if o.Security.RotateID.Enabled {
+		if o.Security.RotateID.FrequencyDays == 0 {
+			return fmt.Errorf("id rotation frequency must be greater than 0")
 		}
 	}
 	return nil

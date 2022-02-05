@@ -74,6 +74,11 @@ export const HostTrust: React.FC<HostTrustProps> = (props: HostTrustProps) => {
             });
         });
     };
+    const rotateIdentity = () => {
+        Host.RotateID(props.host.ID).then(() => {
+            Notification.success('Identity Rotated');
+        });
+    };
 
     let badge = (<Badge pill outline={props.outline} color={Style.Palette.Secondary}><Icon.Label icon={<Icon.QuestionCircle />} label="Unknown" /></Badge>);
 
@@ -92,6 +97,7 @@ export const HostTrust: React.FC<HostTrustProps> = (props: HostTrustProps) => {
     const untrustIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Unlock />} label="Remove Trusted Identity" onClick={removeTrust} />) : null;
     const trustPendingMenu = props.host.Trust.UntrustedIdentity ? (<Menu.Item icon={<Icon.Lock />} label="Confirm Pending Identity" onClick={trustPending} />) : null;
     const copyServerIdentityMenu = (<Menu.Item icon={<Icon.Clipboard />} label="Copy Server Identity" onClick={copyServerIdentity} />);
+    const rotateIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Random />} label="Rotate Identity" onClick={rotateIdentity} />) : null;
 
     return (
         <span className="badges">
@@ -101,6 +107,7 @@ export const HostTrust: React.FC<HostTrustProps> = (props: HostTrustProps) => {
                 {untrustIdentityMenu}
                 {trustPendingMenu}
                 <Menu.Divider />
+                {rotateIdentityMenu}
                 {copyServerIdentityMenu}
             </Dropdown>
         </span>

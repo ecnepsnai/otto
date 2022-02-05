@@ -2,11 +2,11 @@ import * as React from 'react';
 import { Input } from '../../../components/input/Input';
 import { Options } from '../../../types/Options';
 
-interface OptionsRotatePSKProps {
-    defaultValue: Options.RotatePSK;
-    onUpdate: (value: Options.RotatePSK) => (void);
+interface OptionsRotateIDProps {
+    defaultValue: Options.RotateID;
+    onUpdate: (value: Options.RotateID) => (void);
 }
-export const OptionsRotatePSK: React.FC<OptionsRotatePSKProps> = (props: OptionsRotatePSKProps) => {
+export const OptionsRotateID: React.FC<OptionsRotateIDProps> = (props: OptionsRotateIDProps) => {
     const [value, setValue] = React.useState(props.defaultValue);
 
     React.useEffect(() => {
@@ -38,9 +38,9 @@ export const OptionsRotatePSK: React.FC<OptionsRotatePSKProps> = (props: Options
     return (
         <React.Fragment>
             <Input.Checkbox
-                label="Automatically Rotate Client PSKs"
+                label="Automatically Rotate Client Identites"
                 defaultValue={value.Enabled}
-                helpText="If checked then client PSKs are updated at the frequency specified below."
+                helpText="If checked then client IDs are updated at the frequency specified below."
                 onChange={changeEnabled} />
             {content()}
         </React.Fragment>

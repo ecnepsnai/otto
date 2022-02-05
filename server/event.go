@@ -185,6 +185,31 @@ func (s *eventStoreObject) HostRegisterIncorrectKey(remoteAddr string) {
 	event.Save()
 }
 
+func (s *eventStoreObject) HostTrustModified(host *Host, currentUser string) {
+	event := newEvent(EventTypeHostTrustModified, map[string]string{
+		"host_id":            host.ID,
+		"name":               host.Name,
+		"address":            host.Address,
+		"modified_by":        currentUser,
+		"trusted_public_key": host.Trust.TrustedIdentity,
+		"pending_public_key": host.Trust.UntrustedIdentity,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) HostIdentityRotated(host *Host, hostID, serverID, currentUser string) {
+	event := newEvent(EventTypeHostIdentityRotated, map[string]string{
+		"host_id":           host.ID,
+		"name":              host.Name,
+		"modified_by":       currentUser,
+		"server_public_key": serverID,
+		"host_public_key":   hostID,
+	})
+
+	event.Save()
+}
+
 func (s *eventStoreObject) GroupAdded(group *Group, currentUser string) {
 	event := newEvent(EventTypeGroupAdded, map[string]string{
 		"group_id": group.ID,

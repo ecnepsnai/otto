@@ -246,7 +246,7 @@ func TestConnection(t *testing.T) {
 		panic(err)
 	}
 
-	go otto.Listen(otto.ListenOptions{
+	l, err := otto.SetupListener(otto.ListenOptions{
 		Address:          "127.0.0.1:12400",
 		Identity:         listenerIdentity.Signer(),
 		TrustedPublicKey: dialerIdentity.PublicKeyString(),
@@ -260,6 +260,10 @@ func TestConnection(t *testing.T) {
 		}
 		c.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{})
 	})
+	if err != nil {
+		panic(err)
+	}
+	go l.Accept()
 	time.Sleep(5 * time.Millisecond)
 
 	c, err := otto.Dial(otto.DialOptions{

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -11,15 +12,28 @@ import (
 	"github.com/ecnepsnai/otto"
 )
 
+var restartServer = false
+var listener *otto.Listener
+
 func listen() {
-	otto.Listen(otto.ListenOptions{
-		Address:          config.ListenAddr,
-		AllowFrom:        getAllowFroms(),
-		Identity:         clientIdentity,
-		TrustedPublicKey: config.ServerIdentity,
-	}, func(c *otto.Connection) {
-		handle(c)
-	})
+	for {
+		var err error
+		listener, err = otto.SetupListener(otto.ListenOptions{
+			Address:          config.ListenAddr,
+			AllowFrom:        getAllowFroms(),
+			Identity:         clientIdentity,
+			TrustedPublicKey: config.ServerIdentity,
+		}, handle)
+		if err != nil {
+			panic("error listening: " + err.Error())
+		}
+		listener.Accept()
+		log.Warn("Server stopped")
+		if !restartServer {
+			break
+		}
+		log.Info("Server restarting")
+	}
 }
 
 func handle(conn *otto.Connection) {
@@ -80,28 +94,39 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		ClientVersion: MainVersion,
 	}
 	switch message.Action {
-	case otto.ActionExit, otto.ActionReboot, otto.ActionShutdown:
+	case otto.ActionReloadConfig, otto.ActionExitClient, otto.ActionReboot, otto.ActionShutdown:
 		// No action
 		break
-	case otto.ActionReloadConfig:
-		if err := loadConfig(); err != nil {
-			reply.Error = err
-		}
 	case otto.ActionRunScript:
 		reply.ScriptResult = runScript(conn, message.Script, cancel)
-	case otto.ActionUploadFile, otto.ActionUploadFileAndExit:
+	case otto.ActionUploadFile, otto.ActionUploadFileAndExitClient:
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err
 		}
 	case otto.ActionUpdateIdentity:
-		newIdentity := string(message.File.Data)
-		if newIdentity == "" {
+		newServerPublicKey := string(message.File.Data)
+		if newServerPublicKey == "" {
 			reply.Error = fmt.Errorf("no identity provided")
 		} else {
-			if err := updateServerIdentity(newIdentity); err != nil {
+			if err := updateServerIdentity(newServerPublicKey); err != nil {
 				reply.Error = err
 			}
 		}
+
+		if err := generateIdentity(); err != nil {
+			reply.Error = err
+		}
+		newID, err := loadClientIdentity()
+		if err != nil {
+			reply.Error = err
+		}
+
+		newPublicKey := base64.RawStdEncoding.EncodeToString(newID.PublicKey().Marshal())
+		reply.File.Data = []byte(newPublicKey)
+		log.PWarn("Identity rotated", map[string]interface{}{
+			"client_public": newPublicKey,
+			"server_public": newServerPublicKey,
+		})
 	default:
 		log.Error("Unknown action %d", message.Action)
 		return
@@ -113,11 +138,19 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		return
 	}
 
-	if message.Action == otto.ActionUpdateIdentity {
-		loadConfig()
+	if message.Action == otto.ActionReloadConfig || message.Action == otto.ActionUpdateIdentity {
+		if err := loadConfig(); err != nil {
+			reply.Error = err
+		}
+
+		restartServer = true
+		mustLoadIdentity()
+		conn.Close()
+		defer listener.Close()
+		return
 	}
 
-	if message.Action == otto.ActionUploadFileAndExit || message.Action == otto.ActionExit {
+	if message.Action == otto.ActionUploadFileAndExitClient || message.Action == otto.ActionExitClient {
 		conn.Close()
 		log.Warn("Exiting at request of '%s'", conn.RemoteAddr().String())
 		os.Exit(1)

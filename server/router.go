@@ -41,9 +41,9 @@ func RouterSetup() {
 	h := handle{}
 	v := view{}
 
-	server.HTTP.Static("/static/*filepath", Directories.Build)
-	server.HTTP.Static(fmt.Sprintf("/otto%s/*filepath", ServerVersion), Directories.Build)
-	server.HTTP.Static("/clients/*filepath", Directories.Clients)
+	server.HTTP.Static("/static/", Directories.Build)
+	server.HTTP.Static(fmt.Sprintf("/otto%s/", ServerVersion), Directories.Build)
+	server.HTTP.Static("/clients/", Directories.Clients)
 
 	// Authentication
 	server.HTTP.GET("/login", v.Login, unauthenticatedOptions)
@@ -59,7 +59,8 @@ func RouterSetup() {
 	server.API.GET("/api/hosts/host/:id/schedules", h.HostGetSchedules, authenticatedOptions(false))
 	server.API.GET("/api/hosts/host/:id/id", h.HostGetServerID, authenticatedOptions(false))
 	server.API.POST("/api/hosts/host/:id/heartbeat", h.HostTriggerHeartbeat, authenticatedOptions(false))
-	server.API.POST("/api/hosts/host/:id/trust", h.HostUpdateTrust, authenticatedOptions(false))
+	server.API.POST("/api/hosts/host/:id/id/trust", h.HostUpdateTrust, authenticatedOptions(false))
+	server.API.POST("/api/hosts/host/:id/id/rotate", h.HostRotateID, authenticatedOptions(false))
 	server.API.POST("/api/hosts/host/:id", h.HostEdit, authenticatedOptions(false))
 	server.API.DELETE("/api/hosts/host/:id", h.HostDelete, authenticatedOptions(false))
 

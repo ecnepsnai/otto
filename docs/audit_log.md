@@ -147,6 +147,32 @@ Event for when host registration fails with an incorrect registration key.
 |`distribution_name`|The name of the distribution running on the host|
 |`distribution_version`|The version of the distribution running on the host|
 
+### HostTrustModified
+
+Event for when the trust for a host is modified.
+
+|Parameter|Description|
+|-|-|
+|`host_id`|The ID of the host|
+|`name`|The name of the host|
+|`address`|The address of the host|
+|`modified_by`|The username of the user who modified the trust|
+|`trusted_public_key`|The trusted public key for this host, if any|
+|`pending_public_key`|The untrusted public key for this host, if any|
+
+### HostIdentityRotated
+
+Event for when the identity pair for a host is modified. This event may be triggered by the system if automatic host
+identity rotation is enabled.
+
+|Parameter|Description|
+|-|-|
+|`host_id`|The ID of the host|
+|`name`|The name of the host|
+|`modified_by`|The username of the user who modified the trust. May be `system`.|
+|`server_public_key`|The new server public key for this host|
+|`host_public_key`|The new host public key|
+
 ### GroupAdded
 
 Event for when a new group is added.

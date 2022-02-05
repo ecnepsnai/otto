@@ -178,6 +178,16 @@
                 "value": "\"HostRegisterIncorrectKey\""
             },
             {
+                "key": "HostTrustModified",
+                "description": "HostTrustModified event",
+                "value": "\"HostTrustModified\""
+            },
+            {
+                "key": "HostIdentityRotated",
+                "description": "HostIdentityRotated event",
+                "value": "\"HostIdentityRotated\""
+            },
+            {
                 "key": "GroupAdded",
                 "description": "GroupAdded event",
                 "value": "\"GroupAdded\""
