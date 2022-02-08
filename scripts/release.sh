@@ -6,60 +6,54 @@ if [[ -z "${VERSION}" ]]; then
 fi
 export VERSION=${VERSION}
 
-OTTO_PATH=$(realpath ../)
+ROOT_PATH=$(realpath ../)
+OTTO_PATH=$(realpath ../otto)
+FRONTEND_PATH=$(realpath ../frontend)
 
 PRODUCT_NAME=otto
-PACKAGE_NAME=otto-${VERSION}
+PACKAGE_NAME=${PRODUCT_NAME}-${VERSION}
 COLOR_NC='\033[0m'
 COLOR_GREEN='\033[0;32m'
-LOG=${OTTO_PATH}/otto-install.log
+LOG=${ROOT_PATH}/logs/otto-install.log
 
-cd ${OTTO_PATH}
+cd ${ROOT_PATH}
 git clean -qxdf
-cd ${OTTO_PATH}/scripts
+cd ${ROOT_PATH}/scripts
 ./install_backend.sh ${VERSION}
-cd ${OTTO_PATH}/static/
+cd ${FRONTEND_PATH}
 rm -rf build/
 echo -en "Building frontend... "
 npm install >> ${LOG} 2>&1
 npx webpack --config webpack.login.production.js >> ${LOG}
 npx webpack --config webpack.app.production.js >> ${LOG}
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
-cd ${OTTO_PATH}
+cd ${ROOT_PATH}
 rm -rf artifacts/
 mkdir -p artifacts/
 
 function build_server() {
     cd ${OTTO_PATH}/cmd/server
-    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${3}
-    NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
-    mv ${3} ../../
-    cd ../../
+    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${PRODUCT_NAME} >> ${LOG} 2>&1
+    
+    cp -r ${FRONTEND_PATH}/build static
+    mkdir clients
+    cp ${ROOT_PATH}/artifacts/ottoclient* clients
 
-    rm -rf ${PACKAGE_NAME}
-    mkdir -p ${PACKAGE_NAME}/static
-    mkdir -p ${PACKAGE_NAME}/clients
-    mv ${3} ${PACKAGE_NAME}
-    cp -r static/build ${PACKAGE_NAME}/static
-    cp -r artifacts/ottoclient* ${PACKAGE_NAME}/clients
-    tar -czf ${NAME}.tar.gz ${PACKAGE_NAME}/
-    rm -rf ${PACKAGE_NAME}/
-    mv ${NAME}.tar.gz artifacts/
+    NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
+    tar -czf ${NAME}.tar.gz ${PRODUCT_NAME} static clients
+    mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/
+    git clean -qxdf
+    cd ${ROOT_PATH}
 }
 
 function build_client() {
     cd ${OTTO_PATH}/cmd/client
-    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w"
+    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${PRODUCT_NAME} >> ${LOG} 2>&1
     NAME=${PRODUCT_NAME}client-${VERSION}_${1}-${2}
-    mv client ../../otto
-    cd ../../
-    mkdir ${PACKAGE_NAME}
-    mv otto ${PACKAGE_NAME}
-    cd ${PACKAGE_NAME}
-    tar -czf ${NAME}.tar.gz *
-    mv ${NAME}.tar.gz ../artifacts/
-    cd ../
-    rm -rf ${PACKAGE_NAME}
+    tar -czf ${NAME}.tar.gz otto
+    mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/
+    git clean -qxdf
+    cd ${ROOT_PATH}
 }
 
 echo -en "Packaging client builds... "
@@ -73,7 +67,7 @@ echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 echo -en "Packaging server build... "
 for ARCH in 'amd64' 'arm64'; do
     for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
-        build_server ${OS} ${ARCH} ${PRODUCT_NAME}
+        build_server ${OS} ${ARCH}
     done
 done
 
@@ -81,5 +75,5 @@ cd ${OTTO_PATH}
 git checkout -- cmd/client/cbgen_version.go server/cbgen_version.go || true
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
-cd scripts/
+cd ${ROOT_PATH}/scripts/
 ./docker.sh ${VERSION}
