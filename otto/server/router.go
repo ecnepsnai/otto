@@ -17,6 +17,11 @@ var bindAddress = "localhost:8080"
 
 // RouterSetup set up the HTTP router
 func RouterSetup() {
+	if !DirectoryExists(Directories.Static) {
+		fmt.Fprintf(os.Stderr, "Required static directory not found at '%s', quitting...\n", Directories.Static)
+		os.Exit(1)
+	}
+
 	server := web.New(bindAddress)
 	server.MaxRequestsPerSecond = 15
 
@@ -41,8 +46,8 @@ func RouterSetup() {
 	h := handle{}
 	v := view{}
 
-	server.HTTP.Static("/static/", Directories.Build)
-	server.HTTP.Static(fmt.Sprintf("/otto%s/", ServerVersion), Directories.Build)
+	server.HTTP.Static("/static/", Directories.Static)
+	server.HTTP.Static(fmt.Sprintf("/otto%s/", ServerVersion), Directories.Static)
 	server.HTTP.Static("/clients/", Directories.Clients)
 
 	// Authentication
@@ -152,12 +157,12 @@ func RouterSetup() {
 
 	server.NotFoundHandler = func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
-		notFoundFile := path.Join(Directories.Build, "404.html")
+		notFoundFile := path.Join(Directories.Static, "404.html")
 		accept := r.Header.Get("Accept")
 		if strings.Contains(accept, "application/json") {
 			json.NewEncoder(w).Encode(web.CommonErrors.NotFound)
 		} else if FileExists(notFoundFile) {
-			file, err := os.OpenFile(path.Join(Directories.Build, "404.html"), os.O_RDONLY, os.ModePerm)
+			file, err := os.OpenFile(path.Join(Directories.Static, "404.html"), os.O_RDONLY, os.ModePerm)
 			if err != nil {
 				panic(err)
 			}

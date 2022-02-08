@@ -34,8 +34,6 @@ type apiDirectories struct {
 	Logs string
 
 	Static string
-
-	Build string
 }
 
 // Directories absolute paths of API related directires.
@@ -54,8 +52,6 @@ func fsSetup() {
 		Logs: path.Join(dataDirectory, "logs"),
 
 		Static: path.Join(operatingDirectory, "static"),
-
-		Build: path.Join(operatingDirectory, "static", "build"),
 	}
 
 	MakeDirectoryIfNotExist(Directories.Clients)
@@ -66,15 +62,7 @@ func fsSetup() {
 
 	MakeDirectoryIfNotExist(Directories.Logs)
 
-	if !DirectoryExists(Directories.Static) {
-		fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.Static)
-		os.Exit(1)
-	}
-
-	if !DirectoryExists(Directories.Build) {
-		fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.Build)
-		os.Exit(1)
-	}
+	MakeDirectoryIfNotExist(Directories.Static)
 
 }
 

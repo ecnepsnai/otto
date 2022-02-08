@@ -1,9 +1,7 @@
 .DS_Store
 
 # executables
-/otto
-/otto_*
-!/otto_test.go
+/.otto_dev
 
 # Artifacts
 artifacts/
@@ -23,9 +21,9 @@ cmd/client/*
 cmd/server/*
 !cmd/server/*.go
 
-# Static
-/static/node_modules
-/static/build
-/static/fonts/*
-/static/copy/assets/js
-/static/copy/assets/css
+# Frontend
+/frontend/node_modules
+/frontend/build
+/frontend/fonts/*
+/frontend/copy/assets/js
+/frontend/copy/assets/css

@@ -177,6 +177,15 @@ func postBootstrapArgs() {
 			o.Register.Enabled = true
 			o.Register.Key = secutil.RandomString(6)
 			o.Save()
+		} else if arg == "--static-dir" {
+			if i == count-1 {
+				fmt.Fprintf(os.Stderr, "%s requires exactly 1 parameter\n", arg)
+				printHelpAndExit()
+			}
+
+			value := args[i+1]
+			Directories.Static = value
+			i++
 		}
 
 		i++

@@ -17,15 +17,7 @@
     },
     {
         "name": "Static",
-        "dir_name": "static",
-        "required": true,
-        "subdirs": [
-            {
-                "name": "Build",
-                "dir_name": "build",
-                "required": true
-            }
-        ]
+        "dir_name": "static"
     },
     {
         "name": "Clients",
