@@ -593,34 +593,34 @@ func (l *Listener) accept(c net.Conn) {
 
 	go ssh.DiscardRequests(reqs)
 
-	newChannel := <-chans
-
-	log.Debug("ssh channel opened")
-	if newChannel.ChannelType() != sshChannelName {
-		log.PError("Unknown SSH channel", map[string]interface{}{
-			"channel_type": newChannel.ChannelType(),
-			"remote_addr":  c.RemoteAddr().String(),
-		})
-		newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
-		return
-	}
-	channel, _, err := newChannel.Accept()
-	if err != nil {
-		log.PError("SSH channel error", map[string]interface{}{
+	for newChannel := range chans {
+		log.Debug("ssh channel opened")
+		if newChannel.ChannelType() != sshChannelName {
+			log.PError("Unknown SSH channel", map[string]interface{}{
+				"channel_type": newChannel.ChannelType(),
+				"remote_addr":  c.RemoteAddr().String(),
+			})
+			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+			return
+		}
+		channel, _, err := newChannel.Accept()
+		if err != nil {
+			log.PError("SSH channel error", map[string]interface{}{
+				"remote_addr": c.RemoteAddr().String(),
+				"error":       err.Error(),
+			})
+			return
+		}
+		log.PDebug("SSH handshake success", map[string]interface{}{
 			"remote_addr": c.RemoteAddr().String(),
-			"error":       err.Error(),
 		})
-		return
+		l.handle(&Connection{
+			w:          channel,
+			remoteAddr: c.RemoteAddr(),
+			localAddr:  c.LocalAddr(),
+		})
+		channel.Close()
 	}
-	log.PDebug("SSH handshake success", map[string]interface{}{
-		"remote_addr": c.RemoteAddr().String(),
-	})
-	l.handle(&Connection{
-		w:          channel,
-		remoteAddr: c.RemoteAddr(),
-		localAddr:  c.LocalAddr(),
-	})
-	channel.Close()
 }
 
 // DialOptions describes options for dialing to a host
