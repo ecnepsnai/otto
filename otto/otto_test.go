@@ -3,6 +3,7 @@ package otto_test
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -247,7 +248,7 @@ func TestConnection(t *testing.T) {
 	}
 
 	l, err := otto.SetupListener(otto.ListenOptions{
-		Address:          "127.0.0.1:12400",
+		Address:          "127.0.0.1:0",
 		Identity:         listenerIdentity.Signer(),
 		TrustedPublicKey: dialerIdentity.PublicKeyString(),
 	}, func(c *otto.Connection) {
@@ -263,12 +264,13 @@ func TestConnection(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	port := l.Port()
 	go l.Accept()
 	time.Sleep(5 * time.Millisecond)
 
 	c, err := otto.Dial(otto.DialOptions{
 		Network:          "tcp",
-		Address:          "127.0.0.1:12400",
+		Address:          fmt.Sprintf("127.0.0.1:%d", port),
 		Identity:         dialerIdentity.Signer(),
 		TrustedPublicKey: listenerIdentity.PublicKeyString(),
 	})

@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -531,6 +532,16 @@ func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Liste
 		handle:    handle,
 		l:         l,
 	}, nil
+}
+
+// Port get the port the listener is listening on
+func (l *Listener) Port() uint16 {
+	p := strings.Split(l.l.Addr().String(), ":")
+	port, err := strconv.ParseUint(p[len(p)-1], 10, 16)
+	if err != nil {
+		panic("invalid port")
+	}
+	return uint16(port)
 }
 
 // Accept will accpet incoming connections. Blocking.

@@ -7,13 +7,21 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/secutil"
 )
 
-func TestExecute(t *testing.T) {
+func randLocalhostIP() string {
+	return fmt.Sprintf("127.%d.%d.%d",
+		secutil.RandomNumber(1, 254),
+		secutil.RandomNumber(1, 254),
+		secutil.RandomNumber(1, 254))
+}
+
+func TestExecutePing(t *testing.T) {
 	t.Parallel()
 
+	ip := randLocalhostIP()
 	version := randomString(4)
-	var port uint32 = 12401
 	clientId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -25,8 +33,8 @@ func TestExecute(t *testing.T) {
 
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:           randomString(6),
-		Address:        "127.0.0.1",
-		Port:           port,
+		Address:        ip,
+		Port:           uint32(secutil.RandomNumber(0, 65535)),
 		ClientIdentity: clientId.PublicKeyString(),
 		GroupIDs:       []string{group.ID},
 	})
@@ -35,28 +43,40 @@ func TestExecute(t *testing.T) {
 	}
 
 	serverId := IdentityStore.Get(host.ID)
+	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
+	l, listenErr := otto.SetupListener(otto.ListenOptions{
+		Address:          ip + ":0",
+		AllowFrom:        []net.IPNet{*allowFrom},
+		Identity:         clientId.Signer(),
+		TrustedPublicKey: serverId.PublicKeyString(),
+	}, func(conn *otto.Connection) {
+		messageType, _, err := conn.ReadMessage()
+		if err != nil {
+			panic("Error reading message: " + err.Error())
+		}
+		if messageType != otto.MessageTypeHeartbeatRequest {
+			panic("Incorrect message type")
+		}
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+			t.Fatalf("Error writing message: " + err.Error())
+		}
+		conn.Close()
+	})
+	if listenErr != nil {
+		panic("error listening: " + listenErr.Error())
+	}
+
+	host.Port = uint32(l.Port())
+	HostStore.Table.Update(host)
 
 	go func() {
-		_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
-		l, err := otto.SetupListener(otto.ListenOptions{
-			Address:          fmt.Sprintf("127.0.0.1:%d", port),
-			AllowFrom:        []net.IPNet{*allowFrom},
-			Identity:         clientId.Signer(),
-			TrustedPublicKey: serverId.PublicKeyString(),
-		}, func(conn *otto.Connection) {
-			conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version})
-			conn.Close()
-		})
-		if err != nil {
-			panic("error listening: " + err.Error())
-		}
 		l.Accept()
 	}()
 
 	time.Sleep(50 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Errorf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Message)
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -69,11 +89,93 @@ func TestExecute(t *testing.T) {
 	}
 }
 
+func TestExecuteAction(t *testing.T) {
+	t.Parallel()
+
+	ip := randLocalhostIP()
+	version := randomString(4)
+	clientId, _ := otto.NewIdentity()
+
+	group, err := GroupStore.NewGroup(newGroupParameters{
+		Name: randomString(6),
+	})
+	if err != nil {
+		t.Fatalf("Error making group: %s", err.Message)
+	}
+
+	host, err := HostStore.NewHost(newHostParameters{
+		Name:           randomString(6),
+		Address:        ip,
+		Port:           uint32(secutil.RandomNumber(0, 65535)),
+		ClientIdentity: clientId.PublicKeyString(),
+		GroupIDs:       []string{group.ID},
+	})
+	if err != nil {
+		t.Fatalf("Error making host: %s", err.Message)
+	}
+
+	actionType := otto.ActionRunScript
+
+	serverId := IdentityStore.Get(host.ID)
+	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
+	l, listenErr := otto.SetupListener(otto.ListenOptions{
+		Address:          ip + ":0",
+		AllowFrom:        []net.IPNet{*allowFrom},
+		Identity:         clientId.Signer(),
+		TrustedPublicKey: serverId.PublicKeyString(),
+	}, func(conn *otto.Connection) {
+		messageType, message, err := conn.ReadMessage()
+		if err != nil {
+			panic("Error reading message: " + err.Error())
+		}
+		if messageType != otto.MessageTypeTriggerAction {
+			panic("Incorrect message type")
+		}
+		action, ok := message.(otto.MessageTriggerAction)
+		if !ok {
+			panic("Incorrect message type")
+		}
+		if action.Action != actionType {
+			panic("Incorrect action type")
+		}
+		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ClientVersion: version}); err != nil {
+			panic("Error writing message: " + err.Error())
+		}
+		conn.Close()
+	})
+	if listenErr != nil {
+		panic("error listening: " + listenErr.Error())
+	}
+
+	host.Port = uint32(l.Port())
+	HostStore.Table.Update(host)
+
+	go func() {
+		l.Accept()
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+
+	result, err := host.TriggerAction(otto.MessageTriggerAction{Action: actionType}, nil, nil)
+	if err != nil {
+		t.Fatalf("Error triggering action: %s", err.Message)
+	}
+
+	if result.ClientVersion != version {
+		t.Errorf("Unexpected version for host. Expected '%s' got '%s'", version, result.ClientVersion)
+	}
+
+	hb := heartbeatStore.LastHeartbeat(host)
+	if hb == nil {
+		t.Fatalf("No heartbeat found for host")
+	}
+}
+
 func TestExecuteUntrustedKey(t *testing.T) {
 	t.Parallel()
 
+	ip := randLocalhostIP()
 	version := randomString(4)
-	var port uint32 = 12402
 	clientId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -85,8 +187,8 @@ func TestExecuteUntrustedKey(t *testing.T) {
 
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:     randomString(6),
-		Address:  "127.0.0.2",
-		Port:     port,
+		Address:  ip,
+		Port:     uint32(secutil.RandomNumber(0, 65535)),
 		GroupIDs: []string{group.ID},
 	})
 	if err != nil {
@@ -95,20 +197,26 @@ func TestExecuteUntrustedKey(t *testing.T) {
 
 	serverId := IdentityStore.Get(host.ID)
 
-	go func() {
-		_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
-		l, err := otto.SetupListener(otto.ListenOptions{
-			Address:          fmt.Sprintf("127.0.0.2:%d", port),
-			AllowFrom:        []net.IPNet{*allowFrom},
-			Identity:         clientId.Signer(),
-			TrustedPublicKey: serverId.PublicKeyString(),
-		}, func(conn *otto.Connection) {
-			conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version})
-			conn.Close()
-		})
-		if err != nil {
-			panic("error listening: " + err.Error())
+	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
+	l, listenErr := otto.SetupListener(otto.ListenOptions{
+		Address:          ip + ":0",
+		AllowFrom:        []net.IPNet{*allowFrom},
+		Identity:         clientId.Signer(),
+		TrustedPublicKey: serverId.PublicKeyString(),
+	}, func(conn *otto.Connection) {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+			t.Fatalf("Error writing message: " + err.Error())
 		}
+		conn.Close()
+	})
+	if listenErr != nil {
+		panic("error listening: " + listenErr.Error())
+	}
+
+	host.Port = uint32(l.Port())
+	HostStore.Table.Update(host)
+
+	go func() {
 		l.Accept()
 	}()
 
@@ -126,8 +234,8 @@ func TestExecuteUntrustedKey(t *testing.T) {
 func TestExecuteIncorrectIdentity(t *testing.T) {
 	t.Parallel()
 
+	ip := randLocalhostIP()
 	version := randomString(4)
-	var port uint32 = 12403
 	clientId, _ := otto.NewIdentity()
 	otherId, _ := otto.NewIdentity()
 
@@ -140,8 +248,8 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:           randomString(6),
-		Address:        "127.0.0.3",
-		Port:           port,
+		Address:        ip,
+		Port:           uint32(secutil.RandomNumber(0, 65535)),
 		ClientIdentity: otherId.PublicKeyString(),
 		GroupIDs:       []string{group.ID},
 	})
@@ -150,21 +258,26 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 	}
 
 	serverId := IdentityStore.Get(host.ID)
+	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
+	l, listenErr := otto.SetupListener(otto.ListenOptions{
+		Address:          ip + ":0",
+		AllowFrom:        []net.IPNet{*allowFrom},
+		Identity:         clientId.Signer(),
+		TrustedPublicKey: serverId.PublicKeyString(),
+	}, func(conn *otto.Connection) {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+			t.Fatalf("Error writing message: " + err.Error())
+		}
+		conn.Close()
+	})
+	if listenErr != nil {
+		panic("error listening: " + listenErr.Error())
+	}
+
+	host.Port = uint32(l.Port())
+	HostStore.Table.Update(host)
 
 	go func() {
-		_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
-		l, err := otto.SetupListener(otto.ListenOptions{
-			Address:          fmt.Sprintf("127.0.0.3:%d", port),
-			AllowFrom:        []net.IPNet{*allowFrom},
-			Identity:         clientId.Signer(),
-			TrustedPublicKey: serverId.PublicKeyString(),
-		}, func(conn *otto.Connection) {
-			conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version})
-			conn.Close()
-		})
-		if err != nil {
-			panic("error listening: " + err.Error())
-		}
 		l.Accept()
 	}()
 
@@ -178,8 +291,8 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 func TestExecuteReconnect(t *testing.T) {
 	t.Parallel()
 
+	ip := randLocalhostIP()
 	version := randomString(4)
-	var port uint32 = 12404
 	clientId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -191,8 +304,8 @@ func TestExecuteReconnect(t *testing.T) {
 
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:           randomString(6),
-		Address:        "127.0.0.4",
-		Port:           port,
+		Address:        ip,
+		Port:           uint32(secutil.RandomNumber(0, 65535)),
 		ClientIdentity: clientId.PublicKeyString(),
 		GroupIDs:       []string{group.ID},
 	})
@@ -202,28 +315,34 @@ func TestExecuteReconnect(t *testing.T) {
 
 	serverId := IdentityStore.Get(host.ID)
 
-	go func() {
-		_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
-		l, err := otto.SetupListener(otto.ListenOptions{
-			Address:          fmt.Sprintf("127.0.0.4:%d", port),
-			AllowFrom:        []net.IPNet{*allowFrom},
-			Identity:         clientId.Signer(),
-			TrustedPublicKey: serverId.PublicKeyString(),
-		}, func(conn *otto.Connection) {
-			conn.ReadMessage()
-			conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version})
-			conn.Close()
-		})
-		if err != nil {
-			panic("error listening: " + err.Error())
+	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
+	l, listenErr := otto.SetupListener(otto.ListenOptions{
+		Address:          ip + ":0",
+		AllowFrom:        []net.IPNet{*allowFrom},
+		Identity:         clientId.Signer(),
+		TrustedPublicKey: serverId.PublicKeyString(),
+	}, func(conn *otto.Connection) {
+		conn.ReadMessage()
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+			t.Fatalf("Error writing message: " + err.Error())
 		}
+		conn.Close()
+	})
+	if listenErr != nil {
+		panic("error listening: " + listenErr.Error())
+	}
+
+	host.Port = uint32(l.Port())
+	HostStore.Table.Update(host)
+
+	go func() {
 		l.Accept()
 	}()
 
 	time.Sleep(50 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Errorf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Message)
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -238,7 +357,7 @@ func TestExecuteReconnect(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Errorf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Message)
 	}
 
 	hb = heartbeatStore.LastHeartbeat(host)
