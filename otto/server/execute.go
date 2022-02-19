@@ -101,6 +101,7 @@ func (hc *hostConnection) Close() {
 func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.MessageActionResult, *Error) {
 	conn, err := host.connect()
 	if err != nil {
+		heartbeatStore.UpdateHostReachability(host, false)
 		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -110,6 +111,7 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 	if err != nil {
 		return nil, ErrorUser(err.Error())
 	}
+	heartbeatStore.UpdateHostReachability(host, true)
 
 	return result, nil
 }
