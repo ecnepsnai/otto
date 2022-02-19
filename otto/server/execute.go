@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
@@ -93,21 +92,6 @@ func (host *Host) connect() (*hostConnection, error) {
 	}, nil
 }
 
-// SendMessage will send the given Otto message to the host
-func (hc *hostConnection) SendMessage(messageType uint32, message interface{}) error {
-	if err := hc.Conn.WriteMessage(messageType, message); err != nil {
-		log.Error("Error sending message to host '%s': %s", hc.Address, err.Error())
-		return err
-	}
-
-	return nil
-}
-
-// ReadMessage will try and read a message from the Otto host.
-func (hc *hostConnection) ReadMessage() (uint32, interface{}, error) {
-	return hc.Conn.ReadMessage()
-}
-
 // Close will close the connection to the Otto host
 func (hc *hostConnection) Close() {
 	hc.Conn.Close()
@@ -122,46 +106,12 @@ func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput f
 	}
 	defer conn.Close()
 
-	if err := conn.SendMessage(otto.MessageTypeTriggerAction, action); err != nil {
-		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
-		return nil, ErrorFrom(err)
+	result, err := conn.Conn.TriggerAction(action, actionOutput, cancel)
+	if err != nil {
+		return nil, ErrorUser(err.Error())
 	}
 
-	go func() {
-		for {
-			<-cancel
-			conn.SendMessage(otto.MessageTypeCancelAction, otto.MessageCancelAction{})
-		}
-	}()
-
-	for {
-		messageType, message, err := conn.ReadMessage()
-		if err == io.EOF || messageType == 0 {
-			return nil, nil
-		} else if err != nil {
-			log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
-			return nil, ErrorFrom(err)
-		}
-
-		switch messageType {
-		case otto.MessageTypeActionOutput:
-			output := message.(otto.MessageActionOutput)
-			if actionOutput != nil {
-				actionOutput(output.Stdout, output.Stderr)
-			}
-		case otto.MessageTypeActionResult:
-			result := message.(otto.MessageActionResult)
-			scriptResult := &result.ScriptResult
-			heartbeatStore.UpdateHostReachability(host, true)
-			log.Debug("Action completed with result: %s", scriptResult.String())
-			return &result, nil
-		case otto.MessageTypeGeneralFailure:
-			result := message.(otto.MessageGeneralFailure)
-			generalError := result.Error
-			log.Error("General error triggering action on host '%s': %s", host.ID, generalError.Error())
-			return nil, ErrorUser(generalError.Error())
-		}
-	}
+	return result, nil
 }
 
 // Ping ping the host
@@ -174,36 +124,16 @@ func (host *Host) Ping() *Error {
 	}
 	defer conn.Close()
 
-	if err := conn.SendMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{ServerVersion: ServerVersion}); err != nil {
-		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
-		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorFrom(err)
-	}
-	messageType, message, err := conn.ReadMessage()
-	if err == io.EOF {
-		log.Error("Client closed connection before replying to heartbeat '%s'", host.ID)
-		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorServer("Client closed connection")
-	} else if err != nil {
-		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
-		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorFrom(err)
-	}
-	switch messageType {
-	case otto.MessageTypeHeartbeatResponse:
-		response := message.(otto.MessageHeartbeatResponse)
-		log.PDebug("Heartbeat reply received", map[string]interface{}{
-			"host_name":      host.Name,
-			"host_address":   host.Address,
-			"client_version": response.ClientVersion,
-			"properties":     response.Properties,
+	reply, err := conn.Conn.SendHeartbeat(otto.MessageHeartbeatRequest{ServerVersion: ServerVersion})
+	if err != nil {
+		log.PError("Error sending heartbeat request to host", map[string]interface{}{
+			"host_id": host.ID,
+			"error":   err.Error(),
 		})
-		heartbeatStore.RegisterHeartbeatReply(host, response)
-	default:
-		log.Error("Unexpected otto message %d while looking for heartbeat reply (%d)", messageType, otto.MessageTypeHeartbeatResponse)
 		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorServer("Unexpected response")
+		return ErrorFrom(err)
 	}
+	heartbeatStore.RegisterHeartbeatReply(host, *reply)
 
 	return nil
 }

@@ -7,21 +7,15 @@ package otto
 
 import (
 	"bytes"
-	"crypto/ed25519"
-	"crypto/rand"
-	"crypto/x509"
-	"encoding/base64"
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
 	"io"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"golang.org/x/crypto/ssh"
 )
 
 var log = logtic.Log.Connect("libotto")
@@ -389,74 +383,6 @@ func EncodeMessage(messageType uint32, message interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (c *Connection) Close() error {
-	log.PDebug("Connection closed", map[string]interface{}{
-		"local_addr":  c.localAddr.String(),
-		"remote_addr": c.remoteAddr.String(),
-	})
-	return c.w.Close()
-}
-
-// Identity is DER encoded private key
-type Identity []byte
-
-// NewIdentity will generate a new ed25519 identity
-func NewIdentity() (Identity, error) {
-	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		return nil, err
-	}
-
-	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return privateKeyBytes, nil
-}
-
-// ParseIdentity will parse the data as an identity
-func ParseIdentity(data []byte) (Identity, error) {
-	pkey, err := x509.ParsePKCS8PrivateKey(data)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := ssh.NewSignerFromKey(pkey); err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-// Signer return the SSH signer for the identity
-func (i Identity) Signer() ssh.Signer {
-	privateKey, err := x509.ParsePKCS8PrivateKey(i)
-	if err != nil {
-		panic(err)
-	}
-
-	signer, err := ssh.NewSignerFromKey(privateKey)
-	if err != nil {
-		panic(err)
-	}
-
-	return signer
-}
-
-// PublicKey will return a DER-encoded representation of the public key for this identity
-func (i Identity) PublicKey() ssh.PublicKey {
-	return i.Signer().PublicKey()
-}
-
-// String will return a base64-encoded representation of the identity
-func (i Identity) String() string {
-	return base64.StdEncoding.EncodeToString(i)
-}
-
-// PublicKey will return a base64-encoded representation of the public key for this identity
-func (i Identity) PublicKeyString() string {
-	return base64.StdEncoding.EncodeToString(i.PublicKey().Marshal())
-}
-
 const sshChannelName = "otto"
 
 // Connection describes a connection between the Otto Server and Otto Host
@@ -480,226 +406,10 @@ func (c *Connection) LocalAddr() net.Addr {
 	return c.localAddr
 }
 
-// ListenOptions describes options for listening
-type ListenOptions struct {
-	Address          string
-	AllowFrom        []net.IPNet
-	Identity         ssh.Signer
-	TrustedPublicKey string
-}
-
-// Listener describes an active listening Otto server
-type Listener struct {
-	options   ListenOptions
-	sshConfig *ssh.ServerConfig
-	handle    func(conn *Connection)
-	l         net.Listener
-}
-
-// SetupListener will prepare a listening socket for incoming connections. No connections are accepted until you call
-// Accept().
-func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Listener, error) {
-	sshConfig := &ssh.ServerConfig{
-		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			log.PDebug("Handshake", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
-			})
-			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
-				log.Debug("Recognized public key")
-				return &ssh.Permissions{
-					Extensions: map[string]string{
-						"pubkey-fp": ssh.FingerprintSHA256(pubKey),
-					},
-				}, nil
-			}
-			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
-			})
-			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
-		},
-		ServerVersion: fmt.Sprintf("SSH-2.0-OTTO-%d", ProtocolVersion),
-	}
-	sshConfig.AddHostKey(options.Identity)
-
-	l, err := net.Listen("tcp", options.Address)
-	if err != nil {
-		return nil, err
-	}
-	log.Info("Otto client listening on %s", options.Address)
-	return &Listener{
-		options:   options,
-		sshConfig: sshConfig,
-		handle:    handle,
-		l:         l,
-	}, nil
-}
-
-// Port get the port the listener is listening on
-func (l *Listener) Port() uint16 {
-	p := strings.Split(l.l.Addr().String(), ":")
-	port, err := strconv.ParseUint(p[len(p)-1], 10, 16)
-	if err != nil {
-		panic("invalid port")
-	}
-	return uint16(port)
-}
-
-// Accept will accpet incoming connections. Blocking.
-func (l *Listener) Accept() {
-	for {
-		c, err := l.l.Accept()
-		if err != nil {
-			if strings.Contains(err.Error(), "use of closed network connection") {
-				return
-			}
-			log.PDebug("Error accepting connection", map[string]interface{}{
-				"error": err.Error(),
-			})
-			continue
-		}
-		log.PDebug("Incoming connection", map[string]interface{}{
-			"remote_addr": c.RemoteAddr().String(),
-		})
-		go l.accept(c)
-	}
-}
-
-// Close will stop the listener.
-func (l *Listener) Close() {
-	l.l.Close()
-}
-
-func (l *Listener) accept(c net.Conn) {
-	if len(l.options.AllowFrom) > 0 {
-		allow := false
-		for _, allowNet := range l.options.AllowFrom {
-			if allowNet.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
-				log.PDebug("Connection allowed by rule", map[string]interface{}{
-					"remote_addr":     c.RemoteAddr().String(),
-					"allowed_network": allowNet.String(),
-				})
-				allow = true
-				break
-			}
-		}
-		if !allow {
-			log.PWarn("Rejecting connection from server outside of allowed network", map[string]interface{}{
-				"remote_addr":  c.RemoteAddr().String(),
-				"allowed_addr": l.options.AllowFrom,
-			})
-			c.Close()
-			return
-		}
-	}
-
-	_, chans, reqs, err := ssh.NewServerConn(c, l.sshConfig)
-	if err != nil {
-		log.PError("SSH handshake error", map[string]interface{}{
-			"remote_addr": c.RemoteAddr().String(),
-			"error":       err.Error(),
-		})
-		c.Close()
-		return
-	}
-
-	go ssh.DiscardRequests(reqs)
-
-	for newChannel := range chans {
-		log.Debug("ssh channel opened")
-		if newChannel.ChannelType() != sshChannelName {
-			log.PError("Unknown SSH channel", map[string]interface{}{
-				"channel_type": newChannel.ChannelType(),
-				"remote_addr":  c.RemoteAddr().String(),
-			})
-			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
-			return
-		}
-		channel, _, err := newChannel.Accept()
-		if err != nil {
-			log.PError("SSH channel error", map[string]interface{}{
-				"remote_addr": c.RemoteAddr().String(),
-				"error":       err.Error(),
-			})
-			return
-		}
-		log.PDebug("SSH handshake success", map[string]interface{}{
-			"remote_addr": c.RemoteAddr().String(),
-		})
-		l.handle(&Connection{
-			w:          channel,
-			remoteAddr: c.RemoteAddr(),
-			localAddr:  c.LocalAddr(),
-		})
-		channel.Close()
-	}
-}
-
-// DialOptions describes options for dialing to a host
-type DialOptions struct {
-	Network          string
-	Address          string
-	Identity         ssh.Signer
-	TrustedPublicKey string
-	Timeout          time.Duration
-}
-
-// Dial will dial the host specified by the options and perform a SSH handshake with it.
-func Dial(options DialOptions) (*Connection, error) {
-	clientConfig := &ssh.ClientConfig{
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(options.Identity),
-		},
-		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			log.PDebug("Handshake", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
-			})
-			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(key.Marshal()) {
-				log.Debug("Recognized public key")
-				return nil
-			}
-			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
-			})
-			return fmt.Errorf("unknown public key: %x", key.Marshal())
-		},
-		HostKeyAlgorithms: []string{ssh.KeyAlgoED25519},
-		ClientVersion:     fmt.Sprintf("SSH-2.0-OTTO-%d", ProtocolVersion),
-		Timeout:           options.Timeout,
-	}
-
-	log.PDebug("Dialing", map[string]interface{}{
-		"network": options.Network,
-		"address": options.Address,
-		"timeout": options.Timeout.String(),
+func (c *Connection) Close() error {
+	log.PDebug("Connection closed", map[string]interface{}{
+		"local_addr":  c.localAddr.String(),
+		"remote_addr": c.remoteAddr.String(),
 	})
-	client, err := ssh.Dial(options.Network, options.Address, clientConfig)
-	if err != nil {
-		log.PError("Error connecting to host", map[string]interface{}{
-			"address": options.Address,
-			"error":   err.Error(),
-		})
-		return nil, err
-	}
-
-	log.PDebug("Opening channel", map[string]interface{}{
-		"address":      options.Address,
-		"channel_name": sshChannelName,
-	})
-	channel, _, err := client.OpenChannel(sshChannelName, nil)
-	if err != nil {
-		log.PError("Error connecting to host", map[string]interface{}{
-			"address": options.Address,
-			"error":   err.Error(),
-		})
-		return nil, err
-	}
-	log.PDebug("Connected to host", map[string]interface{}{
-		"address": options.Address,
-	})
-
-	return &Connection{
-		w:          channel,
-		remoteAddr: client.RemoteAddr(),
-		localAddr:  client.LocalAddr(),
-	}, nil
+	return c.w.Close()
 }
