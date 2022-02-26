@@ -26,10 +26,10 @@ func parseArgs() {
 
 Host Information:
 	Hostname: %s
-    Kernel Name: %s
-    Kernel Version: %s
-    Distribution Name: %s
-    Distribution Version: %s
+	Kernel Name: %s
+	Kernel Version: %s
+	Distribution Name: %s
+	Distribution Version: %s
 `
 			fmt.Printf(message, MainVersion, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
 			os.Exit(0)
@@ -43,13 +43,23 @@ Host Information:
 			os.Exit(0)
 		} else if arg == "-s" || arg == "--setup" {
 			tryGuidedSetup()
+		} else if arg == "-t" || arg == "--trust-identity" {
+			if i == len(args)-1 {
+				fmt.Fprintf(os.Stderr, "Arg %s requires a value\n", arg)
+				os.Exit(1)
+			}
+			key := args[i+1]
+			i++
+			updateServerIdentity(key)
+			os.Exit(0)
 		} else {
 			fmt.Printf(`Usage: %s [options]
 
 Options:
--v --version     Print client version and host information
--p --public-key  Print the client public key
--s --setup       Start the interactive setup process
+-v --version              Print client version and host information
+-p --public-key           Print the client public key
+-s --setup                Start the interactive setup process
+-t --trust-identity <id>  Trust the specified server identity
 
 Environment variables:
 OTTO_VERBOSE    If set with any value, increases the verbosity of the client log
