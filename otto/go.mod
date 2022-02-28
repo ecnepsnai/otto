@@ -12,7 +12,7 @@ require (
 	github.com/ecnepsnai/secutil v1.0.3
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/store v1.2.2
-	github.com/ecnepsnai/web v1.8.0
+	github.com/ecnepsnai/web v1.8.1
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
