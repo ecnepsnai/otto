@@ -21,7 +21,6 @@ echo -en "Packaging server container... "
 rm -rf Docker
 mkdir Docker
 cp Dockerfile Docker/Dockerfile
-cp entrypoint.sh Docker/entrypoint.sh
 cd Docker
 
 # Add service
