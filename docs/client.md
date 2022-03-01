@@ -37,37 +37,57 @@ If enabled on the server, clients can configure themselves by automatically regi
 
 Please see the [Automatic Registration](automatic_register.md) documentation for further information.
 
+### Interactive Setup
+
+The Otto client offers an interactive setup which can be accessed by running the client with the `-s` argument.
+
 ### Manual Configuration
 
 You may also manually configure the Otto client with a configuration file. The configuration file is a JSON file with a
 single, top-level object. The `otto_client.conf` configuration file must be in the same directory as the Otto client
 binary.
 
-The Otto client offers an interactive setup which can be accessed by running the client with the `-s` argument.
-
-If you choose to manually configure the Otto client, you must also add the host to the Otto server through the web UI.
-
-|Property|Required|Description|
-|-|-|-|
-|`listen_addr`|No|The address to listen to. Defaults to `0.0.0.0:12444`.|
-|`psk`|Yes|The PSK configured for this host on the server.|
-|`log_path`|No|The path to a file where the Otto client should log. Defaults to the directory where the otto binary is.|
-|`default_uid`|No|The default UID if not specified by the script. Defaults to `0`.|
-|`default_gid`|No|The default GID if not specified by the script. Defaults to `0`.|
-|`path`|No|The value of $PATH when scripts are executed|
-|`allow_from`|No|A CIDR address where connections from Otto Servers will be allowed from. Defaults to `0.0.0.0/0`.|
+|Property|Required|Type|Description|Default Value|
+|-|-|-|-|-|
+|`listen_addr`|No|string|The address to listen to.|`0.0.0.0:12444`|
+|`identity_path`|No|string|The full path to where the client identity will be saved.|`.otto_id.der`|
+|`server_identity`|Yes|string|The public key from the Otto server.||
+|`log_path`|No|string|The directory where the Otto client log will be saved. Do not specify a file name.|`.`|
+|`default_uid`|No|number|The UID for scripts to run as.|The current UID of the Otto client process|
+|`default_gid`|No|number|The GID for scripts to run as.|The current GID of the Otto client process|
+|`path`|No|string|The value of the $PATH environment variable used when running scripts.|Value of `$PATH`|
+|`allow_from`|No|[]string|Array of CIDR addresses where connections from Otto Servers will be allowed from.|`["0.0.0.0/0", "::/0"]`
 
 **Example:**
 
 ```json
 {
-    "psk": "36C1CD5993F64EF0394C0DE9DE12567D",
+    "listen_addr": "0.0.0.0:12444",
+    "identity_path": ".otto_id.der",
+    "server_identity": "AAAAC3NzaC1lZDI1NTE5AAAAIOnAN2JvtaL7AHsQlfj0IXmxHJSh6/3gKSP7lYwIDszZ",
     "log_path": ".",
-    "path":"/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin",
-    "default_uid": 0,
-    "default_gid": 0,
-    "allow_from": "10.0.0.0/8"
+    "default_uid": 1000,
+    "default_gid": 1000,
+    "path": "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin",
+    "allow_from": [
+        "192.168.0.0/16"
+    ]
 }
+
 ```
 
-Please note that the Otto client may update this config file, such as to rotate the PSK.
+Please note that the Otto client may update this config file, such as to rotate the server identity.
+
+## Identity Management
+
+An identity refers to a private and public key used as part of the Otto protocol. The Otto client maintains an identity
+that is used when the Otto server connects to the Otto client. The Otto server also maintains a unique identity for each
+Otto host.
+
+The Otto client must be configured to trust the public key from the Otto host. You can access the servers unique public
+key on the Otto server web interface on the Trust menu of a host.
+
+Should you need to manually update the identity of the server on an Otto client, you can do so by running the client
+software with the `-s` argument. For example: `./otto -s <server identity>`. Alternatively you can manually edit the
+Otto client config file.
+

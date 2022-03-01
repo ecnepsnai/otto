@@ -92,17 +92,17 @@ If you have no way to access the Otto service then you will need to reset the us
 
 The default account will be recreated and you can log in using `admin`:`admin`.
 
-## Host PSK Rotation
+## Identity Management
 
-By default, Otto will automatically rotate the PSK used when connecting to hosts every 7 days, as well as the first time
-Otto connects to a host manually added by the user, that is, a host that was added through the web UI and not added with
-client registration.
+An identity refers to a private and public key used as part of the Otto protocol. The Otto client maintains an identity
+that is used when the Otto server connects to the Otto client. The Otto server also maintains a unique identity for each
+Otto host.
 
-New PSKs are 64-characters long and are sourced from the servers cryptographically-secure pseudorandom number generator,
-such as `/dev/urandom`. Rotation occurs during heartbeats and the server records the last time each host was updated.
+When the Otto server connects to an Otto host, it checks the public identity from that host to see if it is recognized.
+If the identity is unknown, the server puts that host in a "pending" trust state. You can trust a pending identity in
+the Trust menu when looking at a host on the Otto server web interface.
 
-The frequency of this rotation can be configured in server settings. You may also disable automatic rotation entirely
-if you so desire.
+### Automatic Rotation
 
-Host PSKs can also be rotated at any time when viewing a host on the Otto server web UI. You can rotate a client PSK
-even if automatic rotation is disabled.
+By default the Otto server will automatically rotate the identities for all hosts every 7 days. This can be configured
+or disabled in the security settings on the Otto web interface.

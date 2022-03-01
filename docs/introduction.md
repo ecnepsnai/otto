@@ -7,9 +7,9 @@ systems.
 
 There are two components to Otto: The Server and Client.
 
-**The Otto Service**
+**The Otto Server**
 
-The otto service is the central location where hosts, groups, and scripts are configured. The otto server connects to
+The otto server is the central location where hosts, groups, and scripts are configured. The otto server connects to
 clients
 to run scripts. All configuration is stored in this central location.
 
@@ -21,7 +21,7 @@ The otto client is a small piece of software that runs on your hosts and accepts
 
 Let's get started using Otto!
 
-## Starting the Otto Service
+## Starting the Otto Server
 
 *Further reading: [The Otto Server](server.md)*
 
@@ -45,9 +45,15 @@ firewall is configured to allow incoming connections to that port.
 
 ## Add a Host
 
-On the Otto service web interface navigate to the Hosts list and click "Create New".
+On the Otto server web interface, navigate to the Hosts list and click "Create New".
 
-Input the friendly-name and the address of the server, the PSK, and check the "Otto Clients" group.
+Input a the address of the host, and check the "Otto Clients" group.
+
+Click the menu button beside the Trust status and select "Copy Server Identity".
+
+On the Otto Host, run the interactive setup for the client using `./otto -s`.
+
+Paste the server identity copied from the Otto server web interface.
 
 ## Add a Group (Optional)
 
