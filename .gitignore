@@ -6,6 +6,7 @@
 # Artifacts
 artifacts/
 scripts/Docker/
+scripts/client_rpm/build
 otto-*/
 
 # Logs

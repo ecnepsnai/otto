@@ -7,7 +7,9 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/otto/
-ExecStart=/opt/otto/start.sh
+ExecStartPre=cp -f /opt/otto/otto /opt/otto/.otto_running
+ExecStart=/opt/otto/.otto_running
+ExecStopPost=rm -f /opt/otto/.otto_running
 TimeoutSec=5000
 Restart=on-failure
 

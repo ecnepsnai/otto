@@ -64,6 +64,9 @@ for ARCH in 'amd64' 'arm64'; do
 done
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
+cd ${ROOT_PATH}/scripts/client_rpm
+./build.sh ${VERSION}
+
 echo -en "Packaging server build... "
 for ARCH in 'amd64' 'arm64'; do
     for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do

@@ -1,4 +1,4 @@
-FROM alpine:3
+FROM docker.io/library/alpine:3
 LABEL maintainer="Ian Spence <ian@ecnepsnai.com>"
 LABEL org.opencontainers.image.authors="Ian Spence <ian@ecnepsnai.com>"
 LABEL org.opencontainers.image.source=https://github.com/ecnepsnai/otto
