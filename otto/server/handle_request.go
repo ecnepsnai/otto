@@ -83,9 +83,18 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		Result *ScriptResult `json:"Result,omitempty"`
 	}
 
+	writeMessage := func(m requestResponse) {
+		log.Debug("ws send %d", m.Code)
+		if err := conn.WriteJSON(m); err != nil {
+			log.PError("Error sending websocket message", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+	}
+
 	r := requestParams{}
 	if err := conn.ReadJSON(&r); err != nil {
-		conn.WriteJSON(requestResponse{
+		writeMessage(requestResponse{
 			Code:  requestResponseCodeError,
 			Error: "Invalid request",
 		})
@@ -94,7 +103,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 
 	host := HostCache.ByID(r.HostID)
 	if host == nil {
-		conn.WriteJSON(requestResponse{
+		writeMessage(requestResponse{
 			Code:  requestResponseCodeError,
 			Error: fmt.Sprintf("No host with ID %s", r.HostID),
 		})
@@ -102,7 +111,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 	}
 
 	if !IsClientAction(r.Action) {
-		conn.WriteJSON(requestResponse{
+		writeMessage(requestResponse{
 			Code:  requestResponseCodeError,
 			Error: fmt.Sprintf("Unknown action %s", r.Action),
 		})
@@ -111,18 +120,18 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 
 	if r.Action == ClientActionPing {
 		if err := host.Ping(); err != nil {
-			conn.WriteJSON(requestResponse{
+			writeMessage(requestResponse{
 				Code:  requestResponseCodeError,
 				Error: fmt.Sprintf("Error pinging host %s", err.Error),
 			})
 			return
 		}
-		conn.WriteJSON(requestResponse{Code: 200})
+		writeMessage(requestResponse{Code: 200})
 		return
 	} else if r.Action == ClientActionRunScript {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
-			conn.WriteJSON(requestResponse{
+			writeMessage(requestResponse{
 				Code:  requestResponseCodeError,
 				Error: fmt.Sprintf("No script with ID %s", r.ScriptID),
 			})
@@ -137,9 +146,18 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 			}
 			for running {
 				cancelRequest := cancelParams{}
-				conn.ReadJSON(&cancelRequest)
+				if err := conn.ReadJSON(&cancelRequest); err != nil {
+					log.PError("Error reading from websocket connection", map[string]interface{}{
+						"error": err.Error(),
+					})
+					running = false
+					break
+				}
 				if cancelRequest.Cancel {
-					log.Warn("Request to cancel running script '%s' on host '%s'", r.ScriptID, r.HostID)
+					log.PWarn("Request to cancel running script", map[string]interface{}{
+						"script_id": r.ScriptID,
+						"host_id":   r.HostID,
+					})
 					cancel <- true
 				}
 				time.Sleep(5 * time.Millisecond)
@@ -149,7 +167,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 			lastKA := time.Now().AddDate(0, 0, -1)
 			for running {
 				if time.Since(lastKA) > 10*time.Second {
-					conn.WriteJSON(requestResponse{
+					writeMessage(requestResponse{
 						Code: requestResponseCodeKeepalive,
 					})
 					lastKA = time.Now()
@@ -159,14 +177,14 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		}()
 
 		result, err := host.RunScript(script, func(stdout, stderr []byte) {
-			conn.WriteJSON(requestResponse{
+			writeMessage(requestResponse{
 				Code:   requestResponseCodeOutput,
 				Stdout: string(stdout),
 				Stderr: string(stderr),
 			})
 		}, cancel)
 		if err != nil {
-			conn.WriteJSON(requestResponse{
+			writeMessage(requestResponse{
 				Code:  requestResponseCodeError,
 				Error: err.Message,
 			})
@@ -175,7 +193,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		}
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
-		conn.WriteJSON(requestResponse{
+		writeMessage(requestResponse{
 			Code:   requestResponseCodeFinished,
 			Result: result,
 		})
@@ -183,10 +201,10 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		return
 	} else if r.Action == ClientActionExitClient {
 		if err := host.ExitClient(); err != nil {
-			conn.WriteJSON(requestResponse{Code: requestResponseCodeFinished})
+			writeMessage(requestResponse{Code: requestResponseCodeFinished})
 			return
 		}
-		conn.WriteJSON(requestResponse{Code: requestResponseCodeFinished})
+		writeMessage(requestResponse{Code: requestResponseCodeFinished})
 		return
 	}
 }
