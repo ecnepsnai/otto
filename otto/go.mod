@@ -1,6 +1,6 @@
 module github.com/ecnepsnai/otto
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ecnepsnai/cron v1.3.2
