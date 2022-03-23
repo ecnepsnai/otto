@@ -44,7 +44,19 @@ func uploadFile(file otto.File) error {
 		return err
 	}
 
-	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, intToFileMode(file.Mode))
+	if file.Path == "" {
+		return fmt.Errorf("invalid file path")
+	}
+	if file.Path[0] != '/' {
+		return fmt.Errorf("file path must be absolute")
+	}
+
+	mode, err := intToFileMode(file.Mode)
+	if err != nil {
+		return fmt.Errorf("invalid file permissions: %s", err.Error())
+	}
+
+	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, mode)
 	if err != nil {
 		log.Error("Error opening file: path='%s' error='%s'", file.Path, err.Error())
 		return err
@@ -70,10 +82,10 @@ func uploadFile(file otto.File) error {
 	return nil
 }
 
-func intToFileMode(m uint32) os.FileMode {
+func intToFileMode(m uint32) (os.FileMode, error) {
 	n, err := strconv.ParseUint(fmt.Sprintf("0%d", m), 8, 32)
 	if err != nil {
-		panic(err)
+		return os.ModePerm, err
 	}
-	return os.FileMode(n)
+	return os.FileMode(n), nil
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -101,24 +100,24 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		reply.ScriptResult = runScript(conn, message.Script, cancel)
 	case otto.ActionUploadFile, otto.ActionUploadFileAndExitClient:
 		if err := uploadFile(message.File); err != nil {
-			reply.Error = err
+			reply.Error = err.Error()
 		}
 	case otto.ActionUpdateIdentity:
 		newServerPublicKey := string(message.File.Data)
 		if newServerPublicKey == "" {
-			reply.Error = fmt.Errorf("no identity provided")
+			reply.Error = "no identity provided"
 		} else {
 			if err := updateServerIdentity(newServerPublicKey); err != nil {
-				reply.Error = err
+				reply.Error = err.Error()
 			}
 		}
 
 		if err := generateIdentity(); err != nil {
-			reply.Error = err
+			reply.Error = err.Error()
 		}
 		newID, err := loadClientIdentity()
 		if err != nil {
-			reply.Error = err
+			reply.Error = err.Error()
 		}
 
 		newPublicKey := base64.RawStdEncoding.EncodeToString(newID.PublicKey().Marshal())
@@ -140,7 +139,7 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 
 	if message.Action == otto.ActionReloadConfig || message.Action == otto.ActionUpdateIdentity {
 		if err := loadConfig(); err != nil {
-			reply.Error = err
+			reply.Error = err.Error()
 		}
 
 		restartServer = true

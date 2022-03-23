@@ -79,7 +79,7 @@ type MessageActionOutput struct {
 // MessageActionResult describes the result of a triggered action
 type MessageActionResult struct {
 	ScriptResult  ScriptResult `json:"script_result"`
-	Error         error        `json:"error"`
+	Error         string       `json:"error"`
 	File          File         `json:"file"`
 	ClientVersion string       `json:"client_version"`
 }
