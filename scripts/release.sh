@@ -33,7 +33,7 @@ mkdir -p artifacts/
 
 function build_server() {
     cd ${OTTO_PATH}/cmd/server
-    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${PRODUCT_NAME} >> ${LOG} 2>&1
+    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -trimpath -buildmode=exe -o ${PRODUCT_NAME} >> ${LOG} 2>&1
     
     cp -r ${FRONTEND_PATH}/build static
     mkdir clients
@@ -48,7 +48,7 @@ function build_server() {
 
 function build_client() {
     cd ${OTTO_PATH}/cmd/client
-    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -o ${PRODUCT_NAME} >> ${LOG} 2>&1
+    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w" -trimpath -buildmode=exe -o ${PRODUCT_NAME} >> ${LOG} 2>&1
     NAME=${PRODUCT_NAME}client-${VERSION}_${1}-${2}
     tar -czf ${NAME}.tar.gz otto
     mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/

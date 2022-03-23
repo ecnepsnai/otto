@@ -20,7 +20,7 @@ Otto is an automation toolkit for Unix-like computers. This package provides the
 cd otto
 CGO_ENABLED=0 go get
 cd cmd/client
-CGO_ENABLED=0 go build -ldflags="-s -w" -v -o %{name}
+CGO_ENABLED=0 go build -buildmode=exe -trimpath -ldflags="-s -w" -v -o %{name}
 
 %install
 mkdir -p %{buildroot}/opt/%{name}
