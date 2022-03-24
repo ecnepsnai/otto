@@ -29,7 +29,7 @@ export const EventList: React.FC = () => {
         return (<PageLoading />);
     }
     return (
-        <Page title="Audit Log">
+        <Page title="Event Log">
             <Table.Table>
                 <Table.Head>
                     <Table.Column>Event</Table.Column>

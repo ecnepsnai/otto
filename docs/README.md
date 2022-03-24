@@ -6,7 +6,7 @@ This is the home of documentation for the Otto automation framework.
 
 ## Table of Contents
 
-- [Audit Log](audit_log.md)
+- [Event Log](event_log.md)
 - [Automatic Client Registration](automatic_register.md)
 - [Groups](group.md)
 - [Introduction](introduction.md)

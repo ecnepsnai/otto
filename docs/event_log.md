@@ -1,4 +1,4 @@
-# Audit Log
+# Event Log
 
 The Otto server maintains a log of various events, both user triggered and automatic, for later reporting in the audit
 log.
