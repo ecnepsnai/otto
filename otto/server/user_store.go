@@ -180,3 +180,25 @@ func (s *userStoreObject) DeleteUser(user *User) *Error {
 	log.Warn("User deleted: username='%s' email='%s'", user.Username, user.Email)
 	return nil
 }
+
+func (s *userStoreObject) DisableUser(username string) *Error {
+	u := UserStore.UserWithUsername(username)
+	if u == nil {
+		return ErrorUser("no user with username %s", username)
+	}
+	user := *u
+
+	user.CanLogIn = false
+
+	if err := s.Table.Update(user); err != nil {
+		log.Error("Error updating user '%s': %s", username, err.Error())
+		return ErrorFrom(err)
+	}
+
+	UserCache.Update()
+
+	log.PWarn("Disabled user", map[string]interface{}{
+		"user": username,
+	})
+	return nil
+}

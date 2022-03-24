@@ -6,7 +6,11 @@ import "github.com/ecnepsnai/secutil"
 func (s *shadowStoreObject) Compare(username string, raw []byte) bool {
 	hashedPwBytes := s.Store.Get(username)
 	if len(hashedPwBytes) == 0 {
-		log.Warn("No shadow entry: username='%s'", username)
+		log.PWarn("No shadow entry found for user", map[string]interface{}{
+			"username": username,
+		})
+		UserStore.DisableUser(username)
+		EventStore.UserModified(username, systemUsername)
 		return false
 	}
 
@@ -28,7 +32,11 @@ func (s *shadowStoreObject) Delete(username string) {
 func (s *shadowStoreObject) Upgrade(username string, raw []byte) {
 	hashedPwBytes := s.Store.Get(username)
 	if len(hashedPwBytes) == 0 {
-		log.Warn("No shadow entry: username='%s'", username)
+		log.PWarn("No shadow entry found for user", map[string]interface{}{
+			"username": username,
+		})
+		UserStore.DisableUser(username)
+		EventStore.UserModified(username, systemUsername)
 		return
 	}
 
