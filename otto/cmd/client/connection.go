@@ -61,6 +61,8 @@ func handle(conn *otto.Connection) {
 			go handleTriggerAction(conn, message.(otto.MessageTriggerAction), cancel)
 		case otto.MessageTypeCancelAction:
 			cancel <- true
+		case otto.MessageTypeRotateIdentityRequest:
+			handleRotateIdentity(conn, message.(otto.MessageRotateIdentityRequest))
 		default:
 			log.Warn("Unexpected message with type %d from %s", messageType, conn.RemoteAddr().String())
 		}
@@ -102,30 +104,6 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err.Error()
 		}
-	case otto.ActionUpdateIdentity:
-		newServerPublicKey := string(message.File.Data)
-		if newServerPublicKey == "" {
-			reply.Error = "no identity provided"
-		} else {
-			if err := updateServerIdentity(newServerPublicKey); err != nil {
-				reply.Error = err.Error()
-			}
-		}
-
-		if err := generateIdentity(); err != nil {
-			reply.Error = err.Error()
-		}
-		newID, err := loadClientIdentity()
-		if err != nil {
-			reply.Error = err.Error()
-		}
-
-		newPublicKey := base64.RawStdEncoding.EncodeToString(newID.PublicKey().Marshal())
-		reply.File.Data = []byte(newPublicKey)
-		log.PWarn("Identity rotated", map[string]interface{}{
-			"client_public": newPublicKey,
-			"server_public": newServerPublicKey,
-		})
 	default:
 		log.Error("Unknown action %d", message.Action)
 		return
@@ -137,7 +115,7 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		return
 	}
 
-	if message.Action == otto.ActionReloadConfig || message.Action == otto.ActionUpdateIdentity {
+	if message.Action == otto.ActionReloadConfig {
 		if err := loadConfig(); err != nil {
 			reply.Error = err.Error()
 		}
@@ -164,6 +142,50 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		log.Warn("Shutting down at request of '%s'", conn.RemoteAddr().String())
 		exec.Command("/usr/sbin/halt").Run()
 	}
+}
+
+func handleRotateIdentity(conn *otto.Connection, message otto.MessageRotateIdentityRequest) {
+	reply := otto.MessageRotateIdentityResponse{}
+
+	if message.PublicKey == "" {
+		reply.Error = "no identity provided"
+	} else {
+		if err := updateServerIdentity(message.PublicKey); err != nil {
+			reply.Error = err.Error()
+		}
+	}
+
+	if err := generateIdentity(); err != nil {
+		reply.Error = err.Error()
+	}
+	newID, err := loadClientIdentity()
+	if err != nil {
+		reply.Error = err.Error()
+	}
+
+	newPublicKey := base64.RawStdEncoding.EncodeToString(newID.PublicKey().Marshal())
+	reply.PublicKey = newPublicKey
+	log.PWarn("Identity rotated", map[string]interface{}{
+		"client_public": newPublicKey,
+		"server_public": message.PublicKey,
+	})
+
+	if err := conn.WriteMessage(otto.MessageTypeRotateIdentityResponse, reply); err != nil {
+		log.PError("Error writing rotate identity response", map[string]interface{}{
+			"remote_addr": conn.RemoteAddr().String(),
+			"error":       err.Error(),
+		})
+	}
+
+	if err := loadConfig(); err != nil {
+		reply.Error = err.Error()
+	}
+
+	restartServer = true
+	mustLoadIdentity()
+	conn.Close()
+	defer listener.Close()
+	return
 }
 
 func getCurrentUIDandGID() (uint32, uint32) {

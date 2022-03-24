@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// SendHeartbeat will send a heartbeat request to the host, returning a reply or an error
 func (conn *Connection) SendHeartbeat(request MessageHeartbeatRequest) (*MessageHeartbeatResponse, error) {
 	if err := conn.WriteMessage(MessageTypeHeartbeatRequest, request); err != nil {
 		log.PError("Error writing message", map[string]interface{}{
@@ -40,6 +41,45 @@ func (conn *Connection) SendHeartbeat(request MessageHeartbeatRequest) (*Message
 	return &response, nil
 }
 
+// RotateIdentity will send a request to rotate the identity on the host, returning a reply or an error
+func (conn *Connection) RotateIdentity(request MessageRotateIdentityRequest) (*MessageRotateIdentityResponse, error) {
+	if err := conn.WriteMessage(MessageTypeRotateIdentityRequest, request); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+
+	messageType, data, err := conn.ReadMessage()
+	if err != nil {
+		log.PError("Error reading message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	if messageType != MessageTypeRotateIdentityResponse {
+		err = fmt.Errorf("incorrect message type %d", messageType)
+		log.PError("Error reading message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+
+	response, ok := data.(MessageRotateIdentityResponse)
+	if !ok {
+		err = fmt.Errorf("incorrect response data type")
+		log.PError("Error reading message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+
+	return &response, nil
+}
+
+// TriggerAction will trigger an action on the host. Returns a result or an error.
+// actionOutput is called whenever there is output on the action and may be called multiple times.
+// Send a message to cancel to abort the action.
 func (conn *Connection) TriggerAction(action MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*MessageActionResult, error) {
 	if err := conn.WriteMessage(MessageTypeTriggerAction, action); err != nil {
 		log.PError("Error writing message", map[string]interface{}{
@@ -77,11 +117,10 @@ func (conn *Connection) TriggerAction(action MessageTriggerAction, actionOutput 
 			return &result, nil
 		case MessageTypeGeneralFailure:
 			result := message.(MessageGeneralFailure)
-			generalError := result.Error
 			log.PError("General error triggering action on host", map[string]interface{}{
-				"error": generalError.Error(),
+				"error": result.Error,
 			})
-			return nil, generalError
+			return nil, fmt.Errorf("%s", result.Error)
 		}
 	}
 }

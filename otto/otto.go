@@ -30,6 +30,8 @@ func init() {
 	gob.Register(MessageCancelAction{})
 	gob.Register(MessageActionOutput{})
 	gob.Register(MessageActionResult{})
+	gob.Register(MessageRotateIdentityRequest{})
+	gob.Register(MessageRotateIdentityResponse{})
 	gob.Register(MessageGeneralFailure{})
 
 	gob.Register(Script{})
@@ -46,7 +48,10 @@ const (
 	MessageTypeCancelAction
 	MessageTypeActionOutput
 	MessageTypeActionResult
-	MessageTypeGeneralFailure
+	MessageTypeRotateIdentityRequest
+	MessageTypeRotateIdentityResponse
+
+	MessageTypeGeneralFailure = uint32(0xFFFFFFFF)
 )
 
 // MessageHeartbeatRequest describes a heartbeat request
@@ -84,9 +89,20 @@ type MessageActionResult struct {
 	ClientVersion string       `json:"client_version"`
 }
 
+// MessageRotateIdentityRequest describes a request to rotate an identity
+type MessageRotateIdentityRequest struct {
+	PublicKey string `json:"public_key"`
+}
+
+// MessageRotateIdentityResponse describes the response for rotating an identity
+type MessageRotateIdentityResponse struct {
+	PublicKey string `json:"public_key"`
+	Error     string `json:"error"`
+}
+
 // MessageGeneralFailure describes a general failure
 type MessageGeneralFailure struct {
-	Error error `json:"error"`
+	Error string `json:"error"`
 }
 
 // Actions
@@ -98,7 +114,6 @@ const (
 	ActionExitClient
 	ActionReboot
 	ActionShutdown
-	ActionUpdateIdentity
 )
 
 // Script describes a script
@@ -353,6 +368,18 @@ func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
 		return message, nil
 	case MessageTypeActionResult:
 		message := MessageActionResult{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeRotateIdentityRequest:
+		message := MessageRotateIdentityRequest{}
+		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			return nil, err
+		}
+		return message, nil
+	case MessageTypeRotateIdentityResponse:
+		message := MessageRotateIdentityResponse{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
 			return nil, err
 		}

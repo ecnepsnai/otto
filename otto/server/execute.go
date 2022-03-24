@@ -22,11 +22,10 @@ type ScriptResult struct {
 }
 
 var clientActionMap = map[string]uint32{
-	ClientActionRunScript:      otto.ActionRunScript,
-	ClientActionExitClient:     otto.ActionUploadFileAndExitClient,
-	ClientActionReboot:         otto.ActionReboot,
-	ClientActionShutdown:       otto.ActionShutdown,
-	ClientActionUpdateIdentity: otto.ActionUpdateIdentity,
+	ClientActionRunScript:  otto.ActionRunScript,
+	ClientActionExitClient: otto.ActionUploadFileAndExitClient,
+	ClientActionReboot:     otto.ActionReboot,
+	ClientActionShutdown:   otto.ActionShutdown,
 }
 
 type hostConnection struct {
@@ -278,33 +277,47 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 		return "", "", ErrorFrom(iderr)
 	}
 
-	result, err := host.TriggerAction(otto.MessageTriggerAction{
-		Action: otto.ActionUpdateIdentity,
-		File: otto.File{
-			Data: []byte(serverId.PublicKeyString()),
-		},
-	}, nil, nil)
+	conn, err := host.connect()
+	if err != nil {
+		heartbeatStore.UpdateHostReachability(host, false)
+		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
+		return "", "", ErrorFrom(err)
+	}
+	defer conn.Close()
+
+	reply, err := conn.Conn.RotateIdentity(otto.MessageRotateIdentityRequest{
+		PublicKey: serverId.PublicKeyString(),
+	})
 	if err != nil {
 		log.PError("Error requesting client update identity", map[string]interface{}{
 			"host":  host.ID,
-			"error": err.Message,
+			"error": err.Error,
 		})
-		return "", "", err
+		return "", "", ErrorFrom(err)
 	}
-	if result.File.Data == nil {
-		log.PError("Client did not return new identity", map[string]interface{}{
+	if reply.Error != "" {
+		log.PError("Error requesting client update identity", map[string]interface{}{
 			"host":  host.ID,
-			"error": err.Message,
+			"error": reply.Error,
 		})
-		return "", "", err
+		return "", "", ErrorServer(reply.Error)
+	}
+	if reply.PublicKey == "" {
+		log.PError("Error requesting client update identity", map[string]interface{}{
+			"host":  host.ID,
+			"error": "no public key in response",
+		})
+		return "", "", ErrorServer("no public key in response")
 	}
 
+	clientPublicKey := reply.PublicKey
+
 	IdentityStore.Set(host.ID, serverId)
-	err = HostStore.UpdateHostTrust(host.ID, HostTrust{
-		TrustedIdentity: string(result.File.Data),
+	trust := HostTrust{
+		TrustedIdentity: clientPublicKey,
 		LastTrustUpdate: time.Now(),
-	})
-	if err != nil {
+	}
+	if err := HostStore.UpdateHostTrust(host.ID, trust); err != nil {
 		log.PError("Error updating host trust", map[string]interface{}{
 			"host":  host.ID,
 			"error": err.Message,
@@ -316,7 +329,7 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 		"host_id":    host.ID,
 		"host_name":  host.Name,
 		"server_pub": serverId.PublicKeyString(),
-		"client_pub": string(result.File.Data),
+		"client_pub": clientPublicKey,
 	})
-	return serverId.PublicKeyString(), string(result.File.Data), nil
+	return serverId.PublicKeyString(), clientPublicKey, nil
 }
