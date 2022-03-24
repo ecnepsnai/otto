@@ -53,6 +53,8 @@ interface ModalProps {
      * Optional if the modal can not be dismissed by clicking the background or pressing esc
      */
     static?: boolean;
+
+    children?: React.ReactNode;
 }
 
 interface ModalState {

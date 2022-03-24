@@ -26,6 +26,8 @@ interface FormProps {
      * If true the submit button is disabled
      */
     loading?: boolean;
+
+    children?: React.ReactNode;
 }
 
 interface FormState {
