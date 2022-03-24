@@ -210,6 +210,25 @@ func (s *eventStoreObject) HostIdentityRotated(host *Host, hostID, serverID, cur
 	event.Save()
 }
 
+func (s *eventStoreObject) HostBecameReachable(host *Host) {
+	event := newEvent(EventTypeHostBecameReachable, map[string]string{
+		"host_id": host.ID,
+		"name":    host.Name,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) HostBecameUnreachable(host *Host, lastHeartbeat time.Time) {
+	event := newEvent(EventTypeHostBecameUnreachable, map[string]string{
+		"host_id":        host.ID,
+		"name":           host.Name,
+		"last_heartbeat": lastHeartbeat.String(),
+	})
+
+	event.Save()
+}
+
 func (s *eventStoreObject) GroupAdded(group *Group, currentUser string) {
 	event := newEvent(EventTypeGroupAdded, map[string]string{
 		"group_id": group.ID,

@@ -173,6 +173,25 @@ identity rotation is enabled.
 |`server_public_key`|The new server public key for this host|
 |`host_public_key`|The new host public key|
 
+### HostBecameReachable
+
+Event for when a host that was unreachable became reachable
+
+|Parameter|Description|
+|-|-|
+|`host_id`|The ID of the host|
+|`name`|The name of the host|
+
+### HostBecameUnreachable
+
+Event for when a host that was reachable became unreachable
+
+|Parameter|Description|
+|-|-|
+|`host_id`|The ID of the host|
+|`name`|The name of the host|
+|`last_heartbeat`|The date and time when the last heartbeat was registered|
+
 ### GroupAdded
 
 Event for when a new group is added.

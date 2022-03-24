@@ -188,6 +188,16 @@
                 "value": "\"HostIdentityRotated\""
             },
             {
+                "key": "HostBecameReachable",
+                "description": "HostBecameReachable event",
+                "value": "\"HostBecameReachable\""
+            },
+            {
+                "key": "HostBecameUnreachable",
+                "description": "HostBecameUnreachable event",
+                "value": "\"HostBecameUnreachable\""
+            },
+            {
                 "key": "GroupAdded",
                 "description": "GroupAdded event",
                 "value": "\"GroupAdded\""

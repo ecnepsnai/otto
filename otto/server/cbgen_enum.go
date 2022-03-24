@@ -119,6 +119,10 @@ const (
 	EventTypeHostTrustModified = "HostTrustModified"
 	// EventTypeHostIdentityRotated HostIdentityRotated event
 	EventTypeHostIdentityRotated = "HostIdentityRotated"
+	// EventTypeHostBecameReachable HostBecameReachable event
+	EventTypeHostBecameReachable = "HostBecameReachable"
+	// EventTypeHostBecameUnreachable HostBecameUnreachable event
+	EventTypeHostBecameUnreachable = "HostBecameUnreachable"
 	// EventTypeGroupAdded GroupAdded event
 	EventTypeGroupAdded = "GroupAdded"
 	// EventTypeGroupModified GroupModified event
@@ -174,6 +178,8 @@ var AllEventType = []string{
 	EventTypeHostRegisterIncorrectKey,
 	EventTypeHostTrustModified,
 	EventTypeHostIdentityRotated,
+	EventTypeHostBecameReachable,
+	EventTypeHostBecameUnreachable,
 	EventTypeGroupAdded,
 	EventTypeGroupModified,
 	EventTypeGroupDeleted,
@@ -211,6 +217,8 @@ var EventTypeMap = map[string]string{
 	EventTypeHostRegisterIncorrectKey: "HostRegisterIncorrectKey",
 	EventTypeHostTrustModified:        "HostTrustModified",
 	EventTypeHostIdentityRotated:      "HostIdentityRotated",
+	EventTypeHostBecameReachable:      "HostBecameReachable",
+	EventTypeHostBecameUnreachable:    "HostBecameUnreachable",
 	EventTypeGroupAdded:               "GroupAdded",
 	EventTypeGroupModified:            "GroupModified",
 	EventTypeGroupDeleted:             "GroupDeleted",
@@ -248,6 +256,8 @@ var EventTypeNameMap = map[string]string{
 	"HostRegisterIncorrectKey": "HostRegisterIncorrectKey",
 	"HostTrustModified":        "HostTrustModified",
 	"HostIdentityRotated":      "HostIdentityRotated",
+	"HostBecameReachable":      "HostBecameReachable",
+	"HostBecameUnreachable":    "HostBecameUnreachable",
 	"GroupAdded":               "GroupAdded",
 	"GroupModified":            "GroupModified",
 	"GroupDeleted":             "GroupDeleted",
@@ -350,6 +360,16 @@ var EventTypeSchema = []map[string]interface{}{
 		"name":        "HostIdentityRotated",
 		"description": "HostIdentityRotated event",
 		"value":       "HostIdentityRotated",
+	},
+	{
+		"name":        "HostBecameReachable",
+		"description": "HostBecameReachable event",
+		"value":       "HostBecameReachable",
+	},
+	{
+		"name":        "HostBecameUnreachable",
+		"description": "HostBecameUnreachable event",
+		"value":       "HostBecameUnreachable",
 	},
 	{
 		"name":        "GroupAdded",

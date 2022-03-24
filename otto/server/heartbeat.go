@@ -95,6 +95,7 @@ func (s *heartbeatStoreType) RegisterHeartbeatReply(host *Host, reply otto.Messa
 			"host_id":   host.ID,
 			"host_name": host.Name,
 		})
+		EventStore.HostBecameReachable(host)
 	}
 
 	return &heartbeat, nil
@@ -125,12 +126,14 @@ func (s *heartbeatStoreType) UpdateHostReachability(host *Host, isReachable bool
 			"host_id":   host.ID,
 			"host_name": host.Name,
 		})
+		EventStore.HostBecameUnreachable(host, heartbeat.LastReply)
 	}
 	if becameReachable {
 		log.PInfo("Host became reachable", map[string]interface{}{
 			"host_id":   host.ID,
 			"host_name": host.Name,
 		})
+		EventStore.HostBecameReachable(host)
 	}
 
 	return &heartbeat, nil
