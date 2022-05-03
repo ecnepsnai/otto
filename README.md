@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/ecnepsnai/otto/pre-release/static/img/full_light.png" height="50px" alt="otto">
+<img src="https://raw.githubusercontent.com/ecnepsnai/otto/pre-release/frontend/img/full_light.png" height="50px" alt="otto">
 
 **Welcome to Otto, where things are *Ottomatic beyond belief!***
 
