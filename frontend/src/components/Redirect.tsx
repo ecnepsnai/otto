@@ -8,7 +8,7 @@ export class Redirect {
 }
 
 interface GlobalRedirectFrameState {
-    redirect?: ReactRedirect;
+    redirect?: string;
 }
 export class GlobalRedirectFrame extends React.Component<unknown, GlobalRedirectFrameState> {
     constructor(props: unknown) {
@@ -21,10 +21,7 @@ export class GlobalRedirectFrame extends React.Component<unknown, GlobalRedirect
 
     public static redirectTo(url: string): void {
         this.instance.setState({
-            redirect: new ReactRedirect({
-                to: url,
-                push: true,
-            })
+            redirect: url
         }, () => {
             setTimeout(() => {
                 this.instance.setState({ redirect: undefined });
@@ -33,10 +30,14 @@ export class GlobalRedirectFrame extends React.Component<unknown, GlobalRedirect
     }
 
     render(): JSX.Element {
-        return (
-            <div id="global-redirect-frame">
-                { this.state.redirect}
-            </div>
-        );
+        if (this.state.redirect) {
+            return (
+                <div id="global-redirect-frame">
+                    <ReactRedirect to={this.state.redirect} push />
+                </div>
+            );
+        }
+
+        return (<div id="global-redirect-frame"></div>);
     }
 }

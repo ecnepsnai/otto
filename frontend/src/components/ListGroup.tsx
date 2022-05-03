@@ -2,7 +2,10 @@ import * as React from 'react';
 import '../../css/list-group.scss';
 
 export namespace ListGroup {
-    export const List: React.FC = (props: { children: React.ReactNode }) => {
+    interface ListProps {
+        children?: React.ReactNode
+    }
+    export const List: React.FC<ListProps> = (props: ListProps) => {
         return (
             <ul className="list-group list-group-flush">{props.children}</ul>
         );

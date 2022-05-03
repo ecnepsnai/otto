@@ -107,11 +107,17 @@ export const ButtonLink: React.FC<ButtonLinkProps> = (props: ButtonLinkProps) =>
     </Button>;
 };
 
-export const Buttons: React.FC = (props: { children: React.ReactNode }) => {
+interface ButtonsProps {
+    children?: React.ReactNode
+}
+export const Buttons: React.FC<ButtonsProps> = (props: ButtonsProps) => {
     return (<div className="buttons">{props.children}</div>);
 };
 
-export const ButtonGroup: React.FC = (props: { children: React.ReactNode }) => {
+interface ButtonGroupProps {
+    children?: React.ReactNode
+}
+export const ButtonGroup: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) => {
     return (<div className="btn-group">{props.children}</div>);
 };
 
