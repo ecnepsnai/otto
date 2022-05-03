@@ -52,7 +52,12 @@ func (h Host) Scripts() []ScriptEnabledGroup {
 	for _, group := range groups {
 		scripts, err := group.Scripts()
 		if err != nil {
-			return nil
+			log.PError("Unable to determine group scripts for host", map[string]interface{}{
+				"host_id":  h.ID,
+				"group_id": group.ID,
+				"error":    err.Message,
+			})
+			continue
 		}
 		ehabledGroups := make([]ScriptEnabledGroup, len(scripts))
 		for i, script := range scripts {

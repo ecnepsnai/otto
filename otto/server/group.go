@@ -29,7 +29,14 @@ func (g Group) Hosts() ([]Host, *Error) {
 func (g Group) Scripts() ([]Script, *Error) {
 	scripts := make([]Script, len(g.ScriptIDs))
 	for i, scriptID := range g.ScriptIDs {
-		script := ScriptStore.ScriptWithID(scriptID)
+		script := ScriptCache.ByID(scriptID)
+		if script == nil {
+			log.PError("Group referrs to non-existant script", map[string]interface{}{
+				"group_id":  g.ID,
+				"script_id": scriptID,
+			})
+			return nil, ErrorServer("group referring to script that doesn't exist")
+		}
 		scripts[i] = *script
 	}
 	return scripts, nil
