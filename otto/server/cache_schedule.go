@@ -44,9 +44,7 @@ func (c *cacheTypeSchedule) All() []Schedule {
 	defer c.lock.RUnlock()
 
 	all := make([]Schedule, len(c.all))
-	for i, schedule := range c.all {
-		all[i] = schedule
-	}
+	copy(all, c.all)
 
 	return all
 }
@@ -57,9 +55,7 @@ func (c *cacheTypeSchedule) Enabled() []Schedule {
 	defer c.lock.RUnlock()
 
 	enabled := make([]Schedule, len(c.enabled))
-	for i, schedule := range c.enabled {
-		enabled[i] = schedule
-	}
+	copy(enabled, c.enabled)
 
 	return enabled
 }

@@ -42,9 +42,7 @@ func (c *cacheTypeUser) All() []User {
 	defer c.lock.RUnlock()
 
 	all := make([]User, len(c.all))
-	for i, user := range c.all {
-		all[i] = user
-	}
+	copy(all, c.all)
 
 	return all
 }
@@ -55,9 +53,7 @@ func (c *cacheTypeUser) Enabled() []User {
 	defer c.lock.RUnlock()
 
 	enabled := make([]User, len(c.enabled))
-	for i, user := range c.enabled {
-		enabled[i] = user
-	}
+	copy(enabled, c.enabled)
 
 	return enabled
 }

@@ -42,9 +42,7 @@ func (c *cacheTypeScript) All() []Script {
 	defer c.lock.RUnlock()
 
 	all := make([]Script, len(c.all))
-	for i, script := range c.all {
-		all[i] = script
-	}
+	copy(all, c.all)
 
 	return all
 }
@@ -55,9 +53,7 @@ func (c *cacheTypeScript) Enabled() []Script {
 	defer c.lock.RUnlock()
 
 	enabled := make([]Script, len(c.enabled))
-	for i, script := range c.enabled {
-		enabled[i] = script
-	}
+	copy(enabled, c.enabled)
 
 	return enabled
 }

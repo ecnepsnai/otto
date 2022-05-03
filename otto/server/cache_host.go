@@ -42,9 +42,7 @@ func (c *cacheTypeHost) All() []Host {
 	defer c.lock.RUnlock()
 
 	all := make([]Host, len(c.all))
-	for i, host := range c.all {
-		all[i] = host
-	}
+	copy(all, c.all)
 
 	return all
 }

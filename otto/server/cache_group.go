@@ -45,9 +45,7 @@ func (c *cacheTypeGroup) All() []Group {
 	defer c.lock.RUnlock()
 
 	all := make([]Group, len(c.all))
-	for i, group := range c.all {
-		all[i] = group
-	}
+	copy(all, c.all)
 
 	return all
 }
