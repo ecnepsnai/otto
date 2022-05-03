@@ -11,13 +11,13 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (v *view) Register(request web.Request, writer web.Writer) web.Response {
+func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse {
 	if !Options.Register.Enabled {
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"remote_addr": request.HTTP.RemoteAddr,
 			"reason":      "registration disabled",
 		})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 404,
 		}
 	}
@@ -28,14 +28,14 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 			"reason":                  "unsupported otto protocol version",
 			"client_protocol_version": requestProtocolVersion,
 		})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 400,
 		}
 	}
 
 	encryptedData, erro := io.ReadAll(request.HTTP.Body)
 	if erro != nil {
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 400,
 		}
 	}
@@ -46,14 +46,14 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 			"remote_addr": request.HTTP.RemoteAddr,
 			"reason":      "incorrect register key",
 		})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 403,
 		}
 	}
 
 	r := otto.RegisterRequest{}
 	if err := json.Unmarshal(decryptedData, &r); err != nil {
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 400,
 		}
 	}
@@ -65,7 +65,7 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 			"reason":      "duplicate hostname",
 			"hostname":    r.Properties.Hostname,
 		})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 400,
 		}
 	}
@@ -98,7 +98,7 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 			"address":  address,
 			"error":    err.Message,
 		})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
@@ -107,7 +107,7 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 	serverId := IdentityStore.Get(host.ID)
 	if serverId == nil {
 		log.PError("No server identity for host", map[string]interface{}{"host_id": host.ID})
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
@@ -129,17 +129,17 @@ func (v *view) Register(request web.Request, writer web.Writer) web.Response {
 		Scripts:        scripts,
 	})
 	if erro != nil {
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
 	encryptedResponse, erro := secutil.Encryption.AES_256_GCM.Encrypt(responseData, Options.Register.Key)
 	if erro != nil {
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
-	return web.Response{
+	return web.HTTPResponse{
 		Status:      200,
 		Reader:      io.NopCloser(bytes.NewReader(encryptedResponse)),
 		ContentType: "application/octet-stream",

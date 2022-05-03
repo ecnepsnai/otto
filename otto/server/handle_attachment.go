@@ -72,7 +72,7 @@ func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
 	return AttachmentStore.AttachmentWithID(attachmentID), nil
 }
 
-func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.Response) {
+func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.HTTPResponse) {
 	attachmentID := request.Parameters["id"]
 
 	attachment := AttachmentStore.AttachmentWithID(attachmentID)

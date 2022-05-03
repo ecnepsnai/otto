@@ -8,6 +8,8 @@ github.com/ecnepsnai/logtic v1.8.1/go.mod h1:T1Urgk72Dz8z8JxtZSq63xD0djhy9bRJcfd
 github.com/ecnepsnai/logtic v1.9.0/go.mod h1:fs2kkqGqiX77ejVNBKpSV/dMVtn9bTg9YtHLP9MC0U8=
 github.com/ecnepsnai/logtic v1.9.1 h1:EmN1g7p+xtCZMzuICnVSYsNclJSG9n+X3K8FOdffFi8=
 github.com/ecnepsnai/logtic v1.9.1/go.mod h1:fs2kkqGqiX77ejVNBKpSV/dMVtn9bTg9YtHLP9MC0U8=
+github.com/ecnepsnai/logtic v1.9.2 h1:RoPIpBRjY5gGN4/WuOwBpYXNH+lIfmj4TwqvLz1CCoQ=
+github.com/ecnepsnai/logtic v1.9.2/go.mod h1:fs2kkqGqiX77ejVNBKpSV/dMVtn9bTg9YtHLP9MC0U8=
 github.com/ecnepsnai/osquery v1.0.0 h1:FWwqlA7hCtO7Usg3N+DlZPNPHWf5nfdypnPEor2ayCs=
 github.com/ecnepsnai/osquery v1.0.0/go.mod h1:vxsezNRznmkLa8UjVh88tlJiRbgW7iwinkjyg/Xc2RU=
 github.com/ecnepsnai/search v1.0.2 h1:n0ShQzimXmrHklaEsJCu0ehmraNLK8QZVFlaABg9igc=
@@ -20,6 +22,8 @@ github.com/ecnepsnai/store v1.2.2 h1:Azyi23OgLyJmXX6OOSE7trd+/CLTzDvBpw+HIIUiO4c
 github.com/ecnepsnai/store v1.2.2/go.mod h1:ODK2OhOEVD+aGKoazkAEShp8GSgTCkalIDRpKAJ6yRI=
 github.com/ecnepsnai/web v1.8.1 h1:LAQezQw4ldKnFbiYU4VyhX+pWn6QOR45Yrg8mp3+J34=
 github.com/ecnepsnai/web v1.8.1/go.mod h1:Xgndev6dRBbLzsA8Eowkg+AlJGwHAmYfnRXFnd8Jmvo=
+github.com/ecnepsnai/web v1.9.1 h1:5it1J4NECW1U1YHjtq3iSn/milQtSYN58f8ue8Gdv+s=
+github.com/ecnepsnai/web v1.9.1/go.mod h1:/1Ewy+Pnet6Yw563sfzb3mbCCGRIsrXjKVxa2H8fPs4=
 github.com/fatih/color v1.12.0/go.mod h1:ELkj/draVOlAH/xkhN6mQ50Qd0MPOk5AAr3maGEBuJM=
 github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
@@ -36,6 +40,8 @@ go.etcd.io/bbolt v1.3.6/go.mod h1:qXsaaIqmgQH0T+OPdb99Bf+PKfBBQVAdyD6TY9G8XM4=
 golang.org/x/crypto v0.0.0-20210817164053-32db794688a5/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838 h1:71vQrMauZZhcTVK6KdYM+rklehEEwb3E+ZhaE5jrPrE=
 golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
+golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f h1:OeJjE6G4dgCY4PIXvIRQbE8+RX+uXZyGhUy/ksMGJoc=
+golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
 golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=

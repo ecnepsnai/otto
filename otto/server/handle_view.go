@@ -7,7 +7,7 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (v *view) Login(request web.Request, writer web.Writer) (response web.Response) {
+func (v *view) Login(request web.Request, writer web.Writer) (response web.HTTPResponse) {
 	// Redirect users to index if they're already logged in
 	session := sessionForHTTPRequest(request.HTTP, false)
 	if session != nil {
@@ -22,7 +22,7 @@ func (v *view) Login(request web.Request, writer web.Writer) (response web.Respo
 	f, err := os.Open(path.Join(Directories.Static, "login.html"))
 	if err != nil {
 		log.Error("Error reading static file: %s", err.Error())
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
@@ -30,34 +30,34 @@ func (v *view) Login(request web.Request, writer web.Writer) (response web.Respo
 	return
 }
 
-func (v *view) JavaScript(request web.Request, writer web.Writer) web.Response {
+func (v *view) JavaScript(request web.Request, writer web.Writer) web.HTTPResponse {
 	file, err := os.OpenFile(path.Join(Directories.Static, "index.html"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Error("Error serving javascript: %s", err.Error())
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
-	return web.Response{
+	return web.HTTPResponse{
 		Reader: file,
 	}
 }
 
-func (v *view) Favicon(request web.Request, writer web.Writer) web.Response {
+func (v *view) Favicon(request web.Request, writer web.Writer) web.HTTPResponse {
 	file, err := os.OpenFile(path.Join(Directories.Static, "assets", "img", "favicon.ico"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Error("Error serving favicon: %s", err.Error())
-		return web.Response{
+		return web.HTTPResponse{
 			Status: 500,
 		}
 	}
-	return web.Response{
+	return web.HTTPResponse{
 		ContentType: "image/x-icon",
 		Reader:      file,
 	}
 }
 
-func (v *view) Redirect(request web.Request, writer web.Writer) (response web.Response) {
+func (v *view) Redirect(request web.Request, writer web.Writer) (response web.HTTPResponse) {
 	redirectLocation := ""
 
 	session := sessionForHTTPRequest(request.HTTP, false)
