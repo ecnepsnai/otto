@@ -96,6 +96,15 @@ func (s Schedule) RunNow() {
 		}
 	}
 
+	script := ScriptCache.ByID(s.ScriptID)
+	if script == nil {
+		log.PError("Schedule targets non-existant script", map[string]interface{}{
+			"schedule_id": s.ID,
+			"script_id":   s.ScriptID,
+		})
+		return
+	}
+
 	report.HostIDs = hosts.Values()
 	report.HostResult = map[string]int{}
 	success := 0
@@ -104,28 +113,35 @@ func (s Schedule) RunNow() {
 	for _, hostID := range hosts.Values() {
 		host := HostCache.ByID(hostID)
 		if host == nil {
-			log.Error("Schedule for nonexistant host: schedule=%s host=%s", s.ID, hostID)
-			return
-		}
-		script := ScriptStore.ScriptWithID(s.ScriptID)
-		if script == nil {
-			log.Error("Schedule for nonexistant script: schedule=%s script=%s", s.ID, s.ScriptID)
-			return
+			log.PError("Schedule targets non-existant host", map[string]interface{}{
+				"schedule_id": s.ID,
+				"host_id":     hostID,
+			})
+			continue
 		}
 
 		result, err := host.RunScript(script, nil, nil)
 		if err != nil {
 			fail++
-			log.Error("Error running scheduled script: schedule=%s script=%s host=%s error='%s'", s.ID, s.ScriptID, host.ID, err.Message)
-			report.HostResult[host.ID] = -1
+			log.PError("Error running scheduled script", map[string]interface{}{
+				"schedule_id": s.ID,
+				"script_id":   s.ScriptID,
+				"host_id":     host.ID,
+				"error":       err.Message,
+			})
+			report.HostResult[host.ID] = 1
 			continue
 		} else {
-			report.HostResult[host.ID] = result.Result.Code
 			success++
+			report.HostResult[host.ID] = result.Result.Code
 		}
 
 		EventStore.ScriptRun(script, host, &result.Result, &s, "")
-		log.Info("Result: %v", result)
+		log.PInfo("Finished running scheduled script", map[string]interface{}{
+			"schedule_id": s.ID,
+			"script_id":   s.ScriptID,
+			"host_id":     host.ID,
+		})
 	}
 
 	ScheduleStore.updateLastRun(s)
@@ -143,5 +159,13 @@ func (s Schedule) RunNow() {
 	} else {
 		report.Result = ScheduleResultFail
 	}
-	go ScheduleReportStore.Table.Add(report)
+	ScheduleReportStore.Table.Add(report)
+	log.PInfo("Finished running schedule", map[string]interface{}{
+		"schedule_id":   s.ID,
+		"start_time":    start,
+		"finished_time": finished,
+		"elapsed":       time.Since(start).String(),
+		"num_success":   success,
+		"num_fail":      fail,
+	})
 }

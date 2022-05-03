@@ -25,7 +25,7 @@ export const EventList: React.FC = () => {
         });
     };
 
-    const showMoreClient = () => {
+    const showMoreClick = () => {
         SetShownEvents(events => {
             return AllEvents.slice(0, Math.min(events.length+20, AllEvents.length));
         });
@@ -55,7 +55,7 @@ export const EventList: React.FC = () => {
                 </Table.Body>
             </Table.Table>
             <div className="mt-2">
-                <Button color={Style.Palette.Primary} onClick={showMoreClient} disabled={showMoreDiabled()}><Icon.Label icon={<Icon.Plus />} label="Show More" /></Button>
+                <Button color={Style.Palette.Primary} onClick={showMoreClick} disabled={showMoreDiabled()}><Icon.Label icon={<Icon.Plus />} label="Show More" /></Button>
                 <span className="ms-1"><em>{ShownEvents.length} of {AllEvents.length}</em></span>
             </div>
         </Page>

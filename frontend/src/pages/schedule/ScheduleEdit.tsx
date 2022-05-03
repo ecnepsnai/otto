@@ -275,6 +275,7 @@ export const ScheduleEdit: React.FC = () => {
                     defaultValue={schedule.Name}
                     onChange={changeName}
                     required />
+                {enabledCheckbox()}
                 <Input.Select
                     label="Script"
                     defaultValue={schedule.ScriptID}
@@ -296,7 +297,6 @@ export const ScheduleEdit: React.FC = () => {
                     <option value="0 0 * * 1">Every Monday at Midnight</option>
                     <option value="custom">Custom</option>
                 </Input.Select>
-                {enabledCheckbox()}
                 {cronPatternInput()}
                 <Input.Radio
                     label="Run On"

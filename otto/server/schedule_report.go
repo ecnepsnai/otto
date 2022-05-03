@@ -1,6 +1,7 @@
 package server
 
 import (
+	"sort"
 	"time"
 
 	"github.com/ecnepsnai/ds"
@@ -42,6 +43,13 @@ func (s *schedulereportStoreObject) GetReportsForSchedule(scheduleID string) []S
 		}
 		reports[i] = host
 	}
+
+	sort.Slice(reports, func(i, j int) bool {
+		left := reports[i]
+		right := reports[j]
+
+		return left.Time.Start.UnixNano() > right.Time.Start.UnixNano()
+	})
 
 	return reports
 }

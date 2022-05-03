@@ -165,6 +165,7 @@ export const HostEdit: React.FC = () => {
                     defaultValue={host.Name}
                     onChange={changeName}
                     required />
+                {enabledCheckbox()}
                 <Input.Checkbox label="Connect to host using this name" defaultValue={useHostName} onChange={changeUseHostName} />
                 {addressInput()}
                 <Input.Number
@@ -172,7 +173,6 @@ export const HostEdit: React.FC = () => {
                     defaultValue={host.Port}
                     onChange={changePort}
                     required />
-                {enabledCheckbox()}
                 <Card.Card className="mt-3">
                     <Card.Header>Environment Variables</Card.Header>
                     <Card.Body>
