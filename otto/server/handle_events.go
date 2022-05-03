@@ -7,12 +7,12 @@ import (
 )
 
 func (h *handle) EventsGet(request web.Request) (interface{}, *web.Error) {
-	cStr := sliceFirst(request.HTTP.URL.Query()["c"])
-	if cStr == "" {
+	countStr := sliceFirst(request.HTTP.URL.Query()["c"])
+	if countStr == "" {
 		return nil, web.ValidationError("Must specify max number of events")
 	}
 
-	count, cerr := strconv.Atoi(cStr)
+	count, cerr := strconv.Atoi(countStr)
 	if cerr != nil {
 		return nil, web.ValidationError("Invalid count")
 	}

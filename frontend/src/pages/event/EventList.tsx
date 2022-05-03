@@ -4,28 +4,39 @@ import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Table } from '../../components/Table';
 import { EventListItem } from './EventListItem';
+import { Button } from '../../components/Button';
+import { Style } from '../../components/Style';
+import { Icon } from '../../components/Icon';
 
 export const EventList: React.FC = () => {
-    const [loading, setLoading] = React.useState(true);
-    const [events, setEvents] = React.useState<EventType[]>();
+    const [IsLoading, SetIsLoading] = React.useState(true);
+    const [ShownEvents, SetShownEvents] = React.useState<EventType[]>();
+    const [AllEvents, SetAllEvents] = React.useState<EventType[]>();
 
     React.useEffect(() => {
-        loadData();
+        loadEvents();
     }, []);
 
     const loadEvents = () => {
-        return Event.List(20).then(events => {
-            setEvents(events);
+        Event.List(0).then(events => {
+            SetAllEvents(events);
+            SetShownEvents(events.slice(0, Math.min(20, events.length)));
+            SetIsLoading(false);
         });
     };
 
-    const loadData = () => {
-        Promise.all([loadEvents()]).then(() => {
-            setLoading(false);
+    const showMoreClient = () => {
+        SetShownEvents(events => {
+            return AllEvents.slice(0, Math.min(events.length+20, AllEvents.length));
         });
     };
 
-    if (loading) {
+    const showMoreDiabled = () => {
+        return ShownEvents.length >= AllEvents.length;
+    };
+
+
+    if (IsLoading) {
         return (<PageLoading />);
     }
     return (
@@ -37,12 +48,16 @@ export const EventList: React.FC = () => {
                 </Table.Head>
                 <Table.Body>
                     {
-                        events.map(event => {
-                            return <EventListItem event={event} key={event.ID}></EventListItem>;
+                        ShownEvents.map(event => {
+                            return (<EventListItem event={event} key={event.ID}></EventListItem>);
                         })
                     }
                 </Table.Body>
             </Table.Table>
+            <div className="mt-2">
+                <Button color={Style.Palette.Primary} onClick={showMoreClient} disabled={showMoreDiabled()}><Icon.Label icon={<Icon.Plus />} label="Show More" /></Button>
+                <span className="ms-1"><em>{ShownEvents.length} of {AllEvents.length}</em></span>
+            </div>
         </Page>
     );
 };
