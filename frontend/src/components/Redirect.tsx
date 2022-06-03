@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect as ReactRedirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 export class Redirect {
     public static To(url: string): void {
@@ -33,7 +33,7 @@ export class GlobalRedirectFrame extends React.Component<unknown, GlobalRedirect
         if (this.state.redirect) {
             return (
                 <div id="global-redirect-frame">
-                    <ReactRedirect to={this.state.redirect} push />
+                    <Navigate to={this.state.redirect} />
                 </div>
             );
         }

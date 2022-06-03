@@ -1,7 +1,6 @@
 const merge = require('webpack-merge');
 const common = require('./webpack.app.common.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
 
 const version = process.env.VERSION;
 if (!version) {
@@ -9,7 +8,7 @@ if (!version) {
 }
 
 module.exports = merge.merge(common, {
-    mode: "production",
+    mode: 'production',
     plugins: [
         new HtmlWebpackPlugin({
             base: '/otto' + version + '/',
@@ -18,13 +17,6 @@ module.exports = merge.merge(common, {
                 versionTag: version,
             },
             filename: 'index.html'
-        }),
-        new CopyPlugin({
-            patterns: [
-                { from: 'node_modules/react/umd/react.production.min.js', to: 'assets/js/' },
-                { from: 'node_modules/react-dom/umd/react-dom.production.min.js', to: 'assets/js/' },
-                { from: 'node_modules/react-router-dom/umd/react-router-dom.min.js', to: 'assets/js/' },
-            ]
         }),
     ],
 });

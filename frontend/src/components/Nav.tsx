@@ -56,8 +56,12 @@ export const NavItem: React.FC<NavItemProps> = (props: NavItemProps) => {
         }
     };
 
+    const className = (p: { isActive: boolean; }) => {
+        return 'nav-link ' + (p.isActive ? 'active' : '');
+    };
+
     return (
-        <NavLink to={props.link} onClick={didClick} className="nav-link" activeClassName="active">
+        <NavLink to={props.link} onClick={didClick} className={className}>
             <li className="nav-item" data-target=".navbar-collapse.show" data-toggle="collapse">
                 <Icon.Label icon={props.icon} label={props.label} />
             </li>

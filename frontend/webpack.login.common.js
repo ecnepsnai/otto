@@ -6,7 +6,7 @@ module.exports = {
     entry: './src/Login.tsx',
 
     resolve: {
-        extensions: [".ts", ".tsx", ".js", ".html"]
+        extensions: ['.ts', '.tsx', '.js', '.html']
     },
 
     plugins: [
@@ -19,7 +19,7 @@ module.exports = {
             ]
         }),
         new ESLintPlugin({
-            extensions: [".ts", ".tsx"]
+            extensions: ['.ts', '.tsx']
         }),
     ],
 
@@ -30,18 +30,18 @@ module.exports = {
                 exclude: /node_modules/,
                 use: [
                     {
-                        loader: "ts-loader"
+                        loader: 'ts-loader'
                     }
                 ]
             },
             {
-                enforce: "pre",
-                test: /\.js$/,
-                loader: "source-map-loader"
+                test: /\.(woff|woff2)$/,
+                type: 'asset/inline'
             },
             {
-                test: /\.(woff|woff2)$/,
-                type: 'asset/inline',
+                enforce: 'pre',
+                test: /\.js$/,
+                loader: 'source-map-loader'
             },
             {
                 test: /\.s[ac]ss$/i,
@@ -61,10 +61,6 @@ module.exports = {
                 ]
             },
         ]
-    },
-    externals: {
-        'react': 'React',
-        'react-dom': 'ReactDOM',
     },
 
     output: {

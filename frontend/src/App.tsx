@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { StateManager } from './services/StateManager';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GlobalModalFrame } from './components/Modal';
 import { GlobalNotificationFrame } from './components/Notification';
 import { GlobalRedirectFrame } from './components/Redirect';
@@ -44,34 +44,34 @@ export const App: React.FC = () => {
     }
 
     return (<ErrorBoundary>
-        <Router>
+        <BrowserRouter>
             <Nav />
-            <Switch>
-                <Route path="/hosts/host/:id/edit" component={HostEdit} />
-                <Route path="/hosts/host/:id" component={HostView} />
-                <Route path="/hosts/host" component={HostEdit} />
-                <Route path="/hosts" component={HostList} />
-                <Route path="/groups/group/:id/edit" component={GroupEdit} />
-                <Route path="/groups/group/:id" component={GroupView} />
-                <Route path="/groups/group" component={GroupEdit} />
-                <Route path="/groups" component={GroupList} />
-                <Route path="/scripts/script/:id/edit" component={ScriptEdit} />
-                <Route path="/scripts/script/:id" component={ScriptView} />
-                <Route path="/scripts/script" component={ScriptEdit} />
-                <Route path="/scripts" component={ScriptList} />
-                <Route path="/schedules/schedule/:id/edit" component={ScheduleEdit} />
-                <Route path="/schedules/schedule/:id" component={ScheduleView} />
-                <Route path="/schedules/schedule" component={ScheduleEdit} />
-                <Route path="/schedules" component={ScheduleList} />
-                <Route path="/system/options" component={SystemOptions} />
-                <Route path="/system/users" component={SystemUsers} />
-                <Route path="/system/register" component={SystemRegister} />
-                <Route path="/events" component={EventList} />
-            </Switch>
+            <Routes>
+                <Route path="/hosts/host/:id/edit" element={<HostEdit />} />
+                <Route path="/hosts/host/:id" element={<HostView />} />
+                <Route path="/hosts/host" element={<HostEdit />} />
+                <Route path="/hosts" element={<HostList />} />
+                <Route path="/groups/group/:id/edit" element={<GroupEdit />} />
+                <Route path="/groups/group/:id" element={<GroupView />} />
+                <Route path="/groups/group" element={<GroupEdit />} />
+                <Route path="/groups" element={<GroupList />} />
+                <Route path="/scripts/script/:id/edit" element={<ScriptEdit />} />
+                <Route path="/scripts/script/:id" element={<ScriptView />} />
+                <Route path="/scripts/script" element={<ScriptEdit />} />
+                <Route path="/scripts" element={<ScriptList />} />
+                <Route path="/schedules/schedule/:id/edit" element={<ScheduleEdit />} />
+                <Route path="/schedules/schedule/:id" element={<ScheduleView />} />
+                <Route path="/schedules/schedule" element={<ScheduleEdit />} />
+                <Route path="/schedules" element={<ScheduleList />} />
+                <Route path="/system/options" element={<SystemOptions />} />
+                <Route path="/system/users" element={<SystemUsers />} />
+                <Route path="/system/register" element={<SystemRegister />} />
+                <Route path="/events" element={<EventList />} />
+            </Routes>
             <GlobalModalFrame />
             <GlobalNotificationFrame />
             <GlobalRedirectFrame />
             <GlobalContextMenuFrame />
-        </Router>
+        </BrowserRouter>
     </ErrorBoundary>);
 };
