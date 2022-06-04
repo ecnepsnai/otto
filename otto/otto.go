@@ -57,12 +57,14 @@ const (
 // MessageHeartbeatRequest describes a heartbeat request
 type MessageHeartbeatRequest struct {
 	ServerVersion string `json:"server_version"`
+	Nonce         string `json:"nonce"`
 }
 
 // MessageHeartbeatResponse describes a heartbeat response
 type MessageHeartbeatResponse struct {
 	ClientVersion string            `json:"client_version"`
 	Properties    map[string]string `json:"properties"`
+	Nonce         string            `json:"nonce"`
 }
 
 // MessageTriggerAction describes an action trigger

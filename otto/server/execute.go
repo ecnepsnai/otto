@@ -10,6 +10,7 @@ import (
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
+	"github.com/ecnepsnai/secutil"
 )
 
 // ScriptResult describes a script result
@@ -125,7 +126,8 @@ func (host *Host) Ping() *Error {
 	}
 	defer conn.Close()
 
-	reply, err := conn.Conn.SendHeartbeat(otto.MessageHeartbeatRequest{ServerVersion: ServerVersion})
+	nonce := secutil.RandomString(8)
+	reply, err := conn.Conn.SendHeartbeat(otto.MessageHeartbeatRequest{ServerVersion: ServerVersion, Nonce: nonce})
 	if err != nil {
 		log.PError("Error sending heartbeat request to host", map[string]interface{}{
 			"host_id": host.ID,
@@ -133,6 +135,15 @@ func (host *Host) Ping() *Error {
 		})
 		heartbeatStore.UpdateHostReachability(host, false)
 		return ErrorFrom(err)
+	}
+	if reply.Nonce != nonce {
+		log.PError("Unexpected nonce in heartbeat reply", map[string]interface{}{
+			"host_id":        host.ID,
+			"expected_nonce": nonce,
+			"actual_nonce":   reply.Nonce,
+		})
+		heartbeatStore.UpdateHostReachability(host, false)
+		return ErrorServer("invalid nonce")
 	}
 	heartbeatStore.RegisterHeartbeatReply(host, *reply)
 

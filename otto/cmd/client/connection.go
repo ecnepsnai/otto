@@ -70,7 +70,11 @@ func handle(conn *otto.Connection) {
 }
 
 func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeatRequest) {
-	log.Info("Heartbeat from %s (v%s)", conn.RemoteAddr().String(), message.ServerVersion)
+	log.PInfo("Incoming heartbeat", map[string]interface{}{
+		"remote_addr":    conn.RemoteAddr().String(),
+		"server_version": message.ServerVersion,
+		"nonce":          message.Nonce,
+	})
 
 	properties := map[string]string{
 		"hostname":             registerProperties.Hostname,
@@ -83,6 +87,7 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 	response := otto.MessageHeartbeatResponse{
 		ClientVersion: MainVersion,
 		Properties:    properties,
+		Nonce:         message.Nonce,
 	}
 
 	if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, response); err != nil {
