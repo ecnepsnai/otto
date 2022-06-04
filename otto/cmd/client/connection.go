@@ -18,10 +18,10 @@ func listen() {
 	for {
 		var err error
 		listener, err = otto.SetupListener(otto.ListenOptions{
-			Address:          config.ListenAddr,
-			AllowFrom:        getAllowFroms(),
-			Identity:         clientIdentity,
-			TrustedPublicKey: config.ServerIdentity,
+			Address:           config.ListenAddr,
+			AllowFrom:         getAllowFroms(),
+			Identity:          clientIdentity,
+			TrustedPublicKeys: []string{config.ServerIdentity, loopbackIdentity.PublicKeyString()},
 		}, handle)
 		if err != nil {
 			panic("error listening: " + err.Error())
@@ -190,7 +190,6 @@ func handleRotateIdentity(conn *otto.Connection, message otto.MessageRotateIdent
 	mustLoadIdentity()
 	conn.Close()
 	defer listener.Close()
-	return
 }
 
 func getCurrentUIDandGID() (uint32, uint32) {

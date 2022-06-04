@@ -3,6 +3,7 @@ package otto
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 	"net"
 	"strconv"
 	"strings"
@@ -12,10 +13,10 @@ import (
 
 // ListenOptions describes options for listening
 type ListenOptions struct {
-	Address          string
-	AllowFrom        []net.IPNet
-	Identity         ssh.Signer
-	TrustedPublicKey string
+	Address           string
+	AllowFrom         []net.IPNet
+	Identity          ssh.Signer
+	TrustedPublicKeys []string
 }
 
 // Listener describes an active listening Otto server
@@ -29,20 +30,28 @@ type Listener struct {
 // SetupListener will prepare a listening socket for incoming connections. No connections are accepted until you call
 // Accept().
 func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Listener, error) {
+	for _, trustedKey := range options.TrustedPublicKeys {
+		if trustedKey == base64.StdEncoding.EncodeToString(options.Identity.PublicKey().Marshal()) {
+			return nil, fmt.Errorf("server and client identity cannot be the same")
+		}
+	}
+
 	sshConfig := &ssh.ServerConfig{
 		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			log.PDebug("Handshake", map[string]interface{}{
+			log.PDebug("[LISTEN] Handshake", map[string]interface{}{
 				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
 			})
-			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
-				log.Debug("Recognized public key")
-				return &ssh.Permissions{
-					Extensions: map[string]string{
-						"pubkey-fp": ssh.FingerprintSHA256(pubKey),
-					},
-				}, nil
+			for _, trustedKey := range options.TrustedPublicKeys {
+				if trustedKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
+					log.Debug("[LISTEN] Recognized public key")
+					return &ssh.Permissions{
+						Extensions: map[string]string{
+							"pubkey-fp": ssh.FingerprintSHA256(pubKey),
+						},
+					}, nil
+				}
 			}
-			log.PWarn("Rejecting connection from untrusted public key", map[string]interface{}{
+			log.PWarn("[LISTEN] Rejecting connection from untrusted public key", map[string]interface{}{
 				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
 			})
 			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
@@ -82,12 +91,12 @@ func (l *Listener) Accept() {
 			if strings.Contains(err.Error(), "use of closed network connection") {
 				return
 			}
-			log.PDebug("Error accepting connection", map[string]interface{}{
+			log.PDebug("[LISTEN] Error accepting connection", map[string]interface{}{
 				"error": err.Error(),
 			})
 			continue
 		}
-		log.PDebug("Incoming connection", map[string]interface{}{
+		log.PDebug("[LISTEN] Incoming connection", map[string]interface{}{
 			"remote_addr": c.RemoteAddr().String(),
 		})
 		go l.accept(c)
@@ -104,7 +113,7 @@ func (l *Listener) accept(c net.Conn) {
 		allow := false
 		for _, allowNet := range l.options.AllowFrom {
 			if allowNet.Contains(c.RemoteAddr().(*net.TCPAddr).IP) {
-				log.PDebug("Connection allowed by rule", map[string]interface{}{
+				log.PDebug("[LISTEN] Connection allowed by rule", map[string]interface{}{
 					"remote_addr":     c.RemoteAddr().String(),
 					"allowed_network": allowNet.String(),
 				})
@@ -113,7 +122,7 @@ func (l *Listener) accept(c net.Conn) {
 			}
 		}
 		if !allow {
-			log.PWarn("Rejecting connection from server outside of allowed network", map[string]interface{}{
+			log.PWarn("[LISTEN] Rejecting connection from server outside of allowed network", map[string]interface{}{
 				"remote_addr":  c.RemoteAddr().String(),
 				"allowed_addr": l.options.AllowFrom,
 			})
@@ -122,12 +131,14 @@ func (l *Listener) accept(c net.Conn) {
 		}
 	}
 
-	_, chans, reqs, err := ssh.NewServerConn(c, l.sshConfig)
+	sc, chans, reqs, err := ssh.NewServerConn(c, l.sshConfig)
 	if err != nil {
-		log.PError("SSH handshake error", map[string]interface{}{
-			"remote_addr": c.RemoteAddr().String(),
-			"error":       err.Error(),
-		})
+		if err != io.EOF {
+			log.PError("[LISTEN] SSH handshake error", map[string]interface{}{
+				"remote_addr": c.RemoteAddr().String(),
+				"error":       err.Error(),
+			})
+		}
 		c.Close()
 		return
 	}
@@ -135,9 +146,9 @@ func (l *Listener) accept(c net.Conn) {
 	go ssh.DiscardRequests(reqs)
 
 	for newChannel := range chans {
-		log.Debug("ssh channel opened")
+		log.Debug("[LISTEN] ssh channel opened")
 		if newChannel.ChannelType() != sshChannelName {
-			log.PError("Unknown SSH channel", map[string]interface{}{
+			log.PError("[LISTEN] Unknown SSH channel", map[string]interface{}{
 				"channel_type": newChannel.ChannelType(),
 				"remote_addr":  c.RemoteAddr().String(),
 			})
@@ -146,13 +157,13 @@ func (l *Listener) accept(c net.Conn) {
 		}
 		channel, _, err := newChannel.Accept()
 		if err != nil {
-			log.PError("SSH channel error", map[string]interface{}{
+			log.PError("[LISTEN] SSH channel error", map[string]interface{}{
 				"remote_addr": c.RemoteAddr().String(),
 				"error":       err.Error(),
 			})
 			return
 		}
-		log.PDebug("SSH handshake success", map[string]interface{}{
+		log.PDebug("[LISTEN] SSH handshake success", map[string]interface{}{
 			"remote_addr": c.RemoteAddr().String(),
 		})
 		l.handle(&Connection{
@@ -162,4 +173,5 @@ func (l *Listener) accept(c net.Conn) {
 		})
 		channel.Close()
 	}
+	sc.Close()
 }

@@ -25,5 +25,8 @@ func main() {
 	logtic.Log.Open()
 	log = logtic.Log.Connect("otto")
 
+	setupLoopback()
+	go startLoopbackRepeater()
+
 	listen()
 }

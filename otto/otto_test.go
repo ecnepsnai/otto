@@ -248,9 +248,9 @@ func TestConnection(t *testing.T) {
 	}
 
 	l, err := otto.SetupListener(otto.ListenOptions{
-		Address:          "127.0.0.1:0",
-		Identity:         listenerIdentity.Signer(),
-		TrustedPublicKey: dialerIdentity.PublicKeyString(),
+		Address:           "127.0.0.1:0",
+		Identity:          listenerIdentity.Signer(),
+		TrustedPublicKeys: []string{dialerIdentity.PublicKeyString()},
 	}, func(c *otto.Connection) {
 		messageType, _, err := c.ReadMessage()
 		if err != nil {

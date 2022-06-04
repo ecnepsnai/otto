@@ -45,10 +45,10 @@ func TestExecutePing(t *testing.T) {
 	serverId := IdentityStore.Get(host.ID)
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
-		Address:          ip + ":0",
-		AllowFrom:        []net.IPNet{*allowFrom},
-		Identity:         clientId.Signer(),
-		TrustedPublicKey: serverId.PublicKeyString(),
+		Address:           ip + ":0",
+		AllowFrom:         []net.IPNet{*allowFrom},
+		Identity:          clientId.Signer(),
+		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		messageType, _, err := conn.ReadMessage()
 		if err != nil {
@@ -119,10 +119,10 @@ func TestExecuteAction(t *testing.T) {
 	serverId := IdentityStore.Get(host.ID)
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
-		Address:          ip + ":0",
-		AllowFrom:        []net.IPNet{*allowFrom},
-		Identity:         clientId.Signer(),
-		TrustedPublicKey: serverId.PublicKeyString(),
+		Address:           ip + ":0",
+		AllowFrom:         []net.IPNet{*allowFrom},
+		Identity:          clientId.Signer(),
+		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
@@ -199,10 +199,10 @@ func TestExecuteUntrustedKey(t *testing.T) {
 
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
-		Address:          ip + ":0",
-		AllowFrom:        []net.IPNet{*allowFrom},
-		Identity:         clientId.Signer(),
-		TrustedPublicKey: serverId.PublicKeyString(),
+		Address:           ip + ":0",
+		AllowFrom:         []net.IPNet{*allowFrom},
+		Identity:          clientId.Signer(),
+		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
@@ -260,10 +260,10 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 	serverId := IdentityStore.Get(host.ID)
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
-		Address:          ip + ":0",
-		AllowFrom:        []net.IPNet{*allowFrom},
-		Identity:         clientId.Signer(),
-		TrustedPublicKey: serverId.PublicKeyString(),
+		Address:           ip + ":0",
+		AllowFrom:         []net.IPNet{*allowFrom},
+		Identity:          clientId.Signer(),
+		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
@@ -317,10 +317,10 @@ func TestExecuteReconnect(t *testing.T) {
 
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
-		Address:          ip + ":0",
-		AllowFrom:        []net.IPNet{*allowFrom},
-		Identity:         clientId.Signer(),
-		TrustedPublicKey: serverId.PublicKeyString(),
+		Address:           ip + ":0",
+		AllowFrom:         []net.IPNet{*allowFrom},
+		Identity:          clientId.Signer(),
+		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		conn.ReadMessage()
 		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {

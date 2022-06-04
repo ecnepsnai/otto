@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/ecnepsnai/otto"
 	"golang.org/x/crypto/ssh"
@@ -251,12 +252,36 @@ func defaultConfig() clientConfig {
 
 func getAllowFroms() []net.IPNet {
 	nets := make([]net.IPNet, len(config.AllowFrom))
+	allowUnspecified := false
 	for i, a := range config.AllowFrom {
+		if a == "0.0.0.0/0" || a == "::/0" {
+			allowUnspecified = true
+		}
 		_, network, err := net.ParseCIDR(a)
 		if err != nil {
-			panic("invalid CIDR address in property allow_from")
+			panic(fmt.Sprintf("invalid CIDR address: %s", a))
 		}
 		nets[i] = *network
 	}
+
+	// Append address for loopback connections (if needed)
+	if !allowUnspecified {
+		if strings.HasPrefix(config.ListenAddr, "0.0.0.0") {
+			_, loopback, _ := net.ParseCIDR("127.0.0.1/32")
+			nets = append(nets, *loopback)
+		} else if strings.HasPrefix(config.ListenAddr, "[::]") {
+			_, loopback, _ := net.ParseCIDR("::1/128")
+			nets = append(nets, *loopback)
+		} else {
+			address := addressFromSocketString(config.ListenAddr)
+			cidr := "/32"
+			if strings.Contains(address, ":") {
+				cidr = "128"
+			}
+			_, loopback, _ := net.ParseCIDR(fmt.Sprintf("%s/%s", address, cidr))
+			nets = append(nets, *loopback)
+		}
+	}
+
 	return nets
 }
