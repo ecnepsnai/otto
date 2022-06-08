@@ -9,7 +9,6 @@ import (
 type Script struct {
 	ID               string `ds:"primary"`
 	Name             string `ds:"unique" min:"1" max:"140"`
-	Enabled          bool   `ds:"index"`
 	Executable       string `min:"1"`
 	Script           string `min:"1"`
 	Environment      []environ.Variable

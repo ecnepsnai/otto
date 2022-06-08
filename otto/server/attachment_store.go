@@ -215,7 +215,6 @@ func (s attachmentStoreObject) Cleanup() *Error {
 			attachmentIDs := append(script.AttachmentIDs[:idx], script.AttachmentIDs[idx+1:]...)
 			ScriptStore.EditScript(&script, editScriptParameters{
 				Name:             script.Name,
-				Enabled:          script.Enabled,
 				Executable:       script.Executable,
 				Script:           script.Script,
 				Environment:      script.Environment,

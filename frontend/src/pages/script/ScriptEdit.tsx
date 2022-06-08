@@ -61,26 +61,6 @@ export const ScriptEdit: React.FC = () => {
         setGroupIDs(GroupIDs);
     };
 
-    const enabledCheckbox = () => {
-        if (isNew) {
-            return null;
-        }
-
-        return (
-            <Input.Checkbox
-                label="Enabled"
-                defaultValue={script.Enabled}
-                onChange={changeEnabled} />
-        );
-    };
-
-    const changeEnabled = (Enabled: boolean) => {
-        setScript(script => {
-            script.Enabled = Enabled;
-            return { ...script };
-        });
-    };
-
     const changeRunAs = (runAs: RunAs) => {
         setScript(script => {
             script.RunAs = runAs;
@@ -171,7 +151,6 @@ export const ScriptEdit: React.FC = () => {
                     defaultValue={script.Name}
                     onChange={changeName}
                     required />
-                {enabledCheckbox()}
                 <Input.RunAsInput inheritLabel="Run As Specific User" label="Run As" defaultValue={script.RunAs} onChange={changeRunAs} />
                 <Input.Text
                     label="Working Directory"

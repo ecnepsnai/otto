@@ -8,7 +8,6 @@ import { Card } from '../../components/Card';
 import { URLParams } from '../../services/Params';
 import { EditButton, DeleteButton, Button, SmallPlayButton, ButtonAnchor } from '../../components/Button';
 import { ListGroup } from '../../components/ListGroup';
-import { EnabledBadge } from '../../components/Badge';
 import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Redirect } from '../../components/Redirect';
@@ -178,7 +177,6 @@ export const ScriptView: React.FC = () => {
                             {runAs()}
                             <ListGroup.TextItem title="Working Directory">{script.WorkingDirectory}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Executable">{script.Executable}</ListGroup.TextItem>
-                            <ListGroup.TextItem title="Status"><EnabledBadge value={script.Enabled} /></ListGroup.TextItem>
                         </ListGroup.List>
                     </Card.Card>
                     <EnvironmentVariableCard variables={script.Environment} className="mb-3" />

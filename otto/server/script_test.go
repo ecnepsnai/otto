@@ -66,7 +66,6 @@ func TestEditScript(t *testing.T) {
 
 	script, err = ScriptStore.EditScript(script, editScriptParameters{
 		Name:       randomString(6),
-		Enabled:    true,
 		Executable: "/bin/bash",
 		Script:     "#!/bin/bash\necho hello\n",
 		Environment: []environ.Variable{
@@ -223,7 +222,6 @@ func TestRenameDuplicateScript(t *testing.T) {
 
 	_, err = ScriptStore.EditScript(scriptB, editScriptParameters{
 		Name:       name,
-		Enabled:    true,
 		Executable: "/bin/bash",
 		Script:     "#!/bin/bash\necho hello\n",
 		Environment: []environ.Variable{

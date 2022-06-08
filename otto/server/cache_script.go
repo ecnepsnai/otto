@@ -3,11 +3,10 @@ package server
 import "sync"
 
 type cacheTypeScript struct {
-	lock    *sync.RWMutex
-	all     []Script
-	enabled []Script
-	byName  map[string]int
-	byID    map[string]int
+	lock   *sync.RWMutex
+	all    []Script
+	byName map[string]int
+	byID   map[string]int
 }
 
 // ScriptCache the script cache
@@ -19,16 +18,12 @@ func (c *cacheTypeScript) Update() {
 	defer c.lock.Unlock()
 
 	c.all = []Script{}
-	c.enabled = []Script{}
 	c.byName = map[string]int{}
 	c.byID = map[string]int{}
 	scripts := ScriptStore.AllScripts()
 
 	c.all = scripts
 	for i, script := range scripts {
-		if script.Enabled {
-			c.enabled = append(c.enabled, script)
-		}
 		c.byName[script.Name] = i
 		c.byID[script.ID] = i
 	}
@@ -46,17 +41,6 @@ func (c *cacheTypeScript) All() []Script {
 	copy(all, c.all)
 
 	return all
-}
-
-// Enabled get all enabled scripts
-func (c *cacheTypeScript) Enabled() []Script {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-
-	enabled := make([]Script, len(c.enabled))
-	copy(enabled, c.enabled)
-
-	return enabled
 }
 
 // ByName get an script by its name

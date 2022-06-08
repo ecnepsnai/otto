@@ -17,10 +17,10 @@ otto-*/
 /logs
 
 # cmd executables
-cmd/client/*
-!cmd/client/*.go
-cmd/server/*
-!cmd/server/*.go
+otto/cmd/client/*
+!otto/cmd/client/*.go
+otto/cmd/server/*
+!otto/cmd/server/*.go
 
 # Frontend
 /frontend/node_modules

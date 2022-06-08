@@ -18,7 +18,7 @@ The web UI for the Otto server is a React.JS web application written in Typescri
 Directory structure:
 
 ```
-/static
+/frontend
     /css   -> Contains all Sass .scss files
     /html  -> Contains the HTML for the login page and application frame
     /img   -> Contains all images
@@ -32,13 +32,13 @@ Directory structure:
 ## libotto
 
 libotto is a golang library that defines the common data structures shared between the Otto client and server. This is
-all contained within `otto.go` in the project's root.
+all contained within the `/otto` directory.
 
 ## Otto Client
 
 The otto client is a small golang application with no runtime requirements.
 
-Source code for the otto client is located in `/cmd/client`
+Source code for the otto client is located in `/otto/cmd/client`
 
 ## Otto Server
 
@@ -50,11 +50,12 @@ Directory structure:
 ```
 /scripts
     /codegen   -> Contains definitions for the cbgen golang code generator.
-/server        -> Contains all golang code for the server
-    /environ   -> Library that defines an environment variable. Broken off for easier testing.
+/otto
+    /server        -> Contains all golang code for the server
+        /environ   -> Library that defines an environment variable. Broken off for easier testing.
 ```
 
-The actual executable for the server itself is located in `/cmd/server`. The executable is only responsible for starting
+The actual executable for the server itself is located in `/otto/cmd/server`. The executable is only responsible for starting
 the server and capturing signals from the system.
 
 # Running a Development Build
@@ -67,15 +68,14 @@ To run the Otto server:
 ```bash
 ./run.sh -v
 ```
-*Note: Changes to the server are not automatically reflected in the running instance. You will need to quite and restart the server to show any new changes.*
+*Note: Changes to the backend server software are not automatically reflected in the running instance. You will need to quit and restart the server to show any new changes.*
 
 To automatically compile any changes to the front-end:
 
 ```bash
-cd static
-npx webpack --config webpack.app.development.js --watch
+cd frontend
+node start_webpack.js --watch 
 ```
-*Note: Use `webpack.login.development.js` if you're working on the login page.*
 
 # Releasing the Application
 

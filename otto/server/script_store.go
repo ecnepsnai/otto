@@ -93,7 +93,6 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		Script:           params.Script,
 		Environment:      params.Environment,
 		RunAs:            params.RunAs,
-		Enabled:          true,
 		WorkingDirectory: params.WorkingDirectory,
 		AfterExecution:   params.AfterExecution,
 		AttachmentIDs:    params.AttachmentIDs,
@@ -108,12 +107,12 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 	}
 
 	log.Info("Added new script '%s'", params.Name)
+	ScriptCache.Update()
 	return &script, nil
 }
 
 type editScriptParameters struct {
 	Name             string
-	Enabled          bool
 	Executable       string
 	Script           string
 	Environment      []environ.Variable
@@ -137,7 +136,6 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	}
 
 	script.Name = params.Name
-	script.Enabled = params.Enabled
 	script.Executable = params.Executable
 	script.Script = params.Script
 	script.Environment = params.Environment
@@ -155,6 +153,7 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 	}
 
 	log.Info("Updating script '%s'", params.Name)
+	ScriptCache.Update()
 	return script, nil
 }
 
@@ -178,5 +177,6 @@ func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
 
 	GroupStore.CleanupDeadScripts()
 	log.Info("Deleting script '%s'", script.Name)
+	ScriptCache.Update()
 	return nil
 }

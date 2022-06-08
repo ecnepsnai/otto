@@ -78,14 +78,6 @@ const ScriptTableContextMenu = (script: ScriptType, onReload: () => void): (Cont
         });
     };
 
-    const toggleMenuClick = () => {
-        const s = script;
-        s.Enabled = !s.Enabled;
-        Script.Save(s).then(() => {
-            onReload();
-        });
-    };
-
     const executeScriptMenuClick = () => {
         GlobalModalFrame.showModal(<RunModal scriptID={script.ID} key={Rand.ID()} />);
     };
@@ -100,11 +92,6 @@ const ScriptTableContextMenu = (script: ScriptType, onReload: () => void): (Cont
             title: 'Edit',
             icon: (<Icon.Edit />),
             href: '/scripts/script/' + script.ID + '/edit',
-        },
-        {
-            title: script.Enabled ? 'Disable' : 'Enable',
-            icon: script.Enabled ? (<Icon.TimesCircle />) : (<Icon.CheckCircle />),
-            onClick: toggleMenuClick,
         },
         'separator',
         {

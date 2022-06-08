@@ -9,7 +9,6 @@ import { AttachmentType } from './Attachment';
 export interface ScriptType {
     ID?: string;
     Name?: string;
-    Enabled?: boolean;
     Executable?: string;
     Script?: string;
     Environment?: Variable[];
@@ -26,7 +25,6 @@ export class Script {
     public static Blank(): ScriptType {
         return {
             Name: '',
-            Enabled: true,
             Executable: '/bin/bash',
             Script: '',
             RunAs: {
