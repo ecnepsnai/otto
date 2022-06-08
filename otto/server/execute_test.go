@@ -50,14 +50,15 @@ func TestExecutePing(t *testing.T) {
 		Identity:          clientId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
-		messageType, _, err := conn.ReadMessage()
+		messageType, m, err := conn.ReadMessage()
 		if err != nil {
 			panic("Error reading message: " + err.Error())
 		}
 		if messageType != otto.MessageTypeHeartbeatRequest {
 			panic("Incorrect message type")
 		}
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+		message := m.(otto.MessageHeartbeatRequest)
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version, Nonce: message.Nonce}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()
@@ -322,8 +323,9 @@ func TestExecuteReconnect(t *testing.T) {
 		Identity:          clientId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
-		conn.ReadMessage()
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+		_, m, _ := conn.ReadMessage()
+		message := m.(otto.MessageHeartbeatRequest)
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version, Nonce: message.Nonce}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()

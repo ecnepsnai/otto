@@ -45,6 +45,7 @@ func testSetup() {
 	stateSetup()
 	dataStoreSetup()
 	storeSetup()
+	statsSetup()
 	CacheSetup()
 	LoadOptions()
 }
