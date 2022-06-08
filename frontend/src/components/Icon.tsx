@@ -6,6 +6,8 @@ import {
     faArrowLeft,
     faBars,
     faCalendarAlt,
+    faCaretDown,
+    faCaretUp,
     faCheckCircle,
     faChevronRight,
     faClipboard,
@@ -81,6 +83,8 @@ export namespace Icon {
     export const ArrowLeft: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowLeft, options: props });
     export const Bars: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBars, options: props });
     export const Calendar: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCalendarAlt, options: props });
+    export const CaretDown: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCaretDown, options: props });
+    export const CaretUp: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCaretUp, options: props });
     export const CheckCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCheckCircle, options: props });
     export const ChevronRight: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faChevronRight, options: props });
     export const Clipboard: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faClipboard, options: props });

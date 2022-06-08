@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { Buttons, AddButton } from '../../../components/Button';
+import { ContextMenuItem } from '../../../components/ContextMenu';
+import { Icon } from '../../../components/Icon';
 import { Loading } from '../../../components/Loading';
 import { GlobalModalFrame } from '../../../components/Modal';
-import { Table } from '../../../components/Table';
+import { Column, Table } from '../../../components/Table';
+import { Formatter } from '../../../services/Formatter';
 import { Attachment, AttachmentType } from '../../../types/Attachment';
 import { Script } from '../../../types/Script';
 import { AttachmentEdit } from './AttachmentEdit';
-import { AttachmentListItem } from './AttachmentListItem';
 
 interface AttachmentListProps {
     scriptID?: string;
@@ -46,18 +48,29 @@ export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentL
         });
     };
 
-    const didEditAttachment = (idx: number) => {
-        return (attachment: Attachment) => {
+    const didEditAttachment = (attachment: AttachmentType) => {
+        return () => {
             setAttachments(attachments => {
-                attachments[idx] = attachment;
+                for (let i = 0; i < attachments.length; i++) {
+                    if (attachments[i].ID == attachment.ID) {
+                        attachments[i] = attachment;
+                    }
+                }
                 return [...attachments];
             });
         };
     };
 
-    const didDeleteAttachment = (idx: number) => {
+    const didDeleteAttachment = (attachment: AttachmentType) => {
         return () => {
             setAttachments(attachments => {
+                let idx = -1;
+                for (let i = 0; i < attachments.length; i++) {
+                    if (attachments[i].ID == attachment.ID) {
+                        idx = i;
+                        break;
+                    }
+                }
                 attachments.splice(idx, 1);
                 return [...attachments];
             });
@@ -72,25 +85,77 @@ export const AttachmentList: React.FC<AttachmentListProps> = (props: AttachmentL
         return (<Loading />);
     }
 
+    const tableCols: Column[] = [
+        {
+            title: 'Path',
+            value: 'Path',
+            sort: 'Path'
+        },
+        {
+            title: 'Type',
+            value: 'MimeType',
+            sort: 'MimeType'
+        },
+        {
+            title: 'Owner',
+            value: (v: AttachmentType) => {
+                if (v.Owner.Inherit) {
+                    return (<em>Inherit from Script</em>);
+                }
+                return (<span>{v.Owner.UID + ':' + v.Owner.GID}</span>);
+            },
+        },
+        {
+            title: 'Permissions',
+            value: 'Mode',
+            sort: 'Mode'
+        },
+        {
+            title: 'Size',
+            value: (v: AttachmentType) => {
+                return (<span>{Formatter.Bytes(v.Size)}</span>);
+            },
+            sort: 'Size'
+        }
+    ];
+
     return (<div>
         <Buttons>
             <AddButton onClick={createButtonClick} />
         </Buttons>
-        <Table.Table>
-            <Table.Head>
-                <Table.Column>Path</Table.Column>
-                <Table.Column>Type</Table.Column>
-                <Table.Column>Owner</Table.Column>
-                <Table.Column>Permission</Table.Column>
-                <Table.Column>Size</Table.Column>
-            </Table.Head>
-            <Table.Body>
-                {
-                    attachments.map((attachment, idx) => {
-                        return (<AttachmentListItem attachment={attachment} key={idx} didEdit={didEditAttachment(idx)} didDelete={didDeleteAttachment(idx)} />);
-                    })
-                }
-            </Table.Body>
-        </Table.Table>
+        <Table columns={tableCols} data={attachments} contextMenu={(a: AttachmentType) => AttachmentTableContextMenu(a, didEditAttachment(a), didDeleteAttachment(a))} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
     </div>);
+};
+
+const AttachmentTableContextMenu = (attachment: AttachmentType, didUpate: () => void, didDelete: () => void): (ContextMenuItem | 'separator')[] => {
+    const editClick = () => {
+        GlobalModalFrame.showModal(<AttachmentEdit attachment={attachment} didUpdate={didUpate} />);
+    };
+
+    const deleteClick = () => {
+        Attachment.DeleteModal(attachment).then(deleted => {
+            if (deleted) {
+                didDelete();
+            }
+        });
+    };
+
+    return [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            onClick: editClick
+        },
+        {
+            title: 'Download',
+            icon: (<Icon.Download />),
+            href: '/api/attachments/attachment/' + attachment.ID + '/download'
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteClick,
+        },
+    ];
 };

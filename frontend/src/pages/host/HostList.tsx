@@ -3,9 +3,16 @@ import { Host, HostType } from '../../types/Host';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { CreateButton } from '../../components/Button';
-import { Table } from '../../components/Table';
-import { HostListItem } from './HostListItem';
+import { Column, Table } from '../../components/Table';
 import { Heartbeat, HeartbeatType } from '../../types/Heartbeat';
+import { Link } from 'react-router-dom';
+import { Formatter } from '../../services/Formatter';
+import { DefaultSort } from '../../services/Sort';
+import { HostTrust } from './HostTrust';
+import { HeartbeatBadge } from '../../components/Badge';
+import { ClientVersion } from '../../components/ClientVersion';
+import { ContextMenuItem } from '../../components/ContextMenu';
+import { Icon } from '../../components/Icon';
 
 export const HostList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
@@ -44,25 +51,75 @@ export const HostList: React.FC = () => {
         </React.Fragment>
     );
 
+    const tableCols: Column[] = [
+        {
+            title: 'Name',
+            value: (v: HostType) => {
+                return (<Link to={'/hosts/host/' + v.ID}>{v.Name}</Link>);
+            },
+            sort: 'Name'
+        },
+        {
+            title: 'Address',
+            value: 'Address',
+            sort: 'Address'
+        },
+        {
+            title: 'Groups',
+            value: (v: HostType) => {
+                return (<span>{Formatter.ValueOrNothing(v.GroupIDs.length)}</span>);
+            },
+            sort: (asc: boolean, left: HostType, right: HostType) => {
+                return DefaultSort(asc, (left.GroupIDs || []).length, (right.GroupIDs || []).length);
+            }
+        },
+        {
+            title: 'Trust',
+            value: (v: HostType) => {
+                return (<HostTrust host={v} badgeOnly outline />);
+            },
+        },
+        {
+            title: 'Status',
+            value: (v: HostType) => {
+                return (<HeartbeatBadge heartbeat={heartbeats.get(v.Address)} outline />);
+            },
+        },
+        {
+            title: 'Version',
+            value: (v: HostType) => {
+                return (<ClientVersion heartbeat={heartbeats.get(v.Address)} />);
+            },
+        },
+    ];
+
     return (
         <Page title="Hosts" toolbar={toolbar}>
-            <Table.Table>
-                <Table.Head>
-                    <Table.Column>Name</Table.Column>
-                    <Table.Column>Address</Table.Column>
-                    <Table.Column>Groups</Table.Column>
-                    <Table.Column>Trust</Table.Column>
-                    <Table.Column>Reachable</Table.Column>
-                    <Table.Column>Version</Table.Column>
-                </Table.Head>
-                <Table.Body>
-                    {
-                        hosts.map(host => {
-                            return <HostListItem host={host} heartbeat={heartbeats.get(host.Address)} key={host.ID} onReload={loadData}></HostListItem>;
-                        })
-                    }
-                </Table.Body>
-            </Table.Table>
+            <Table columns={tableCols} data={hosts} contextMenu={(a: HostType) => HostTableContextMenu(a, loadHosts)} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
         </Page>
     );
+};
+
+const HostTableContextMenu = (host: HostType, onReload: () => (void)): (ContextMenuItem | 'separator')[] => {
+    const deleteMenuClick = () => {
+        Host.DeleteModal(host).then(confirmed => {
+            if (confirmed) {
+                onReload();
+            }
+        });
+    };
+
+    return [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            href: '/hosts/host/' + host.ID + '/edit',
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteMenuClick,
+        },
+    ];
 };

@@ -3,8 +3,12 @@ import { Group, GroupType } from '../../types/Group';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { CreateButton } from '../../components/Button';
-import { Table } from '../../components/Table';
-import { GroupListItem } from './GroupListItem';
+import { Column, Table } from '../../components/Table';
+import { Link } from 'react-router-dom';
+import { ContextMenuItem } from '../../components/ContextMenu';
+import { Icon } from '../../components/Icon';
+import { Formatter } from '../../services/Formatter';
+import { DefaultSort } from '../../services/Sort';
 
 export const GroupList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
@@ -43,22 +47,61 @@ export const GroupList: React.FC = () => {
         </React.Fragment>
     );
 
+    const tableCols: Column[] = [
+        {
+            title: 'Name',
+            value: (v: GroupType) => {
+                return (<Link to={'/groups/group/' + v.ID}>{v.Name}</Link>);
+            },
+            sort: 'Name'
+        },
+        {
+            title: 'Hosts',
+            value: (v: GroupType) => {
+                return (<span>{Formatter.ValueOrNothing(membership[v.ID].length)}</span>);
+            },
+            sort: (asc: boolean, left: GroupType, right: GroupType) => {
+                return DefaultSort(asc, membership[left.ID].length, membership[right.ID].length);
+            }
+        },
+        {
+            title: 'Scripts',
+            value: (v: GroupType) => {
+                return (<span>{Formatter.ValueOrNothing((v.ScriptIDs || []).length)}</span>);
+            },
+            sort: (asc: boolean, left: GroupType, right: GroupType) => {
+                return DefaultSort(asc, (left.ScriptIDs || []).length, (right.ScriptIDs || []).length);
+            }
+        },
+    ];
+
     return (
         <Page title="Groups" toolbar={toolbar}>
-            <Table.Table>
-                <Table.Head>
-                    <Table.Column>Name</Table.Column>
-                    <Table.Column>Hosts</Table.Column>
-                    <Table.Column>Scripts</Table.Column>
-                </Table.Head>
-                <Table.Body>
-                    {
-                        groups.map(group => {
-                            return <GroupListItem group={group} hosts={membership[group.ID]} key={group.ID} onReload={loadData} numGroups={groups.length}></GroupListItem>;
-                        })
-                    }
-                </Table.Body>
-            </Table.Table>
+            <Table columns={tableCols} data={groups} contextMenu={(a: GroupType) => GroupTableContextMenu(a, loadGroups)} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
         </Page>
     );
+};
+
+const GroupTableContextMenu = (group: GroupType, onReload: () => (void)): (ContextMenuItem | 'separator')[] => {
+    const deleteMenuClick = () => {
+        Group.DeleteModal(group).then(confirmed => {
+            if (confirmed) {
+                onReload();
+            }
+        });
+    };
+
+    return [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            href: '/groups/group/' + group.ID + '/edit',
+        },
+        'separator',
+        {
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: deleteMenuClick,
+        },
+    ];
 };

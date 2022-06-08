@@ -7,8 +7,7 @@ import { PageLoading } from '../../../components/Loading';
 import { GlobalModalFrame, Modal, ModalForm } from '../../../components/Modal';
 import { Page } from '../../../components/Page';
 import { Style } from '../../../components/Style';
-import { Table } from '../../../components/Table';
-import { Rand } from '../../../services/Rand';
+import { Column, Table } from '../../../components/Table';
 import { StateManager } from '../../../services/StateManager';
 import { User, UserType } from '../../../types/User';
 import { ContextMenuItem } from '../../../components/ContextMenu';
@@ -61,48 +60,22 @@ export const SystemUsers: React.FC = () => {
     };
 
     const editUserMenuClick = (user: UserType) => {
-        GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={updateUser} />);
+        return () => {
+            GlobalModalFrame.showModal(<OptionsUsersModal user={user} onUpdate={updateUser} />);
+        };
     };
     const deleteUserMenuClick = (user: UserType) => {
-        Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
-            if (!confirmed) {
-                return;
-            }
-
-            User.Delete(user).then(() => {
-                loadUsers();
-            });
-        });
-    };
-
-    const userRow = (user: UserType) => {
-        const contextMenu: (ContextMenuItem | 'separator')[] = [
-            {
-                title: 'Edit',
-                icon: (<Icon.Edit />),
-                onClick: () => {
-                    editUserMenuClick(user);
+        return () => {
+            Modal.delete('Delete User?', 'Are you sure you want to delete this user? This can not be undone.').then(confirmed => {
+                if (!confirmed) {
+                    return;
                 }
-            },
-        ];
-        if (StateManager.Current().User.Username != user.Username) {
-            contextMenu.push('separator');
-            contextMenu.push({
-                title: 'Delete',
-                icon: (<Icon.Delete />),
-                onClick: () => {
-                    deleteUserMenuClick(user);
-                }
-            });
-        }
 
-        return (
-            <Table.Row key={Rand.ID()} menu={contextMenu}>
-                <td>{user.Username}</td>
-                <td>{user.Email}</td>
-                <td><EnabledBadge value={user.CanLogIn} trueText="Yes" falseText="No" /></td>
-            </Table.Row>
-        );
+                User.Delete(user).then(() => {
+                    loadUsers();
+                });
+            });
+        };
     };
 
     if (loading) {
@@ -115,20 +88,53 @@ export const SystemUsers: React.FC = () => {
         </React.Fragment>
     );
 
+    const tableCols: Column[] = [
+        {
+            title: 'Username',
+            value: 'Username',
+            sort: 'Username'
+        },
+        {
+            title: 'Email',
+            value: 'Email',
+            sort: 'Email'
+        },
+        {
+            title: 'Can Login',
+            value: (v: UserType) => {
+                return (<EnabledBadge value={v.CanLogIn} />);
+            }
+        },
+    ];
+
     return (
         <Page title="Users" toolbar={toolbar}>
-            <Table.Table>
-                <Table.Head>
-                    <Table.Column>Username</Table.Column>
-                    <Table.Column>Email</Table.Column>
-                    <Table.Column>Can Login</Table.Column>
-                </Table.Head>
-                <Table.Body>
-                    {users.map(userRow)}
-                </Table.Body>
-            </Table.Table>
+            <Table columns={tableCols} data={users} contextMenu={(a: UserType) => UserTableContextMenu(a, editUserMenuClick(a), deleteUserMenuClick(a))} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
         </Page>
     );
+};
+
+const UserTableContextMenu = (user: UserType, didEditUser: () => void, didDeleteUser: () => void): (ContextMenuItem | 'separator')[] => {
+    const contextMenu: (ContextMenuItem | 'separator')[]  = [
+        {
+            title: 'Edit',
+            icon: (<Icon.Edit />),
+            onClick: () => {
+                didEditUser();
+            }
+        },
+    ];
+    if (StateManager.Current().User.Username != user.Username) {
+        contextMenu.push('separator');
+        contextMenu.push({
+            title: 'Delete',
+            icon: (<Icon.Delete />),
+            onClick: () => {
+                didDeleteUser();
+            }
+        });
+    }
+    return contextMenu;
 };
 
 interface OptionsUsersModalProps {

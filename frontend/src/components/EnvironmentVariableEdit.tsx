@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table } from './Table';
+import { Column, Table } from './Table';
 import { AddButton } from './Button';
 import { Icon } from './Icon';
 import { Modal, GlobalModalFrame, ModalForm } from './Modal';
@@ -23,73 +23,81 @@ export const EnvironmentVariableEdit: React.FC<EnvironmentVariableEditProps> = (
         GlobalModalFrame.showModal(<EnvironmentVariableEditModal default={{}} onSave={addNewVariable} />);
     };
 
-    const replaceVariable = (idx: number) => {
-        return (variable: Variable) => {
-            const vars = props.variables;
-            vars[idx] = variable;
-            props.onChange(vars);
-        };
+    const replaceVariable = (variable: Variable) => {
+        const vars = props.variables;
+        let idx = -1;
+        for (let i = 0; i < vars.length; i++) {
+            if (vars[i].Key === variable.Key) {
+                idx = i;
+                break;
+            }
+        }
+        vars[idx] = variable;
+        props.onChange(vars);
     };
 
-    const editVar = (variable: Variable, idx: number): () => (void) => {
+    const didEditVariable = (variable: Variable): () => (void) => {
         return () => {
-            GlobalModalFrame.showModal(<EnvironmentVariableEditModal default={variable} onSave={replaceVariable(idx)} />);
+            GlobalModalFrame.showModal(<EnvironmentVariableEditModal default={variable} onSave={replaceVariable} />);
         };
     };
 
-    const deleteVar = (idx: number): () => (void) => {
+    const didDeleteVariable = (variable: Variable): () => (void) => {
         return () => {
             Modal.delete('Delete Variable', 'Are you sure you want to delete this variable?').then(confirmed => {
                 if (!confirmed) {
                     return;
                 }
                 const vars = props.variables;
+                let idx = -1;
+                for (let i = 0; i < vars.length; i++) {
+                    if (vars[i].Key === variable.Key) {
+                        idx = i;
+                        break;
+                    }
+                }
+
                 vars.splice(idx, 1);
                 props.onChange(vars);
             });
         };
     };
 
+    const tableCols: Column[] = [
+        {
+            title: 'Key',
+            value: (v: Variable) => {
+                return (<span>{v.Key}</span>);
+            },
+            sort: 'Key'
+        },
+        {
+            title: 'Value',
+            value: (v: Variable) => {
+                if (v.Secret) {
+                    return (<span>******</span>);
+                }
+                return (<code>{v.Value}</code>);
+            },
+            sort: 'Value'
+        }
+    ];
+
     return (
         <React.Fragment>
             <AddButton onClick={createClick} />
-            <Table.Table>
-                <Table.Head>
-                    <Table.Column>Key</Table.Column>
-                    <Table.Column>Value</Table.Column>
-                </Table.Head>
-                <Table.Body>
-                    {
-                        (props.variables || []).map((variable, idx) => {
-                            return (
-                                <EnvironmentVariableEditListItem
-                                    variable={variable}
-                                    key={idx}
-                                    requestEdit={editVar(variable, idx)}
-                                    requestDelete={deleteVar(idx)} />
-                            );
-                        })
-                    }
-                </Table.Body>
-            </Table.Table>
+            <Table columns={tableCols} data={props.variables} contextMenu={(a: Variable) => VariableTableContextMenu(a, didEditVariable(a), didDeleteVariable(a))} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
         </React.Fragment>
     );
 };
 
-interface EnvironmentVariableEditListItemProps {
-    variable: Variable;
-    requestEdit: () => (void);
-    requestDelete: () => (void);
-}
-const EnvironmentVariableEditListItem: React.FC<EnvironmentVariableEditListItemProps> = (props: EnvironmentVariableEditListItemProps) => {
-    const content = props.variable.Secret ? '******' : props.variable.Value;
-
-    const contextMenu: (ContextMenuItem | 'separator')[] = [
+const VariableTableContextMenu = (variable: Variable, didEditVariable: () => void, didDeleteVariable: () => void): (ContextMenuItem | 'separator')[] => {
+    return [
         {
             title: 'Edit',
             icon: (<Icon.Edit />),
             onClick: () => {
-                props.requestEdit();
+                didEditVariable();
             }
         },
         'separator',
@@ -97,21 +105,10 @@ const EnvironmentVariableEditListItem: React.FC<EnvironmentVariableEditListItemP
             title: 'Delete',
             icon: (<Icon.Delete />),
             onClick: () => {
-                props.requestDelete();
+                didDeleteVariable();
             }
         },
     ];
-
-    return (
-        <Table.Row menu={contextMenu}>
-            <td>
-                {props.variable.Key}
-            </td>
-            <td>
-                <code>{content}</code>
-            </td>
-        </Table.Row>
-    );
 };
 
 interface EnvironmentVariableEditModalProps {
