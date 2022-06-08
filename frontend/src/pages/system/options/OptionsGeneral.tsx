@@ -4,6 +4,7 @@ import { Options } from '../../../types/Options';
 import { EnvironmentVariableEdit } from '../../../components/EnvironmentVariableEdit';
 import { Variable } from '../../../types/Variable';
 import { Alert } from '../../../components/Alert';
+import { Card } from '../../../components/Card';
 
 interface OptionsGeneralProps {
     defaultValue: Options.General;
@@ -59,12 +60,14 @@ export const OptionsGeneral: React.FC<OptionsGeneralProps> = (props: OptionsGene
                 defaultValue={value.ServerURL}
                 onChange={changeServerURL} />
             {originWarning()}
-            <label className="form-label">Global Environment Variables</label>
-            <div>
-                <EnvironmentVariableEdit
-                    variables={value.GlobalEnvironment || []}
-                    onChange={changeGlobalEnvironment} />
-            </div>
+            <Card.Card>
+                <Card.Header>Global Environment Variables</Card.Header>
+                <Card.Body>
+                    <EnvironmentVariableEdit
+                        variables={value.GlobalEnvironment || []}
+                        onChange={changeGlobalEnvironment} />
+                </Card.Body>
+            </Card.Card>
         </div>
     );
 };

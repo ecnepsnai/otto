@@ -12,12 +12,16 @@ github.com/ecnepsnai/logtic v1.9.2 h1:RoPIpBRjY5gGN4/WuOwBpYXNH+lIfmj4TwqvLz1CCo
 github.com/ecnepsnai/logtic v1.9.2/go.mod h1:fs2kkqGqiX77ejVNBKpSV/dMVtn9bTg9YtHLP9MC0U8=
 github.com/ecnepsnai/osquery v1.0.0 h1:FWwqlA7hCtO7Usg3N+DlZPNPHWf5nfdypnPEor2ayCs=
 github.com/ecnepsnai/osquery v1.0.0/go.mod h1:vxsezNRznmkLa8UjVh88tlJiRbgW7iwinkjyg/Xc2RU=
+github.com/ecnepsnai/ring v1.0.5 h1:2RiLTBZ+66Y4jXgZY/MvIE8xCpAWf8EVvC8Uj731x0U=
+github.com/ecnepsnai/ring v1.0.5/go.mod h1:VA22uhgwptZNMQGqMTt3NBUnNp+XqqH0pvCD9gYAOrQ=
 github.com/ecnepsnai/search v1.0.2 h1:n0ShQzimXmrHklaEsJCu0ehmraNLK8QZVFlaABg9igc=
 github.com/ecnepsnai/search v1.0.2/go.mod h1:c8vtmY+8h07eyzp5IQcTK29DNlR1V9u0/EUtQRg6LwQ=
 github.com/ecnepsnai/secutil v1.0.3 h1:jltWXO7K9zTgq33Bm7vuma6V3X799dliF05JeI1foFw=
 github.com/ecnepsnai/secutil v1.0.3/go.mod h1:XUyQczlk/77WW8H4WUmxX8+9SJl4KH2s6LT3+1qyu+8=
 github.com/ecnepsnai/set v1.0.0 h1:ErepEMF5/RVlc31Vu2Sf5ZDzf6FOQJ6dlwueRZ6zH8s=
 github.com/ecnepsnai/set v1.0.0/go.mod h1:70MwbzTpbsVtcPqg0DupFbEo3iwbE+nEnkPWYUi8SVM=
+github.com/ecnepsnai/stats v1.0.0 h1:9QClYW65H3rM3zQL57tWticogc+zLz9f2GlEsRYPoVc=
+github.com/ecnepsnai/stats v1.0.0/go.mod h1:dYNPtuy1sByJwtwi6H+WA0dkJPXH5OdQZVKa4RLw1FM=
 github.com/ecnepsnai/store v1.2.2 h1:Azyi23OgLyJmXX6OOSE7trd+/CLTzDvBpw+HIIUiO4c=
 github.com/ecnepsnai/store v1.2.2/go.mod h1:ODK2OhOEVD+aGKoazkAEShp8GSgTCkalIDRpKAJ6yRI=
 github.com/ecnepsnai/web v1.8.1 h1:LAQezQw4ldKnFbiYU4VyhX+pWn6QOR45Yrg8mp3+J34=

@@ -11,6 +11,7 @@ require (
 	github.com/ecnepsnai/search v1.0.2
 	github.com/ecnepsnai/secutil v1.0.3
 	github.com/ecnepsnai/set v1.0.0
+	github.com/ecnepsnai/stats v1.0.0
 	github.com/ecnepsnai/store v1.2.2
 	github.com/ecnepsnai/web v1.9.1
 	github.com/google/gofuzz v1.2.0
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	github.com/ecnepsnai/ring v1.0.5 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/lithammer/fuzzysearch v1.1.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect

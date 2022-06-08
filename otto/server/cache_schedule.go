@@ -36,6 +36,7 @@ func (c *cacheTypeSchedule) Update() {
 	}
 
 	log.Debug("Updated schedule cache")
+	Stats.Counters.NumberSchedules.Set(uint64(len(c.all)))
 }
 
 // All get all schedules

@@ -24,6 +24,9 @@ func (c *cacheTypeHost) Update() {
 	c.byID = map[string]int{}
 	hosts := HostStore.AllHosts()
 
+	nTrusted := uint64(0)
+	nUntrusted := uint64(0)
+
 	c.all = hosts
 	for i, host := range hosts {
 		if host.Enabled {
@@ -31,9 +34,17 @@ func (c *cacheTypeHost) Update() {
 		}
 		c.byName[host.Name] = i
 		c.byID[host.ID] = i
+		if host.Trust.TrustedIdentity != "" {
+			nTrusted++
+		} else {
+			nUntrusted++
+		}
 	}
 
 	log.Debug("Updated host cache")
+	Stats.Counters.NumberHosts.Set(uint64(len(c.all)))
+	Stats.Counters.TrustedHosts.Set(nTrusted)
+	Stats.Counters.UntrustedHosts.Set(nUntrusted)
 }
 
 // All get all hosts

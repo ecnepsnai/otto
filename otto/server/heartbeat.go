@@ -136,7 +136,22 @@ func (s *heartbeatStoreType) UpdateHostReachability(host *Host, isReachable bool
 		EventStore.HostBecameReachable(host)
 	}
 
+	s.UpdateReachabilityStats()
 	return &heartbeat, nil
+}
+
+func (s *heartbeatStoreType) UpdateReachabilityStats() {
+	reachable := uint64(0)
+	unreachable := uint64(0)
+	for _, hb := range s.Heartbeats {
+		if hb.IsReachable {
+			reachable++
+		} else {
+			unreachable++
+		}
+	}
+	Stats.Counters.ReachableHosts.Set(reachable)
+	Stats.Counters.UnreachableHosts.Set(unreachable)
 }
 
 func (s *heartbeatStoreType) CleanupHeartbeats() *Error {
@@ -149,5 +164,6 @@ func (s *heartbeatStoreType) CleanupHeartbeats() *Error {
 			delete(s.Heartbeats, heartbeat.Address)
 		}
 	}
+	s.UpdateReachabilityStats()
 	return nil
 }

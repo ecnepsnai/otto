@@ -29,6 +29,7 @@ func CommonSetup() {
 	stateSetup()
 	migrateIfNeeded()
 	LoadOptions()
+	statsSetup()
 }
 
 func initLogtic(verbose bool) {

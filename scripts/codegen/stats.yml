@@ -1,0 +1,27 @@
+counters:
+  - name: "NumberHosts"
+    description: "The number of hosts"
+
+  - name: "NumberGroups"
+    description: "The number of groups"
+
+  - name: "NumberScripts"
+    description: "The number of scripts"
+
+  - name: "NumberSchedules"
+    description: "The number of schedules"
+
+  - name: "NumberUsers"
+    description: "The number of users"
+
+  - name: "ReachableHosts"
+    description: "The number of reachable hosts"
+
+  - name: "UnreachableHosts"
+    description: "The number of unreachable hosts"
+
+  - name: "TrustedHosts"
+    description: "The number of trusted hosts"
+
+  - name: "UntrustedHosts"
+    description: "The number of untrusted hosts"

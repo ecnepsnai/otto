@@ -34,6 +34,7 @@ func (c *cacheTypeUser) Update() {
 	}
 
 	log.Debug("Updated user cache")
+	Stats.Counters.NumberUsers.Set(uint64(len(c.all)))
 }
 
 // All get all users

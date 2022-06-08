@@ -34,6 +34,7 @@ func (c *cacheTypeScript) Update() {
 	}
 
 	log.Debug("Updated script cache")
+	Stats.Counters.NumberScripts.Set(uint64(len(c.all)))
 }
 
 // All get all scripts

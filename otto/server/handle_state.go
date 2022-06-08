@@ -44,3 +44,7 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 
 	return s, nil
 }
+
+func (h *handle) Stats(request web.Request) (interface{}, *web.Error) {
+	return Stats.GetCounterValues(), nil
+}

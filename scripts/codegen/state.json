@@ -1,7 +1,0 @@
-[
-    {
-        "name": "TableVersion",
-        "type": "int",
-        "default": "0"
-    }
-]

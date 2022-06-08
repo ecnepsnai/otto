@@ -37,6 +37,7 @@ func (c *cacheTypeGroup) Update() {
 	}
 
 	log.Debug("Updated group cache")
+	Stats.Counters.NumberGroups.Set(uint64(len(c.all)))
 }
 
 // All get all groups

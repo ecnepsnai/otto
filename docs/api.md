@@ -428,6 +428,28 @@ Returns the current state of the system. This endpoint is used by the web interf
 - The Server Version
 - The Current User
 
+**GET /api/stats**
+
+Returns statistics about the Otto server.
+
+Example response:
+```json
+{
+    "data": {
+        "NumberGroups": 1,
+        "NumberHosts": 0,
+        "NumberSchedules": 0,
+        "NumberScripts": 0,
+        "NumberUsers": 0,
+        "ReachableHosts": 0,
+        "TrustedHosts": 0,
+        "UnreachableHosts": 0,
+        "UntrustedHosts": 0
+    },
+    "code": 200
+}
+```
+
 **GET /api/options**
 
 

@@ -130,6 +130,7 @@ func RouterSetup() {
 
 	// State
 	server.API.GET("/api/state", h.State, authenticatedOptions(false))
+	server.API.GET("/api/stats", h.Stats, authenticatedOptions(false))
 
 	// Users
 	server.API.GET("/api/users", h.UserList, authenticatedOptions(false))
