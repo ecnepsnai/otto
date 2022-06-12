@@ -11,12 +11,12 @@ type Group struct {
 }
 
 // HostIDs return the IDs for each host member of this group
-func (g Group) HostIDs() []string {
+func (g *Group) HostIDs() []string {
 	return GroupCache.HostIDs(g.ID)
 }
 
 // Hosts get all hosts for this group
-func (g Group) Hosts() ([]Host, *Error) {
+func (g *Group) Hosts() ([]Host, *Error) {
 	hosts := make([]Host, len(g.HostIDs()))
 	for i, hostID := range g.HostIDs() {
 		host := HostCache.ByID(hostID)
@@ -26,7 +26,7 @@ func (g Group) Hosts() ([]Host, *Error) {
 }
 
 // Scripts get all scripts for this group
-func (g Group) Scripts() ([]Script, *Error) {
+func (g *Group) Scripts() ([]Script, *Error) {
 	scripts := make([]Script, len(g.ScriptIDs))
 	for i, scriptID := range g.ScriptIDs {
 		script := ScriptCache.ByID(scriptID)
@@ -35,7 +35,10 @@ func (g Group) Scripts() ([]Script, *Error) {
 				"group_id":  g.ID,
 				"script_id": scriptID,
 			})
-			return nil, ErrorServer("group referring to script that doesn't exist")
+			group := *g
+			group.ScriptIDs = append(group.ScriptIDs[:i], group.ScriptIDs[i+1:]...)
+			GroupStore.Table.Update(group)
+			return group.Scripts()
 		}
 		scripts[i] = *script
 	}
