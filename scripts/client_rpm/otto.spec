@@ -1,5 +1,5 @@
 Name:           otto
-Version:        ##VERSION##
+Version:        %{_version}
 Release:        1
 Summary:        The Otto Host client software
 License:        Apache-2.0
@@ -20,7 +20,8 @@ Otto is an automation toolkit for Unix-like computers. This package provides the
 cd otto
 CGO_ENABLED=0 go get
 cd cmd/client
-CGO_ENABLED=0 go build -buildmode=exe -trimpath -ldflags="-s -w" -v -o %{name}
+CGO_ENABLED=0 go build -buildmode=exe -trimpath -ldflags="-s -w -X 'main.Version=%{version}' -X 'main.BuildDate=%{_date}'" -v -o %{name}
+./%{name} -v
 
 %install
 mkdir -p %{buildroot}/opt/%{name}
@@ -34,6 +35,11 @@ CGO_ENABLED=0 go test -v ./...
 
 %post
 %systemd_post %{name}.service
+
+%posttrans
+if test pidof otto = 1; then
+    systemctl restart %{name}.service
+fi
 
 %preun
 %systemd_preun %{name}.service

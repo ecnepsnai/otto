@@ -1,4 +1,4 @@
-FROM docker.io/library/rockylinux:8.5
+FROM docker.io/library/rockylinux:latest
 
 # Install rpm requirements
 RUN dnf -y install git curl tar rpm-build rpmdevtools
@@ -16,7 +16,9 @@ WORKDIR /root/rpmbuild
 ADD otto.spec .
 RUN mkdir SOURCES
 COPY otto-*.tar.gz SOURCES/
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 VOLUME /root/rpmbuild/RPMS
 
-ENTRYPOINT [ "/usr/bin/rpmbuild", "-ba", "otto.spec" ]
+ENTRYPOINT /entrypoint.sh
