@@ -24,6 +24,9 @@ func Dial(options DialOptions) (*Connection, error) {
 		return nil, fmt.Errorf("server and client identity cannot be the same")
 	}
 
+	localIdentity := options.Identity.PublicKey().Marshal()
+	var remoteIdentity []byte
+
 	clientConfig := &ssh.ClientConfig{
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(options.Identity),
@@ -32,6 +35,7 @@ func Dial(options DialOptions) (*Connection, error) {
 			log.PDebug("[DIAL] Handshake", map[string]interface{}{
 				"public_key": base64.StdEncoding.EncodeToString(key.Marshal()),
 			})
+			remoteIdentity = key.Marshal()
 			if options.TrustedPublicKey == base64.StdEncoding.EncodeToString(key.Marshal()) {
 				log.Debug("[DIAL] Recognized public key")
 				return nil
@@ -77,8 +81,10 @@ func Dial(options DialOptions) (*Connection, error) {
 	})
 
 	return &Connection{
-		w:          channel,
-		remoteAddr: client.RemoteAddr(),
-		localAddr:  client.LocalAddr(),
+		w:              channel,
+		remoteAddr:     client.RemoteAddr(),
+		localAddr:      client.LocalAddr(),
+		localIdentity:  localIdentity,
+		remoteIdentity: remoteIdentity,
 	}, nil
 }

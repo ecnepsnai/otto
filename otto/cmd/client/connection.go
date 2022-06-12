@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"io"
 	"os"
@@ -36,9 +37,12 @@ func listen() {
 }
 
 func handle(conn *otto.Connection) {
-	log.PInfo("Connection established", map[string]interface{}{
-		"remote_addr": conn.RemoteAddr().String(),
-	})
+	if !bytes.Equal(conn.RemoteIdentity(), loopbackIdentity.PublicKey().Marshal()) {
+		log.PInfo("Connection established", map[string]interface{}{
+			"remote_addr": conn.RemoteAddr().String(),
+			"identity":    base64.StdEncoding.EncodeToString(conn.RemoteIdentity()),
+		})
+	}
 	defer conn.Close()
 
 	cancel := make(chan bool)
@@ -70,11 +74,13 @@ func handle(conn *otto.Connection) {
 }
 
 func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeatRequest) {
-	log.PInfo("Incoming heartbeat", map[string]interface{}{
-		"remote_addr":    conn.RemoteAddr().String(),
-		"server_version": message.ServerVersion,
-		"nonce":          message.Nonce,
-	})
+	if !bytes.Equal(conn.RemoteIdentity(), loopbackIdentity.PublicKey().Marshal()) {
+		log.PInfo("Incoming heartbeat", map[string]interface{}{
+			"remote_addr":    conn.RemoteAddr().String(),
+			"server_version": message.ServerVersion,
+			"nonce":          message.Nonce,
+		})
+	}
 
 	properties := map[string]string{
 		"hostname":             registerProperties.Hostname,

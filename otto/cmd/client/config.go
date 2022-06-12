@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net"
 	"os"
-	"strings"
 
 	"github.com/ecnepsnai/otto"
 	"golang.org/x/crypto/ssh"
@@ -169,6 +169,7 @@ func mustLoadIdentity() {
 		panic(err)
 	}
 	clientIdentity = signer
+	log.Debug("Client identity loaded: %s", base64.StdEncoding.EncodeToString(clientIdentity.PublicKey().Marshal()))
 }
 
 func saveNewConfig(c clientConfig) error {
@@ -225,6 +226,7 @@ func updateServerIdentity(newPublicKey string) error {
 		return err
 	}
 
+	oldPublicKey := c.ServerIdentity
 	c.ServerIdentity = newPublicKey
 
 	if err := saveNewConfig(c); err != nil {
@@ -235,7 +237,10 @@ func updateServerIdentity(newPublicKey string) error {
 		return err
 	}
 
-	log.Warn("server identity updated")
+	log.PWarn("Server identity updated", map[string]interface{}{
+		"old_identity": oldPublicKey,
+		"new_identity": newPublicKey,
+	})
 	return nil
 }
 
@@ -252,35 +257,12 @@ func defaultConfig() clientConfig {
 
 func getAllowFroms() []net.IPNet {
 	nets := make([]net.IPNet, len(config.AllowFrom))
-	allowUnspecified := false
 	for i, a := range config.AllowFrom {
-		if a == "0.0.0.0/0" || a == "::/0" {
-			allowUnspecified = true
-		}
 		_, network, err := net.ParseCIDR(a)
 		if err != nil {
 			panic(fmt.Sprintf("invalid CIDR address: %s", a))
 		}
 		nets[i] = *network
-	}
-
-	// Append address for loopback connections (if needed)
-	if !allowUnspecified {
-		if strings.HasPrefix(config.ListenAddr, "0.0.0.0") {
-			_, loopback, _ := net.ParseCIDR("127.0.0.1/32")
-			nets = append(nets, *loopback)
-		} else if strings.HasPrefix(config.ListenAddr, "[::]") {
-			_, loopback, _ := net.ParseCIDR("::1/128")
-			nets = append(nets, *loopback)
-		} else {
-			address := addressFromSocketString(config.ListenAddr)
-			cidr := "/32"
-			if strings.Contains(address, ":") {
-				cidr = "128"
-			}
-			_, loopback, _ := net.ParseCIDR(fmt.Sprintf("%s/%s", address, cidr))
-			nets = append(nets, *loopback)
-		}
 	}
 
 	return nets

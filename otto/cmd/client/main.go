@@ -14,10 +14,9 @@ func main() {
 	parseArgs()
 	tryAutoRegister()
 	mustLoadConfig()
-	mustLoadIdentity()
 
 	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
-	logtic.Log.Level = logtic.LevelWarn
+	logtic.Log.Level = logtic.LevelInfo
 	if os.Getenv("OTTO_VERBOSE") != "" {
 		logtic.Log.Level = logtic.LevelDebug
 	}
@@ -25,6 +24,7 @@ func main() {
 	logtic.Log.Open()
 	log = logtic.Log.Connect("otto")
 
+	mustLoadIdentity()
 	setupLoopback()
 	go startLoopbackRepeater()
 

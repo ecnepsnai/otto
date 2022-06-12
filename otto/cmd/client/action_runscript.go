@@ -33,6 +33,12 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 	}()
 
 	start := time.Now()
+	log.PInfo("Executing script", map[string]interface{}{
+		"remote_addr": conn.RemoteAddr().String(),
+		"name":        script.Name,
+		"wd":          script.WorkingDirectory,
+		"exec":        script.Executable,
+	})
 
 	for _, file := range script.Files {
 		if err := uploadFile(file); err != nil {
@@ -110,7 +116,7 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	log.Info("Running '%s'", tmp.Name())
+	log.Debug("Running '%s'", tmp.Name())
 	if err := cmd.Start(); err != nil {
 		result.Success = false
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -145,7 +151,14 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 		}
 	}()
 	err = cmd.Wait()
-	log.Info("Script '%s' exited after %s", script.Name, time.Since(start))
+	log.PInfo("Finished executing script", map[string]interface{}{
+		"remote_addr": conn.RemoteAddr().String(),
+		"elapsed":     time.Since(start).String(),
+		"exit_code":   cmd.ProcessState.ExitCode(),
+		"name":        script.Name,
+		"wd":          script.WorkingDirectory,
+		"exec":        script.Executable,
+	})
 	didExit = true
 
 	result.Stderr = stderr.String()
@@ -167,7 +180,6 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 		return result
 	}
 
-	log.Info("Script exit OK")
 	result.Success = true
 	canCancel = false
 	return result

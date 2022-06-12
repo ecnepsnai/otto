@@ -21,10 +21,9 @@ type ListenOptions struct {
 
 // Listener describes an active listening Otto server
 type Listener struct {
-	options   ListenOptions
-	sshConfig *ssh.ServerConfig
-	handle    func(conn *Connection)
-	l         net.Listener
+	options ListenOptions
+	handle  func(conn *Connection)
+	l       net.Listener
 }
 
 // SetupListener will prepare a listening socket for incoming connections. No connections are accepted until you call
@@ -36,40 +35,15 @@ func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Liste
 		}
 	}
 
-	sshConfig := &ssh.ServerConfig{
-		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			log.PDebug("[LISTEN] Handshake", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
-			})
-			for _, trustedKey := range options.TrustedPublicKeys {
-				if trustedKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
-					log.Debug("[LISTEN] Recognized public key")
-					return &ssh.Permissions{
-						Extensions: map[string]string{
-							"pubkey-fp": ssh.FingerprintSHA256(pubKey),
-						},
-					}, nil
-				}
-			}
-			log.PWarn("[LISTEN] Rejecting connection from untrusted public key", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
-			})
-			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
-		},
-		ServerVersion: fmt.Sprintf("SSH-2.0-OTTO-%d", ProtocolVersion),
-	}
-	sshConfig.AddHostKey(options.Identity)
-
 	l, err := net.Listen("tcp", options.Address)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Otto client listening on %s", options.Address)
 	return &Listener{
-		options:   options,
-		sshConfig: sshConfig,
-		handle:    handle,
-		l:         l,
+		options: options,
+		handle:  handle,
+		l:       l,
 	}, nil
 }
 
@@ -131,7 +105,36 @@ func (l *Listener) accept(c net.Conn) {
 		}
 	}
 
-	sc, chans, reqs, err := ssh.NewServerConn(c, l.sshConfig)
+	localIdentity := l.options.Identity.PublicKey().Marshal()
+	var remoteIdentity []byte
+
+	sshConfig := &ssh.ServerConfig{
+		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
+			log.PDebug("[LISTEN] Handshake", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+			})
+			remoteIdentity = pubKey.Marshal()
+
+			for _, trustedKey := range l.options.TrustedPublicKeys {
+				if trustedKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
+					log.Debug("[LISTEN] Recognized public key")
+					return &ssh.Permissions{
+						Extensions: map[string]string{
+							"pubkey-fp": ssh.FingerprintSHA256(pubKey),
+						},
+					}, nil
+				}
+			}
+			log.PWarn("[LISTEN] Rejecting connection from untrusted public key", map[string]interface{}{
+				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+			})
+			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
+		},
+		ServerVersion: fmt.Sprintf("SSH-2.0-OTTO-%d", ProtocolVersion),
+	}
+	sshConfig.AddHostKey(l.options.Identity)
+
+	sc, chans, reqs, err := ssh.NewServerConn(c, sshConfig)
 	if err != nil {
 		if err != io.EOF {
 			log.PError("[LISTEN] SSH handshake error", map[string]interface{}{
@@ -167,9 +170,11 @@ func (l *Listener) accept(c net.Conn) {
 			"remote_addr": c.RemoteAddr().String(),
 		})
 		l.handle(&Connection{
-			w:          channel,
-			remoteAddr: c.RemoteAddr(),
-			localAddr:  c.LocalAddr(),
+			w:              channel,
+			remoteAddr:     c.RemoteAddr(),
+			localAddr:      c.LocalAddr(),
+			localIdentity:  localIdentity,
+			remoteIdentity: remoteIdentity,
 		})
 		channel.Close()
 	}

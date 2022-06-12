@@ -416,9 +416,11 @@ const sshChannelName = "otto"
 
 // Connection describes a connection between the Otto Server and Otto Host
 type Connection struct {
-	w          io.ReadWriteCloser
-	remoteAddr net.Addr
-	localAddr  net.Addr
+	w              io.ReadWriteCloser
+	remoteAddr     net.Addr
+	localAddr      net.Addr
+	remoteIdentity []byte
+	localIdentity  []byte
 }
 
 func MockConnection(w io.ReadWriteCloser) *Connection {
@@ -433,6 +435,14 @@ func (c *Connection) RemoteAddr() net.Addr {
 
 func (c *Connection) LocalAddr() net.Addr {
 	return c.localAddr
+}
+
+func (c *Connection) RemoteIdentity() []byte {
+	return c.remoteIdentity
+}
+
+func (c *Connection) LocalIdentity() []byte {
+	return c.localIdentity
 }
 
 func (c *Connection) Close() error {

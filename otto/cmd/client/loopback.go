@@ -56,5 +56,5 @@ func sendLoopbackHeartbeat() {
 		log.Fatal("Otto client is not listening correctly, exiting...")
 	}
 	c.Close()
-	log.Info("Loopback heartbeat successful")
+	log.Debug("Loopback heartbeat successful")
 }
