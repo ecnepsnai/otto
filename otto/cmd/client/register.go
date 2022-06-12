@@ -78,7 +78,7 @@ func tryAutoRegister() {
 	if err != nil {
 		panic("Error reading client identity: " + err.Error())
 	}
-	rlog.Printf("Client identity: %s", base64.RawURLEncoding.EncodeToString(signer.PublicKey().Marshal()))
+	rlog.Printf("Client identity: %s", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
 
 	// Make the request
 	request := otto.RegisterRequest{

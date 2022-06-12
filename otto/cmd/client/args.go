@@ -40,7 +40,7 @@ Host Information:
 				fmt.Fprintf(os.Stderr, "Error reading identity: %s\n", err.Error())
 				os.Exit(1)
 			}
-			fmt.Printf("%s\n", base64.RawURLEncoding.EncodeToString(signer.PublicKey().Marshal()))
+			fmt.Printf("%s\n", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
 			os.Exit(0)
 		} else if arg == "-s" || arg == "--setup" {
 			tryGuidedSetup()

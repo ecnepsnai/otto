@@ -174,7 +174,7 @@ func handleRotateIdentity(conn *otto.Connection, message otto.MessageRotateIdent
 		reply.Error = err.Error()
 	}
 
-	newPublicKey := base64.RawStdEncoding.EncodeToString(newID.PublicKey().Marshal())
+	newPublicKey := base64.StdEncoding.EncodeToString(newID.PublicKey().Marshal())
 	reply.PublicKey = newPublicKey
 	log.PWarn("Identity rotated", map[string]interface{}{
 		"client_public": newPublicKey,

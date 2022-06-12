@@ -71,7 +71,7 @@ func (host *Host) connect() (*hostConnection, error) {
 			if herr != nil {
 				return nil, err
 			}
-			pendingKey := base64.RawStdEncoding.EncodeToString(key)
+			pendingKey := base64.StdEncoding.EncodeToString(key)
 			host.Trust.UntrustedIdentity = pendingKey
 			HostStore.UpdateHostTrust(host.ID, host.Trust)
 			log.PInfo("Recorded new identity from client", map[string]interface{}{
