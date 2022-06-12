@@ -27,7 +27,7 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 	s := stateType{
 		Runtime: runtimeType{
 			ServerFQDN: hostname,
-			Version:    ServerVersion,
+			Version:    Version,
 			Config:     runtime.GOOS + "_" + runtime.GOARCH,
 		},
 		User:     user,

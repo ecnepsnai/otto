@@ -77,7 +77,7 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 	if !bytes.Equal(conn.RemoteIdentity(), loopbackIdentity.PublicKey().Marshal()) {
 		log.PInfo("Incoming heartbeat", map[string]interface{}{
 			"remote_addr":    conn.RemoteAddr().String(),
-			"server_version": message.ServerVersion,
+			"server_version": message.Version,
 			"nonce":          message.Nonce,
 		})
 	}
@@ -91,7 +91,7 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 	}
 
 	response := otto.MessageHeartbeatResponse{
-		ClientVersion: MainVersion,
+		ClientVersion: Version,
 		Properties:    properties,
 		Nonce:         message.Nonce,
 	}
@@ -103,7 +103,7 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 
 func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerAction, cancel chan bool) {
 	reply := otto.MessageActionResult{
-		ClientVersion: MainVersion,
+		ClientVersion: Version,
 	}
 	switch message.Action {
 	case otto.ActionReloadConfig, otto.ActionExitClient, otto.ActionReboot, otto.ActionShutdown:

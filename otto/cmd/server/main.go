@@ -21,7 +21,7 @@ func main() {
 }
 
 func start() {
-	fmt.Printf("Otto %s (Runtime %s). Copyright Ian Spence 2020-2022.\n", server.ServerVersion, runtime.Version())
+	fmt.Printf("Otto %s (Built on '%s', Runtime %s). Copyright Ian Spence 2020-2022.\n", server.Version, server.BuildDate, runtime.Version())
 	server.Start()
 	stop()
 }

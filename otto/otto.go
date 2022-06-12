@@ -56,8 +56,8 @@ const (
 
 // MessageHeartbeatRequest describes a heartbeat request
 type MessageHeartbeatRequest struct {
-	ServerVersion string `json:"server_version"`
-	Nonce         string `json:"nonce"`
+	Version string `json:"server_version"`
+	Nonce   string `json:"nonce"`
 }
 
 // MessageHeartbeatResponse describes a heartbeat response

@@ -127,7 +127,7 @@ func (host *Host) Ping() *Error {
 	defer conn.Close()
 
 	nonce := secutil.RandomString(8)
-	reply, err := conn.Conn.SendHeartbeat(otto.MessageHeartbeatRequest{ServerVersion: ServerVersion, Nonce: nonce})
+	reply, err := conn.Conn.SendHeartbeat(otto.MessageHeartbeatRequest{Version: Version, Nonce: nonce})
 	if err != nil {
 		log.PError("Error sending heartbeat request to host", map[string]interface{}{
 			"host_id": host.ID,

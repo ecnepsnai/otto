@@ -21,6 +21,7 @@ func parseArgs() {
 		if arg == "-v" || arg == "--version" {
 			message := `Otto client:
 	Version: %s
+	Built On: %s
 	Protocol version: %d
 	Go runtime: %s
 
@@ -31,7 +32,7 @@ Host Information:
 	Distribution Name: %s
 	Distribution Version: %s
 `
-			fmt.Printf(message, MainVersion, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
+			fmt.Printf(message, Version, BuildDate, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
 			os.Exit(0)
 		} else if arg == "-p" || arg == "--public-key" {
 			signer, err := loadClientIdentity()

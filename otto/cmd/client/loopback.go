@@ -40,8 +40,8 @@ func sendLoopbackHeartbeat() {
 	}
 	nonce := secutil.RandomString(8)
 	resp, err := c.SendHeartbeat(otto.MessageHeartbeatRequest{
-		ServerVersion: MainVersion,
-		Nonce:         nonce,
+		Version: Version,
+		Nonce:   nonce,
 	})
 	if err != nil {
 		log.Error("Error sending loopback heartbeat to client: %s", err.Error())
@@ -51,7 +51,7 @@ func sendLoopbackHeartbeat() {
 		log.Error("Unexpected nonce in loopback heartbeat, this should never happen")
 		log.Fatal("Otto client is not listening correctly, exiting...")
 	}
-	if resp.ClientVersion != MainVersion {
+	if resp.ClientVersion != Version {
 		log.Error("Unexpected version in loopback heartbeat, this should never happen")
 		log.Fatal("Otto client is not listening correctly, exiting...")
 	}

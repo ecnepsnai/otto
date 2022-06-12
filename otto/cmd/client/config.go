@@ -34,7 +34,7 @@ const (
 
 func loadConfig() error {
 	if _, err := os.Stat(otto_CONFIG_FILE_NAME); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n\nUse -s to run interactive setup.\n", MainVersion)
+		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n\nUse -s to run interactive setup.\n", Version)
 		os.Exit(1)
 	}
 

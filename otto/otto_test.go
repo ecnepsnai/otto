@@ -53,7 +53,7 @@ func TestHeartbeat(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	heartbeatRequest := otto.MessageHeartbeatRequest{ServerVersion: "foo"}
+	heartbeatRequest := otto.MessageHeartbeatRequest{Version: "foo"}
 	if err := conn.WriteMessage(otto.MessageTypeHeartbeatRequest, heartbeatRequest); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
@@ -101,7 +101,7 @@ func TestMalformedMessageType(t *testing.T) {
 	var messageType uint32
 	f.Fuzz(&messageType)
 
-	heartbeatRequest := otto.MessageHeartbeatRequest{ServerVersion: "foo"}
+	heartbeatRequest := otto.MessageHeartbeatRequest{Version: "foo"}
 	if err := conn.WriteMessage(messageType, heartbeatRequest); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
