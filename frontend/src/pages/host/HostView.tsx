@@ -72,6 +72,10 @@ export const HostView: React.FC = () => {
         });
     };
 
+    const didHeartbeat = () => {
+        loadHost();
+    };
+
     if (loading) {
         return (<PageLoading />);
     }
@@ -106,7 +110,7 @@ export const HostView: React.FC = () => {
                             <ListGroup.TextItem title="Trust"><HostTrust host={host} onReload={loadHost} /></ListGroup.TextItem>
                         </ListGroup.List>
                     </Card.Card>
-                    <HostHeartbeat host={host} defaultHeartbeat={heartbeat} />
+                    <HostHeartbeat host={host} defaultHeartbeat={heartbeat} didUpdate={didHeartbeat} />
                     <EnvironmentVariableCard className="mb-3" variables={host.Environment} />
                     <ScheduleListCard schedules={schedules} className="mb-3" />
                 </Layout.Column>

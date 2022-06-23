@@ -12,6 +12,7 @@ import { DateLabel } from '../../components/DateLabel';
 interface HostHeartbeatProps {
     host: HostType;
     defaultHeartbeat?: HeartbeatType;
+    didUpdate?: (heartbeat: HeartbeatType) => void;
 }
 export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeatProps) => {
     const [Heartbeat, setHeartbeat] = React.useState(props.defaultHeartbeat);
@@ -22,6 +23,9 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
         Host.Heartbeat(props.host.ID).then(heartbeat => {
             setIsLoading(false);
             setHeartbeat(heartbeat);
+            if (props.didUpdate) {
+                props.didUpdate(heartbeat);
+            }
         }, () => {
             setIsLoading(false);
         });
