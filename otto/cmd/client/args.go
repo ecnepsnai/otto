@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto"
 )
 
@@ -34,6 +35,8 @@ Host Information:
 `
 			fmt.Printf(message, Version, BuildDate, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
 			os.Exit(0)
+		} else if arg == "-d" || arg == "--debug" {
+			logtic.Log.Level = logtic.LevelDebug
 		} else if arg == "-p" || arg == "--public-key" {
 			signer, err := loadClientIdentity()
 			if err != nil {

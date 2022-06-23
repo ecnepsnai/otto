@@ -416,6 +416,7 @@ const sshChannelName = "otto"
 
 // Connection describes a connection between the Otto Server and Otto Host
 type Connection struct {
+	id             int
 	w              io.ReadWriteCloser
 	remoteAddr     net.Addr
 	localAddr      net.Addr
@@ -447,6 +448,7 @@ func (c *Connection) LocalIdentity() []byte {
 
 func (c *Connection) Close() error {
 	log.PDebug("Connection closed", map[string]interface{}{
+		"id":          c.id,
 		"local_addr":  c.localAddr.String(),
 		"remote_addr": c.remoteAddr.String(),
 	})

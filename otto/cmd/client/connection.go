@@ -28,11 +28,11 @@ func listen() {
 			panic("error listening: " + err.Error())
 		}
 		listener.Accept()
-		log.Warn("Server stopped")
+		log.Warn("Listener stopped")
 		if !restartServer {
 			break
 		}
-		log.Info("Server restarting")
+		log.Info("Listener restarting")
 	}
 }
 

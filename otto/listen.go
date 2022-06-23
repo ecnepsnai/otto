@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -58,17 +59,14 @@ func (l *Listener) Port() uint16 {
 }
 
 // Accept will accpet incoming connections. Blocking.
-func (l *Listener) Accept() {
+func (l *Listener) Accept() error {
 	for {
 		c, err := l.l.Accept()
 		if err != nil {
-			if strings.Contains(err.Error(), "use of closed network connection") {
-				return
-			}
 			log.PDebug("[LISTEN] Error accepting connection", map[string]interface{}{
 				"error": err.Error(),
 			})
-			continue
+			return err
 		}
 		log.PDebug("[LISTEN] Incoming connection", map[string]interface{}{
 			"remote_addr": c.RemoteAddr().String(),
@@ -83,6 +81,8 @@ func (l *Listener) Close() {
 }
 
 func (l *Listener) accept(c net.Conn) {
+	connId := fdFromConn(c)
+
 	if len(l.options.AllowFrom) > 0 {
 		allow := false
 		for _, allowNet := range l.options.AllowFrom {
@@ -167,16 +167,26 @@ func (l *Listener) accept(c net.Conn) {
 			return
 		}
 		log.PDebug("[LISTEN] SSH handshake success", map[string]interface{}{
+			"id":          connId,
 			"remote_addr": c.RemoteAddr().String(),
 		})
 		l.handle(&Connection{
+			id:             connId,
 			w:              channel,
 			remoteAddr:     c.RemoteAddr(),
 			localAddr:      c.LocalAddr(),
 			localIdentity:  localIdentity,
 			remoteIdentity: remoteIdentity,
 		})
+		c.Close()
 		channel.Close()
 	}
 	sc.Close()
+}
+
+func fdFromConn(c net.Conn) int {
+	fdVal := reflect.Indirect(reflect.ValueOf(c)).FieldByName("fd")
+	pfdVal := reflect.Indirect(fdVal).FieldByName("pfd")
+	fdInt := int(pfdVal.FieldByName("Sysfd").Int())
+	return fdInt
 }

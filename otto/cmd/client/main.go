@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"path"
 
@@ -16,9 +17,8 @@ func main() {
 	mustLoadConfig()
 
 	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
-	logtic.Log.Level = logtic.LevelInfo
-	if os.Getenv("OTTO_VERBOSE") != "" {
-		logtic.Log.Level = logtic.LevelDebug
+	if os.Getenv("OTTO_VERBOSE") == "" {
+		logtic.Log.Stdout = io.Discard
 	}
 
 	logtic.Log.Open()
