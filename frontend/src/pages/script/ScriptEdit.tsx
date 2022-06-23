@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RunAs, Script, ScriptType } from '../../types/Script';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -10,7 +10,6 @@ import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdi
 import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
-import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 import { AttachmentList } from './attachment/AttachmentList';
 
@@ -20,6 +19,7 @@ export const ScriptEdit: React.FC = () => {
     const [script, setScript] = React.useState<ScriptType>();
     const [isNew, setIsNew] = React.useState<boolean>();
     const [groupIDs, setGroupIDs] = React.useState<string[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadScript();
@@ -114,7 +114,7 @@ export const ScriptEdit: React.FC = () => {
         return promise.then(script => {
             Script.SetGroups(script.ID, groupIDs).then(() => {
                 Notification.success('Script Saved');
-                Redirect.To('/scripts/script/' + script.ID);
+                navigate('/scripts/script/' + script.ID);
             });
         });
     };

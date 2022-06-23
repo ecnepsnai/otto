@@ -2,9 +2,9 @@ import * as React from 'react';
 import * as Bootstrap from 'bootstrap';
 import { useDebounce } from '@react-hook/debounce';
 import { API } from '../services/API';
-import { Redirect } from './Redirect';
-import '../../css/system-search.scss';
 import { Nothing } from './Nothing';
+import { useNavigate } from 'react-router-dom';
+import '../../css/system-search.scss';
 
 interface SystemSearchResult {
     Type: 'Host' | 'Group' | 'Script' | 'Schedule' | 'User';
@@ -13,8 +13,9 @@ interface SystemSearchResult {
 }
 
 export const SystemSearch: React.FC = () => {
+    const navigate = useNavigate();
     const SEARCH_GROW_WIDTH = 100;
-    const SEARCH_ANIMATION_DURATION = 160;
+    const SEARCH_ANIMATION_DELAY = 160;
 
     const [Query, setQuery] = useDebounce('', 300);
     const [Results, setResults] = React.useState<SystemSearchResult[]>();
@@ -53,7 +54,7 @@ export const SystemSearch: React.FC = () => {
         }
 
         if (Query != '') {
-            setTimeout(doSearch, SEARCH_ANIMATION_DURATION);
+            setTimeout(doSearch, SEARCH_ANIMATION_DELAY);
         }
     };
 
@@ -65,16 +66,16 @@ export const SystemSearch: React.FC = () => {
             }
 
             setResults(undefined);
-        }, SEARCH_ANIMATION_DURATION);
+        }, SEARCH_ANIMATION_DELAY);
     };
 
     const resultClick = (href: string) => {
         new Bootstrap.Collapse(document.getElementById('navbarNav')).hide();
-        Redirect.To(href);
+        navigate(href);
         setTimeout(() => {
             setQuery('');
             (document.getElementById('system-search-input') as HTMLInputElement).value = '';
-        }, SEARCH_ANIMATION_DURATION);
+        }, SEARCH_ANIMATION_DELAY);
     };
 
     return (
@@ -140,7 +141,7 @@ const ResultsList: React.FC<ResultsListProps> = (props: ResultsListProps) => {
     return (
         <ul className="dropdown-menu show" style={style}>
             {noResults()}
-            { props.results.map((result, idx) => {
+            {props.results.map((result, idx) => {
                 if (idx > MAX_VISIBLE_RESULTS) {
                     return null;
                 }

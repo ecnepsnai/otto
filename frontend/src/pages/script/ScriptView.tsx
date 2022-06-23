@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Script, ScriptType, ScriptEnabledHost } from '../../types/Script';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
@@ -10,7 +10,6 @@ import { EditButton, DeleteButton, Button, SmallPlayButton, ButtonAnchor } from 
 import { ListGroup } from '../../components/ListGroup';
 import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
-import { Redirect } from '../../components/Redirect';
 import { Style } from '../../components/Style';
 import { GlobalModalFrame } from '../../components/Modal';
 import { RunModal } from '../run/RunModal';
@@ -36,6 +35,7 @@ export const ScriptView: React.FC = () => {
     const [hosts, setHosts] = React.useState<DedupedScriptEnabledHost[]>();
     const [attachments, setAttachments] = React.useState<AttachmentType[]>();
     const [schedules, setSchedules] = React.useState<ScheduleType[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadData();
@@ -91,7 +91,7 @@ export const ScriptView: React.FC = () => {
                 return;
             }
 
-            Redirect.To('/scripts');
+            navigate('/scripts');
         });
     };
 

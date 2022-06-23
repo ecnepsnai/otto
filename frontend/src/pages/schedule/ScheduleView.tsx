@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Schedule, ScheduleReport, ScheduleType } from '../../types/Schedule';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Loading, PageLoading } from '../../components/Loading';
 import { Host, HostType } from '../../types/Host';
@@ -9,7 +9,6 @@ import { Page } from '../../components/Page';
 import { Layout } from '../../components/Layout';
 import { EditButton, DeleteButton, Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { Redirect } from '../../components/Redirect';
 import { GroupType } from '../../types/Group';
 import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge } from '../../components/Badge';
@@ -28,6 +27,7 @@ export const ScheduleView: React.FC = () => {
     const [script, setScript] = React.useState<ScriptType>();
     const [hosts, setHosts] = React.useState<HostType[]>();
     const [groups, setGroups] = React.useState<GroupType[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadData();
@@ -78,7 +78,7 @@ export const ScheduleView: React.FC = () => {
                 return;
             }
 
-            Redirect.To('/schedules');
+            navigate('/schedules');
         });
     };
 
@@ -181,7 +181,7 @@ const ScheduleReportList: React.FC<ScheduleReportListProps> = (props: ScheduleRe
 
     const showMoreClick = () => {
         SetShownReports(reports => {
-            return props.reports.slice(0, Math.min(reports.length+20, props.reports.length));
+            return props.reports.slice(0, Math.min(reports.length + 20, props.reports.length));
         });
     };
 

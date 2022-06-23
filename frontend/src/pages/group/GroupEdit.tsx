@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -10,7 +10,6 @@ import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdi
 import { ScriptCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
-import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 
 export const GroupEdit: React.FC = () => {
@@ -19,6 +18,7 @@ export const GroupEdit: React.FC = () => {
     const [group, setGroup] = React.useState<GroupType>();
     const [isNew, setIsNew] = React.useState<boolean>();
     const [hostIDs, setHostIDs] = React.useState<string[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadGroup();
@@ -78,7 +78,7 @@ export const GroupEdit: React.FC = () => {
         return promise.then(group => {
             Group.SetHosts(group.ID, hostIDs).then(() => {
                 Notification.success('Group Saved');
-                Redirect.To('/groups/group/' + group.ID);
+                navigate('/groups/group/' + group.ID);
             });
         });
     };

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Host, HostType } from '../../types/Host';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
@@ -10,7 +10,6 @@ import { EnvironmentVariableEdit } from '../../components/EnvironmentVariableEdi
 import { GroupCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
-import { Redirect } from '../../components/Redirect';
 import { Variable } from '../../types/Variable';
 
 export const HostEdit: React.FC = () => {
@@ -19,6 +18,7 @@ export const HostEdit: React.FC = () => {
     const [host, setHost] = React.useState<HostType>();
     const [isNew, setIsNew] = React.useState<boolean>();
     const [useHostName, setUseHostname] = React.useState<boolean>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadHost();
@@ -109,7 +109,7 @@ export const HostEdit: React.FC = () => {
 
         return promise.then(host => {
             Notification.success('Host Saved');
-            Redirect.To('/hosts/host/' + host.ID);
+            navigate('/hosts/host/' + host.ID);
         });
     };
 

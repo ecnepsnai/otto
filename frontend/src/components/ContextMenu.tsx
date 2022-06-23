@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Icon } from './Icon';
-import { Redirect } from './Redirect';
+import { useNavigate } from 'react-router-dom';
 import '../../css/context-menu.scss';
 
 export interface ContextMenuItem {
@@ -18,6 +18,8 @@ export interface ContextMenuProps {
 }
 
 export const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps) => {
+    const navigate = useNavigate();
+
     const style: React.CSSProperties = {
         display: 'block',
         position: 'absolute',
@@ -39,7 +41,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps)
             GlobalContextMenuFrame.removeMenu();
 
             if (item.href) {
-                Redirect.To(item.href);
+                navigate(item.href);
             }
 
             if (item.onClick) {

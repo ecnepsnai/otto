@@ -6,13 +6,12 @@ import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { EditButton, DeleteButton } from '../../components/Button';
 import { Layout } from '../../components/Layout';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Card } from '../../components/Card';
 import { ListGroup } from '../../components/ListGroup';
 import { EnabledBadge } from '../../components/Badge';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
-import { Redirect } from '../../components/Redirect';
 import { ScheduleType } from '../../types/Schedule';
 import { GroupListCard } from '../../components/GroupListCard';
 import { ScriptListCard } from '../../components/ScriptListCard';
@@ -28,6 +27,7 @@ export const HostView: React.FC = () => {
     const [groups, setGroups] = React.useState<GroupType[]>();
     const [scripts, setScripts] = React.useState<ScriptEnabledGroup[]>();
     const [schedules, setSchedules] = React.useState<ScheduleType[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadData();
@@ -67,7 +67,7 @@ export const HostView: React.FC = () => {
     const deleteClick = () => {
         Host.DeleteModal(host).then(deleted => {
             if (deleted) {
-                Redirect.To('/hosts');
+                navigate('/hosts');
             }
         });
     };

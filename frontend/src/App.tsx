@@ -3,7 +3,6 @@ import { StateManager } from './services/StateManager';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GlobalModalFrame } from './components/Modal';
 import { GlobalNotificationFrame } from './components/Notification';
-import { GlobalRedirectFrame } from './components/Redirect';
 import { GlobalContextMenuFrame } from './components/ContextMenu';
 import { Loading } from './components/Loading';
 import { Nav } from './components/Nav';
@@ -70,7 +69,6 @@ export const App: React.FC = () => {
             </Routes>
             <GlobalModalFrame />
             <GlobalNotificationFrame />
-            <GlobalRedirectFrame />
             <GlobalContextMenuFrame />
         </BrowserRouter>
     </ErrorBoundary>);

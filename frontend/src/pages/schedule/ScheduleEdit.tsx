@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { Schedule, ScheduleType } from '../../types/Schedule';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { Page } from '../../components/Page';
 import { Input } from '../../components/input/Input';
 import { Form } from '../../components/Form';
 import { Notification } from '../../components/Notification';
-import { Redirect } from '../../components/Redirect';
 import { Script, ScriptType } from '../../types/Script';
 import { GroupCheckList, HostCheckList } from '../../components/CheckList';
 import { Card } from '../../components/Card';
@@ -25,6 +24,7 @@ export const ScheduleEdit: React.FC = () => {
     const [runOn, setRunOn] = React.useState<'groups' | 'hosts'>();
     const [patternTemplate, setPatternTemplate] = React.useState<string>();
     const [scripts, setScripts] = React.useState<ScriptType[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadData();
@@ -219,7 +219,7 @@ export const ScheduleEdit: React.FC = () => {
 
         return promise.then(schedule => {
             Notification.success('Schedule Saved');
-            Redirect.To('/schedules/schedule/' + schedule.ID);
+            navigate('/schedules/schedule/' + schedule.ID);
         });
     };
 

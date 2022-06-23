@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Group, GroupType } from '../../types/Group';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { PageLoading } from '../../components/Loading';
 import { HostType } from '../../types/Host';
@@ -13,7 +13,6 @@ import { ListGroup } from '../../components/ListGroup';
 import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Nothing } from '../../components/Nothing';
-import { Redirect } from '../../components/Redirect';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
@@ -25,6 +24,7 @@ export const GroupView: React.FC = () => {
     const [hosts, setHosts] = React.useState<HostType[]>();
     const [scripts, setScripts] = React.useState<ScriptType[]>();
     const [schedules, setSchedules] = React.useState<ScheduleType[]>();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         loadData();
@@ -62,7 +62,7 @@ export const GroupView: React.FC = () => {
                 return;
             }
 
-            Redirect.To('/groups');
+            navigate('/groups');
         });
     };
 

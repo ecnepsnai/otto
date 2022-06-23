@@ -1,7 +1,7 @@
 import * as React from 'react';
 import '../../css/button.scss';
 import { Style } from './Style';
-import { Redirect } from './Redirect';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 
 interface CommonButtonProps {
@@ -94,8 +94,10 @@ interface ButtonLinkProps {
  * A button that acts as a link. When clicked it redirects the user to the destination.
  */
 export const ButtonLink: React.FC<ButtonLinkProps> = (props: ButtonLinkProps) => {
+    const navigate = useNavigate();
+
     const onClick = () => {
-        Redirect.To(props.to);
+        navigate(props.to);
     };
     return <Button
         color={props.color}
