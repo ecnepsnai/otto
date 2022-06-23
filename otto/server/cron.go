@@ -18,6 +18,13 @@ func CronSetup() {
 			},
 		},
 		{
+			Pattern: "0 * * * *",
+			Name:    "CleanupHeartbeats",
+			Exec: func() {
+				heartbeatStore.CleanupHeartbeats()
+			},
+		},
+		{
 			Pattern: "1 0 * * *",
 			Name:    "RotateLogs",
 			Exec: func() {
