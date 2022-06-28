@@ -25,7 +25,7 @@ var dataDirectory = getAPIOperatingDir()
 type apiDirectories struct {
 	Base string
 
-	Clients string
+	Agents string
 
 	Data string
 
@@ -43,7 +43,7 @@ func fsSetup() {
 	Directories = apiDirectories{
 		Base: operatingDirectory,
 
-		Clients: path.Join(operatingDirectory, "clients"),
+		Agents: path.Join(operatingDirectory, "agents"),
 
 		Data: path.Join(dataDirectory, "data"),
 
@@ -54,7 +54,7 @@ func fsSetup() {
 		Static: path.Join(operatingDirectory, "static"),
 	}
 
-	MakeDirectoryIfNotExist(Directories.Clients)
+	MakeDirectoryIfNotExist(Directories.Agents)
 
 	MakeDirectoryIfNotExist(Directories.Data)
 

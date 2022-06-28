@@ -5,10 +5,10 @@ import { Icon } from './Icon';
 import { Popover } from './Popover';
 import { Style } from './Style';
 
-interface ClientVersionProps {
+interface AgentVersionProps {
     heartbeat: HeartbeatType;
 }
-export const ClientVersion: React.FC<ClientVersionProps> = (props: ClientVersionProps) => {
+export const AgentVersion: React.FC<AgentVersionProps> = (props: AgentVersionProps) => {
     let versionStr = '';
     if (props.heartbeat) {
         versionStr = props.heartbeat.Version;
@@ -18,19 +18,19 @@ export const ClientVersion: React.FC<ClientVersionProps> = (props: ClientVersion
     if (isNaN(version)) {
         version = 0;
     }
-    const clientVersion = versionStr;
-    const clientVersionNumber = version;
+    const agentVersion = versionStr;
+    const agentVersionNumber = version;
     const serverVersionNumber = StateManager.VersionNumber();
 
 
     const isOutOfDate = () => {
-        return clientVersionNumber < serverVersionNumber;
+        return agentVersionNumber < serverVersionNumber;
     };
 
-    const versionString = clientVersionNumber == 0 ? 'Unknown' : clientVersion;
+    const versionString = agentVersionNumber == 0 ? 'Unknown' : agentVersion;
 
     if (isOutOfDate()) {
-        return (<Popover content="A newer version of the Otto client is available"><Icon.Label icon={<Icon.ExclamationTriangle color={Style.Palette.Warning} />} label={versionString} /></Popover>);
+        return (<Popover content="A newer version of the Otto agent is available"><Icon.Label icon={<Icon.ExclamationTriangle color={Style.Palette.Warning} />} label={versionString} /></Popover>);
     }
 
     return (<span>{versionString}</span>);

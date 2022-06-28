@@ -85,10 +85,10 @@ export const SystemRegister: React.FC = () => {
         const registerKey = options.Key.replace('"', '\\"');
         let url = StateManager.Current().Options.General.ServerURL;
         url = url.substr(0, url.length - 1);
-        const command = 'REGISTER_KEY="' + registerKey + '" \\\nREGISTER_HOST="' + url + '" \\\n./otto';
+        const command = 'REGISTER_KEY="' + registerKey + '" \\\nREGISTER_HOST="' + url + '" \\\n/opt/otto-agent/agent';
 
         GlobalModalFrame.showModal(<Modal title="Register Command">
-            <p>Copy and paste the following command into any shell to start client registration</p>
+            <p>Copy and paste the following command into any shell to start agent registration</p>
             <Pre>{command}</Pre>
         </Modal>);
     };
@@ -146,7 +146,7 @@ export const SystemRegister: React.FC = () => {
             <Input.Text
                 type="text"
                 label="Register Key"
-                helpText="Clients that wish to register with this server must specify this key to authenticate"
+                helpText="Agents that wish to register with this server must specify this key to authenticate"
                 defaultValue={options.Key}
                 onChange={changeKey}
                 key={keyInputKey}
@@ -165,7 +165,7 @@ export const SystemRegister: React.FC = () => {
             </Card.Card>
             <Input.Select
                 label="Default Group"
-                helpText="If none of the above rules match the client will be added to this group"
+                helpText="If none of the above rules match the agent will be added to this group"
                 defaultValue={options.DefaultGroupID}
                 onChange={changeDefaultGroupID}>
                 {groups.map((group, idx) => {

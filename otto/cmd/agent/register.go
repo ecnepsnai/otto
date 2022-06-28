@@ -49,18 +49,18 @@ func tryAutoRegister() {
 	// Exit when Finished
 	exitWhenFinished := os.Getenv("REGISTER_DONT_EXIT_ON_FINISH") == ""
 
-	// Client Port
+	// Agent Port
 	port := uint32(12444)
-	portStr := os.Getenv("OTTO_CLIENT_PORT")
+	portStr := os.Getenv("OTTO_AGENT_PORT")
 	if portStr != "" {
 		p, err := strconv.ParseUint(portStr, 10, 32)
 		if err != nil {
-			panic("Invalid value for variable OTTO_CLIENT_PORT")
+			panic("Invalid value for variable OTTO_AGENT_PORT")
 		}
 		port = uint32(p)
 	}
 
-	rlog.Printf("Will attempt to register client with otto server '%s'", host)
+	rlog.Printf("Will attempt to register agent with otto server '%s'", host)
 	if noTLSVerify {
 		rlog.Printf("WARNING - TLS Verification disabled, this is insecure and should not be used in production")
 	}
@@ -72,19 +72,19 @@ func tryAutoRegister() {
 	uid, gid := getUIDandGID()
 
 	if err := generateIdentity(); err != nil {
-		panic("Error generating client identity: " + err.Error())
+		panic("Error generating agent identity: " + err.Error())
 	}
-	signer, err := loadClientIdentity()
+	signer, err := loadAgentIdentity()
 	if err != nil {
-		panic("Error reading client identity: " + err.Error())
+		panic("Error reading agent identity: " + err.Error())
 	}
-	rlog.Printf("Client identity: %s", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
+	rlog.Printf("Agent identity: %s", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
 
 	// Make the request
 	request := otto.RegisterRequest{
-		ClientIdentity: base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()),
-		Port:           port,
-		Properties:     registerProperties,
+		AgentIdentity: base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()),
+		Port:          port,
+		Properties:    registerProperties,
 	}
 	data, err := json.Marshal(request)
 	if err != nil {
@@ -108,11 +108,11 @@ func tryAutoRegister() {
 	if noTLSVerify {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
-	httpClient := &http.Client{Transport: tr}
+	httpAgent := &http.Client{Transport: tr}
 
 	// Request registration
 	rlog.Printf("HTTP PUT -> %s", url)
-	response, err := httpClient.Do(req)
+	response, err := httpAgent.Do(req)
 	if err != nil {
 		rlog.Fatalf("Error connecting to otto server: %s", err.Error())
 	}
@@ -148,7 +148,7 @@ func tryAutoRegister() {
 	}
 
 	// Save the config
-	conf := clientConfig{
+	conf := agentConfig{
 		IdentityPath:   otto_IDENTITY_FILE_NAME,
 		ServerIdentity: registerResponse.ServerIdentity,
 		LogPath:        ".",

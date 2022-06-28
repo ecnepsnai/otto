@@ -78,8 +78,8 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		log.Warn("Script with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
 	}
-	if params.AfterExecution != "" && !IsClientAction(params.AfterExecution) {
-		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
+	if params.AfterExecution != "" && !IsAgentAction(params.AfterExecution) {
+		return nil, ErrorUser("Invalid agent action %s", params.AfterExecution)
 	}
 
 	if err := environ.Validate(params.Environment); err != nil {
@@ -127,8 +127,8 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 		log.Warn("Script with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
 	}
-	if params.AfterExecution != "" && !IsClientAction(params.AfterExecution) {
-		return nil, ErrorUser("Invalid client action %s", params.AfterExecution)
+	if params.AfterExecution != "" && !IsAgentAction(params.AfterExecution) {
+		return nil, ErrorUser("Invalid agent action %s", params.AfterExecution)
 	}
 
 	if err := environ.Validate(params.Environment); err != nil {

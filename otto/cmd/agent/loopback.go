@@ -31,12 +31,12 @@ func sendLoopbackHeartbeat() {
 		Network:          "tcp",
 		Address:          config.ListenAddr,
 		Identity:         loopbackIdentity.Signer(),
-		TrustedPublicKey: base64.StdEncoding.EncodeToString(clientIdentity.PublicKey().Marshal()),
+		TrustedPublicKey: base64.StdEncoding.EncodeToString(agentIdentity.PublicKey().Marshal()),
 		Timeout:          2 * time.Second,
 	})
 	if err != nil {
-		log.Error("Error making loopback connection to otto client: %s", err.Error())
-		log.Fatal("Otto client is not listening correctly, exiting...")
+		log.Error("Error making loopback connection to otto agent: %s", err.Error())
+		log.Fatal("Otto agent is not listening correctly, exiting...")
 	}
 	nonce := secutil.RandomString(8)
 	resp, err := c.SendHeartbeat(otto.MessageHeartbeatRequest{
@@ -44,16 +44,16 @@ func sendLoopbackHeartbeat() {
 		Nonce:   nonce,
 	})
 	if err != nil {
-		log.Error("Error sending loopback heartbeat to client: %s", err.Error())
-		log.Fatal("Otto client is not listening correctly, exiting...")
+		log.Error("Error sending loopback heartbeat to agent: %s", err.Error())
+		log.Fatal("Otto agent is not listening correctly, exiting...")
 	}
 	if resp.Nonce != nonce {
 		log.Error("Unexpected nonce in loopback heartbeat, this should never happen")
-		log.Fatal("Otto client is not listening correctly, exiting...")
+		log.Fatal("Otto agent is not listening correctly, exiting...")
 	}
-	if resp.ClientVersion != Version {
+	if resp.AgentVersion != Version {
 		log.Error("Unexpected version in loopback heartbeat, this should never happen")
-		log.Fatal("Otto client is not listening correctly, exiting...")
+		log.Fatal("Otto agent is not listening correctly, exiting...")
 	}
 	c.Close()
 	log.Debug("Loopback heartbeat successful")

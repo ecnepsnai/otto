@@ -14,7 +14,7 @@ func tryGuidedSetup() {
 	config.DefaultGID = gid
 	config.Path = os.Getenv("PATH")
 
-	signer, err := loadOrGenerateClientIdentity()
+	signer, err := loadOrGenerateAgentIdentity()
 	if err != nil {
 		panic(err)
 	}
@@ -45,9 +45,9 @@ func tryGuidedSetup() {
 	config.ListenAddr = getConfigValue("Listen Address", config.ListenAddr)
 	config.ServerIdentity = getConfigValue("Server Identity (Copy from Otto Server)", "")
 	config.AllowFrom = strings.Split(getConfigValue("Allow Connections From (comma-separated list of CIDR addresses)", strings.Join(config.AllowFrom, ",")), ",")
-	fmt.Printf("Client identity: %s\n", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
+	fmt.Printf("Agent identity: %s\n", base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()))
 
 	saveNewConfig(config)
-	fmt.Printf("Otto is now configured! Run %s to start the client\n", os.Args[0])
+	fmt.Printf("Otto is now configured! Run %s to start the agent\n", os.Args[0])
 	os.Exit(0)
 }

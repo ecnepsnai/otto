@@ -21,7 +21,7 @@ func listen() {
 		listener, err = otto.SetupListener(otto.ListenOptions{
 			Address:           config.ListenAddr,
 			AllowFrom:         getAllowFroms(),
-			Identity:          clientIdentity,
+			Identity:          agentIdentity,
 			TrustedPublicKeys: []string{config.ServerIdentity, loopbackIdentity.PublicKeyString()},
 		}, handle)
 		if err != nil {
@@ -91,9 +91,9 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 	}
 
 	response := otto.MessageHeartbeatResponse{
-		ClientVersion: Version,
-		Properties:    properties,
-		Nonce:         message.Nonce,
+		AgentVersion: Version,
+		Properties:   properties,
+		Nonce:        message.Nonce,
 	}
 
 	if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, response); err != nil {
@@ -103,15 +103,15 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 
 func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerAction, cancel chan bool) {
 	reply := otto.MessageActionResult{
-		ClientVersion: Version,
+		AgentVersion: Version,
 	}
 	switch message.Action {
-	case otto.ActionReloadConfig, otto.ActionExitClient, otto.ActionReboot, otto.ActionShutdown:
+	case otto.ActionReloadConfig, otto.ActionExitAgent, otto.ActionReboot, otto.ActionShutdown:
 		// No action
 		break
 	case otto.ActionRunScript:
 		reply.ScriptResult = runScript(conn, message.Script, cancel)
-	case otto.ActionUploadFile, otto.ActionUploadFileAndExitClient:
+	case otto.ActionUploadFile, otto.ActionUploadFileAndExitAgent:
 		if err := uploadFile(message.File); err != nil {
 			reply.Error = err.Error()
 		}
@@ -138,7 +138,7 @@ func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerActio
 		return
 	}
 
-	if message.Action == otto.ActionUploadFileAndExitClient || message.Action == otto.ActionExitClient {
+	if message.Action == otto.ActionUploadFileAndExitAgent || message.Action == otto.ActionExitAgent {
 		conn.Close()
 		log.Warn("Exiting at request of '%s'", conn.RemoteAddr().String())
 		os.Exit(1)
@@ -169,7 +169,7 @@ func handleRotateIdentity(conn *otto.Connection, message otto.MessageRotateIdent
 	if err := generateIdentity(); err != nil {
 		reply.Error = err.Error()
 	}
-	newID, err := loadClientIdentity()
+	newID, err := loadAgentIdentity()
 	if err != nil {
 		reply.Error = err.Error()
 	}
@@ -177,7 +177,7 @@ func handleRotateIdentity(conn *otto.Connection, message otto.MessageRotateIdent
 	newPublicKey := base64.StdEncoding.EncodeToString(newID.PublicKey().Marshal())
 	reply.PublicKey = newPublicKey
 	log.PWarn("Identity rotated", map[string]interface{}{
-		"client_public": newPublicKey,
+		"agent_public":  newPublicKey,
 		"server_public": message.PublicKey,
 	})
 

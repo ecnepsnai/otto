@@ -89,11 +89,11 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 	}
 	if !script.RunAs.Inherit {
 		if uid, _ := getCurrentUIDandGID(); uid != 0 {
-			log.Error("Cannot run script as specific user without the Otto client running as root")
+			log.Error("Cannot run script as specific user without the Otto agent running as root")
 			canCancel = false
 			return otto.ScriptResult{
 				Success:   false,
-				ExecError: "Running a script as a specific user requires the Otto client running as root",
+				ExecError: "Running a script as a specific user requires the Otto agent running as root",
 				Elapsed:   time.Since(start),
 			}
 		}

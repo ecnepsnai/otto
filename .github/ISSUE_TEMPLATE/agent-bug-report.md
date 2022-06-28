@@ -1,8 +1,8 @@
 ---
-name: Client Bug Report
-about: Report a bug with the Otto Client
-title: "[CLIENT] [BUG]"
-labels: bug, otto-client
+name: Agent Bug Report
+about: Report a bug with the Otto Agent
+title: "[AGENT] [BUG]"
+labels: bug, otto-agent
 assignees: ecnepsnai
 
 ---
@@ -24,6 +24,6 @@ A clear and concise description of what you expected to happen.
 A clear and concise description of what actually happened.
 
 **Runtime Information**
-- Otto client version: *run `otto -v`*
+- Otto agent version: *run `otto -v`*
 - Otto server version: *can be found in the top right menu*
 - OS Name & Version: *run `uname -a`*

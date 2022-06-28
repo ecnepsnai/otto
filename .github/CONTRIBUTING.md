@@ -31,19 +31,19 @@ Directory structure:
 
 ## libotto
 
-libotto is a golang library that defines the common data structures shared between the Otto client and server. This is
+libotto is a golang library that defines the common data structures shared between the Otto agent and server. This is
 all contained within the `/otto` directory.
 
-## Otto Client
+## Otto Agent
 
-The otto client is a small golang application with no runtime requirements.
+The otto agent is a small golang application with no runtime requirements.
 
-Source code for the otto client is located in `/otto/cmd/client`
+Source code for the otto agent is located in `/otto/cmd/agent`
 
 ## Otto Server
 
 The otto server is a golang application that powers the otto web UI and is what actually interacts with the otto
-clients.
+agents.
 
 Directory structure:
 

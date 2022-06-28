@@ -1,11 +1,11 @@
 # Scripts
 
-A script is configured on the Otto server and is executed on the Otto client. Scripts can be in any executable format as
+A script is configured on the Otto server and is executed on the Otto agent. Scripts can be in any executable format as
 long as the executable itself requires only the first and only parameter being the path to the script.
 
 For example: `bash <script>`, `python <python file>`.
 
-An Otto client can run multiple scripts in parallel, and scripts can be aborted by the user during execution. Aborted
+An Otto agent can run multiple scripts in parallel, and scripts can be aborted by the user during execution. Aborted
 scripts are killed with SIGTERM.
 
 ## Environment Variables
@@ -38,7 +38,7 @@ the web interface.
 You can attach files to scripts that will be uploaded and placed on hosts at specified paths before the script is run.
 Attachments are uploaded each time a script runs, and will overwrite any existing files at the same path.
 
-If the destination directory for the attachment does not exist the Otto client will create it. The otto client will use
+If the destination directory for the attachment does not exist the Otto agent will create it. The otto agent will use
 the default mode for the directory, and set the owner to the same as the attachment.
 
 Attachments can be owned by specific UID/GID or inherit the UID/GID that the script runs as, and have a specific

@@ -10,7 +10,7 @@
     - key: IPv6
       description: IPv6 only
       value: '"ipv6"'
-- name: ClientAction
+- name: AgentAction
   type: string
   values:
     - key: Ping
@@ -19,9 +19,9 @@
     - key: RunScript
       description: Run the script on the host
       value: '"run_script"'
-    - key: ExitClient
-      description: Exit the client on the host
-      value: '"exit_client"'
+    - key: ExitAgent
+      description: Exit the agent on the host
+      value: '"exit_agent"'
     - key: Reboot
       description: Reboot the host
       value: '"reboot"'
@@ -29,7 +29,7 @@
       description: Power off the host
       value: '"shutdown"'
     - key: UpdateIdentity
-      description: Update the server identity on the client
+      description: Update the server identity on the agent
       value: '"update_identity"'
 - name: ScheduleResult
   type: int

@@ -26,16 +26,16 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		return nil, web.ValidationError("No host with ID %s", r.HostID)
 	}
 
-	if !IsClientAction(r.Action) {
+	if !IsAgentAction(r.Action) {
 		return nil, web.ValidationError("Unknown action %s", r.Action)
 	}
 
-	if r.Action == ClientActionPing {
+	if r.Action == AgentActionPing {
 		if err := host.Ping(); err != nil {
 			return false, nil
 		}
 		return true, nil
-	} else if r.Action == ClientActionRunScript {
+	} else if r.Action == AgentActionRunScript {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			return nil, web.ValidationError("No script with ID %s", r.ScriptID)
@@ -49,8 +49,8 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 
 		return result, nil
-	} else if r.Action == ClientActionExitClient {
-		if err := host.ExitClient(); err != nil {
+	} else if r.Action == AgentActionExitAgent {
+		if err := host.ExitAgent(); err != nil {
 			return false, nil
 		}
 		return true, nil
@@ -110,7 +110,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		return
 	}
 
-	if !IsClientAction(r.Action) {
+	if !IsAgentAction(r.Action) {
 		writeMessage(requestResponse{
 			Code:  requestResponseCodeError,
 			Error: fmt.Sprintf("Unknown action %s", r.Action),
@@ -118,7 +118,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		return
 	}
 
-	if r.Action == ClientActionPing {
+	if r.Action == AgentActionPing {
 		if err := host.Ping(); err != nil {
 			writeMessage(requestResponse{
 				Code:  requestResponseCodeError,
@@ -128,7 +128,7 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		}
 		writeMessage(requestResponse{Code: 200})
 		return
-	} else if r.Action == ClientActionRunScript {
+	} else if r.Action == AgentActionRunScript {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			writeMessage(requestResponse{
@@ -199,8 +199,8 @@ func (h handle) RequestStream(request web.Request, conn web.WSConn) {
 		})
 		running = false
 		return
-	} else if r.Action == ClientActionExitClient {
-		if err := host.ExitClient(); err != nil {
+	} else if r.Action == AgentActionExitAgent {
+		if err := host.ExitAgent(); err != nil {
 			writeMessage(requestResponse{Code: requestResponseCodeFinished})
 			return
 		}

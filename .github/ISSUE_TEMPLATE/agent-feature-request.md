@@ -1,8 +1,8 @@
 ---
-name: Client Feature Request
-about: Suggest an idea for the Otto Client
-title: "[CLIENT] [REQ]"
-labels: enhancement, otto-client
+name: Agent Feature Request
+about: Suggest an idea for the Otto Agent
+title: "[AGENT] [REQ]"
+labels: enhancement, otto-agent
 assignees: ecnepsnai
 
 ---

@@ -32,7 +32,7 @@ type Listener struct {
 func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Listener, error) {
 	for _, trustedKey := range options.TrustedPublicKeys {
 		if trustedKey == base64.StdEncoding.EncodeToString(options.Identity.PublicKey().Marshal()) {
-			return nil, fmt.Errorf("server and client identity cannot be the same")
+			return nil, fmt.Errorf("server and agent identity cannot be the same")
 		}
 	}
 
@@ -40,7 +40,7 @@ func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Liste
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Otto client listening on %s", options.Address)
+	log.Info("Otto agent listening on %s", options.Address)
 	return &Listener{
 		options: options,
 		handle:  handle,

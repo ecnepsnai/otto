@@ -8,7 +8,7 @@ var defaultUser = newUserParameters{
 }
 
 var defaultGroup = newGroupParameters{
-	Name: "Otto Clients",
+	Name: "Otto Agents",
 }
 
 var defaultScript = newScriptParameters{

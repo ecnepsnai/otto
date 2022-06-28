@@ -38,9 +38,9 @@ export const OptionsRotateID: React.FC<OptionsRotateIDProps> = (props: OptionsRo
     return (
         <React.Fragment>
             <Input.Checkbox
-                label="Automatically Rotate Client Identites"
+                label="Automatically Rotate Agent Identites"
                 defaultValue={value.Enabled}
-                helpText="If checked then client IDs are updated at the frequency specified below."
+                helpText="If checked then agent IDs are updated at the frequency specified below."
                 onChange={changeEnabled} />
             {content()}
         </React.Fragment>

@@ -84,14 +84,14 @@ func (h *Host) RotateIdentityIfNeeded() *Error {
 		return nil
 	}
 
-	log.PInfo("Triggering automatic rotation of client identity", map[string]interface{}{
+	log.PInfo("Triggering automatic rotation of agent identity", map[string]interface{}{
 		"host_id":                h.ID,
 		"host_name":              h.Name,
 		"days_since_last_update": daysSinceLastUpdate,
 	})
 	serverID, hostID, err := h.RotateIdentity()
 	if err != nil {
-		log.PError("Error automatically rotating client identity", map[string]interface{}{
+		log.PError("Error automatically rotating agent identity", map[string]interface{}{
 			"host_id":   h.ID,
 			"host_name": h.Name,
 			"error":     err.Error,

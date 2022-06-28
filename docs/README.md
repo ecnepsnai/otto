@@ -7,12 +7,12 @@ This is the home of documentation for the Otto automation framework.
 ## Table of Contents
 
 - [Event Log](event_log.md)
-- [Automatic Client Registration](automatic_register.md)
+- [Automatic Agent Registration](automatic_register.md)
 - [Groups](group.md)
 - [Introduction](introduction.md)
 - [Otto Protocol](protocol.md)
 - [REST API](api.md)
 - [Schedules](schedule.md)
 - [Scripts](script.md)
-- [The Otto Client](client.md)
+- [Hosts](host.md)
 - [The Otto Server](server.md)

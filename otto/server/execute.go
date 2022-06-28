@@ -22,11 +22,11 @@ type ScriptResult struct {
 	RunError    string
 }
 
-var clientActionMap = map[string]uint32{
-	ClientActionRunScript:  otto.ActionRunScript,
-	ClientActionExitClient: otto.ActionUploadFileAndExitClient,
-	ClientActionReboot:     otto.ActionReboot,
-	ClientActionShutdown:   otto.ActionShutdown,
+var agentActionMap = map[string]uint32{
+	AgentActionRunScript: otto.ActionRunScript,
+	AgentActionExitAgent: otto.ActionUploadFileAndExitAgent,
+	AgentActionReboot:    otto.ActionReboot,
+	AgentActionShutdown:  otto.ActionShutdown,
 }
 
 type hostConnection struct {
@@ -36,7 +36,7 @@ type hostConnection struct {
 	Conn     *otto.Connection
 }
 
-// connect will open a connection to the Otto client on the host
+// connect will open a connection to the Otto agent on the host
 func (host *Host) connect() (*hostConnection, error) {
 	address := fmt.Sprintf("%s:%d", host.Address, host.Port)
 	log.Debug("Connecting to host %s", address)
@@ -74,8 +74,8 @@ func (host *Host) connect() (*hostConnection, error) {
 			pendingKey := base64.StdEncoding.EncodeToString(key)
 			host.Trust.UntrustedIdentity = pendingKey
 			HostStore.UpdateHostTrust(host.ID, host.Trust)
-			log.PInfo("Recorded new identity from client", map[string]interface{}{
-				"client":   host.ID,
+			log.PInfo("Recorded new identity from agent", map[string]interface{}{
+				"agent":    host.ID,
 				"identity": pendingKey,
 			})
 		}
@@ -221,7 +221,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 
 	if result.ScriptResult.Success {
 		if script.AfterExecution != "" {
-			clientAction, ok := clientActionMap[script.AfterExecution]
+			agentAction, ok := agentActionMap[script.AfterExecution]
 			if !ok {
 				log.PError("Unknown post-execution action", map[string]interface{}{
 					"action":    script.AfterExecution,
@@ -240,7 +240,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 
 			log.Info("Performing post-execution action '%s' on host '%s'", script.AfterExecution, host.Address)
 			_, err = host.TriggerAction(otto.MessageTriggerAction{
-				Action: clientAction,
+				Action: agentAction,
 			}, nil, cancel)
 			if err != nil {
 				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ScriptResult.ExecError)
@@ -267,13 +267,13 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 	}, nil
 }
 
-// ExitClient exit the otto client on the host
-func (host *Host) ExitClient() *Error {
+// ExitAgent exit the otto agent on the host
+func (host *Host) ExitAgent() *Error {
 	_, err := host.TriggerAction(otto.MessageTriggerAction{
-		Action: otto.ActionExitClient,
+		Action: otto.ActionExitAgent,
 	}, nil, nil)
 	if err != nil {
-		log.Error("Error exiting otto client on host '%s': %s", host.Address, err.Message)
+		log.Error("Error exiting otto agent on host '%s': %s", host.Address, err.Message)
 		return err
 	}
 	return nil
@@ -300,32 +300,32 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 		PublicKey: serverId.PublicKeyString(),
 	})
 	if err != nil {
-		log.PError("Error requesting client update identity", map[string]interface{}{
+		log.PError("Error requesting agent update identity", map[string]interface{}{
 			"host":  host.ID,
 			"error": err.Error,
 		})
 		return "", "", ErrorFrom(err)
 	}
 	if reply.Error != "" {
-		log.PError("Error requesting client update identity", map[string]interface{}{
+		log.PError("Error requesting agent update identity", map[string]interface{}{
 			"host":  host.ID,
 			"error": reply.Error,
 		})
 		return "", "", ErrorServer(reply.Error)
 	}
 	if reply.PublicKey == "" {
-		log.PError("Error requesting client update identity", map[string]interface{}{
+		log.PError("Error requesting agent update identity", map[string]interface{}{
 			"host":  host.ID,
 			"error": "no public key in response",
 		})
 		return "", "", ErrorServer("no public key in response")
 	}
 
-	clientPublicKey := reply.PublicKey
+	agentPublicKey := reply.PublicKey
 
 	IdentityStore.Set(host.ID, serverId)
 	trust := HostTrust{
-		TrustedIdentity: clientPublicKey,
+		TrustedIdentity: agentPublicKey,
 		LastTrustUpdate: time.Now(),
 	}
 	if err := HostStore.UpdateHostTrust(host.ID, trust); err != nil {
@@ -340,7 +340,7 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 		"host_id":    host.ID,
 		"host_name":  host.Name,
 		"server_pub": serverId.PublicKeyString(),
-		"client_pub": clientPublicKey,
+		"agent_pub":  agentPublicKey,
 	})
-	return serverId.PublicKeyString(), clientPublicKey, nil
+	return serverId.PublicKeyString(), agentPublicKey, nil
 }

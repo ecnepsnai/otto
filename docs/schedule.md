@@ -19,7 +19,7 @@ You can use a pre-defined frequency template of:
 
 Or define your own schedule using [cron patterns](https://pkg.go.dev/github.com/ecnepsnai/cron#pkg-overview).
 
-**All schedules run in the UTC timezone, not the timezone of the server, client, or your local computer.**
+**All schedules run in the UTC timezone, not the timezone of the server, agent, or your local computer.**
 
 Last, select the individual hosts or groups that you want this script to run.
 

@@ -44,7 +44,7 @@ type OptionsRotateID struct {
 	FrequencyDays uint
 }
 
-// OptionsNetwork describes network options for connecting to otto clients
+// OptionsNetwork describes network options for connecting to otto agents
 type OptionsNetwork struct {
 	ForceIPVersion     string
 	Timeout            int64

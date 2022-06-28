@@ -1,7 +1,7 @@
 /*
 Package otto an automation toolkit for Unix-like computers.
 
-This package contains the common interfaces and methods shared by the Otto client and Otto server.
+This package contains the common interfaces and methods shared by the Otto agent and Otto server.
 */
 package otto
 
@@ -21,7 +21,7 @@ import (
 var log = logtic.Log.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
-const ProtocolVersion = uint32(2)
+const ProtocolVersion = uint32(3)
 
 func init() {
 	gob.Register(MessageHeartbeatRequest{})
@@ -62,9 +62,9 @@ type MessageHeartbeatRequest struct {
 
 // MessageHeartbeatResponse describes a heartbeat response
 type MessageHeartbeatResponse struct {
-	ClientVersion string            `json:"client_version"`
-	Properties    map[string]string `json:"properties"`
-	Nonce         string            `json:"nonce"`
+	AgentVersion string            `json:"agent_version"`
+	Properties   map[string]string `json:"properties"`
+	Nonce        string            `json:"nonce"`
 }
 
 // MessageTriggerAction describes an action trigger
@@ -85,10 +85,10 @@ type MessageActionOutput struct {
 
 // MessageActionResult describes the result of a triggered action
 type MessageActionResult struct {
-	ScriptResult  ScriptResult `json:"script_result"`
-	Error         string       `json:"error"`
-	File          File         `json:"file"`
-	ClientVersion string       `json:"client_version"`
+	ScriptResult ScriptResult `json:"script_result"`
+	Error        string       `json:"error"`
+	File         File         `json:"file"`
+	AgentVersion string       `json:"agent_version"`
 }
 
 // MessageRotateIdentityRequest describes a request to rotate an identity
@@ -112,8 +112,8 @@ const (
 	ActionRunScript uint32 = iota + 1
 	ActionReloadConfig
 	ActionUploadFile
-	ActionUploadFileAndExitClient
-	ActionExitClient
+	ActionUploadFileAndExitAgent
+	ActionExitAgent
 	ActionReboot
 	ActionShutdown
 )
@@ -167,9 +167,9 @@ type File struct {
 
 // RegisterRequest describes a register request
 type RegisterRequest struct {
-	ClientIdentity string                    `json:"identity"`
-	Port           uint32                    `json:"port"`
-	Properties     RegisterRequestProperties `json:"properties"`
+	AgentIdentity string                    `json:"identity"`
+	Port          uint32                    `json:"port"`
+	Properties    RegisterRequestProperties `json:"properties"`
 }
 
 // RegisterRequestProperties describes properties for a register request
@@ -191,7 +191,7 @@ func readFrame(r io.Reader) ([]byte, error) {
 	versionBuf := make([]byte, 4)
 	if _, err := io.ReadFull(r, versionBuf); err != nil {
 		if err == io.EOF {
-			// Client closed - nothing to read
+			// Agent closed - nothing to read
 			return nil, nil
 		}
 

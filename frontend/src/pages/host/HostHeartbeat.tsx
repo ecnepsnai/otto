@@ -6,7 +6,7 @@ import { Icon } from '../../components/Icon';
 import { HeartbeatType } from '../../types/Heartbeat';
 import { HeartbeatBadge } from '../../components/Badge';
 import { Card } from '../../components/Card';
-import { ClientVersion } from '../../components/ClientVersion';
+import { AgentVersion } from '../../components/AgentVersion';
 import { DateLabel } from '../../components/DateLabel';
 
 interface HostHeartbeatProps {
@@ -39,12 +39,12 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
         return (<ListGroup.TextItem title="Last Heartbeat"><DateLabel date={Heartbeat.LastReply} /></ListGroup.TextItem>);
     };
 
-    const clientVersion = (): JSX.Element => {
+    const agentVersion = (): JSX.Element => {
         if (!Heartbeat) {
             return null;
         }
 
-        return (<ListGroup.TextItem title="Client Version"><ClientVersion heartbeat={Heartbeat} /></ListGroup.TextItem>);
+        return (<ListGroup.TextItem title="Agent Version"><AgentVersion heartbeat={Heartbeat} /></ListGroup.TextItem>);
     };
 
     const hostProperties = (): JSX.Element => {
@@ -75,7 +75,7 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
 
     return (
         <Card.Card className="mb-3">
-            <Card.Header>Otto Client Information</Card.Header>
+            <Card.Header>Otto Agent Information</Card.Header>
             <ListGroup.List>
                 <ListGroup.TextItem title="Status">
                     <HeartbeatBadge heartbeat={Heartbeat} />
@@ -84,7 +84,7 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
                     </span>
                 </ListGroup.TextItem>
                 {lastReply()}
-                {clientVersion()}
+                {agentVersion()}
                 {hostProperties()}
             </ListGroup.List>
         </Card.Card>

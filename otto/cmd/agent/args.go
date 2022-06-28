@@ -20,7 +20,7 @@ func parseArgs() {
 	for i < len(args) {
 		arg := args[i]
 		if arg == "-v" || arg == "--version" {
-			message := `Otto client:
+			message := `Otto agent:
 	Version: %s
 	Built On: %s
 	Protocol version: %d
@@ -38,7 +38,7 @@ Host Information:
 		} else if arg == "-d" || arg == "--debug" {
 			logtic.Log.Level = logtic.LevelDebug
 		} else if arg == "-p" || arg == "--public-key" {
-			signer, err := loadClientIdentity()
+			signer, err := loadAgentIdentity()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error reading identity: %s\n", err.Error())
 				os.Exit(1)
@@ -60,13 +60,13 @@ Host Information:
 			fmt.Printf(`Usage: %s [options]
 
 Options:
--v --version              Print client version and host information
--p --public-key           Print the client public key
+-v --version              Print agent version and host information
+-p --public-key           Print the agent public key
 -s --setup                Start the interactive setup process
 -t --trust-identity <id>  Trust the specified server identity
 
 Environment variables:
-OTTO_VERBOSE    If set with any value, increases the verbosity of the client log
+OTTO_VERBOSE    If set with any value, increases the verbosity of the agent log
 `, os.Args[0])
 			os.Exit(1)
 		}

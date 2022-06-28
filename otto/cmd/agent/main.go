@@ -16,7 +16,7 @@ func main() {
 	tryAutoRegister()
 	mustLoadConfig()
 
-	logtic.Log.FilePath = path.Join(config.LogPath, "otto_client.log")
+	logtic.Log.FilePath = path.Join(config.LogPath, "otto_agent.log")
 	if os.Getenv("OTTO_VERBOSE") == "" {
 		logtic.Log.Stdout = io.Discard
 	}

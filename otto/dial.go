@@ -21,7 +21,7 @@ type DialOptions struct {
 // Dial will dial the host specified by the options and perform a SSH handshake with it.
 func Dial(options DialOptions) (*Connection, error) {
 	if base64.StdEncoding.EncodeToString(options.Identity.PublicKey().Marshal()) == options.TrustedPublicKey {
-		return nil, fmt.Errorf("server and client identity cannot be the same")
+		return nil, fmt.Errorf("server and agent identity cannot be the same")
 	}
 
 	localIdentity := options.Identity.PublicKey().Marshal()

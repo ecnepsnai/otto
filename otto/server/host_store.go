@@ -96,12 +96,12 @@ func (s *hostStoreObject) AllHosts() []Host {
 }
 
 type newHostParameters struct {
-	Name           string
-	Address        string
-	Port           uint32
-	ClientIdentity string
-	GroupIDs       []string
-	Environment    []environ.Variable
+	Name          string
+	Address       string
+	Port          uint32
+	AgentIdentity string
+	GroupIDs      []string
+	Environment   []environ.Variable
 }
 
 func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
@@ -137,8 +137,8 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	if err := limits.Check(host); err != nil {
 		return nil, ErrorUser(err.Error())
 	}
-	if params.ClientIdentity != "" {
-		host.Trust.TrustedIdentity = params.ClientIdentity
+	if params.AgentIdentity != "" {
+		host.Trust.TrustedIdentity = params.AgentIdentity
 		host.Trust.LastTrustUpdate = time.Now()
 	}
 

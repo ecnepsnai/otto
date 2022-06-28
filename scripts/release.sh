@@ -37,35 +37,35 @@ function build_server() {
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w -X 'github.com/ecnepsnai/otto/server.Version=${VERSION}' -X 'github.com/ecnepsnai/otto/server.BuildDate=${BUILD_DATE}'" -trimpath -buildmode=exe -o ${PRODUCT_NAME} >> ${LOG} 2>&1
     
     cp -r ${FRONTEND_PATH}/build static
-    mkdir clients
-    cp ${ROOT_PATH}/artifacts/ottoclient* clients
+    mkdir agents
+    cp ${ROOT_PATH}/artifacts/ottoagent* agents
 
     NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
-    tar -czf ${NAME}.tar.gz ${PRODUCT_NAME} static clients
+    tar -czf ${NAME}.tar.gz ${PRODUCT_NAME} static agents
     mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/
     git clean -qxdf
     cd ${ROOT_PATH}
 }
 
-function build_client() {
-    cd ${OTTO_PATH}/cmd/client
+function build_agent() {
+    cd ${OTTO_PATH}/cmd/agent
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.BuildDate=${BUILD_DATE}'" -trimpath -buildmode=exe -o ${PRODUCT_NAME} >> ${LOG} 2>&1
-    NAME=${PRODUCT_NAME}client-${VERSION}_${1}-${2}
+    NAME=${PRODUCT_NAME}agent-${VERSION}_${1}-${2}
     tar -czf ${NAME}.tar.gz otto
     mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/
     git clean -qxdf
     cd ${ROOT_PATH}
 }
 
-echo -en "Packaging client builds... "
+echo -en "Packaging agent builds... "
 for ARCH in 'amd64' 'arm64'; do
     for OS in 'linux' 'freebsd' 'openbsd' 'netbsd'; do
-        build_client ${OS} ${ARCH}
+        build_agent ${OS} ${ARCH}
     done
 done
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
-cd ${ROOT_PATH}/scripts/client_rpm
+cd ${ROOT_PATH}/scripts/agent_rpm
 ./build.sh ${VERSION}
 
 echo -en "Packaging server build... "

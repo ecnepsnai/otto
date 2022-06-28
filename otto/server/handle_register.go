@@ -24,9 +24,9 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 
 	if requestProtocolVersion := request.HTTP.Header.Get("X-OTTO-PROTO-VERSION"); fmt.Sprintf("%d", otto.ProtocolVersion) != requestProtocolVersion {
 		log.PWarn("Rejected registration request", map[string]interface{}{
-			"remote_addr":             request.HTTP.RemoteAddr,
-			"reason":                  "unsupported otto protocol version",
-			"client_protocol_version": requestProtocolVersion,
+			"remote_addr":            request.HTTP.RemoteAddr,
+			"reason":                 "unsupported otto protocol version",
+			"agent_protocol_version": requestProtocolVersion,
 		})
 		return web.HTTPResponse{
 			Status: 400,
@@ -86,11 +86,11 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 	// RemoteAddr will always have a port, but may be a wrapped IPv6 address
 	address := stripPortFromRemoteAddr(request.HTTP.RemoteAddr)
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:           r.Properties.Hostname,
-		Address:        address,
-		Port:           r.Port,
-		ClientIdentity: r.ClientIdentity,
-		GroupIDs:       []string{groupID},
+		Name:          r.Properties.Hostname,
+		Address:       address,
+		Port:          r.Port,
+		AgentIdentity: r.AgentIdentity,
+		GroupIDs:      []string{groupID},
 	})
 	if err != nil {
 		log.PError("Error adding new host", map[string]interface{}{

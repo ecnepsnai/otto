@@ -16,7 +16,6 @@ LOG=${ROOT_PATH}/logs/otto-install.log
 REVISION=$(git rev-parse HEAD)
 DATETIME=$(date --rfc-3339=seconds)
 
-
 echo -en "Packaging server container... "
 rm -rf Docker
 mkdir Docker

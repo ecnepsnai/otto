@@ -59,7 +59,7 @@ export const OptionsNetwork: React.FC<OptionsNetworkProps> = (props: OptionsNetw
             <Input.Number
                 label="Timeout"
                 append="Seconds"
-                helpText="The maximum number of seconds Otto will wait while trying to connect to a client"
+                helpText="The maximum number of seconds Otto will wait while trying to connect to a agent"
                 defaultValue={value.Timeout}
                 onChange={changeTimeout} />
             <Input.Number

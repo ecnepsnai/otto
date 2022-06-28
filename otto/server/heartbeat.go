@@ -75,7 +75,7 @@ func (s *heartbeatStoreType) RegisterHeartbeatReply(host *Host, reply otto.Messa
 		IsReachable: true,
 		LastReply:   time.Now(),
 		LastAttempt: time.Now(),
-		Version:     reply.ClientVersion,
+		Version:     reply.AgentVersion,
 		Properties:  reply.Properties,
 	}
 	s.Lock.Lock()

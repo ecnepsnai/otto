@@ -4,58 +4,58 @@ package server
 // Do not make changes to this file as they will be lost
 
 const (
-	// ClientActionPing Ping the host
-	ClientActionPing = "ping"
-	// ClientActionRunScript Run the script on the host
-	ClientActionRunScript = "run_script"
-	// ClientActionExitClient Exit the client on the host
-	ClientActionExitClient = "exit_client"
-	// ClientActionReboot Reboot the host
-	ClientActionReboot = "reboot"
-	// ClientActionShutdown Power off the host
-	ClientActionShutdown = "shutdown"
-	// ClientActionUpdateIdentity Update the server identity on the client
-	ClientActionUpdateIdentity = "update_identity"
+	// AgentActionPing Ping the host
+	AgentActionPing = "ping"
+	// AgentActionRunScript Run the script on the host
+	AgentActionRunScript = "run_script"
+	// AgentActionExitAgent Exit the agent on the host
+	AgentActionExitAgent = "exit_agent"
+	// AgentActionReboot Reboot the host
+	AgentActionReboot = "reboot"
+	// AgentActionShutdown Power off the host
+	AgentActionShutdown = "shutdown"
+	// AgentActionUpdateIdentity Update the server identity on the agent
+	AgentActionUpdateIdentity = "update_identity"
 )
 
-// AllClientAction all ClientAction values
-var AllClientAction = []string{
-	ClientActionPing,
-	ClientActionRunScript,
-	ClientActionExitClient,
-	ClientActionReboot,
-	ClientActionShutdown,
-	ClientActionUpdateIdentity,
+// AllAgentAction all AgentAction values
+var AllAgentAction = []string{
+	AgentActionPing,
+	AgentActionRunScript,
+	AgentActionExitAgent,
+	AgentActionReboot,
+	AgentActionShutdown,
+	AgentActionUpdateIdentity,
 }
 
-// ClientActionMap map ClientAction keys to values
-var ClientActionMap = map[string]string{
-	ClientActionPing:           "ping",
-	ClientActionRunScript:      "run_script",
-	ClientActionExitClient:     "exit_client",
-	ClientActionReboot:         "reboot",
-	ClientActionShutdown:       "shutdown",
-	ClientActionUpdateIdentity: "update_identity",
+// AgentActionMap map AgentAction keys to values
+var AgentActionMap = map[string]string{
+	AgentActionPing:           "ping",
+	AgentActionRunScript:      "run_script",
+	AgentActionExitAgent:      "exit_agent",
+	AgentActionReboot:         "reboot",
+	AgentActionShutdown:       "shutdown",
+	AgentActionUpdateIdentity: "update_identity",
 }
 
-// ClientActionNameMap map ClientAction keys to values
-var ClientActionNameMap = map[string]string{
+// AgentActionNameMap map AgentAction keys to values
+var AgentActionNameMap = map[string]string{
 	"Ping":           "ping",
 	"RunScript":      "run_script",
-	"ExitClient":     "exit_client",
+	"ExitAgent":      "exit_agent",
 	"Reboot":         "reboot",
 	"Shutdown":       "shutdown",
 	"UpdateIdentity": "update_identity",
 }
 
-// IsClientAction is the provided value a valid ClientAction
-func IsClientAction(q string) bool {
-	_, k := ClientActionMap[q]
+// IsAgentAction is the provided value a valid AgentAction
+func IsAgentAction(q string) bool {
+	_, k := AgentActionMap[q]
 	return k
 }
 
-// ClientActionSchema the ClientAction schema.
-var ClientActionSchema = []map[string]interface{}{
+// AgentActionSchema the AgentAction schema.
+var AgentActionSchema = []map[string]interface{}{
 	{
 		"name":        "Ping",
 		"description": "Ping the host",
@@ -67,9 +67,9 @@ var ClientActionSchema = []map[string]interface{}{
 		"value":       "run_script",
 	},
 	{
-		"name":        "ExitClient",
-		"description": "Exit the client on the host",
-		"value":       "exit_client",
+		"name":        "ExitAgent",
+		"description": "Exit the agent on the host",
+		"value":       "exit_agent",
 	},
 	{
 		"name":        "Reboot",
@@ -83,7 +83,7 @@ var ClientActionSchema = []map[string]interface{}{
 	},
 	{
 		"name":        "UpdateIdentity",
-		"description": "Update the server identity on the client",
+		"description": "Update the server identity on the agent",
 		"value":       "update_identity",
 	},
 }
@@ -650,7 +650,7 @@ var ScheduleResultSchema = []map[string]interface{}{
 
 // AllEnums map of all enums
 var AllEnums = map[string]interface{}{
-	"ClientAction":         ClientActionSchema,
+	"AgentAction":          AgentActionSchema,
 	"EventType":            EventTypeSchema,
 	"IPVersionOption":      IPVersionOptionSchema,
 	"RegisterRuleProperty": RegisterRulePropertySchema,

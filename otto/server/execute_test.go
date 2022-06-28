@@ -22,7 +22,7 @@ func TestExecutePing(t *testing.T) {
 
 	ip := randLocalhostIP()
 	version := randomString(4)
-	clientId, _ := otto.NewIdentity()
+	agentId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name: randomString(6),
@@ -32,11 +32,11 @@ func TestExecutePing(t *testing.T) {
 	}
 
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:           randomString(6),
-		Address:        ip,
-		Port:           uint32(secutil.RandomNumber(0, 65535)),
-		ClientIdentity: clientId.PublicKeyString(),
-		GroupIDs:       []string{group.ID},
+		Name:          randomString(6),
+		Address:       ip,
+		Port:          uint32(secutil.RandomNumber(0, 65535)),
+		AgentIdentity: agentId.PublicKeyString(),
+		GroupIDs:      []string{group.ID},
 	})
 	if err != nil {
 		t.Fatalf("Error making host: %s", err.Message)
@@ -47,7 +47,7 @@ func TestExecutePing(t *testing.T) {
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
 		Address:           ip + ":0",
 		AllowFrom:         []net.IPNet{*allowFrom},
-		Identity:          clientId.Signer(),
+		Identity:          agentId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		messageType, m, err := conn.ReadMessage()
@@ -58,7 +58,7 @@ func TestExecutePing(t *testing.T) {
 			panic("Incorrect message type")
 		}
 		message := m.(otto.MessageHeartbeatRequest)
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version, Nonce: message.Nonce}); err != nil {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{AgentVersion: version, Nonce: message.Nonce}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()
@@ -95,7 +95,7 @@ func TestExecuteAction(t *testing.T) {
 
 	ip := randLocalhostIP()
 	version := randomString(4)
-	clientId, _ := otto.NewIdentity()
+	agentId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name: randomString(6),
@@ -105,11 +105,11 @@ func TestExecuteAction(t *testing.T) {
 	}
 
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:           randomString(6),
-		Address:        ip,
-		Port:           uint32(secutil.RandomNumber(0, 65535)),
-		ClientIdentity: clientId.PublicKeyString(),
-		GroupIDs:       []string{group.ID},
+		Name:          randomString(6),
+		Address:       ip,
+		Port:          uint32(secutil.RandomNumber(0, 65535)),
+		AgentIdentity: agentId.PublicKeyString(),
+		GroupIDs:      []string{group.ID},
 	})
 	if err != nil {
 		t.Fatalf("Error making host: %s", err.Message)
@@ -122,7 +122,7 @@ func TestExecuteAction(t *testing.T) {
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
 		Address:           ip + ":0",
 		AllowFrom:         []net.IPNet{*allowFrom},
-		Identity:          clientId.Signer(),
+		Identity:          agentId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		messageType, message, err := conn.ReadMessage()
@@ -139,7 +139,7 @@ func TestExecuteAction(t *testing.T) {
 		if action.Action != actionType {
 			panic("Incorrect action type")
 		}
-		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ClientVersion: version}); err != nil {
+		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{AgentVersion: version}); err != nil {
 			panic("Error writing message: " + err.Error())
 		}
 		conn.Close()
@@ -162,8 +162,8 @@ func TestExecuteAction(t *testing.T) {
 		t.Fatalf("Error triggering action: %s", err.Message)
 	}
 
-	if result.ClientVersion != version {
-		t.Errorf("Unexpected version for host. Expected '%s' got '%s'", version, result.ClientVersion)
+	if result.AgentVersion != version {
+		t.Errorf("Unexpected version for host. Expected '%s' got '%s'", version, result.AgentVersion)
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -177,7 +177,7 @@ func TestExecuteUntrustedKey(t *testing.T) {
 
 	ip := randLocalhostIP()
 	version := randomString(4)
-	clientId, _ := otto.NewIdentity()
+	agentId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name: randomString(6),
@@ -202,10 +202,10 @@ func TestExecuteUntrustedKey(t *testing.T) {
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
 		Address:           ip + ":0",
 		AllowFrom:         []net.IPNet{*allowFrom},
-		Identity:          clientId.Signer(),
+		Identity:          agentId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{AgentVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()
@@ -227,8 +227,8 @@ func TestExecuteUntrustedKey(t *testing.T) {
 
 	host = HostCache.ByID(host.ID)
 
-	if host.Trust.UntrustedIdentity != clientId.PublicKeyString() {
-		t.Errorf("Unrecognized public key for host. Expected '%s' got '%s'", clientId.PublicKeyString(), host.Trust.UntrustedIdentity)
+	if host.Trust.UntrustedIdentity != agentId.PublicKeyString() {
+		t.Errorf("Unrecognized public key for host. Expected '%s' got '%s'", agentId.PublicKeyString(), host.Trust.UntrustedIdentity)
 	}
 }
 
@@ -237,7 +237,7 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 
 	ip := randLocalhostIP()
 	version := randomString(4)
-	clientId, _ := otto.NewIdentity()
+	agentId, _ := otto.NewIdentity()
 	otherId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
@@ -248,11 +248,11 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 	}
 
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:           randomString(6),
-		Address:        ip,
-		Port:           uint32(secutil.RandomNumber(0, 65535)),
-		ClientIdentity: otherId.PublicKeyString(),
-		GroupIDs:       []string{group.ID},
+		Name:          randomString(6),
+		Address:       ip,
+		Port:          uint32(secutil.RandomNumber(0, 65535)),
+		AgentIdentity: otherId.PublicKeyString(),
+		GroupIDs:      []string{group.ID},
 	})
 	if err != nil {
 		t.Fatalf("Error making host: %s", err.Message)
@@ -263,10 +263,10 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
 		Address:           ip + ":0",
 		AllowFrom:         []net.IPNet{*allowFrom},
-		Identity:          clientId.Signer(),
+		Identity:          agentId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version}); err != nil {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{AgentVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()
@@ -294,7 +294,7 @@ func TestExecuteReconnect(t *testing.T) {
 
 	ip := randLocalhostIP()
 	version := randomString(4)
-	clientId, _ := otto.NewIdentity()
+	agentId, _ := otto.NewIdentity()
 
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name: randomString(6),
@@ -304,11 +304,11 @@ func TestExecuteReconnect(t *testing.T) {
 	}
 
 	host, err := HostStore.NewHost(newHostParameters{
-		Name:           randomString(6),
-		Address:        ip,
-		Port:           uint32(secutil.RandomNumber(0, 65535)),
-		ClientIdentity: clientId.PublicKeyString(),
-		GroupIDs:       []string{group.ID},
+		Name:          randomString(6),
+		Address:       ip,
+		Port:          uint32(secutil.RandomNumber(0, 65535)),
+		AgentIdentity: agentId.PublicKeyString(),
+		GroupIDs:      []string{group.ID},
 	})
 	if err != nil {
 		t.Fatalf("Error making host: %s", err.Message)
@@ -320,12 +320,12 @@ func TestExecuteReconnect(t *testing.T) {
 	l, listenErr := otto.SetupListener(otto.ListenOptions{
 		Address:           ip + ":0",
 		AllowFrom:         []net.IPNet{*allowFrom},
-		Identity:          clientId.Signer(),
+		Identity:          agentId.Signer(),
 		TrustedPublicKeys: []string{serverId.PublicKeyString()},
 	}, func(conn *otto.Connection) {
 		_, m, _ := conn.ReadMessage()
 		message := m.(otto.MessageHeartbeatRequest)
-		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{ClientVersion: version, Nonce: message.Nonce}); err != nil {
+		if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{AgentVersion: version, Nonce: message.Nonce}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()

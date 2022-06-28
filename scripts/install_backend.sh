@@ -17,11 +17,11 @@ echo -en "Building backend... "
 cd ${SCRIPTS_PATH}/codegen/
 cbgen -n server
 mv *.go ${OTTO_PATH}/server
-cd ${OTTO_PATH}/cmd/client
+cd ${OTTO_PATH}/cmd/agent
 cbgen -n main
 cd ${OTTO_PATH}/
 go get -t >> ${LOG} 2>&1
-cd ${OTTO_PATH}/cmd/client
+cd ${OTTO_PATH}/cmd/agent
 go get -t >> ${LOG} 2>&1
 cd ${OTTO_PATH}/cmd/server
 go get -t >> ${LOG} 2>&1

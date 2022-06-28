@@ -9,5 +9,5 @@
       dir_name: attachments
 - name: Static
   dir_name: static
-- name: Clients
-  dir_name: clients
+- name: Agents
+  dir_name: agents

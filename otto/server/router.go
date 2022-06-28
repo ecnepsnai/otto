@@ -48,7 +48,7 @@ func RouterSetup() {
 
 	server.HTTP.Static("/static/", Directories.Static)
 	server.HTTP.Static(fmt.Sprintf("/otto%s/", Version), Directories.Static)
-	server.HTTP.Static("/clients/", Directories.Clients)
+	server.HTTP.Static("/agents/", Directories.Agents)
 
 	// Authentication
 	server.HTTP.GET("/login", v.Login, unauthenticatedOptions)

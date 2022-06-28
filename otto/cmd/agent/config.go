@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type clientConfig struct {
+type agentConfig struct {
 	ListenAddr     string   `json:"listen_addr"`
 	IdentityPath   string   `json:"identity_path"`
 	ServerIdentity string   `json:"server_identity"`
@@ -22,19 +22,19 @@ type clientConfig struct {
 	AllowFrom      []string `json:"allow_from"`
 }
 
-var config *clientConfig
-var clientIdentity ssh.Signer
+var config *agentConfig
+var agentIdentity ssh.Signer
 
 const (
-	otto_CONFIG_FILE_NAME          = "otto_client.conf"
-	otto_CONFIG_ATOMIC_FILE_NAME   = ".otto_client.conf.tmp"
+	otto_CONFIG_FILE_NAME          = "otto_agent.conf"
+	otto_CONFIG_ATOMIC_FILE_NAME   = ".otto_agent.conf.tmp"
 	otto_IDENTITY_FILE_NAME        = ".otto_id.der"
 	otto_IDENTITY_ATOMIC_FILE_NAME = ".otto_id.der.tmp"
 )
 
 func loadConfig() error {
 	if _, err := os.Stat(otto_CONFIG_FILE_NAME); os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "The otto client must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/client.md for more information.\n\nUse -s to run interactive setup.\n", Version)
+		fmt.Fprintf(os.Stderr, "The otto agent must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/agent.md for more information.\n\nUse -s to run interactive setup.\n", Version)
 		os.Exit(1)
 	}
 
@@ -117,18 +117,18 @@ func generateIdentity() error {
 	return nil
 }
 
-func loadOrGenerateClientIdentity() (ssh.Signer, error) {
+func loadOrGenerateAgentIdentity() (ssh.Signer, error) {
 	_, err := os.Stat(otto_IDENTITY_FILE_NAME)
 	if err != nil && os.IsNotExist(err) {
 		if err := generateIdentity(); err != nil {
 			return nil, err
 		}
-		return loadClientIdentity()
+		return loadAgentIdentity()
 	}
-	return loadClientIdentity()
+	return loadAgentIdentity()
 }
 
-func loadClientIdentity() (ssh.Signer, error) {
+func loadAgentIdentity() (ssh.Signer, error) {
 	info, err := os.Stat(otto_IDENTITY_FILE_NAME)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -142,7 +142,7 @@ func loadClientIdentity() (ssh.Signer, error) {
 
 	mode := info.Mode()
 	if mode&32 != 0 || mode&16 != 0 || mode&8 != 0 || mode&4 != 0 || mode&2 != 0 || mode&1 != 0 {
-		fmt.Fprintf(os.Stderr, "The client identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the client, then re-trust the host on the Otto server.\n", otto_IDENTITY_FILE_NAME)
+		fmt.Fprintf(os.Stderr, "The agent identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the agent, then re-trust the host on the Otto server.\n", otto_IDENTITY_FILE_NAME)
 		os.Exit(1)
 	}
 
@@ -164,15 +164,15 @@ func loadClientIdentity() (ssh.Signer, error) {
 }
 
 func mustLoadIdentity() {
-	signer, err := loadOrGenerateClientIdentity()
+	signer, err := loadOrGenerateAgentIdentity()
 	if err != nil {
 		panic(err)
 	}
-	clientIdentity = signer
-	log.Debug("Client identity loaded: %s", base64.StdEncoding.EncodeToString(clientIdentity.PublicKey().Marshal()))
+	agentIdentity = signer
+	log.Debug("Agent identity loaded: %s", base64.StdEncoding.EncodeToString(agentIdentity.PublicKey().Marshal()))
 }
 
-func saveNewConfig(c clientConfig) error {
+func saveNewConfig(c agentConfig) error {
 	f, err := os.OpenFile(otto_CONFIG_ATOMIC_FILE_NAME, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.PError("Error opening atomic file for writing", map[string]interface{}{
@@ -244,8 +244,8 @@ func updateServerIdentity(newPublicKey string) error {
 	return nil
 }
 
-func defaultConfig() clientConfig {
-	return clientConfig{
+func defaultConfig() agentConfig {
+	return agentConfig{
 		ListenAddr:   "0.0.0.0:12444",
 		IdentityPath: otto_IDENTITY_FILE_NAME,
 		LogPath:      ".",

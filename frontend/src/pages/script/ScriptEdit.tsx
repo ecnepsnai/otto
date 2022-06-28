@@ -164,10 +164,10 @@ export const ScriptEdit: React.FC = () => {
                     defaultValue={script.AfterExecution}
                     onChange={changeAfterExecution}>
                     <option value="">Do Nothing</option>
-                    <option value="exit_client">Stop the Otto Client</option>
+                    <option value="exit_agent">Stop the Otto Agent</option>
                     <option value="reboot">Reboot the Host</option>
                     <option value="shutdown">Shutdown the Host</option>
-                    <option value="update_psk">Rotate the Client PSK</option>
+                    <option value="update_psk">Rotate the Agent PSK</option>
                 </Input.Select>
                 <Input.Text
                     label="Executable"

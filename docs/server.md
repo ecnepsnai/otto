@@ -94,8 +94,8 @@ The default account will be recreated and you can log in using `admin`:`admin`.
 
 ## Identity Management
 
-An identity refers to a private and public key used as part of the Otto protocol. The Otto client maintains an identity
-that is used when the Otto server connects to the Otto client. The Otto server also maintains a unique identity for each
+An identity refers to a private and public key used as part of the Otto protocol. The Otto agent maintains an identity
+that is used when the Otto server connects to the Otto agent. The Otto server also maintains a unique identity for each
 Otto host.
 
 When the Otto server connects to an Otto host, it checks the public identity from that host to see if it is recognized.

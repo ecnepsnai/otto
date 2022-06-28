@@ -10,7 +10,7 @@ import { Formatter } from '../../services/Formatter';
 import { DefaultSort } from '../../services/Sort';
 import { HostTrust } from './HostTrust';
 import { HeartbeatBadge } from '../../components/Badge';
-import { ClientVersion } from '../../components/ClientVersion';
+import { AgentVersion } from '../../components/AgentVersion';
 import { ContextMenuItem } from '../../components/ContextMenu';
 import { Icon } from '../../components/Icon';
 
@@ -88,7 +88,7 @@ export const HostList: React.FC = () => {
         {
             title: 'Version',
             value: (v: HostType) => {
-                return (<ClientVersion heartbeat={heartbeats.get(v.Address)} />);
+                return (<AgentVersion heartbeat={heartbeats.get(v.Address)} />);
             },
         },
     ];

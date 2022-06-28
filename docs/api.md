@@ -351,7 +351,7 @@ Expected body:
 
 A websocket that can be used to execute a script on a single host and receive live output from the running script.
 
-Upon connecting to the socket, the client must send a JSON message to start the script:
+Upon connecting to the socket, the agent must send a JSON message to start the script:
 ```json
 {
     "HostID": "",
