@@ -7,7 +7,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRequires:  systemd-rpm-macros
 Provides:       %{name} = %{version}
 Prefix:         /opt
-Obsoletes:      otto <= %{version}
+Obsoletes:      otto <= 0.11.6
 
 %description
 Otto is an automation toolkit for Unix-like computers. This package provides the Otto agent software for Otto hosts.
@@ -26,7 +26,7 @@ CGO_ENABLED=0 go build -buildmode=exe -trimpath -ldflags="-s -w -X 'main.Version
 
 %install
 mkdir -p %{buildroot}/opt/%{name}
-install -Dpm 0755 %{name}/cmd/agent/agent %{buildroot}/opt/%{name}/agent
+install -Dpm 0755 otto/cmd/agent/agent %{buildroot}/opt/%{name}/agent
 install -Dpm 644 %{name}.service %{buildroot}%{_unitdir}/%{name}.service
 
 %check

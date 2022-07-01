@@ -13,15 +13,15 @@ echo -en "Building agent rpm... "
 
 rm -rf build/
 mkdir -p build/
-rm -rf otto-${OTTO_VERSION}/
-mkdir otto-${OTTO_VERSION}/
+rm -rf otto-agent-${OTTO_VERSION}/
+mkdir otto-agent-${OTTO_VERSION}/
 
-cp -r ../../otto otto-${OTTO_VERSION}/
-cp otto-agent.service otto-${OTTO_VERSION}/
-tar -czf otto-${OTTO_VERSION}.tar.gz otto-${OTTO_VERSION}/
+cp -r ../../otto otto-agent-${OTTO_VERSION}/
+cp otto-agent.service otto-agent-${OTTO_VERSION}/
+tar -czf otto-agent-${OTTO_VERSION}.tar.gz otto-agent-${OTTO_VERSION}/
 cp Dockerfile otto-agent.spec entrypoint.sh build/
-rm -rf otto-${OTTO_VERSION}/
-mv otto-${OTTO_VERSION}.tar.gz build/
+rm -rf otto-agent-${OTTO_VERSION}/
+mv otto-agent-${OTTO_VERSION}.tar.gz build/
 
 cd build/
 
