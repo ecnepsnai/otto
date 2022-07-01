@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { FormGroup } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
 export interface RadioChoice {
     value: string | number;
     label: string;
 }
-interface RadioProps {
+interface RadioProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -102,7 +103,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
     }
 
     return (
-        <FormGroup>
+        <FormGroup thin={props.thin}>
             <label className="form-label">{props.label}</label>
             {content}
         </FormGroup>

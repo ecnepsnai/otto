@@ -2,13 +2,14 @@ import * as React from 'react';
 import debounce = require('debounce-promise');
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
-interface TextProps {
+interface TextProps extends InputProps {
     /**
      * The label that appears above the input
      */
-    label: string;
+    label?: string;
     /**
      * The value used in the type attribute on the input node
      */
@@ -40,11 +41,11 @@ interface TextProps {
     /**
      * Text label to appear before the input
      */
-    prepend?: string;
+    prepend?: JSX.Element | string;
     /**
      * Text label to appear after the input
      */
-    append?: string;
+    append?: JSX.Element | string;
     /**
      * If true then a fixed width font is used
      */
@@ -173,18 +174,26 @@ export const Text: React.FC<TextProps> = (props: TextProps) => {
         );
     };
 
-    const requiredFlag = () => {
-        if (!props.required) {
+    const label = () => {
+        if (!props.label) {
             return null;
         }
-        return (<span className="form-required">*</span>);
+
+        const requiredFlag = () => {
+            if (!props.required) {
+                return null;
+            }
+            return (<span className="form-required">*</span>);
+        };
+
+        return (<label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>);
     };
 
     return (
-        <FormGroup>
-            <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
-            {content()}
-            {helpText()}
+        <FormGroup thin={props.thin}>
+            { label() }
+            { content() }
+            { helpText() }
         </FormGroup>
     );
 };

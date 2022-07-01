@@ -123,7 +123,9 @@ export class Form extends React.Component<FormProps, FormState> {
 interface FormGroupProps {
     className?: string;
     children?: React.ReactNode;
+    thin?: boolean;
 }
 export const FormGroup: React.FC<FormGroupProps> = (props: FormGroupProps) => {
-    return (<div className={(props.className ?? '') + ' mb-3'}>{props.children}</div>);
+    const margin = props.thin ? 'mb-1' : 'mb-3';
+    return (<div className={(props.className ?? '') + ' ' + margin}>{props.children}</div>);
 };

@@ -26,6 +26,7 @@ import {
     faListAlt,
     faLock,
     faMagic,
+    faMagnifyingGlass,
     faMinus,
     faNetworkWired,
     faPaperclip,
@@ -103,6 +104,7 @@ export namespace Icon {
     export const List: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faListAlt, options: props });
     export const Lock: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faLock, options: props });
     export const Magic: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faMagic, options: props });
+    export const MagnifyingGlass: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faMagnifyingGlass, options: props });
     export const Minus: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faMinus, options: props });
     export const NetworkWired: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faNetworkWired, options: props });
     export const Paperclip: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faPaperclip, options: props });

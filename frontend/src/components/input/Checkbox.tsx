@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { FormGroup } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
-interface CheckboxProps {
+interface CheckboxProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -51,7 +52,7 @@ export const Checkbox: React.FC<CheckboxProps> = (props: CheckboxProps) => {
     };
 
     return (
-        <FormGroup className="form-check">
+        <FormGroup className="form-check" thin={props.thin}>
             <input type="checkbox" className="form-check-input" id={labelID} defaultChecked={checked} onChange={onChange} disabled={props.disabled} />
             <label htmlFor={labelID} className="form-check-label">{props.label}</label>
             { helpText()}

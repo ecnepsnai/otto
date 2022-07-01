@@ -8,6 +8,10 @@ import { Select } from './Select';
 import { Text } from './Text';
 import { Textarea } from './Textarea';
 
+export interface InputProps {
+    thin?: boolean;
+}
+
 export class Input {
     /**
      * A checkbox and a label.

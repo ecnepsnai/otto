@@ -5,6 +5,9 @@ import { Group, GroupType } from '../types/Group';
 import { Script, ScriptType } from '../types/Script';
 import { Host, HostType } from '../types/Host';
 import { Nothing } from './Nothing';
+import { Icon } from './Icon';
+import { Button } from './Button';
+import { Style } from './Style';
 
 interface ItemType {
     key: string;
@@ -25,6 +28,7 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
     const [selected, setSelected] = React.useState<{ [id: string]: boolean }>(initialChecked);
     const [Query, setQuery] = React.useState<string>('');
     const [Items, setItems] = React.useState<ItemType[]>([]);
+    const [ShowAll, SetShowAll] = React.useState(false);
 
     React.useEffect(() => {
         const keys: string[] = [];
@@ -73,6 +77,17 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         setQuery(query);
     };
 
+    const showAllButton = () => {
+        if (Items.length <= 10 || ShowAll) {
+            return null;
+        }
+
+        return (<span>
+            <Button onClick={() => {
+                SetShowAll(true);
+            }} color={Style.Palette.Primary} outline size={Style.Size.XS}>{'Show all (' + Items.length + ')'}</Button>
+        </span>);
+    };
 
     const checkList = () => {
         if (Items.length == 0) {
@@ -82,21 +97,26 @@ export const CheckList: React.FC<CheckListProps> = (props: CheckListProps) => {
         return (<React.Fragment>
             {
                 Items.map((item, idx) => {
+                    if (idx > 9 && !ShowAll) {
+                        return null;
+                    }
                     return (
                         <Input.Checkbox
                             label={item.value}
                             onChange={changeKey(item.key)}
                             defaultValue={selected[item.key]}
-                            key={idx} />
+                            key={idx}
+                            thin />
                     );
                 })
             }
+            { showAllButton() }
         </React.Fragment>);
     };
 
     return (
         <div>
-            <Input.Text type="search" label="Filter" defaultValue={Query} onChange={onSearch} />
+            <Input.Text type="search" placeholder="Filter" defaultValue={Query} onChange={onSearch} prepend={<Icon.MagnifyingGlass />}/>
             {checkList()}
         </div>
     );

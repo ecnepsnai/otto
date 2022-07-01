@@ -23,7 +23,9 @@ func RouterSetup() {
 	}
 
 	server := web.New(bindAddress)
-	server.Options.MaxRequestsPerSecond = 15
+	if Version != "dev" {
+		server.Options.MaxRequestsPerSecond = 15
+	}
 
 	maxBodyLength := uint64(104857600)
 

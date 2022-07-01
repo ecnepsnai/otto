@@ -2,9 +2,10 @@ import * as React from 'react';
 import debounce = require('debounce-promise');
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
-interface TextareaProps {
+interface TextareaProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -153,7 +154,7 @@ export const Textarea: React.FC<TextareaProps> = (props: TextareaProps) => {
     };
 
     return (
-        <FormGroup>
+        <FormGroup thin={props.thin}>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
             { content()}
             { helpText()}

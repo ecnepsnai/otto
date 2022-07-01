@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
-interface SelectProps {
+interface SelectProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -122,7 +123,7 @@ export const Select: React.FC<SelectProps> = (props: SelectProps) => {
         className += ' is-invalid';
     }
     return (
-        <FormGroup>
+        <FormGroup thin={props.thin}>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
             <select
                 defaultValue={props.defaultValue}

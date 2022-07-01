@@ -5,10 +5,11 @@ import { Rand } from '../../services/Rand';
 import { Icon } from '../Icon';
 import { Style } from '../Style';
 import { Button } from '../Button';
-import '../../../css/form.scss';
 import { Clipboard } from '../../services/Clipboard';
+import { InputProps } from './Input';
+import '../../../css/form.scss';
 
-interface PasswordProps {
+interface PasswordProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -172,7 +173,7 @@ export const Password: React.FC<PasswordProps> = (props: PasswordProps) => {
     };
 
     return (
-        <FormGroup>
+        <FormGroup thin={props.thin}>
             <label htmlFor={labelID} className="form-label">{props.label} {requiredFlag()}</label>
             { content()}
             { helpText()}

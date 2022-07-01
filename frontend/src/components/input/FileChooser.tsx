@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { FormGroup } from '../Form';
 import { Rand } from '../../services/Rand';
+import { InputProps } from './Input';
 import '../../../css/form.scss';
 
-interface FileChooserProps {
+interface FileChooserProps extends InputProps {
     /**
      * The label that appears above the input
      */
@@ -34,7 +35,7 @@ export const FileChooser: React.FC<FileChooserProps> = (props: FileChooserProps)
     };
 
     return (
-        <FormGroup>
+        <FormGroup thin={props.thin}>
             <label className="form-label" htmlFor={labelID}>{props.label}</label>
             <div className="form-file">
                 <input className="form-control" type="file" id={labelID} onChange={didSelectFile} />
