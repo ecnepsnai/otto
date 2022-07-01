@@ -8,7 +8,7 @@ module.exports = merge.merge(common, {
     plugins: [
         new HtmlWebpackPlugin({
             base: '/static/',
-            template: './html/login.development.html',
+            template: './html/login.html',
             filename: 'login.html'
         }),
     ],

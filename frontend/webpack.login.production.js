@@ -12,10 +12,7 @@ module.exports = merge.merge(common, {
     plugins: [
         new HtmlWebpackPlugin({
             base: '/otto' + version + '/',
-            template: './html/login.production.html',
-            templateParameters: {
-                versionTag: version,
-            },
+            template: './html/login.html',
             filename: 'login.html'
         }),
     ],
