@@ -144,6 +144,42 @@ export const ScriptView: React.FC = () => {
         }</ListGroup.List>);
     };
 
+    const hostList = () => {
+        if (!hosts || hosts.length === 0) {
+            return (<Card.Body><Nothing /></Card.Body>);
+        }
+
+        return (<ListGroup.List>{
+            hosts.map((scriptHost, index) => {
+                return (<ListGroup.Item key={index}>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <Icon.LayerGroup />
+                            <Link to={'/groups/group/' + scriptHost.GroupID} className="ms-1">{scriptHost.GroupName}</Link>
+                        </div>
+                        <div>
+                            <SmallPlayButton onClick={runScriptGroupClick(scriptHost.GroupID)} />
+                        </div>
+                    </div>
+                    {
+                        scriptHost.Hosts.map((host, index) => {
+                            return (<div className="d-flex justify-content-between" key={index}>
+                                <div>
+                                    <Icon.Descendant />
+                                    <Icon.Desktop />
+                                    <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
+                                </div>
+                                <div>
+                                    <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />
+                                </div>
+                            </div>);
+                        })
+                    }
+                </ListGroup.Item>);
+            })
+        }</ListGroup.List>);
+    };
+
     if (loading) {
         return (<PageLoading />);
     }
@@ -189,37 +225,7 @@ export const ScriptView: React.FC = () => {
                 <Layout.Column>
                     <Card.Card className="mb-3">
                         <Card.Header>Enabled on Hosts</Card.Header>
-                        <ListGroup.List>
-                            {
-                                hosts.map((scriptHost, index) => {
-                                    return (<ListGroup.Item key={index}>
-                                        <div className="d-flex justify-content-between">
-                                            <div>
-                                                <Icon.LayerGroup />
-                                                <Link to={'/groups/group/' + scriptHost.GroupID} className="ms-1">{scriptHost.GroupName}</Link>
-                                            </div>
-                                            <div>
-                                                <SmallPlayButton onClick={runScriptGroupClick(scriptHost.GroupID)} />
-                                            </div>
-                                        </div>
-                                        {
-                                            scriptHost.Hosts.map((host, index) => {
-                                                return (<div className="d-flex justify-content-between" key={index}>
-                                                    <div>
-                                                        <Icon.Descendant />
-                                                        <Icon.Desktop />
-                                                        <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
-                                                    </div>
-                                                    <div>
-                                                        <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />
-                                                    </div>
-                                                </div>);
-                                            })
-                                        }
-                                    </ListGroup.Item>);
-                                })
-                            }
-                        </ListGroup.List>
+                        {hostList()}
                     </Card.Card>
                     <Card.Card className="mb-3">
                         <Card.Header>Script</Card.Header>

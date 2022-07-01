@@ -85,7 +85,7 @@ export const SystemMenu: React.FC = () => {
                     <a className="dropdown-item" href={'https://github.com/ecnepsnai/otto/tree/' + StateManager.Current().Runtime.Version + '/docs'} target="_blank" rel="noreferrer">
                         <Icon.Label icon={<Icon.InfoCircle color={Style.Palette.Primary} />} label="Documentation" />
                     </a>
-                    <a className="dropdown-item" href="https://github.com/ecnepsnai/otto/issues/new" target="_blank" rel="noreferrer">
+                    <a className="dropdown-item" href="https://github.com/ecnepsnai/otto/issues/new/choose" target="_blank" rel="noreferrer">
                         <Icon.Label icon={<Icon.ExclamationCircle color={Style.Palette.Danger} />} label="Report an Issue" />
                     </a>
                 </div>

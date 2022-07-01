@@ -6,7 +6,7 @@ export const Nothing: React.FC = () => {
     return (
         <span className="nothing">
             <Icon.StarOfLife />
-            <span className="">Nothing here...</span>
+            <span>None</span>
         </span>
     );
 };
