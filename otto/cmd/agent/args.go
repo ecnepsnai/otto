@@ -66,7 +66,8 @@ Options:
 -t --trust-identity <id>  Trust the specified server identity
 
 Environment variables:
-OTTO_VERBOSE    If set with any value, increases the verbosity of the agent log
+OTTO_VERBOSE    If set with any value prints the log to stdout/stderr
+OTTO_DEBUG      If set with any value increases the log verbosity to debug
 `, os.Args[0])
 			os.Exit(1)
 		}

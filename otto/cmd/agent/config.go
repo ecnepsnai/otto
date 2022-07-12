@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -172,23 +173,28 @@ func mustLoadIdentity() {
 	log.Debug("Agent identity loaded: %s", base64.StdEncoding.EncodeToString(agentIdentity.PublicKey().Marshal()))
 }
 
+func formatJSON(c interface{}) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	encoder := json.NewEncoder(buf)
+	encoder.SetIndent("", "    ")
+	if err := encoder.Encode(c); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func saveNewConfig(c agentConfig) error {
-	f, err := os.OpenFile(otto_CONFIG_ATOMIC_FILE_NAME, os.O_CREATE|os.O_WRONLY, 0644)
+	data, err := formatJSON(c)
 	if err != nil {
-		log.PError("Error opening atomic file for writing", map[string]interface{}{
-			"file_path": otto_CONFIG_ATOMIC_FILE_NAME,
-			"error":     err.Error(),
+		log.PError("Error encoding config JSON", map[string]interface{}{
+			"error": err.Error(),
 		})
 		return err
 	}
-
-	encoder := json.NewEncoder(f)
-	encoder.SetIndent("", "    ")
-	err = encoder.Encode(c)
-	f.Close()
-	if err != nil {
+	if err := os.WriteFile(otto_CONFIG_ATOMIC_FILE_NAME, data, 0644); err != nil {
 		log.PError("Error writing config JSON", map[string]interface{}{
-			"error": err.Error(),
+			"file_path": otto_CONFIG_ATOMIC_FILE_NAME,
+			"error":     err.Error(),
 		})
 		return err
 	}

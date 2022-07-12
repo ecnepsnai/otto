@@ -1,5 +1,7 @@
 package main
 
+import "os"
+
 func addressFromSocketString(s string) string {
 	// Remove the port first
 	portIdx := -1
@@ -17,4 +19,12 @@ func addressFromSocketString(s string) string {
 	}
 
 	return s
+}
+
+func fileExists(pathname string) bool {
+	_, err := os.Stat(pathname)
+	if err != nil {
+		return !os.IsNotExist(err)
+	}
+	return true
 }
