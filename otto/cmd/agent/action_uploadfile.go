@@ -8,7 +8,7 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 func createDirectoryForOttoFile(file otto.File) error {

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 // Script describes an otto script

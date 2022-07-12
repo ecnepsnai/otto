@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
 )

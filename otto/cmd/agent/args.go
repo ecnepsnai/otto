@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 func parseArgs() {

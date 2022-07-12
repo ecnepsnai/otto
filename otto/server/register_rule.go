@@ -5,7 +5,7 @@ import (
 
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 // RegisterRuleClause describes a single clause for a register rule

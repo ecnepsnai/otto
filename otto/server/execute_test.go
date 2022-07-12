@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 )
 

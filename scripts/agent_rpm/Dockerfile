@@ -1,4 +1,4 @@
-FROM docker.io/library/rockylinux@sha256:72afc2e1a20c9ddf56a81c51148ebcbe927c0a879849efe813bee77d69df1dd8
+FROM docker.io/library/rockylinux:8.6
 
 # Install rpm requirements
 RUN dnf -y install git curl tar rpm-build rpmdevtools

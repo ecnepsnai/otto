@@ -1,6 +1,6 @@
 package server
 
-import "github.com/ecnepsnai/otto"
+import "github.com/ecnepsnai/otto/shared/otto"
 
 // Get will save the given identity for the host ID
 func (s *identityStoreObject) Get(hostID string) otto.Identity {

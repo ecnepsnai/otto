@@ -1,6 +1,6 @@
 package server
 
-import "github.com/ecnepsnai/otto"
+import "github.com/ecnepsnai/otto/shared/otto"
 
 var neededTableVersion = 11
 

@@ -9,7 +9,7 @@ import (
 	"os/user"
 	"strconv"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 var restartServer = false

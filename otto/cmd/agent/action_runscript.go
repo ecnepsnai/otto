@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto.ScriptResult {

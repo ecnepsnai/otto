@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 // Attachment describes a file for a script

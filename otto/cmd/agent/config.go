@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 	"golang.org/x/crypto/ssh"
 )
 

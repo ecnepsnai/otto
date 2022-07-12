@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 // Heartbeat describes a heartbeat to a host

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 	fuzz "github.com/google/gofuzz"
 )

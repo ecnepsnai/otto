@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/otto"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 var eventLog = logtic.Log.Connect("event")

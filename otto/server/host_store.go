@@ -5,8 +5,8 @@ import (
 
 	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
-	"github.com/ecnepsnai/otto"
 	"github.com/ecnepsnai/otto/server/environ"
+	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 func (s *hostStoreObject) HostWithID(id string) *Host {

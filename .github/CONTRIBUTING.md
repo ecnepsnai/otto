@@ -51,6 +51,8 @@ Directory structure:
 /scripts
     /codegen   -> Contains definitions for the cbgen golang code generator.
 /otto
+    /shared
+        /otto  -> Contains the Otto library, shared between the agent and the server
     /server        -> Contains all golang code for the server
         /environ   -> Library that defines an environment variable. Broken off for easier testing.
 ```
