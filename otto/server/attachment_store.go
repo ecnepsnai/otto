@@ -71,13 +71,14 @@ func (s attachmentStoreObject) AttachmentWithID(id string) *Attachment {
 }
 
 type newAttachmentParameters struct {
-	Data     io.Reader
-	Path     string `min:"1"`
-	Name     string `min:"1"`
-	MimeType string `min:"1"`
-	Owner    RunAs
-	Mode     uint32
-	Size     uint64
+	Data        io.Reader
+	Path        string `min:"1"`
+	Name        string `min:"1"`
+	MimeType    string `min:"1"`
+	Owner       RunAs
+	Mode        uint32
+	Size        uint64
+	AfterScript bool
 }
 
 func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*Attachment, *Error) {
@@ -86,15 +87,16 @@ func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*A
 	}
 
 	attachment := Attachment{
-		ID:       newPlainID(),
-		Path:     params.Path,
-		Name:     params.Name,
-		MimeType: params.MimeType,
-		Owner:    params.Owner,
-		Mode:     params.Mode,
-		Created:  time.Now(),
-		Modified: time.Now(),
-		Size:     params.Size,
+		ID:          newPlainID(),
+		Path:        params.Path,
+		Name:        params.Name,
+		MimeType:    params.MimeType,
+		Owner:       params.Owner,
+		Mode:        params.Mode,
+		Created:     time.Now(),
+		Modified:    time.Now(),
+		Size:        params.Size,
+		AfterScript: params.AfterScript,
 	}
 
 	f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
@@ -118,13 +120,14 @@ func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*A
 }
 
 type editAttachmentParams struct {
-	Data     io.Reader
-	Path     string `min:"1"`
-	Name     string `min:"1"`
-	MimeType string `min:"1"`
-	Owner    RunAs
-	Mode     uint32
-	Size     uint64
+	Data        io.Reader
+	Path        string `min:"1"`
+	Name        string `min:"1"`
+	MimeType    string `min:"1"`
+	Owner       RunAs
+	Mode        uint32
+	Size        uint64
+	AfterScript bool
 }
 
 func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (*Attachment, *Error) {
@@ -137,6 +140,7 @@ func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentPa
 	attachment.Owner = params.Owner
 	attachment.Mode = params.Mode
 	attachment.Modified = time.Now()
+	attachment.AfterScript = params.AfterScript
 
 	if params.Data != nil {
 		f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)

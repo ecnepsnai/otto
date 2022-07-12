@@ -59,6 +59,13 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
         });
     };
 
+    const changeAfterScript = (AfterScript: boolean) => {
+        setAttachment(attachment => {
+            attachment.AfterScript = AfterScript;
+            return { ...attachment };
+        });
+    };
+
     const fileInput = () => {
         const labelText = props.attachment ? 'Replace File' : 'Select File';
         const helpText = props.attachment ? 'Select a new file to replace the existing file, otherwise the file is not changed.' : '';
@@ -72,6 +79,7 @@ export const AttachmentEdit: React.FC<AttachmentEditProps> = (props: AttachmentE
             <Input.Text type="text" label="File Path" defaultValue={attachment.Path} required onChange={changePath} helpText="The absolute path where the file will be located on hosts. If the parent directory does not exist it will be created with the same owner as the attachment." fixedWidth />
             <Input.RunAsInput inheritLabel="Specify File Owner" label="Owned By" defaultValue={attachment.Owner} onChange={changeOwner} />
             <Input.Number label="Permission / Mode" defaultValue={attachment.Mode} required onChange={changeMode} helpText="The permission value (mode) for the file" />
+            <Input.Checkbox label="Upload After Script Execution" defaultValue={attachment.AfterScript} onChange={changeAfterScript} helpText="If checked the file will be uploaded once the script has completed successfully. If unchecked the file will be uploaded before the script is executed." />
         </ModalForm>
     );
 };

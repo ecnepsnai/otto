@@ -35,8 +35,12 @@ the web interface.
 
 ## Attachments
 
-You can attach files to scripts that will be uploaded and placed on hosts at specified paths before the script is run.
-Attachments are uploaded each time a script runs, and will overwrite any existing files at the same path.
+You can attach files to scripts that will be uploaded and placed on hosts at specified paths. Attachments are uploaded
+each time a script runs, and will overwrite any existing files at the same path.
+
+By default the attachment is uploaded before the script runs, however you can optionally specify that the attachment
+should be uploaded after the script has completed. In this case, the file will be written only if the script exited with
+no error. If the script exited with an error, the file is not uploaded.
 
 If the destination directory for the attachment does not exist the Otto agent will create it. The otto agent will use
 the default mode for the directory, and set the owner to the same as the attachment.

@@ -11,6 +11,7 @@ export interface AttachmentType {
     Owner?: RunAs;
     Mode?: number;
     Size?: number;
+    AfterScript?: boolean;
 }
 
 export class Attachment {
@@ -114,10 +115,12 @@ export interface NewAttachmentParameters {
     Path: string;
     Owner: RunAs;
     Mode: number;
+    AfterScript: boolean;
 }
 
 export interface EditAttachmentParameters {
     Path: string;
     Owner: RunAs;
     Mode: number;
+    AfterScript: boolean;
 }

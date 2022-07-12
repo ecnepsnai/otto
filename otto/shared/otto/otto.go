@@ -159,10 +159,11 @@ func (sr ScriptResult) String() string {
 
 // File Describes a file
 type File struct {
-	Path  string `json:"path"`
-	Owner RunAs  `json:"owner"`
-	Mode  uint32 `json:"mode"`
-	Data  []byte `json:"data"`
+	Path        string `json:"path"`
+	Owner       RunAs  `json:"owner"`
+	Mode        uint32 `json:"mode"`
+	Data        []byte `json:"data"`
+	AfterScript bool   `json:"after_script"`
 }
 
 // RegisterRequest describes a register request

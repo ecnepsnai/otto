@@ -11,15 +11,16 @@ import (
 
 // Attachment describes a file for a script
 type Attachment struct {
-	ID       string `ds:"primary"`
-	Path     string
-	Name     string
-	MimeType string
-	Owner    RunAs
-	Created  time.Time
-	Modified time.Time
-	Mode     uint32
-	Size     uint64
+	ID          string `ds:"primary"`
+	Path        string
+	Name        string
+	MimeType    string
+	Owner       RunAs
+	Created     time.Time
+	Modified    time.Time
+	Mode        uint32
+	Size        uint64
+	AfterScript bool
 }
 
 // OttoFile return an otto common file
@@ -44,7 +45,8 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 			GID:     attachment.Owner.GID,
 			Inherit: attachment.Owner.Inherit,
 		},
-		Data: fileData,
+		Data:        fileData,
+		AfterScript: attachment.AfterScript,
 	}
 	return &ottoFile, nil
 }

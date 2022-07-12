@@ -41,6 +41,10 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 	})
 
 	for _, file := range script.Files {
+		if file.AfterScript {
+			continue
+		}
+
 		if err := uploadFile(file); err != nil {
 			log.Error("Error uploading script file '%s': %s", file.Path, err.Error())
 			canCancel = false
@@ -178,6 +182,22 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 		}
 		canCancel = false
 		return result
+	}
+
+	for _, file := range script.Files {
+		if !file.AfterScript {
+			continue
+		}
+
+		if err := uploadFile(file); err != nil {
+			log.Error("Error uploading script file '%s': %s", file.Path, err.Error())
+			canCancel = false
+			return otto.ScriptResult{
+				Success:   false,
+				ExecError: err.Error(),
+				Elapsed:   time.Since(start),
+			}
+		}
 	}
 
 	result.Success = true
