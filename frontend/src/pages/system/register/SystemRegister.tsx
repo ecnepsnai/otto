@@ -93,13 +93,6 @@ export const SystemRegister: React.FC = () => {
         </Modal>);
     };
 
-    const changeRunScriptsOnRegister = (RunScriptsOnRegister: boolean) => {
-        setOptions(options => {
-            options.RunScriptsOnRegister = RunScriptsOnRegister;
-            return { ...options };
-        });
-    };
-
     const addRule = (rule: RegisterRuleType) => {
         RegisterRule.New(rule).then(() => {
             Notification.success('Rule Added');
@@ -172,11 +165,6 @@ export const SystemRegister: React.FC = () => {
                     return (<option key={idx} value={group.ID}>{group.Name}</option>);
                 })}
             </Input.Select>
-            <Input.Checkbox
-                label="Automatically Run Scripts on Registration"
-                helpText="When a host successfully registers all scripts associated with the host will run automatically."
-                defaultValue={options.RunScriptsOnRegister}
-                onChange={changeRunScriptsOnRegister} />
         </React.Fragment>);
     };
 

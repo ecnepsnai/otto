@@ -165,11 +165,6 @@ func tryAutoRegister() {
 	}
 	rlog.Printf("Successfully registered with otto server '%s', configuration: %+v", host, conf)
 
-	for _, script := range registerResponse.Scripts {
-		rlog.Printf("Executing first-run script: %s", script.Name)
-		runScript(nil, script, nil)
-	}
-
 	if exitWhenFinished {
 		os.Exit(0)
 	}

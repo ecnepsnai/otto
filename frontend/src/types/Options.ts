@@ -31,7 +31,6 @@ export namespace Options {
         Enabled: boolean;
         Key: string;
         DefaultGroupID: string;
-        RunScriptsOnRegister: boolean;
     }
 
     export interface Security {

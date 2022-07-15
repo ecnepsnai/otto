@@ -53,10 +53,9 @@ type OptionsNetwork struct {
 
 // OptionsRegister describes register options
 type OptionsRegister struct {
-	Enabled              bool
-	Key                  string
-	DefaultGroupID       string
-	RunScriptsOnRegister bool
+	Enabled        bool
+	Key            string
+	DefaultGroupID string
 }
 
 // Options the global options

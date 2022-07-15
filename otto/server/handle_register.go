@@ -120,21 +120,8 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 		}
 	}
 
-	scripts := []otto.Script{}
-	if Options.Register.RunScriptsOnRegister {
-		for _, scriptID := range host.Scripts() {
-			script := ScriptStore.ScriptWithID(scriptID.ScriptID)
-			scriptRequest, err := script.OttoScript()
-			if err != nil {
-				continue
-			}
-			scripts = append(scripts, *scriptRequest)
-		}
-	}
-
 	responseData, erro := json.Marshal(otto.RegisterResponse{
 		ServerIdentity: serverId.PublicKeyString(),
-		Scripts:        scripts,
 	})
 	if erro != nil {
 		return web.HTTPResponse{

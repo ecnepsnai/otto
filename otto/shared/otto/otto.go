@@ -185,8 +185,7 @@ type RegisterRequestProperties struct {
 
 // RegisterResponse describes the response to a register request
 type RegisterResponse struct {
-	ServerIdentity string   `json:"identity"`
-	Scripts        []Script `json:"scripts,omitempty"`
+	ServerIdentity string `json:"identity"`
 }
 
 func readFrame(r io.Reader) ([]byte, error) {
