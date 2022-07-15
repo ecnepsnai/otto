@@ -3,22 +3,58 @@ export class Formatter {
         return Number(Math.round(parseFloat(value + 'e' + decimals)) + 'e-' + decimals);
     }
 
-    public static Duration(input: number): string {
+    /**
+     * Return a formatted human readable strin representing the duration of the given amount of nanoseconds
+     * @param input duration in nanoseconds
+     * @returns A formatted string
+     */
+    public static DurationNS(input: number): string {
+        return this.duration(input, 3600000000000, 60000000000, 1000000000);
+    }
+
+    /**
+     * Return a formatted human readable strin representing the duration of the given amount of seconds
+     * @param input duration in seconds
+     * @returns A formatted string
+     */
+    public static DurationS(input: number): string {
+        return this.duration(input, 3600, 60, 1);
+    }
+
+    private static duration(input: number, dHour: number, dMinute: number, dSecond: number): string {
         if (input == undefined) {
             console.warn('undefined input specified');
             return;
         }
-        if (input < 10000000000) {
-            return 'Less than 1 minute';
+
+        if (input < dSecond) {
+            return 'Less than 1 second';
         }
 
-        if (input > 600000000000) {
-            const nHours = this.round(input / 600000000000, 2);
-            return nHours + ' hours';
+        const hours = Math.floor(input / dHour);
+        const minutes = Math.floor((input % dHour) / dMinute);
+        const seconds = Math.floor(input % dMinute);
+    
+        let result = '';
+        if (hours >= 1) {
+            result += hours + ' hour' + (hours > 1 ? 's' : '') + ' ';
         }
+        if (minutes >= 1) {
+            result += minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ';
+        }
+        if (seconds >= 1) {
+            let s = seconds.toString();
+            if (s.length > 2) {
+                s = s.substring(0, 2);
 
-        const nSeconds = this.round(input / 10000000000, 2);
-        return nSeconds + ' minutes';
+                if (s.at(1) == '0') {
+                    s = s.at(0);
+                }
+            }
+            result += s + ' second' + (seconds > 1 ? 's' : '');
+        }
+        
+        return result;
     }
 
     public static Bytes(input: number): string {

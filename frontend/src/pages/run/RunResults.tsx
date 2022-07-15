@@ -39,7 +39,7 @@ export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) =>
                 <Card.Header>Details</Card.Header>
                 <ListGroup.List>
                     <ListGroup.TextItem title="Return Code">{props.results.Result.code} {returnCodeIcon}</ListGroup.TextItem>
-                    <ListGroup.TextItem title="Duration">{Formatter.Duration(props.results.Duration)}</ListGroup.TextItem>
+                    <ListGroup.TextItem title="Duration">{Formatter.DurationNS(props.results.Duration)}</ListGroup.TextItem>
                 </ListGroup.List>
             </Card.Card>
             <EnvironmentVariableCard variables={props.results.Environment} />
