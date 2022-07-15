@@ -42,8 +42,6 @@ func start() {
 	log = logtic.Log.Connect("otto")
 
 	mustLoadIdentity()
-	setupLoopback()
-	go startLoopbackRepeater()
 
 	listen()
 	stop()

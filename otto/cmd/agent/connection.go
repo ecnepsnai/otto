@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/base64"
 	"io"
 	"os"
@@ -22,7 +21,7 @@ func listen() {
 			Address:           config.ListenAddr,
 			AllowFrom:         getAllowFroms(),
 			Identity:          agentIdentity,
-			TrustedPublicKeys: []string{config.ServerIdentity, loopbackIdentity.PublicKeyString()},
+			TrustedPublicKeys: []string{config.ServerIdentity},
 		}, handle)
 		if err != nil {
 			panic("error listening: " + err.Error())
@@ -37,12 +36,10 @@ func listen() {
 }
 
 func handle(conn *otto.Connection) {
-	if !bytes.Equal(conn.RemoteIdentity(), loopbackIdentity.PublicKey().Marshal()) {
-		log.PInfo("Connection established", map[string]interface{}{
-			"remote_addr": conn.RemoteAddr().String(),
-			"identity":    base64.StdEncoding.EncodeToString(conn.RemoteIdentity()),
-		})
-	}
+	log.PInfo("Connection established", map[string]interface{}{
+		"remote_addr": conn.RemoteAddr().String(),
+		"identity":    base64.StdEncoding.EncodeToString(conn.RemoteIdentity()),
+	})
 	defer conn.Close()
 
 	cancel := make(chan bool)
@@ -74,13 +71,11 @@ func handle(conn *otto.Connection) {
 }
 
 func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeatRequest) {
-	if !bytes.Equal(conn.RemoteIdentity(), loopbackIdentity.PublicKey().Marshal()) {
-		log.PInfo("Incoming heartbeat", map[string]interface{}{
-			"remote_addr":    conn.RemoteAddr().String(),
-			"server_version": message.Version,
-			"nonce":          message.Nonce,
-		})
-	}
+	log.PInfo("Incoming heartbeat", map[string]interface{}{
+		"remote_addr":    conn.RemoteAddr().String(),
+		"server_version": message.Version,
+		"nonce":          message.Nonce,
+	})
 
 	properties := map[string]string{
 		"hostname":             registerProperties.Hostname,
