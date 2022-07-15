@@ -16,6 +16,8 @@ github.com/ecnepsnai/secutil v1.0.3 h1:jltWXO7K9zTgq33Bm7vuma6V3X799dliF05JeI1fo
 github.com/ecnepsnai/secutil v1.0.3/go.mod h1:XUyQczlk/77WW8H4WUmxX8+9SJl4KH2s6LT3+1qyu+8=
 github.com/ecnepsnai/set v1.0.0 h1:ErepEMF5/RVlc31Vu2Sf5ZDzf6FOQJ6dlwueRZ6zH8s=
 github.com/ecnepsnai/set v1.0.0/go.mod h1:70MwbzTpbsVtcPqg0DupFbEo3iwbE+nEnkPWYUi8SVM=
+github.com/ecnepsnai/snapshot v1.0.0 h1:wkdG9rc3/dQVFX4Vr914hHb11i4u9UmcBUmSFSvkHdA=
+github.com/ecnepsnai/snapshot v1.0.0/go.mod h1:Nbwbz8scvXFVUwW16bJvzTuCPtlll9+6rfmVJwXVc9o=
 github.com/ecnepsnai/stats v1.0.0 h1:9QClYW65H3rM3zQL57tWticogc+zLz9f2GlEsRYPoVc=
 github.com/ecnepsnai/stats v1.0.0/go.mod h1:dYNPtuy1sByJwtwi6H+WA0dkJPXH5OdQZVKa4RLw1FM=
 github.com/ecnepsnai/store v1.2.2 h1:Azyi23OgLyJmXX6OOSE7trd+/CLTzDvBpw+HIIUiO4c=

@@ -11,6 +11,7 @@ require (
 	github.com/ecnepsnai/search v1.0.2
 	github.com/ecnepsnai/secutil v1.0.3
 	github.com/ecnepsnai/set v1.0.0
+	github.com/ecnepsnai/snapshot v1.0.0
 	github.com/ecnepsnai/stats v1.0.0
 	github.com/ecnepsnai/store v1.2.2
 	github.com/ecnepsnai/web v1.9.1

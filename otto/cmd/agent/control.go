@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/logtic"
-	"github.com/ecnepsnai/otto/shared/snapshot"
+	"github.com/ecnepsnai/snapshot"
 )
 
 var controlPath = ".control"
