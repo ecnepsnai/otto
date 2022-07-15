@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -224,6 +225,17 @@ func compareUIDandGID(uid, gid uint32) bool {
 
 // getOutboundIP get the IP address used to connect to a remote destination
 func getOutboundIP(host string) net.IP {
+
+	// Ensure there's a port, doesn't matter what port
+	portPattern := regexp.MustCompile(`:[0-9]+$`)
+	if !portPattern.MatchString(host) {
+		if strings.ContainsAny(host, ":") {
+			host = "[" + host + "]:80"
+		} else {
+			host += ":80"
+		}
+	}
+
 	// Because we're using udp there's no handshake or connection actually happening here
 	conn, err := net.Dial("udp", host)
 	if err != nil {
