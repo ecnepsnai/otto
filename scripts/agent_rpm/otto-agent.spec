@@ -36,7 +36,7 @@ CGO_ENABLED=0 go test -v ./...
 %systemd_post %{name}.service
 
 %posttrans
-if test pidof agent = 1; then
+if test $(pidof /opt/%{name}/agent) = 1; then
     systemctl restart %{name}.service
 fi
 
