@@ -109,6 +109,7 @@ func (l *Listener) accept(c net.Conn) {
 	var remoteIdentity []byte
 
 	sshConfig := &ssh.ServerConfig{
+		Config: defaultSSHConfig,
 		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
 			log.PDebug("[LISTEN] Handshake", map[string]interface{}{
 				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),

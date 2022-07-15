@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/logtic"
+	"golang.org/x/crypto/ssh"
 )
 
 var log = logtic.Log.Connect("libotto")
@@ -454,4 +455,10 @@ func (c *Connection) Close() error {
 		"remote_addr": c.remoteAddr.String(),
 	})
 	return c.w.Close()
+}
+
+var defaultSSHConfig = ssh.Config{
+	KeyExchanges: []string{"curve25519-sha256"},
+	Ciphers:      []string{"chacha20-poly1305@openssh.com"},
+	MACs:         []string{"hmac-sha2-256-etm@openssh.com"},
 }

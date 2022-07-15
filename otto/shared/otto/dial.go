@@ -28,6 +28,7 @@ func Dial(options DialOptions) (*Connection, error) {
 	var remoteIdentity []byte
 
 	clientConfig := &ssh.ClientConfig{
+		Config: defaultSSHConfig,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(options.Identity),
 		},
