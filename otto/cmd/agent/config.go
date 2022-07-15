@@ -144,7 +144,9 @@ func loadAgentIdentity() (ssh.Signer, error) {
 	mode := info.Mode()
 	if mode&32 != 0 || mode&16 != 0 || mode&8 != 0 || mode&4 != 0 || mode&2 != 0 || mode&1 != 0 {
 		fmt.Fprintf(os.Stderr, "The agent identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the agent, then re-trust the host on the Otto server.\n", otto_IDENTITY_FILE_NAME)
-		os.Exit(1)
+		if os.Getenv("OTTO_VERY_DANGEROUS_IGNORE_IDENTITY_PERMISSIONS") == "" {
+			os.Exit(1)
+		}
 	}
 
 	data, err := os.ReadFile(otto_IDENTITY_FILE_NAME)
