@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
+	"time"
 
 	"github.com/ecnepsnai/otto/shared/otto"
 )
@@ -76,6 +77,7 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 		"server_version": message.Version,
 		"nonce":          message.Nonce,
 	})
+	Stats.LastHeartbeat = time.Now().UTC().Unix()
 
 	properties := map[string]string{
 		"hostname":             registerProperties.Hostname,

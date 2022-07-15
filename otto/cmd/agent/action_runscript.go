@@ -39,6 +39,8 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 		"wd":          script.WorkingDirectory,
 		"exec":        script.Executable,
 	})
+	Stats.ScriptsExecuted++
+	Stats.LastScriptExecuted = time.Now().UTC().Unix()
 
 	for _, file := range script.Files {
 		if file.AfterScript {
@@ -61,7 +63,7 @@ func runScript(conn *otto.Connection, script otto.Script, cancel chan bool) otto
 		panic(err)
 	}
 	log.Debug("Writing script to %s", tmp.Name())
-	if err := tmp.Chmod(0777); err != nil {
+	if err := tmp.Chmod(0700); err != nil {
 		tmp.Close()
 		panic(err)
 	}

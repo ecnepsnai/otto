@@ -40,6 +40,8 @@ func createDirectoryForOttoFile(file otto.File) error {
 }
 
 func uploadFile(file otto.File) error {
+	Stats.FilesUploaded++
+
 	if err := createDirectoryForOttoFile(file); err != nil {
 		return err
 	}

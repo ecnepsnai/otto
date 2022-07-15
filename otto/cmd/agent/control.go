@@ -47,7 +47,7 @@ func controlAccept(conn net.Conn) {
 	command := string(data[0 : len(data)-1])
 	switch command {
 	case "stat":
-		data, err := formatJSON(snapshot.Collect())
+		data, err := formatJSON(Stats)
 		if err != nil {
 			conn.Write([]byte(fmt.Sprintf("err: %s", err.Error())))
 		} else {
@@ -67,6 +67,10 @@ func controlAccept(conn net.Conn) {
 		} else {
 			conn.Write(data)
 		}
+	case "reload":
+		mustLoadConfig()
+		mustLoadIdentity()
+		conn.Write([]byte("config & identity reloaded"))
 	case "debug":
 		logtic.Log.Level = logtic.LevelDebug
 		conn.Write([]byte("debug logging enabled"))
@@ -74,7 +78,7 @@ func controlAccept(conn net.Conn) {
 		logtic.Log.Level = logtic.LevelError
 		conn.Write([]byte("debug logging disabled"))
 	case "help":
-		conn.Write([]byte("stat, dump, config, debug, nodebug, help"))
+		conn.Write([]byte("valid commands are: stat, dump, config, reload, debug, nodebug, help"))
 	default:
 		conn.Write([]byte(fmt.Sprintf("unknown command '%s'", command)))
 	}
