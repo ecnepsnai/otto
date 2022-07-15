@@ -58,12 +58,21 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 		}
 	}
 
-	existing := HostStore.HostWithAddress(r.Properties.Hostname)
-	if existing != nil {
+	if existing := HostStore.HostWithName(r.Properties.Hostname); existing != nil {
 		log.PWarn("Rejected registration request", map[string]interface{}{
-			"remote_addr": request.HTTP.RemoteAddr,
-			"reason":      "duplicate hostname",
-			"hostname":    r.Properties.Hostname,
+			"reason":   "duplicate hostname",
+			"hostname": r.Properties.Hostname,
+		})
+		return web.HTTPResponse{
+			Status: 400,
+		}
+	}
+
+	hostIP := request.ClientIPAddress().String()
+	if existing := HostStore.HostWithAddress(hostIP); existing != nil {
+		log.PWarn("Rejected registration request", map[string]interface{}{
+			"reason":  "duplicate address",
+			"address": hostIP,
 		})
 		return web.HTTPResponse{
 			Status: 400,
@@ -84,10 +93,9 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 
 	// Use the address that sent this request as the address for the new host, but first strip the port
 	// RemoteAddr will always have a port, but may be a wrapped IPv6 address
-	address := stripPortFromRemoteAddr(request.HTTP.RemoteAddr)
 	host, err := HostStore.NewHost(newHostParameters{
 		Name:          r.Properties.Hostname,
-		Address:       address,
+		Address:       hostIP,
 		Port:          r.Port,
 		AgentIdentity: r.AgentIdentity,
 		GroupIDs:      []string{groupID},
@@ -95,7 +103,7 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 	if err != nil {
 		log.PError("Error adding new host", map[string]interface{}{
 			"hostname": r.Properties.Hostname,
-			"address":  address,
+			"address":  hostIP,
 			"error":    err.Message,
 		})
 		return web.HTTPResponse{
