@@ -67,6 +67,8 @@ echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 
 cd ${ROOT_PATH}/scripts/agent_rpm
 ./build.sh ${VERSION}
+cd ${ROOT_PATH}/scripts/agent_deb
+./build.sh ${VERSION}
 
 echo -en "Packaging server build... "
 for ARCH in 'amd64' 'arm64'; do
