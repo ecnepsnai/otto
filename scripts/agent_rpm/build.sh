@@ -29,11 +29,12 @@ GOLANG_ARCH="amd64"
 if [[ $(uname -m) == 'aarch64' ]]; then
     GOLANG_ARCH="arm64"
 fi
+GOLANG_VERSION=$(curl -sS "https://go.dev/dl/?mode=json" | jq -r '.[0].version' | sed 's/go//')
 
-podman build --build-arg GOLANG_ARCH=${GOLANG_ARCH} -t otto_build . >> ${LOG} 2>&1
+podman build --build-arg GOLANG_ARCH=${GOLANG_ARCH} --build-arg GOLANG_VERSION=${GOLANG_VERSION} -t otto_build_rpm:${OTTO_VERSION} . >> ${LOG} 2>&1
 rm -rf rpms
 mkdir -p rpms
-podman run --user root -v $(readlink -f rpms):/root/rpmbuild/RPMS:Z -e OTTO_VERSION=${OTTO_VERSION} -e BUILD_DATE="${BUILD_DATE}" -it otto_build >> ${LOG} 2>&1
+podman run --user root -v $(readlink -f rpms):/root/rpmbuild/RPMS:Z -e OTTO_VERSION=${OTTO_VERSION} -e BUILD_DATE="${BUILD_DATE}" -it otto_build_rpm:${OTTO_VERSION} >> ${LOG} 2>&1
 cp rpms/*/*.rpm .
 mv *.rpm ../../../artifacts
 cd ../
