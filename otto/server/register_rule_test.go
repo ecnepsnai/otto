@@ -217,6 +217,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 		h := http.Header{}
 		h.Set("User-Agent", "go test")
 		h.Set("X-OTTO-PROTO-VERSION", fmt.Sprintf("%d", otto.ProtocolVersion))
+		h.Set("X-Real-Ip", remoteAddr)
 
 		return web.Request{
 			HTTP: &http.Request{
@@ -227,11 +228,20 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 		}
 	}
 
+	mustIdentity := func() otto.Identity {
+		id, err := otto.NewIdentity()
+		if err != nil {
+			panic(err)
+		}
+		return id
+	}
+
 	// Test that a host that doesn't match any rules gets added to the default group
-	defaultAddress := randomString(6)
+	defaultAddress := "127.0.0.1"
 	v := view{}
 	if webReply := v.Register(mockRequest(defaultAddress, Key, otto.RegisterRequest{
-		Port: 12444,
+		AgentIdentity: mustIdentity().PublicKeyString(),
+		Port:          12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -240,16 +250,17 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionVersion: randomString(6),
 		},
 	}), web.Writer{}); webReply.Status != 200 {
-		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
+		t.Fatalf("[default] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(defaultAddress) == nil {
-		t.Errorf("Host was not registered")
+		t.Errorf("[default] Host was not registered")
 	}
 
 	// Test that a host that matches a rule gets added to the correct group
-	centos8address := randomString(6)
+	centos8address := "127.0.0.2"
 	if webReply := v.Register(mockRequest(centos8address, Key, otto.RegisterRequest{
-		Port: 12444,
+		AgentIdentity: mustIdentity().PublicKeyString(),
+		Port:          12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -258,19 +269,20 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionVersion: "8",
 		},
 	}), web.Writer{}); webReply.Status != 200 {
-		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
+		t.Fatalf("[centos 8] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(centos8address) == nil {
-		t.Errorf("Host was not registered")
+		t.Errorf("[centos 8] Host was not registered")
 	}
 	if HostStore.HostWithAddress(centos8address).GroupIDs[0] != centos8group.ID {
-		t.Errorf("Incorrect group")
+		t.Errorf("[centos 8] Incorrect group")
 	}
 
 	// Test that an incorrect Key does not get registered
-	incorrectKeyAddress := randomString(6)
+	incorrectKeyAddress := "127.0.0.3"
 	if webReply := v.Register(mockRequest(incorrectKeyAddress, randomString(12), otto.RegisterRequest{
-		Port: 12444,
+		AgentIdentity: mustIdentity().PublicKeyString(),
+		Port:          12444,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -279,9 +291,9 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionVersion: "8",
 		},
 	}), web.Writer{}); webReply.Status == 200 {
-		t.Fatalf("Unexpected error trying to register valid host: HTTP %d", webReply.Status)
+		t.Fatalf("[incorrect] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(incorrectKeyAddress) != nil {
-		t.Errorf("Host was registered when one was not expected")
+		t.Errorf("[incorrect] Host was registered when one was not expected")
 	}
 }

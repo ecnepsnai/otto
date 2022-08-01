@@ -57,6 +57,17 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 			Status: 400,
 		}
 	}
+	hostIP := request.ClientIPAddress().String()
+	log.PDebug("Incoming host registration request", map[string]interface{}{
+		"HostIP":              hostIP,
+		"AgentIdentity":       r.AgentIdentity,
+		"Port":                r.Port,
+		"Hostname":            r.Properties.Hostname,
+		"KernelName":          r.Properties.KernelName,
+		"KernelVersion":       r.Properties.KernelVersion,
+		"DistributionName":    r.Properties.DistributionName,
+		"DistributionVersion": r.Properties.DistributionVersion,
+	})
 
 	if existing := HostStore.HostWithName(r.Properties.Hostname); existing != nil {
 		log.PWarn("Rejected registration request", map[string]interface{}{
@@ -68,7 +79,6 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 		}
 	}
 
-	hostIP := request.ClientIPAddress().String()
 	if existing := HostStore.HostWithAddress(hostIP); existing != nil {
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"reason":  "duplicate address",
