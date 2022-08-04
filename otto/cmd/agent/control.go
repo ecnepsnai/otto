@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net"
@@ -79,8 +80,10 @@ func controlAccept(conn net.Conn) {
 	case "nodebug":
 		logtic.Log.Level = logtic.LevelError
 		conn.Write([]byte("debug logging disabled"))
+	case "id":
+		conn.Write([]byte(fmt.Sprintf("Server: %s\nClient: %s", config.ServerIdentity, base64.StdEncoding.EncodeToString(agentIdentity.PublicKey().Marshal()))))
 	case "help":
-		conn.Write([]byte("valid commands are: stat, dump, config, reload, debug, nodebug, help"))
+		conn.Write([]byte("valid commands are: stat, dump, config, reload, debug, nodebug, id, help"))
 	default:
 		conn.Write([]byte(fmt.Sprintf("unknown command '%s'", command)))
 	}
