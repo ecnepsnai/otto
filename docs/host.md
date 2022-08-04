@@ -10,8 +10,7 @@ the server itself.
 ### System Requirements
 
 **Hardware:**
-- CPU: Any semi-recent amd64/x86_64 or arm64 CPU. Generally, if it can run any of the operating systems listed below,
-it'll work for Otto. 32-bit CPUs are not supported.
+- CPU: AMD64: x86-64-v2 or newer. ARM64: ARMv8 or newer.
 - RAM: At least 250MiB of available system memory
 - Disk: Varies by log retention, agents are generally less than 10MiB.
 

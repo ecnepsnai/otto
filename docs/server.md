@@ -35,7 +35,7 @@ You may also wish to run the Otto server as an executable on any Linux, FreeBSD,
 ### System Requirements
 
 **Hardware:**
-- CPU: Any semi-recent amd64/x86_64
+- CPU: AMD64: x86-64-v2 or newer. ARM64: ARMv8 or newer.
 - RAM: At least 500MiB of available system memory
 - Disk: Varies by use and log retention. 1GiB will be plenty.
 
