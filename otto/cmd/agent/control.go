@@ -5,23 +5,25 @@ import (
 	"io"
 	"net"
 	"os"
+	"path"
 	"time"
 
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/snapshot"
 )
 
-var controlPath = ".control"
+const otto_CONTROL_FILE_NAME = ".control"
+
 var controlFd net.Listener
 
 func setupControl() {
-	if fileExists(controlPath) {
-		if err := os.Remove(controlPath); err != nil && !os.IsNotExist(err) {
+	if fileExists(path.Join(otto_DIR, otto_CONTROL_FILE_NAME)) {
+		if err := os.Remove(path.Join(otto_DIR, otto_CONTROL_FILE_NAME)); err != nil && !os.IsNotExist(err) {
 			panic("cant remove agent pid: " + err.Error())
 		}
 	}
 
-	l, err := net.Listen("unix", controlPath)
+	l, err := net.Listen("unix", path.Join(otto_DIR, otto_CONTROL_FILE_NAME))
 	if err != nil {
 		panic("err listen agent pid: " + err.Error())
 	}
@@ -54,7 +56,7 @@ func controlAccept(conn net.Conn) {
 			conn.Write(data)
 		}
 	case "dump":
-		name := fmt.Sprintf("dump_%d_%s.zip", os.Getpid(), time.Now().Format("20060102150405"))
+		name := path.Join(otto_DIR, fmt.Sprintf("dump_%d_%s.zip", os.Getpid(), time.Now().Format("20060102150405")))
 		if err := snapshot.Full(name); err != nil {
 			conn.Write([]byte(fmt.Sprintf("err: %s", err.Error())))
 		} else {

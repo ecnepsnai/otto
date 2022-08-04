@@ -23,6 +23,10 @@ func main() {
 }
 
 func start() {
+	if dir := os.Getenv("OTTO_DIR"); dir != "" {
+		otto_DIR = dir
+	}
+
 	loadRegisterProperties()
 	parseArgs()
 	tryAutoRegister()

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path"
 
 	"github.com/ecnepsnai/otto/shared/otto"
 	"golang.org/x/crypto/ssh"
@@ -33,13 +34,15 @@ const (
 	otto_IDENTITY_ATOMIC_FILE_NAME = ".otto_id.der.tmp"
 )
 
+var otto_DIR = "."
+
 func loadConfig() error {
-	if _, err := os.Stat(otto_CONFIG_FILE_NAME); os.IsNotExist(err) {
+	if _, err := os.Stat(path.Join(otto_DIR, otto_CONFIG_FILE_NAME)); os.IsNotExist(err) {
 		fmt.Fprintf(os.Stderr, "The otto agent must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/agent.md for more information.\n\nUse -s to run interactive setup.\n", Version)
 		os.Exit(1)
 	}
 
-	f, err := os.OpenFile(otto_CONFIG_FILE_NAME, os.O_RDONLY, 0644)
+	f, err := os.OpenFile(path.Join(otto_DIR, otto_CONFIG_FILE_NAME), os.O_RDONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -87,10 +90,10 @@ func generateIdentity() error {
 		return err
 	}
 
-	f, err := os.OpenFile(otto_IDENTITY_ATOMIC_FILE_NAME, os.O_CREATE|os.O_RDWR, 0600)
+	f, err := os.OpenFile(path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME), os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		log.PError("Error opening identity file for writing", map[string]interface{}{
-			"file_path": otto_IDENTITY_ATOMIC_FILE_NAME,
+			"file_path": path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME),
 			"error":     err.Error(),
 		})
 		return err
@@ -98,7 +101,7 @@ func generateIdentity() error {
 
 	if _, err := f.Write(id); err != nil {
 		log.PError("Error writing identity file", map[string]interface{}{
-			"file_path": otto_IDENTITY_ATOMIC_FILE_NAME,
+			"file_path": path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME),
 			"error":     err.Error(),
 		})
 		f.Close()
@@ -106,10 +109,10 @@ func generateIdentity() error {
 	}
 	f.Close()
 
-	if err := os.Rename(otto_IDENTITY_ATOMIC_FILE_NAME, otto_IDENTITY_FILE_NAME); err != nil {
+	if err := os.Rename(path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME), path.Join(otto_DIR, otto_IDENTITY_FILE_NAME)); err != nil {
 		log.PError("Error renaming identity file", map[string]interface{}{
-			"old_name": otto_IDENTITY_ATOMIC_FILE_NAME,
-			"new_name": otto_IDENTITY_FILE_NAME,
+			"old_name": path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME),
+			"new_name": path.Join(otto_DIR, otto_IDENTITY_FILE_NAME),
 			"error":    err.Error(),
 		})
 		return err
@@ -119,7 +122,7 @@ func generateIdentity() error {
 }
 
 func loadOrGenerateAgentIdentity() (ssh.Signer, error) {
-	_, err := os.Stat(otto_IDENTITY_FILE_NAME)
+	_, err := os.Stat(path.Join(otto_DIR, otto_IDENTITY_FILE_NAME))
 	if err != nil && os.IsNotExist(err) {
 		if err := generateIdentity(); err != nil {
 			return nil, err
@@ -130,11 +133,11 @@ func loadOrGenerateAgentIdentity() (ssh.Signer, error) {
 }
 
 func loadAgentIdentity() (ssh.Signer, error) {
-	info, err := os.Stat(otto_IDENTITY_FILE_NAME)
+	info, err := os.Stat(path.Join(otto_DIR, otto_IDENTITY_FILE_NAME))
 	if err != nil {
 		if !os.IsNotExist(err) {
 			log.PError("Error reading identity file", map[string]interface{}{
-				"file_path": otto_IDENTITY_FILE_NAME,
+				"file_path": path.Join(otto_DIR, otto_IDENTITY_FILE_NAME),
 				"error":     err.Error(),
 			})
 		}
@@ -143,13 +146,13 @@ func loadAgentIdentity() (ssh.Signer, error) {
 
 	mode := info.Mode()
 	if mode&32 != 0 || mode&16 != 0 || mode&8 != 0 || mode&4 != 0 || mode&2 != 0 || mode&1 != 0 {
-		fmt.Fprintf(os.Stderr, "The agent identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the agent, then re-trust the host on the Otto server.\n", otto_IDENTITY_FILE_NAME)
+		fmt.Fprintf(os.Stderr, "The agent identity file can be accessed by other users, this is very dangerous! You should delete the '%s' file, restart the agent, then re-trust the host on the Otto server.\n", path.Join(otto_DIR, otto_IDENTITY_FILE_NAME))
 		if os.Getenv("OTTO_VERY_DANGEROUS_IGNORE_IDENTITY_PERMISSIONS") == "" {
 			os.Exit(1)
 		}
 	}
 
-	data, err := os.ReadFile(otto_IDENTITY_FILE_NAME)
+	data, err := os.ReadFile(path.Join(otto_DIR, otto_IDENTITY_FILE_NAME))
 	if err != nil {
 		log.PError("Error reading identity file", map[string]interface{}{
 			"error": err.Error(),
@@ -193,18 +196,18 @@ func saveNewConfig(c agentConfig) error {
 		})
 		return err
 	}
-	if err := os.WriteFile(otto_CONFIG_ATOMIC_FILE_NAME, data, 0644); err != nil {
+	if err := os.WriteFile(path.Join(otto_DIR, otto_CONFIG_ATOMIC_FILE_NAME), data, 0644); err != nil {
 		log.PError("Error writing config JSON", map[string]interface{}{
-			"file_path": otto_CONFIG_ATOMIC_FILE_NAME,
+			"file_path": path.Join(otto_DIR, otto_CONFIG_ATOMIC_FILE_NAME),
 			"error":     err.Error(),
 		})
 		return err
 	}
 
-	if err := os.Rename(otto_CONFIG_ATOMIC_FILE_NAME, otto_CONFIG_FILE_NAME); err != nil {
+	if err := os.Rename(path.Join(otto_DIR, otto_CONFIG_ATOMIC_FILE_NAME), path.Join(otto_DIR, otto_CONFIG_FILE_NAME)); err != nil {
 		log.PError("Error renaming atomic config file", map[string]interface{}{
-			"file_path":        otto_CONFIG_FILE_NAME,
-			"atomic_file_path": otto_CONFIG_ATOMIC_FILE_NAME,
+			"file_path":        path.Join(otto_DIR, otto_CONFIG_FILE_NAME),
+			"atomic_file_path": path.Join(otto_DIR, otto_CONFIG_ATOMIC_FILE_NAME),
 			"error":            err.Error(),
 		})
 		return err
@@ -214,7 +217,7 @@ func saveNewConfig(c agentConfig) error {
 }
 
 func updateServerIdentity(newPublicKey string) error {
-	f, err := os.OpenFile(otto_CONFIG_FILE_NAME, os.O_RDONLY, 0644)
+	f, err := os.OpenFile(path.Join(otto_DIR, otto_CONFIG_FILE_NAME), os.O_RDONLY, 0644)
 	if err != nil {
 		log.PError("Error updating server identity", map[string]interface{}{
 			"where": "reading existing config file",
@@ -255,8 +258,8 @@ func updateServerIdentity(newPublicKey string) error {
 func defaultConfig() agentConfig {
 	return agentConfig{
 		ListenAddr:   "0.0.0.0:12444",
-		IdentityPath: otto_IDENTITY_FILE_NAME,
-		LogPath:      ".",
+		IdentityPath: path.Join(otto_DIR, otto_IDENTITY_FILE_NAME),
+		LogPath:      otto_DIR,
 		DefaultUID:   0,
 		DefaultGID:   0,
 		AllowFrom:    []string{"0.0.0.0/0", "::/0"},
