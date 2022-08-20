@@ -200,7 +200,14 @@ func readFrame(r io.Reader) ([]byte, error) {
 		return nil, err
 	}
 	version := binary.BigEndian.Uint32(versionBuf)
-	if version != ProtocolVersion {
+	if version > ProtocolVersion {
+		log.PError("Unsupported protocol version", map[string]interface{}{
+			"frame_version":     version,
+			"supported_version": ProtocolVersion,
+		})
+		return nil, fmt.Errorf("unsupported protocol version %d", version)
+	}
+	if version < ProtocolVersion {
 		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
 	}
 
@@ -342,54 +349,63 @@ func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
 	case MessageTypeHeartbeatRequest:
 		message := MessageHeartbeatRequest{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageHeartbeatRequest: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeHeartbeatResponse:
 		message := MessageHeartbeatResponse{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageHeartbeatResponse: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeTriggerAction:
 		message := MessageTriggerAction{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageTriggerAction: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeCancelAction:
 		message := MessageCancelAction{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageCancelAction: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeActionOutput:
 		message := MessageActionOutput{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageActionOutput: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeActionResult:
 		message := MessageActionResult{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageActionResult: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeRotateIdentityRequest:
 		message := MessageRotateIdentityRequest{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageRotateIdentityRequest: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeRotateIdentityResponse:
 		message := MessageRotateIdentityResponse{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageRotateIdentityResponse: %s", err.Error())
 			return nil, err
 		}
 		return message, nil
 	case MessageTypeGeneralFailure:
 		message := MessageGeneralFailure{}
 		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
+			log.Error("Error decoding MessageGeneralFailure: %s", err.Error())
 			return nil, err
 		}
 		return message, nil

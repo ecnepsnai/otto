@@ -71,8 +71,8 @@ func TestHeartbeat(t *testing.T) {
 	}
 }
 
-// Test that otto behaves in an expected mannor when it receives a message that has a valid protocol version number but the rest
-// is fuzzed data
+// Test that otto behaves in an expected mannor when it receives a message that has a valid protocol version number but
+// the rest is fuzzed data
 func TestUnsupportedProtocolVersion(t *testing.T) {
 	t.Parallel()
 
