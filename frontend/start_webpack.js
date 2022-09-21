@@ -42,13 +42,11 @@ var startWebpack = (configFile) => {
 }
 
 var startApp = () => {
-    const confFile = mode == 'production' ? 'webpack.app.production.js' : 'webpack.app.development.js';
-    return startWebpack(confFile);
+    return startWebpack('webpack.app.js');
 };
 
 var startLogin = () => {
-    const confFile = mode == 'production' ? 'webpack.login.production.js' : 'webpack.login.development.js';
-    return startWebpack(confFile);
+    return startWebpack('webpack.login.js');
 };
 
 (async () => {
