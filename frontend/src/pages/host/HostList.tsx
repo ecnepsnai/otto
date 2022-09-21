@@ -95,7 +95,6 @@ export const HostList: React.FC = () => {
 
     return (
         <Page title="Hosts" toolbar={toolbar}>
-            <span>{Formatter.DurationNS(600000000)}</span>
             <Table columns={tableCols} data={hosts} contextMenu={(a: HostType) => HostTableContextMenu(a, loadHosts)} defaultSort={{ ColumnIdx: 0, Ascending: true }} />
         </Page>
     );
