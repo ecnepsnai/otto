@@ -25,8 +25,7 @@ cd ${FRONTEND_PATH}
 rm -rf build/
 echo -en "Building frontend... "
 npm install >> ${LOG} 2>&1
-npx webpack --config webpack.login.production.js >> ${LOG}
-npx webpack --config webpack.app.production.js >> ${LOG}
+node start_webpack.js --mode production >> ${LOG} 2>&1
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 cd ${ROOT_PATH}
 rm -rf artifacts/
