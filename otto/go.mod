@@ -13,11 +13,11 @@ require (
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/snapshot v1.0.0
 	github.com/ecnepsnai/stats v1.0.0
-	github.com/ecnepsnai/store v1.2.2
+	github.com/ecnepsnai/store v1.3.0
 	github.com/ecnepsnai/web v1.9.2
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
-	golang.org/x/crypto v0.0.0-20220919173607-35f4265a4bc0
+	golang.org/x/crypto v0.1.0
 )
 
 require (
@@ -25,7 +25,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/lithammer/fuzzysearch v1.1.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 )

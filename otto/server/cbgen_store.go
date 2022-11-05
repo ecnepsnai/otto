@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.10.0
+// This file is was generated automatically by Codegen v1.10.1
 // Do not make changes to this file as they will be lost
 
 import (
@@ -27,8 +27,8 @@ var ShadowStore = shadowStoreObject{Lock: &sync.Mutex{}}
 
 // storeSetup sets up all stores
 func storeSetup() {
-	IdentityStore.Store = cbgenStoreNewStore("identity")
-	ShadowStore.Store = cbgenStoreNewStore("shadow")
+	IdentityStore.Store = cbgenStoreNewStore("identity", "")
+	ShadowStore.Store = cbgenStoreNewStore("shadow", "")
 	cbgenStoreRegisterGobTypes()
 }
 func cbgenStoreRegisterGobTypes() {
@@ -40,8 +40,8 @@ func storeTeardown() {
 	ShadowStore.Store.Close()
 }
 
-func cbgenStoreNewStore(storeName string) *store.Store {
-	s, err := store.New(Directories.Data, storeName, nil)
+func cbgenStoreNewStore(storeName string, bucketName string) *store.Store {
+	s, err := store.New(Directories.Data, storeName, &store.Options{BucketName: bucketName})
 	if err != nil {
 		log.Fatal("Error opening %s store: %s", storeName, err.Error())
 	}

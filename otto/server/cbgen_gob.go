@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.10.0
+// This file is was generated automatically by Codegen v1.10.1
 // Do not make changes to this file as they will be lost
 
 import (
