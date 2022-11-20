@@ -54,7 +54,10 @@ Host Information:
 			}
 			key := args[i+1]
 			i++
-			updateServerIdentity(key)
+			if err := updateServerIdentity(key); err != nil {
+				fmt.Fprintf(os.Stderr, "Error updating server identity: %s", err.Error())
+				os.Exit(1)
+			}
 			os.Exit(0)
 		} else {
 			fmt.Printf(`Usage: %s [options]

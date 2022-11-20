@@ -33,7 +33,7 @@ var agentActionMap = map[string]uint32{
 type hostConnection struct {
 	Host     *Host
 	Address  string
-	Identity otto.Identity
+	Identity *otto.Identity
 	Conn     *otto.Connection
 }
 
@@ -50,7 +50,14 @@ func (host *Host) connect() (*hostConnection, error) {
 		network = "tcp6"
 	}
 
-	id := IdentityStore.Get(host.ID)
+	id, err := IdentityStore.Get(host.ID)
+	if err != nil {
+		log.PError("Error getting identity for host", map[string]interface{}{
+			"host_id": host.ID,
+			"error":   err.Error(),
+		})
+		return nil, fmt.Errorf("identity: %s", err.Error())
+	}
 	if id == nil {
 		log.PError("No server identity for host", map[string]interface{}{"host_id": host.ID})
 		return nil, fmt.Errorf("no identity")

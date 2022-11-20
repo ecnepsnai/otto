@@ -235,7 +235,10 @@ func (s *groupStoreObject) deleteGroup(tx ds.IReadWriteTransaction, group *Group
 		return ErrorFrom(err)
 	}
 
-	heartbeatStore.CleanupHeartbeats()
+	HostStore.Table.StartRead(func(hostTx ds.IReadTransaction) error {
+		heartbeatStore.CleanupHeartbeats(hostTx)
+		return nil
+	})
 	GroupCache.Update(tx)
 	log.Info("Deleting group '%s'", group.Name)
 	return nil

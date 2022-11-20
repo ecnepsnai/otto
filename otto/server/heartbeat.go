@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/shared/otto"
 )
 
@@ -154,12 +155,12 @@ func (s *heartbeatStoreType) UpdateReachabilityStats() {
 	Stats.Counters.UnreachableHosts.Set(unreachable)
 }
 
-func (s *heartbeatStoreType) CleanupHeartbeats() *Error {
+func (s *heartbeatStoreType) CleanupHeartbeats(hostTx ds.IReadTransaction) *Error {
 	heartbeats := s.AllHeartbeats()
 	s.Lock.Lock()
 	defer s.Lock.Unlock()
 	for _, heartbeat := range heartbeats {
-		host := HostStore.HostWithAddress(heartbeat.Address)
+		host := HostStore.hostWithAddress(hostTx, heartbeat.Address)
 		if host == nil {
 			delete(s.Heartbeats, heartbeat.Address)
 		}

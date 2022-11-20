@@ -37,6 +37,9 @@ const (
 var otto_DIR = "."
 
 func loadConfig() error {
+	identityLock.Lock()
+	defer identityLock.Unlock()
+
 	if _, err := os.Stat(path.Join(otto_DIR, otto_CONFIG_FILE_NAME)); os.IsNotExist(err) {
 		fmt.Fprintf(os.Stderr, "The otto agent must be configured before use. See https://github.com/ecnepsnai/otto/blob/%s/docs/agent.md for more information.\n\nUse -s to run interactive setup.\n", Version)
 		os.Exit(1)
@@ -99,7 +102,7 @@ func generateIdentity() error {
 		return err
 	}
 
-	if _, err := f.Write(id); err != nil {
+	if _, err := id.Write(f); err != nil {
 		log.PError("Error writing identity file", map[string]interface{}{
 			"file_path": path.Join(otto_DIR, otto_IDENTITY_ATOMIC_FILE_NAME),
 			"error":     err.Error(),
@@ -217,6 +220,9 @@ func saveNewConfig(c agentConfig) error {
 }
 
 func updateServerIdentity(newPublicKey string) error {
+	identityLock.Lock()
+	defer identityLock.Unlock()
+
 	f, err := os.OpenFile(path.Join(otto_DIR, otto_CONFIG_FILE_NAME), os.O_RDONLY, 0644)
 	if err != nil {
 		log.PError("Error updating server identity", map[string]interface{}{

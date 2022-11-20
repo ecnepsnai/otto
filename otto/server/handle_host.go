@@ -64,7 +64,14 @@ func (h *handle) HostGetSchedules(request web.Request) (interface{}, *web.Error)
 func (h *handle) HostGetServerID(request web.Request) (interface{}, *web.Error) {
 	hostID := request.Parameters["id"]
 
-	identity := IdentityStore.Get(hostID)
+	identity, err := IdentityStore.Get(hostID)
+	if err != nil {
+		log.PError("Error getting identity for host", map[string]interface{}{
+			"host_id": hostID,
+			"error":   err.Error(),
+		})
+		return nil, web.CommonErrors.ServerError
+	}
 	if identity == nil {
 		log.PError("No server identity for host", map[string]interface{}{"host_id": hostID})
 		return nil, web.ValidationError("No host with ID %s", hostID)

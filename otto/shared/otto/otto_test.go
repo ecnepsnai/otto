@@ -247,10 +247,12 @@ func TestConnection(t *testing.T) {
 		panic(err)
 	}
 
-	l, err := otto.SetupListener(otto.ListenOptions{
-		Address:           "127.0.0.1:0",
-		Identity:          listenerIdentity.Signer(),
-		TrustedPublicKeys: []string{dialerIdentity.PublicKeyString()},
+	l, err := otto.SetupListener(&otto.ListenOptions{
+		Address:  "127.0.0.1:0",
+		Identity: listenerIdentity.Signer(),
+		GetTrustedPublicKeys: func() []string {
+			return []string{dialerIdentity.PublicKeyString()}
+		},
 	}, func(c *otto.Connection) {
 		messageType, _, err := c.ReadMessage()
 		if err != nil {

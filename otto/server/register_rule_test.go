@@ -231,7 +231,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 		}
 	}
 
-	mustIdentity := func() otto.Identity {
+	mustIdentity := func() *otto.Identity {
 		id, err := otto.NewIdentity()
 		if err != nil {
 			panic(err)

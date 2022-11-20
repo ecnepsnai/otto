@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/ecnepsnai/otto/shared/otto"
@@ -14,15 +15,20 @@ import (
 
 var restartServer = false
 var listener *otto.Listener
+var identityLock = &sync.RWMutex{}
 
 func listen() {
 	for {
 		var err error
-		listener, err = otto.SetupListener(otto.ListenOptions{
-			Address:           config.ListenAddr,
-			AllowFrom:         getAllowFroms(),
-			Identity:          agentIdentity,
-			TrustedPublicKeys: []string{config.ServerIdentity},
+		listener, err = otto.SetupListener(&otto.ListenOptions{
+			Address:   config.ListenAddr,
+			AllowFrom: getAllowFroms(),
+			Identity:  agentIdentity,
+			GetTrustedPublicKeys: func() []string {
+				identityLock.RLock()
+				defer identityLock.RUnlock()
+				return []string{config.ServerIdentity}
+			},
 		}, handle)
 		if err != nil {
 			panic("error listening: " + err.Error())

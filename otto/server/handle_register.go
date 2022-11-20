@@ -122,7 +122,16 @@ func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse
 	}
 	EventStore.HostRegisterSuccess(host, r, matchedRule)
 
-	serverId := IdentityStore.Get(host.ID)
+	serverId, idErr := IdentityStore.Get(host.ID)
+	if idErr != nil {
+		log.PError("Error getting identity for host", map[string]interface{}{
+			"host_id": host.ID,
+			"error":   idErr.Error(),
+		})
+		return web.HTTPResponse{
+			Status: 500,
+		}
+	}
 	if serverId == nil {
 		log.PError("No server identity for host", map[string]interface{}{"host_id": host.ID})
 		return web.HTTPResponse{

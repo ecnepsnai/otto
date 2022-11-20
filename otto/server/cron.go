@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ecnepsnai/cron"
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/logtic"
 )
 
@@ -21,7 +22,10 @@ func CronSetup() {
 			Pattern: "0 * * * *",
 			Name:    "CleanupHeartbeats",
 			Exec: func() {
-				heartbeatStore.CleanupHeartbeats()
+				HostStore.Table.StartRead(func(tx ds.IReadTransaction) error {
+					heartbeatStore.CleanupHeartbeats(tx)
+					return nil
+				})
 			},
 		},
 		{

@@ -1,7 +1,5 @@
 package server
 
-import "github.com/ecnepsnai/otto/shared/otto"
-
 var neededTableVersion = 11
 
 func migrateIfNeeded() {
@@ -21,33 +19,7 @@ func migrateIfNeeded() {
 	for i <= neededTableVersion {
 		i++
 
-		cbgenDataStoreRegisterHostStore()
-		storeSetup()
-
-		hosts := HostStore.AllHosts()
-		for _, host := range hosts {
-			if IdentityStore.Get(host.ID) != nil {
-				continue
-			}
-
-			id, err := otto.NewIdentity()
-			if err != nil {
-				log.PFatal("Error generating identity for host", map[string]interface{}{
-					"host_id": host.ID,
-					"error":   err.Error(),
-				})
-			}
-
-			IdentityStore.Set(host.ID, id)
-			log.PInfo("Generated server identity for host", map[string]interface{}{
-				"host_id":           host.ID,
-				"server_public_key": id.PublicKeyString(),
-			})
-		}
-
-		HostStore.Table.Close()
-		HostStore.Table = nil
-		storeTeardown()
+		//
 	}
 
 	State.SetTableVersion(i)

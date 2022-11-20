@@ -1,6 +1,7 @@
 package otto
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -14,24 +15,31 @@ import (
 
 // ListenOptions describes options for listening
 type ListenOptions struct {
-	Address           string
-	AllowFrom         []net.IPNet
-	Identity          ssh.Signer
-	TrustedPublicKeys []string
+	Address              string
+	AllowFrom            []net.IPNet
+	Identity             ssh.Signer
+	GetTrustedPublicKeys func() []string
 }
 
 // Listener describes an active listening Otto server
 type Listener struct {
-	options ListenOptions
+	options *ListenOptions
 	handle  func(conn *Connection)
 	l       net.Listener
 }
 
 // SetupListener will prepare a listening socket for incoming connections. No connections are accepted until you call
 // Accept().
-func SetupListener(options ListenOptions, handle func(conn *Connection)) (*Listener, error) {
-	for _, trustedKey := range options.TrustedPublicKeys {
-		if trustedKey == base64.StdEncoding.EncodeToString(options.Identity.PublicKey().Marshal()) {
+func SetupListener(options *ListenOptions, handle func(conn *Connection)) (*Listener, error) {
+	for _, trustedKey := range options.GetTrustedPublicKeys() {
+		log.PDebug("[LISTEN] Validate trusted public key", map[string]interface{}{
+			"public_key": trustedKey,
+		})
+		data, err := base64.StdEncoding.DecodeString(trustedKey)
+		if err != nil {
+			return nil, fmt.Errorf("invalid base64 data for trusted key")
+		}
+		if bytes.Equal(data, options.Identity.PublicKey().Marshal()) {
 			return nil, fmt.Errorf("server and agent identity cannot be the same")
 		}
 	}
@@ -111,23 +119,25 @@ func (l *Listener) accept(c net.Conn) {
 	sshConfig := &ssh.ServerConfig{
 		Config: defaultSSHConfig,
 		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
+			incomingKey := base64.StdEncoding.EncodeToString(pubKey.Marshal())
 			log.PDebug("[LISTEN] Handshake", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+				"public_key": incomingKey,
 			})
 			remoteIdentity = pubKey.Marshal()
 
-			for _, trustedKey := range l.options.TrustedPublicKeys {
-				if trustedKey == base64.StdEncoding.EncodeToString(pubKey.Marshal()) {
-					log.Debug("[LISTEN] Recognized public key")
-					return &ssh.Permissions{
-						Extensions: map[string]string{
-							"pubkey-fp": ssh.FingerprintSHA256(pubKey),
-						},
-					}, nil
+			for _, trustedKey := range l.options.GetTrustedPublicKeys() {
+				if trustedKey != incomingKey {
+					continue
 				}
+				log.Debug("[LISTEN] Recognized public key")
+				return &ssh.Permissions{
+					Extensions: map[string]string{
+						"pubkey-fp": ssh.FingerprintSHA256(pubKey),
+					},
+				}, nil
 			}
 			log.PWarn("[LISTEN] Rejecting connection from untrusted public key", map[string]interface{}{
-				"public_key": base64.StdEncoding.EncodeToString(pubKey.Marshal()),
+				"public_key": incomingKey,
 			})
 			return nil, fmt.Errorf("unknown public key %x", pubKey.Marshal())
 		},

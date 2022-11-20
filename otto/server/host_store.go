@@ -198,17 +198,16 @@ func (s *hostStoreObject) newHost(tx ds.IReadWriteTransaction, params newHostPar
 	}
 	IdentityStore.Set(host.ID, serverId)
 
-	log.PInfo("Registered new host", map[string]interface{}{
-		"name":    host.Name,
-		"address": host.Address,
-		"port":    host.Port,
-	})
-
-	log.Info("Added new host '%s'", params.Name)
 	HostCache.Update(tx)
 	GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
 		GroupCache.Update(groupTx)
 		return nil
+	})
+	log.PInfo("Created new host", map[string]interface{}{
+		"id":      host.ID,
+		"name":    host.Name,
+		"address": host.Address,
+		"port":    host.Port,
 	})
 	return &host, nil
 }
@@ -319,7 +318,7 @@ func (s *hostStoreObject) DeleteHost(host *Host) (rerr *Error) {
 			return nil
 		}
 
-		heartbeatStore.CleanupHeartbeats()
+		heartbeatStore.CleanupHeartbeats(tx)
 		HostCache.Update(tx)
 		GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
 			GroupCache.Update(groupTx)
