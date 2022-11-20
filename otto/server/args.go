@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/secutil"
 )
@@ -136,7 +137,9 @@ func postBootstrapArgs() {
 					},
 					Result: 0,
 				}
-				ScheduleReportStore.Table.Add(report)
+				ScheduleReportStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+					return tx.Add(report)
+				})
 				x++
 			}
 			_, err = RegisterRuleStore.NewRule(newRegisterRuleParams{

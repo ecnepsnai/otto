@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/ecnepsnai/cron v1.3.3
-	github.com/ecnepsnai/ds v1.7.0
+	github.com/ecnepsnai/ds v1.8.0
 	github.com/ecnepsnai/limits v1.0.1
 	github.com/ecnepsnai/logtic v1.9.2
 	github.com/ecnepsnai/osquery v1.0.0
@@ -17,7 +17,7 @@ require (
 	github.com/ecnepsnai/web v1.9.2
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
-	golang.org/x/crypto v0.1.0
+	golang.org/x/crypto v0.2.0
 )
 
 require (
@@ -25,7 +25,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/lithammer/fuzzysearch v1.1.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 )

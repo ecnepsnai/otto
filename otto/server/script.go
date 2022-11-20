@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/otto/shared/otto"
 )
@@ -121,7 +122,10 @@ func (s *scriptStoreObject) SetGroups(script *Script, groupIDs []string) *Error 
 			continue
 		}
 
-		if err := GroupStore.Table.Update(*group); err != nil {
+		err := GroupStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+			return tx.Update(*group)
+		})
+		if err != nil {
 			log.Error("Error updating group '%s': %s", group.Name, err.Error())
 			return ErrorFrom(err)
 		}

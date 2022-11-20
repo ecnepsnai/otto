@@ -1,6 +1,10 @@
 package server
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/ecnepsnai/ds"
+)
 
 type cacheTypeHost struct {
 	lock    *sync.RWMutex
@@ -14,7 +18,7 @@ type cacheTypeHost struct {
 var HostCache = &cacheTypeHost{lock: &sync.RWMutex{}}
 
 // Update populate the host cache, will panic if not able to populate
-func (c *cacheTypeHost) Update() {
+func (c *cacheTypeHost) Update(tx ds.IReadTransaction) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -22,7 +26,7 @@ func (c *cacheTypeHost) Update() {
 	c.enabled = []Host{}
 	c.byName = map[string]int{}
 	c.byID = map[string]int{}
-	hosts := HostStore.AllHosts()
+	hosts := HostStore.allHosts(tx)
 
 	nTrusted := uint64(0)
 	nUntrusted := uint64(0)

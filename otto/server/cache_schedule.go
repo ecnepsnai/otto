@@ -2,6 +2,8 @@ package server
 
 import (
 	"sync"
+
+	"github.com/ecnepsnai/ds"
 )
 
 type cacheTypeSchedule struct {
@@ -16,7 +18,7 @@ type cacheTypeSchedule struct {
 var ScheduleCache = &cacheTypeSchedule{lock: &sync.RWMutex{}}
 
 // Update populate the schedule cache, will panic if not able to populate
-func (c *cacheTypeSchedule) Update() {
+func (c *cacheTypeSchedule) Update(tx ds.IReadTransaction) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -24,7 +26,7 @@ func (c *cacheTypeSchedule) Update() {
 	c.enabled = []Schedule{}
 	c.byName = map[string]int{}
 	c.byID = map[string]int{}
-	schedules := ScheduleStore.AllSchedules()
+	schedules := ScheduleStore.allSchedules(tx)
 
 	c.all = schedules
 	for i, schedule := range schedules {

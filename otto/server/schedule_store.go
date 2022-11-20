@@ -8,8 +8,16 @@ import (
 	"github.com/ecnepsnai/limits"
 )
 
-func (s scheduleStoreObject) AllSchedules() []Schedule {
-	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *scheduleStoreObject) AllSchedules() (schedules []Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedules = s.allSchedules(tx)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) allSchedules(tx ds.IReadTransaction) []Schedule {
+	objects, err := tx.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error listing all schedules: error='%s'", err.Error())
 		return []Schedule{}
@@ -30,8 +38,16 @@ func (s scheduleStoreObject) AllSchedules() []Schedule {
 	return schedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForScript(scriptID string) []Schedule {
-	objects, err := s.Table.GetIndex("ScriptID", scriptID, &ds.GetOptions{Sorted: true, Ascending: true})
+func (s *scheduleStoreObject) AllSchedulesForScript(scriptID string) (schedules []Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedules = s.allSchedulesForScript(tx, scriptID)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) allSchedulesForScript(tx ds.IReadTransaction, scriptID string) []Schedule {
+	objects, err := tx.GetIndex("ScriptID", scriptID, &ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error listing all schedules for script: script_id='%s' error='%s'", scriptID, err.Error())
 		return []Schedule{}
@@ -52,9 +68,17 @@ func (s scheduleStoreObject) AllSchedulesForScript(scriptID string) []Schedule {
 	return schedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) []Schedule {
+func (s *scheduleStoreObject) AllSchedulesForGroup(groupID string) (schedules []Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedules = s.allSchedulesForGroup(tx, groupID)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) allSchedulesForGroup(tx ds.IReadTransaction, groupID string) []Schedule {
 	matchedSchedules := []Schedule{}
-	schedules := s.AllSchedules()
+	schedules := s.allSchedules(tx)
 	for _, schedule := range schedules {
 		if stringSliceContains(groupID, schedule.Scope.GroupIDs) {
 			matchedSchedules = append(matchedSchedules, schedule)
@@ -64,9 +88,17 @@ func (s scheduleStoreObject) AllSchedulesForGroup(groupID string) []Schedule {
 	return matchedSchedules
 }
 
-func (s scheduleStoreObject) AllSchedulesForHost(hostID string) []Schedule {
+func (s *scheduleStoreObject) AllSchedulesForHost(hostID string) (schedules []Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedules = s.allSchedulesForHost(tx, hostID)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) allSchedulesForHost(tx ds.IReadTransaction, hostID string) []Schedule {
 	matchedSchedules := []Schedule{}
-	schedules := s.AllSchedules()
+	schedules := s.allSchedules(tx)
 	for _, schedule := range schedules {
 		if len(schedule.Scope.GroupIDs) > 0 {
 			for _, groupID := range schedule.Scope.GroupIDs {
@@ -87,8 +119,16 @@ func (s scheduleStoreObject) AllSchedulesForHost(hostID string) []Schedule {
 	return matchedSchedules
 }
 
-func (s scheduleStoreObject) ScheduleWithID(id string) *Schedule {
-	object, err := s.Table.Get(id)
+func (s *scheduleStoreObject) ScheduleWithID(id string) (schedule *Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedule = s.scheduleWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) scheduleWithID(tx ds.IReadTransaction, id string) *Schedule {
+	object, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting schedule: id='%s' error='%s'", id, err.Error())
 		return nil
@@ -104,8 +144,16 @@ func (s scheduleStoreObject) ScheduleWithID(id string) *Schedule {
 	return &schedule
 }
 
-func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
-	object, err := s.Table.GetUnique("Name", name)
+func (s *scheduleStoreObject) ScheduleWithName(name string) (schedule *Schedule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		schedule = s.scheduleWithName(tx, name)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) scheduleWithName(tx ds.IReadTransaction, name string) *Schedule {
+	object, err := tx.GetUnique("Name", name)
 	if err != nil {
 		log.Error("Error getting schedule: name='%s' error='%s'", name, err.Error())
 		return nil
@@ -121,7 +169,7 @@ func (s scheduleStoreObject) ScheduleWithName(name string) *Schedule {
 	return &schedule
 }
 
-func (s scheduleStoreObject) RunSchedules() {
+func (s *scheduleStoreObject) RunSchedules() {
 	schedules := s.AllSchedules()
 	for _, schedule := range schedules {
 		if !schedule.Enabled {
@@ -143,14 +191,22 @@ type newScheduleParameters struct {
 	Pattern  string
 }
 
-func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedule, *Error) {
+func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (schedule *Schedule, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		schedule, err = s.newSchedule(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) newSchedule(tx ds.IReadWriteTransaction, params newScheduleParameters) (*Schedule, *Error) {
 	if len(params.Scope.GroupIDs) > 0 && len(params.Scope.HostIDs) > 0 {
 		return nil, ErrorUser("Cannot specify both group IDs and host IDs")
 	}
 	if len(params.Scope.GroupIDs) <= 0 && len(params.Scope.HostIDs) <= 0 {
 		return nil, ErrorUser("Must specify at least one group or host")
 	}
-	if schedule, _ := s.Table.GetUnique("Name", params.Name); schedule != nil {
+	if schedule, _ := tx.GetUnique("Name", params.Name); schedule != nil {
 		return nil, ErrorUser("Duplicate script name")
 	}
 	if script := ScriptStore.ScriptWithID(params.ScriptID); script == nil {
@@ -184,13 +240,13 @@ func (s *scheduleStoreObject) NewSchedule(params newScheduleParameters) (*Schedu
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Add(schedule); err != nil {
+	if err := tx.Add(schedule); err != nil {
 		log.Error("Error adding new schedule '%s': %s", schedule.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Added new schedule '%s'", schedule.ID)
-	ScheduleCache.Update()
+	ScheduleCache.Update(tx)
 
 	return &schedule, nil
 }
@@ -202,14 +258,22 @@ type editScheduleParameters struct {
 	Enabled bool
 }
 
-func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editScheduleParameters) (*Schedule, *Error) {
+func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editScheduleParameters) (newSchedule *Schedule, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		newSchedule, err = s.editSchedule(tx, schedule, params)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) editSchedule(tx ds.IReadWriteTransaction, schedule *Schedule, params editScheduleParameters) (*Schedule, *Error) {
 	if len(params.Scope.GroupIDs) > 0 && len(params.Scope.HostIDs) > 0 {
 		return nil, ErrorUser("Cannot specify both group IDs and host IDs")
 	}
 	if len(params.Scope.GroupIDs) <= 0 && len(params.Scope.HostIDs) <= 0 {
 		return nil, ErrorUser("Must specify at least one group or host")
 	}
-	if existing := s.ScheduleWithName(params.Name); existing != nil && existing.ID != schedule.ID {
+	if existing := s.scheduleWithName(tx, params.Name); existing != nil && existing.ID != schedule.ID {
 		log.PWarn("Schedule rename collission", map[string]interface{}{
 			"schedule_id":   schedule.ID,
 			"existing_id":   existing.ID,
@@ -240,36 +304,47 @@ func (s *scheduleStoreObject) EditSchedule(schedule *Schedule, params editSchedu
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Update(*schedule); err != nil {
+	if err := tx.Update(*schedule); err != nil {
 		log.Error("Error updating schedule '%s': %s", schedule.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Updated schedule '%s'", schedule.ID)
-	ScheduleCache.Update()
+	ScheduleCache.Update(tx)
 
 	return schedule, nil
 }
 
-func (s *scheduleStoreObject) DeleteSchedule(schedule *Schedule) *Error {
-	if err := s.Table.Delete(*schedule); err != nil {
+func (s *scheduleStoreObject) DeleteSchedule(schedule *Schedule) (err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		err = s.deleteSchedule(tx, schedule)
+		return nil
+	})
+	return
+}
+
+func (s *scheduleStoreObject) deleteSchedule(tx ds.IReadWriteTransaction, schedule *Schedule) *Error {
+	if err := tx.Delete(*schedule); err != nil {
 		log.Error("Error deleting schedule '%s': %s", schedule.ID, err.Error())
 		return ErrorFrom(err)
 	}
 
 	log.Info("Deleted schedule '%s'", schedule.ID)
-	ScheduleCache.Update()
+	ScheduleCache.Update(tx)
 
 	return nil
 }
 
-func (s *scheduleStoreObject) updateLastRun(schedule Schedule) *Error {
-	schedule.LastRunTime = time.Now()
-	if err := s.Table.Update(schedule); err != nil {
-		log.Error("Error updating last run for schedule '%s': %s", schedule.ID, err.Error())
-		return ErrorFrom(err)
-	}
-	ScheduleCache.Update()
-
-	return nil
+func (s *scheduleStoreObject) updateLastRun(schedule Schedule) (rerr *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		schedule.LastRunTime = time.Now()
+		if err := tx.Update(schedule); err != nil {
+			log.Error("Error updating last run for schedule '%s': %s", schedule.ID, err.Error())
+			rerr = ErrorFrom(err)
+			return nil
+		}
+		ScheduleCache.Update(tx)
+		return nil
+	})
+	return
 }

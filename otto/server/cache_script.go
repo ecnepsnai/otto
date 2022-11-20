@@ -1,6 +1,10 @@
 package server
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/ecnepsnai/ds"
+)
 
 type cacheTypeScript struct {
 	lock   *sync.RWMutex
@@ -13,14 +17,14 @@ type cacheTypeScript struct {
 var ScriptCache = &cacheTypeScript{lock: &sync.RWMutex{}}
 
 // Update populate the script cache, will panic if not able to populate
-func (c *cacheTypeScript) Update() {
+func (c *cacheTypeScript) Update(tx ds.IReadTransaction) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	c.all = []Script{}
 	c.byName = map[string]int{}
 	c.byID = map[string]int{}
-	scripts := ScriptStore.AllScripts()
+	scripts := ScriptStore.allScripts(tx)
 
 	c.all = scripts
 	for i, script := range scripts {

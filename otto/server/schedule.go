@@ -3,6 +3,7 @@ package server
 import (
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/set"
 )
 
@@ -159,7 +160,10 @@ func (s Schedule) RunNow() {
 	} else {
 		report.Result = ScheduleResultFail
 	}
-	ScheduleReportStore.Table.Add(report)
+
+	ScheduleReportStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Add(report)
+	})
 	log.PInfo("Finished running schedule", map[string]interface{}{
 		"schedule_id":   s.ID,
 		"start_time":    start,

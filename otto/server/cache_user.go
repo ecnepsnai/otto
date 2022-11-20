@@ -1,6 +1,10 @@
 package server
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/ecnepsnai/ds"
+)
 
 type cacheTypeUser struct {
 	lock       *sync.RWMutex
@@ -14,7 +18,7 @@ type cacheTypeUser struct {
 var UserCache = &cacheTypeUser{lock: &sync.RWMutex{}}
 
 // Update populate the user cache, will panic if not able to populate
-func (c *cacheTypeUser) Update() {
+func (c *cacheTypeUser) Update(tx ds.IReadTransaction) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -22,7 +26,7 @@ func (c *cacheTypeUser) Update() {
 	c.enabled = []User{}
 	c.byUsername = map[string]User{}
 	c.byEmail = map[string]User{}
-	users := UserStore.AllUsers()
+	users := UserStore.allUsers(tx)
 
 	c.all = users
 	for _, user := range users {

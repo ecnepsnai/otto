@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 )
@@ -68,7 +69,9 @@ func TestExecutePing(t *testing.T) {
 	}
 
 	host.Port = uint32(l.Port())
-	HostStore.Table.Update(host)
+	HostStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Update(*host)
+	})
 
 	go func() {
 		l.Accept()
@@ -149,7 +152,9 @@ func TestExecuteAction(t *testing.T) {
 	}
 
 	host.Port = uint32(l.Port())
-	HostStore.Table.Update(host)
+	HostStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Update(*host)
+	})
 
 	go func() {
 		l.Accept()
@@ -215,7 +220,9 @@ func TestExecuteUntrustedKey(t *testing.T) {
 	}
 
 	host.Port = uint32(l.Port())
-	HostStore.Table.Update(host)
+	HostStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Update(*host)
+	})
 
 	go func() {
 		l.Accept()
@@ -276,7 +283,9 @@ func TestExecuteIncorrectIdentity(t *testing.T) {
 	}
 
 	host.Port = uint32(l.Port())
-	HostStore.Table.Update(host)
+	HostStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Update(*host)
+	})
 
 	go func() {
 		l.Accept()
@@ -335,7 +344,9 @@ func TestExecuteReconnect(t *testing.T) {
 	}
 
 	host.Port = uint32(l.Port())
-	HostStore.Table.Update(host)
+	HostStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Update(*host)
+	})
 
 	go func() {
 		l.Accept()

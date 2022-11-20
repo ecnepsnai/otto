@@ -1,6 +1,10 @@
 package server
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/ecnepsnai/ds"
+)
 
 type cacheTypeGroup struct {
 	lock    *sync.RWMutex
@@ -14,7 +18,7 @@ type cacheTypeGroup struct {
 var GroupCache = &cacheTypeGroup{lock: &sync.RWMutex{}}
 
 // Update populate the group cache, will panic if not able to populate
-func (c *cacheTypeGroup) Update() {
+func (c *cacheTypeGroup) Update(tx ds.IReadTransaction) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -22,7 +26,7 @@ func (c *cacheTypeGroup) Update() {
 	c.byName = map[string]int{}
 	c.byID = map[string]int{}
 	c.hostIDs = map[string][]string{}
-	groups := GroupStore.AllGroups()
+	groups := GroupStore.allGroups(tx)
 
 	c.all = groups
 	for i, group := range groups {

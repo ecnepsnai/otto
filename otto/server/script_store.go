@@ -6,8 +6,16 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
-func (s *scriptStoreObject) ScriptWithID(id string) *Script {
-	obj, err := s.Table.Get(id)
+func (s *scriptStoreObject) ScriptWithID(id string) (script *Script) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		script = s.scriptWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) scriptWithID(tx ds.IReadTransaction, id string) *Script {
+	obj, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting script: id='%s' error='%s'", id, err.Error())
 		return nil
@@ -23,8 +31,16 @@ func (s *scriptStoreObject) ScriptWithID(id string) *Script {
 	return &script
 }
 
-func (s *scriptStoreObject) ScriptWithName(name string) *Script {
-	obj, err := s.Table.GetUnique("Name", name)
+func (s *scriptStoreObject) ScriptWithName(name string) (script *Script) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		script = s.scriptWithName(tx, name)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) scriptWithName(tx ds.IReadTransaction, name string) *Script {
+	obj, err := tx.GetUnique("Name", name)
 	if err != nil {
 		log.Error("Error getting script: name='%s' error='%s'", name, err.Error())
 		return nil
@@ -40,8 +56,16 @@ func (s *scriptStoreObject) ScriptWithName(name string) *Script {
 	return &script
 }
 
-func (s *scriptStoreObject) AllScripts() []Script {
-	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *scriptStoreObject) AllScripts() (scripts []Script) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		scripts = s.allScripts(tx)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) allScripts(tx ds.IReadTransaction) []Script {
+	objects, err := tx.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error listing scripts: error='%s'", err.Error())
 		return []Script{}
@@ -73,8 +97,16 @@ type newScriptParameters struct {
 	AttachmentIDs    []string
 }
 
-func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Error) {
-	if s.ScriptWithName(params.Name) != nil {
+func (s *scriptStoreObject) NewScript(params newScriptParameters) (script *Script, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		script, err = s.newScript(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) newScript(tx ds.IReadWriteTransaction, params newScriptParameters) (*Script, *Error) {
+	if s.scriptWithName(tx, params.Name) != nil {
 		log.Warn("Script with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
 	}
@@ -101,13 +133,13 @@ func (s *scriptStoreObject) NewScript(params newScriptParameters) (*Script, *Err
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Add(script); err != nil {
+	if err := tx.Add(script); err != nil {
 		log.Error("Error adding new script '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Added new script '%s'", params.Name)
-	ScriptCache.Update()
+	ScriptCache.Update(tx)
 	return &script, nil
 }
 
@@ -122,8 +154,16 @@ type editScriptParameters struct {
 	AttachmentIDs    []string
 }
 
-func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (*Script, *Error) {
-	if existingScript := s.ScriptWithName(params.Name); existingScript != nil && existingScript.ID != script.ID {
+func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (newScript *Script, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		newScript, err = s.editScript(tx, script, params)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) editScript(tx ds.IReadWriteTransaction, script *Script, params editScriptParameters) (*Script, *Error) {
+	if existingScript := s.scriptWithName(tx, params.Name); existingScript != nil && existingScript.ID != script.ID {
 		log.Warn("Script with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Script with name '%s' already exists", params.Name)
 	}
@@ -147,24 +187,32 @@ func (s *scriptStoreObject) EditScript(script *Script, params editScriptParamete
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Update(*script); err != nil {
+	if err := tx.Update(*script); err != nil {
 		log.Error("Error updating script '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Updating script '%s'", params.Name)
-	ScriptCache.Update()
+	ScriptCache.Update(tx)
 	return script, nil
 }
 
-func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
+func (s *scriptStoreObject) DeleteScript(script *Script) (err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		err = s.deleteScript(tx, script)
+		return nil
+	})
+	return
+}
+
+func (s *scriptStoreObject) deleteScript(tx ds.IReadWriteTransaction, script *Script) *Error {
 	for _, schedule := range ScheduleCache.All() {
 		if schedule.ScriptID == script.ID {
 			return ErrorUser("Script is used by schedule %s", schedule.Name)
 		}
 	}
 
-	if err := s.Table.Delete(*script); err != nil {
+	if err := tx.Delete(*script); err != nil {
 		log.Error("Error deleting script '%s': %s", script.Name, err.Error())
 		return ErrorFrom(err)
 	}
@@ -175,8 +223,8 @@ func (s *scriptStoreObject) DeleteScript(script *Script) *Error {
 		}
 	}
 
-	GroupStore.CleanupDeadScripts()
+	GroupStore.CleanupDeadScripts(tx)
 	log.Info("Deleting script '%s'", script.Name)
-	ScriptCache.Update()
+	ScriptCache.Update(tx)
 	return nil
 }

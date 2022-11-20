@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto/shared/otto"
 )
@@ -25,7 +26,10 @@ func (e Event) Save() {
 		panic("Attempt to add event with unknown type")
 	}
 
-	if err := EventStore.Table.Add(e); err != nil {
+	err := EventStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.Add(e)
+	})
+	if err != nil {
 		log.Error("Error saving event: %s", err.Error())
 	}
 	if logtic.Log.Level >= logtic.LevelInfo {

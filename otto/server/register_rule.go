@@ -76,8 +76,16 @@ func (rule RegisterRule) Matches(properties otto.RegisterRequestProperties) bool
 	return allClausesMatched
 }
 
-func (s *registerruleStoreObject) AllRules() []RegisterRule {
-	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *registerruleStoreObject) AllRules() (rules []RegisterRule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		rules = s.allRules(tx)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) allRules(tx ds.IReadTransaction) []RegisterRule {
+	objects, err := tx.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error getting registration rules: %s", err.Error())
 		return []RegisterRule{}
@@ -98,8 +106,16 @@ func (s *registerruleStoreObject) AllRules() []RegisterRule {
 	return rules
 }
 
-func (s *registerruleStoreObject) RuleWithID(id string) *RegisterRule {
-	object, err := s.Table.Get(id)
+func (s *registerruleStoreObject) RuleWithID(id string) (rule *RegisterRule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		rule = s.ruleWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) ruleWithID(tx ds.IReadTransaction, id string) *RegisterRule {
+	object, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting registration rule: %s", err.Error())
 		return nil
@@ -118,8 +134,16 @@ func (s *registerruleStoreObject) RuleWithID(id string) *RegisterRule {
 	return &rule
 }
 
-func (s *registerruleStoreObject) RuleWithName(name string) *RegisterRule {
-	object, err := s.Table.GetUnique("Name", name)
+func (s *registerruleStoreObject) RuleWithName(name string) (rule *RegisterRule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		rule = s.ruleWithName(tx, name)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) ruleWithName(tx ds.IReadTransaction, name string) *RegisterRule {
+	object, err := tx.GetUnique("Name", name)
 	if err != nil {
 		log.Error("Error getting registration rule: %s", err.Error())
 		return nil
@@ -137,8 +161,16 @@ func (s *registerruleStoreObject) RuleWithName(name string) *RegisterRule {
 	return &rule
 }
 
-func (s *registerruleStoreObject) RulesForGroup(groupID string) []RegisterRule {
-	objects, err := s.Table.GetIndex("GroupID", groupID, &ds.GetOptions{Sorted: true, Ascending: true})
+func (s *registerruleStoreObject) RulesForGroup(groupID string) (rules []RegisterRule) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		rules = s.rulesForGroup(tx, groupID)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) rulesForGroup(tx ds.IReadTransaction, groupID string) []RegisterRule {
+	objects, err := tx.GetIndex("GroupID", groupID, &ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error getting registration rules: %s", err.Error())
 		return []RegisterRule{}
@@ -165,7 +197,15 @@ type newRegisterRuleParams struct {
 	GroupID string
 }
 
-func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*RegisterRule, *Error) {
+func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (rule *RegisterRule, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		rule, err = s.newRule(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) newRule(tx ds.IReadWriteTransaction, params newRegisterRuleParams) (*RegisterRule, *Error) {
 	if len(params.Clauses) <= 0 {
 		return nil, ErrorUser("Must include at least one clause")
 	}
@@ -176,7 +216,7 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 		}
 	}
 
-	if s.RuleWithName(params.Name) != nil {
+	if s.ruleWithName(tx, params.Name) != nil {
 		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
@@ -194,7 +234,7 @@ func (s *registerruleStoreObject) NewRule(params newRegisterRuleParams) (*Regist
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Add(rule); err != nil {
+	if err := tx.Add(rule); err != nil {
 		log.Error("Error adding new rule: %s", err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -208,8 +248,16 @@ type editRegisterRuleParams struct {
 	GroupID string
 }
 
-func (s *registerruleStoreObject) EditRule(id string, params editRegisterRuleParams) (*RegisterRule, *Error) {
-	rule := s.RuleWithID(id)
+func (s *registerruleStoreObject) EditRule(id string, params editRegisterRuleParams) (rule *RegisterRule, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		rule, err = s.editRule(tx, id, params)
+		return nil
+	})
+	return
+}
+
+func (s *registerruleStoreObject) editRule(tx ds.IReadWriteTransaction, id string, params editRegisterRuleParams) (*RegisterRule, *Error) {
+	rule := s.ruleWithID(tx, id)
 	if rule == nil {
 		return nil, ErrorUser("No rule with ID %s", id)
 	}
@@ -224,7 +272,7 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 		}
 	}
 
-	if existing := s.RuleWithName(params.Name); existing != nil && existing.ID != id {
+	if existing := s.ruleWithName(tx, params.Name); existing != nil && existing.ID != id {
 		return nil, ErrorUser("Rule with name %s already exists", params.Name)
 	}
 
@@ -239,7 +287,7 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Update(*rule); err != nil {
+	if err := tx.Update(*rule); err != nil {
 		log.Error("Error updating rule '%s': %s", rule.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -247,16 +295,21 @@ func (s *registerruleStoreObject) EditRule(id string, params editRegisterRulePar
 	return rule, nil
 }
 
-func (s *registerruleStoreObject) DeleteRule(id string) (*RegisterRule, *Error) {
-	rule := s.RuleWithID(id)
-	if rule == nil {
-		return nil, ErrorUser("No rule with ID %s", id)
-	}
+func (s *registerruleStoreObject) DeleteRule(id string) (rule *RegisterRule, rerr *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		rule = s.ruleWithID(tx, id)
+		if rule == nil {
+			rerr = ErrorUser("No rule with ID %s", id)
+			return nil
+		}
 
-	if err := s.Table.Delete(*rule); err != nil {
-		log.Error("Error deleting group '%s': %s", id, err.Error())
-		return nil, ErrorFrom(err)
-	}
-
-	return rule, nil
+		if err := tx.Delete(*rule); err != nil {
+			log.Error("Error deleting register rule '%s': %s", id, err.Error())
+			rerr = ErrorFrom(err)
+			return nil
+		}
+		log.Info("Deleted register rule '%s': %s", id, rule.Name)
+		return nil
+	})
+	return
 }

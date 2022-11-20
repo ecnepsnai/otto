@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 	"github.com/ecnepsnai/web"
@@ -169,7 +170,9 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 		t.Fatalf("Error making new group: %s", err.Message)
 	}
 
-	RegisterRuleStore.Table.DeleteAll()
+	RegisterRuleStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		return tx.DeleteAll()
+	})
 	if _, err := RegisterRuleStore.NewRule(newRegisterRuleParams{
 		Name: "CentOS 7 Hosts",
 		Clauses: []RegisterRuleClause{

@@ -5,11 +5,20 @@ import (
 	"os"
 	"time"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/limits"
 )
 
-func (s attachmentStoreObject) AllAttachments() []Attachment {
-	objects, err := s.Table.GetAll(nil)
+func (s attachmentStoreObject) AllAttachments() (attachments []Attachment) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		attachments = s.allAttachments(tx)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) allAttachments(tx ds.IReadTransaction) []Attachment {
+	objects, err := tx.GetAll(nil)
 	if err != nil {
 		log.Error("Error listing attachments: error='%s'", err.Error())
 		return []Attachment{}
@@ -30,7 +39,15 @@ func (s attachmentStoreObject) AllAttachments() []Attachment {
 	return files
 }
 
-func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) []Attachment {
+func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) (attachments []Attachment) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		attachments = s.allAttachmentsForScript(tx, scriptID)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) allAttachmentsForScript(tx ds.IReadTransaction, scriptID string) []Attachment {
 	script := ScriptStore.ScriptWithID(scriptID)
 	if script == nil {
 		return []Attachment{}
@@ -42,7 +59,7 @@ func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) []Attach
 
 	attachments := make([]Attachment, count)
 	for i, id := range script.AttachmentIDs {
-		attachment := s.AttachmentWithID(id)
+		attachment := s.attachmentWithID(tx, id)
 		if attachment == nil {
 			log.Error("Script references non-existant attachment: script_id='%s' attachment_id='%s'", scriptID, id)
 			continue
@@ -53,8 +70,16 @@ func (s attachmentStoreObject) AllAttachmentsForScript(scriptID string) []Attach
 	return attachments
 }
 
-func (s attachmentStoreObject) AttachmentWithID(id string) *Attachment {
-	object, err := s.Table.Get(id)
+func (s attachmentStoreObject) AttachmentWithID(id string) (attachment *Attachment) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		attachment = s.attachmentWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) attachmentWithID(tx ds.IReadTransaction, id string) *Attachment {
+	object, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting attachment: id='%s' error='%s'", id, err.Error())
 		return nil
@@ -81,7 +106,15 @@ type newAttachmentParameters struct {
 	AfterScript bool
 }
 
-func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*Attachment, *Error) {
+func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (attachment *Attachment, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		attachment, err = s.newAttachment(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) newAttachment(tx ds.IReadWriteTransaction, params newAttachmentParameters) (*Attachment, *Error) {
 	if err := limits.Check(params); err != nil {
 		return nil, ErrorUser(err.Error())
 	}
@@ -111,7 +144,7 @@ func (s attachmentStoreObject) NewAttachment(params newAttachmentParameters) (*A
 		return nil, ErrorFrom(err)
 	}
 
-	if err := AttachmentStore.Table.Add(attachment); err != nil {
+	if err := tx.Add(attachment); err != nil {
 		log.Error("Error saving script attachment '%s': %s", attachment.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -130,8 +163,16 @@ type editAttachmentParams struct {
 	AfterScript bool
 }
 
-func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (*Attachment, *Error) {
-	attachment := s.AttachmentWithID(id)
+func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentParams) (attachment *Attachment, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		attachment, err = s.editAttachment(tx, id, params)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) editAttachment(tx ds.IReadWriteTransaction, id string, params editAttachmentParams) (*Attachment, *Error) {
+	attachment := s.attachmentWithID(tx, id)
 	if attachment == nil {
 		return nil, ErrorUser("No script with ID")
 	}
@@ -160,7 +201,7 @@ func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentPa
 		attachment.MimeType = params.MimeType
 	}
 
-	if err := s.Table.Update(*attachment); err != nil {
+	if err := tx.Update(*attachment); err != nil {
 		log.Error("Error updating script attachment '%s': %s", attachment.ID, err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -168,15 +209,23 @@ func (s attachmentStoreObject) EditAttachment(id string, params editAttachmentPa
 	return attachment, nil
 }
 
-func (s attachmentStoreObject) DeleteAttachment(id string) *Error {
-	attachment := s.AttachmentWithID(id)
+func (s attachmentStoreObject) DeleteAttachment(id string) (err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		err = s.deleteAttachment(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s attachmentStoreObject) deleteAttachment(tx ds.IReadWriteTransaction, id string) *Error {
+	attachment := s.attachmentWithID(tx, id)
 	if attachment == nil {
 		return ErrorUser("No script with ID")
 	}
 
 	attachmentPath := attachment.FilePath()
 
-	if err := s.Table.Delete(*attachment); err != nil {
+	if err := tx.Delete(*attachment); err != nil {
 		log.Error("Error deleting script attachment '%s': %s", attachment.ID, err.Error())
 		return ErrorFrom(err)
 	}
@@ -190,58 +239,61 @@ func (s attachmentStoreObject) DeleteAttachment(id string) *Error {
 	return nil
 }
 
-func (s attachmentStoreObject) Cleanup() *Error {
-	attachmentsWithScripts := map[string]bool{}
-	attachments := s.AllAttachments()
-	scripts := ScriptStore.AllScripts()
+func (s attachmentStoreObject) Cleanup() (rerr *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		attachmentsWithScripts := map[string]bool{}
+		attachments := s.allAttachments(tx)
+		scripts := ScriptStore.AllScripts()
 
-	attachmentIDMap := map[string]bool{}
-	for _, attachment := range attachments {
-		attachmentIDMap[attachment.ID] = true
-	}
+		attachmentIDMap := map[string]bool{}
+		for _, attachment := range attachments {
+			attachmentIDMap[attachment.ID] = true
+		}
 
-	for _, attachment := range attachments {
-		for _, script := range scripts {
-			if stringSliceContains(attachment.ID, script.AttachmentIDs) {
-				attachmentsWithScripts[attachment.ID] = true
-				break
+		for _, attachment := range attachments {
+			for _, script := range scripts {
+				if stringSliceContains(attachment.ID, script.AttachmentIDs) {
+					attachmentsWithScripts[attachment.ID] = true
+					break
+				}
 			}
 		}
-	}
 
-	for _, script := range scripts {
-		for idx, attachmentID := range script.AttachmentIDs {
-			if attachmentIDMap[attachmentID] {
+		for _, script := range scripts {
+			for idx, attachmentID := range script.AttachmentIDs {
+				if attachmentIDMap[attachmentID] {
+					continue
+				}
+
+				log.Warn("Unknown attachment found on script: attachment_id='%s' script_id='%s'", attachmentID, script.ID)
+				attachmentIDs := append(script.AttachmentIDs[:idx], script.AttachmentIDs[idx+1:]...)
+				ScriptStore.EditScript(&script, editScriptParameters{
+					Name:             script.Name,
+					Executable:       script.Executable,
+					Script:           script.Script,
+					Environment:      script.Environment,
+					RunAs:            script.RunAs,
+					WorkingDirectory: script.WorkingDirectory,
+					AfterExecution:   script.AfterExecution,
+					AttachmentIDs:    attachmentIDs,
+				})
+			}
+		}
+
+		for _, attachment := range attachments {
+			if attachmentsWithScripts[attachment.ID] {
 				continue
 			}
 
-			log.Warn("Unknown attachment found on script: attachment_id='%s' script_id='%s'", attachmentID, script.ID)
-			attachmentIDs := append(script.AttachmentIDs[:idx], script.AttachmentIDs[idx+1:]...)
-			ScriptStore.EditScript(&script, editScriptParameters{
-				Name:             script.Name,
-				Executable:       script.Executable,
-				Script:           script.Script,
-				Environment:      script.Environment,
-				RunAs:            script.RunAs,
-				WorkingDirectory: script.WorkingDirectory,
-				AfterExecution:   script.AfterExecution,
-				AttachmentIDs:    attachmentIDs,
-			})
-		}
-	}
-
-	for _, attachment := range attachments {
-		if attachmentsWithScripts[attachment.ID] {
-			continue
-		}
-
-		if time.Since(attachment.Modified) > 1*time.Hour {
-			log.Warn("Orphaned attachment found: attachment_id='%s'", attachment.ID)
-			if err := s.DeleteAttachment(attachment.ID); err != nil {
-				return err
+			if time.Since(attachment.Modified) > 1*time.Hour {
+				log.Warn("Orphaned attachment found: attachment_id='%s'", attachment.ID)
+				if err := s.deleteAttachment(tx, attachment.ID); err != nil {
+					rerr = err
+					return nil
+				}
 			}
 		}
-	}
-
-	return nil
+		return nil
+	})
+	return
 }

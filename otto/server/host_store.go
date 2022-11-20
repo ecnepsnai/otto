@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ecnepsnai/ds"
@@ -9,8 +10,16 @@ import (
 	"github.com/ecnepsnai/otto/shared/otto"
 )
 
-func (s *hostStoreObject) HostWithID(id string) *Host {
-	object, err := s.Table.Get(id)
+func (s *hostStoreObject) HostWithID(id string) (host *Host) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		host = s.hostWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) hostWithID(tx ds.IReadTransaction, id string) *Host {
+	object, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting host: id='%s' error='%s'", id, err.Error())
 		return nil
@@ -26,8 +35,16 @@ func (s *hostStoreObject) HostWithID(id string) *Host {
 	return &host
 }
 
-func (s *hostStoreObject) HostWithAddress(address string) *Host {
-	object, err := s.Table.GetUnique("Address", address)
+func (s *hostStoreObject) HostWithAddress(address string) (host *Host) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		host = s.hostWithAddress(tx, address)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) hostWithAddress(tx ds.IReadTransaction, address string) *Host {
+	object, err := tx.GetUnique("Address", address)
 	if err != nil {
 		log.Error("Error getting host: address='%s' error='%s'", address, err.Error())
 		return nil
@@ -43,8 +60,16 @@ func (s *hostStoreObject) HostWithAddress(address string) *Host {
 	return &host
 }
 
-func (s *hostStoreObject) HostWithName(name string) *Host {
-	object, err := s.Table.GetUnique("Name", name)
+func (s *hostStoreObject) HostWithName(name string) (host *Host) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		host = s.hostWithName(tx, name)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) hostWithName(tx ds.IReadTransaction, name string) *Host {
+	object, err := tx.GetUnique("Name", name)
 	if err != nil {
 		log.Error("Error getting host: name='%s' error='%s'", name, err.Error())
 		return nil
@@ -60,12 +85,12 @@ func (s *hostStoreObject) HostWithName(name string) *Host {
 	return &host
 }
 
-func (s *hostStoreObject) findDuplicate(name, address string) string {
-	nameHost := s.HostWithName(name)
+func (s *hostStoreObject) findDuplicate(tx ds.IReadTransaction, name, address string) string {
+	nameHost := s.hostWithName(tx, name)
 	if nameHost != nil {
 		return nameHost.ID
 	}
-	addressHost := s.HostWithAddress(address)
+	addressHost := s.hostWithAddress(tx, address)
 	if addressHost != nil {
 		return addressHost.ID
 	}
@@ -73,8 +98,16 @@ func (s *hostStoreObject) findDuplicate(name, address string) string {
 	return ""
 }
 
-func (s *hostStoreObject) AllHosts() []Host {
-	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *hostStoreObject) AllHosts() (hosts []Host) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		hosts = s.allHosts(tx)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) allHosts(tx ds.IReadTransaction) []Host {
+	objects, err := tx.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error listing all hosts: error='%s'", err.Error())
 		return []Host{}
@@ -87,7 +120,7 @@ func (s *hostStoreObject) AllHosts() []Host {
 	for i, obj := range objects {
 		host, k := obj.(Host)
 		if !k {
-			log.Fatal("Error listing all hosts: error='%s'", "invalid type")
+			panic("invalid object found in host store at insertindex " + fmt.Sprintf("%d", i) + ": " + fmt.Sprintf("%#v", obj))
 		}
 		hosts[i] = host
 	}
@@ -104,8 +137,16 @@ type newHostParameters struct {
 	Environment   []environ.Variable
 }
 
-func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
-	if s.findDuplicate(params.Name, params.Address) != "" {
+func (s *hostStoreObject) NewHost(params newHostParameters) (host *Host, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		host, err = s.newHost(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) newHost(tx ds.IReadWriteTransaction, params newHostParameters) (*Host, *Error) {
+	if s.findDuplicate(tx, params.Name, params.Address) != "" {
 		log.Warn("Host with name '%s' or address '%s' already exists", params.Name, params.Address)
 		return nil, ErrorUser("Name or Address already in use")
 	}
@@ -151,7 +192,7 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 		return nil, ErrorFrom(err)
 	}
 
-	if err := s.Table.Add(host); err != nil {
+	if err := tx.Add(host); err != nil {
 		log.Error("Error adding new host '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
@@ -164,8 +205,11 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (*Host, *Error) {
 	})
 
 	log.Info("Added new host '%s'", params.Name)
-	HostCache.Update()
-	GroupCache.Update()
+	HostCache.Update(tx)
+	GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
+		GroupCache.Update(groupTx)
+		return nil
+	})
 	return &host, nil
 }
 
@@ -178,8 +222,16 @@ type editHostParameters struct {
 	Environment []environ.Variable
 }
 
-func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host, *Error) {
-	dupID := s.findDuplicate(params.Name, params.Address)
+func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (newHost *Host, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		newHost, err = s.editHost(tx, host, params)
+		return nil
+	})
+	return
+}
+
+func (s *hostStoreObject) editHost(tx ds.IReadWriteTransaction, host *Host, params editHostParameters) (*Host, *Error) {
+	dupID := s.findDuplicate(tx, params.Name, params.Address)
 	if dupID != "" && dupID != host.ID {
 		log.Warn("Host with name '%s' or address '%s' already exists", params.Name, params.Address)
 		return nil, ErrorUser("Name or Address already in use")
@@ -209,53 +261,72 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (*Host
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Update(*host); err != nil {
+	if err := tx.Update(*host); err != nil {
 		log.Error("Error updating host '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Updating host '%s'", params.Name)
-	HostCache.Update()
-	GroupCache.Update()
+	HostCache.Update(tx)
+	GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
+		GroupCache.Update(groupTx)
+		return nil
+	})
 	return host, nil
 }
 
-func (s *hostStoreObject) UpdateHostTrust(hostID string, trust HostTrust) *Error {
-	host := s.HostWithID(hostID)
-	if host == nil {
-		return ErrorServer("no host with ID %s", hostID)
-	}
+func (s *hostStoreObject) UpdateHostTrust(hostID string, trust HostTrust) (rerr *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		host := s.hostWithID(tx, hostID)
+		if host == nil {
+			rerr = ErrorServer("no host with ID %s", hostID)
+			return nil
+		}
 
-	host.Trust = trust
-	if err := s.Table.Update(*host); err != nil {
-		log.Error("Error updating host '%s': %s", host.Name, err.Error())
-		return ErrorFrom(err)
-	}
+		host.Trust = trust
+		if err := tx.Update(*host); err != nil {
+			log.Error("Error updating host '%s': %s", host.Name, err.Error())
+			rerr = ErrorFrom(err)
+			return nil
+		}
 
-	log.Info("Updating host trust '%s'", host.Name)
-	HostCache.Update()
-	GroupCache.Update()
-	return nil
+		log.Info("Updating host trust '%s'", host.Name)
+		HostCache.Update(tx)
+		GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
+			GroupCache.Update(groupTx)
+			return nil
+		})
+		return nil
+	})
+	return
 }
 
-func (s *hostStoreObject) DeleteHost(host *Host) *Error {
-	for _, schedule := range ScheduleCache.All() {
-		if len(schedule.Scope.HostIDs) == 0 {
-			continue
+func (s *hostStoreObject) DeleteHost(host *Host) (rerr *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		for _, schedule := range ScheduleCache.All() {
+			if len(schedule.Scope.HostIDs) == 0 {
+				continue
+			}
+			if stringSliceContainsFold(host.ID, schedule.Scope.HostIDs) {
+				rerr = ErrorUser("Host belongs to schedule %s", schedule.Name)
+				return nil
+			}
 		}
-		if stringSliceContainsFold(host.ID, schedule.Scope.HostIDs) {
-			return ErrorUser("Host belongs to schedule %s", schedule.Name)
+
+		if err := tx.Delete(*host); err != nil {
+			log.Error("Error deleting host '%s': %s", host.Name, err.Error())
+			rerr = ErrorFrom(err)
+			return nil
 		}
-	}
 
-	if err := s.Table.Delete(*host); err != nil {
-		log.Error("Error deleting host '%s': %s", host.Name, err.Error())
-		return ErrorFrom(err)
-	}
-
-	heartbeatStore.CleanupHeartbeats()
-	HostCache.Update()
-	GroupCache.Update()
-	log.Info("Deleting host '%s'", host.Name)
-	return nil
+		heartbeatStore.CleanupHeartbeats()
+		HostCache.Update(tx)
+		GroupStore.Table.StartRead(func(groupTx ds.IReadTransaction) error {
+			GroupCache.Update(groupTx)
+			return nil
+		})
+		log.Info("Deleted host '%s'", host.Name)
+		return nil
+	})
+	return
 }

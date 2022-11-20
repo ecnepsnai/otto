@@ -24,8 +24,16 @@ type ScheduleReportTime struct {
 	ElapsedSeconds float64
 }
 
-func (s *schedulereportStoreObject) GetReportsForSchedule(scheduleID string) []ScheduleReport {
-	objs, err := s.Table.GetIndex("ScheduleID", scheduleID, &ds.GetOptions{Sorted: true})
+func (s *schedulereportStoreObject) GetReportsForSchedule(scheduleID string) (reports []ScheduleReport) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		reports = s.getReportsForSchedule(tx, scheduleID)
+		return nil
+	})
+	return
+}
+
+func (s *schedulereportStoreObject) getReportsForSchedule(tx ds.IReadTransaction, scheduleID string) []ScheduleReport {
+	objs, err := tx.GetIndex("ScheduleID", scheduleID, &ds.GetOptions{Sorted: true})
 	if err != nil {
 		log.Error("Error getting all schedule reports: %s", err.Error())
 		return []ScheduleReport{}

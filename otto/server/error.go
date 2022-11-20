@@ -33,6 +33,9 @@ func ErrorServer(format string, a ...interface{}) *Error {
 
 // ErrorFrom create a new server-side error from the given error
 func ErrorFrom(err error) *Error {
+	if err == nil {
+		return nil
+	}
 	return &Error{
 		Server:  true,
 		Message: err.Error(),

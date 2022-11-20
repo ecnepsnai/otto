@@ -6,8 +6,16 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
-func (s *groupStoreObject) GroupWithID(id string) *Group {
-	object, err := s.Table.Get(id)
+func (s *groupStoreObject) GroupWithID(id string) (group *Group) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		group = s.groupWithID(tx, id)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) groupWithID(tx ds.IReadTransaction, id string) *Group {
+	object, err := tx.Get(id)
 	if err != nil {
 		log.Error("Error getting group: id='%s' error='%s'", id, err.Error())
 		return nil
@@ -23,8 +31,16 @@ func (s *groupStoreObject) GroupWithID(id string) *Group {
 	return &group
 }
 
-func (s *groupStoreObject) GroupWithName(name string) *Group {
-	object, err := s.Table.GetUnique("Name", name)
+func (s *groupStoreObject) GroupWithName(name string) (group *Group) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		group = s.groupWithName(tx, name)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) groupWithName(tx ds.IReadTransaction, name string) *Group {
+	object, err := tx.GetUnique("Name", name)
 	if err != nil {
 		log.Error("Error getting group: name='%s' error='%s'", name, err.Error())
 		return nil
@@ -40,8 +56,16 @@ func (s *groupStoreObject) GroupWithName(name string) *Group {
 	return &group
 }
 
-func (s *groupStoreObject) AllGroups() []Group {
-	objects, err := s.Table.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
+func (s *groupStoreObject) AllGroups() (groups []Group) {
+	s.Table.StartRead(func(tx ds.IReadTransaction) error {
+		groups = s.allGroups(tx)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) allGroups(tx ds.IReadTransaction) []Group {
+	objects, err := tx.GetAll(&ds.GetOptions{Sorted: true, Ascending: true})
 	if err != nil {
 		log.Error("Error listing all groups: error='%s'", err.Error())
 		return []Group{}
@@ -68,8 +92,16 @@ type newGroupParameters struct {
 	Environment []environ.Variable
 }
 
-func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) {
-	if s.GroupWithName(params.Name) != nil {
+func (s *groupStoreObject) NewGroup(params newGroupParameters) (group *Group, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		group, err = s.newGroup(tx, params)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) newGroup(tx ds.IReadWriteTransaction, params newGroupParameters) (*Group, *Error) {
+	if s.groupWithName(tx, params.Name) != nil {
 		log.Warn("Group with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Name already in use")
 	}
@@ -98,13 +130,13 @@ func (s *groupStoreObject) NewGroup(params newGroupParameters) (*Group, *Error) 
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Add(group); err != nil {
+	if err := tx.Add(group); err != nil {
 		log.Error("Error adding new group '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Added new group '%s'", params.Name)
-	GroupCache.Update()
+	GroupCache.Update(tx)
 	return &group, nil
 }
 
@@ -114,8 +146,16 @@ type editGroupParameters struct {
 	Environment []environ.Variable
 }
 
-func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (*Group, *Error) {
-	if existingGroup := s.GroupWithName(params.Name); existingGroup != nil && existingGroup.ID != group.ID {
+func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (newGroup *Group, err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		newGroup, err = s.editGroup(tx, group, params)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) editGroup(tx ds.IReadWriteTransaction, group *Group, params editGroupParameters) (*Group, *Error) {
+	if existingGroup := s.groupWithName(tx, params.Name); existingGroup != nil && existingGroup.ID != group.ID {
 		log.Warn("Group with name '%s' already exists", params.Name)
 		return nil, ErrorUser("Name already in use")
 	}
@@ -141,17 +181,25 @@ func (s *groupStoreObject) EditGroup(group *Group, params editGroupParameters) (
 		return nil, ErrorUser(err.Error())
 	}
 
-	if err := s.Table.Update(*group); err != nil {
+	if err := tx.Update(*group); err != nil {
 		log.Error("Error updating group '%s': %s", params.Name, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
 	log.Info("Updating group '%s'", params.Name)
-	GroupCache.Update()
+	GroupCache.Update(tx)
 	return group, nil
 }
 
-func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
+func (s *groupStoreObject) DeleteGroup(group *Group) (err *Error) {
+	s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		err = s.deleteGroup(tx, group)
+		return nil
+	})
+	return
+}
+
+func (s *groupStoreObject) deleteGroup(tx ds.IReadWriteTransaction, group *Group) *Error {
 	hosts, err := group.Hosts()
 	if err != nil {
 		return err
@@ -177,36 +225,40 @@ func (s *groupStoreObject) DeleteGroup(group *Group) *Error {
 		return ErrorUser("Can't delete group that is used in a schedule")
 	}
 
-	if groups := s.AllGroups(); len(groups) <= 1 {
+	if groups := s.allGroups(tx); len(groups) <= 1 {
 		log.Error("At least one group must exist")
 		return ErrorUser("At least one group must exist")
 	}
 
-	if err := s.Table.Delete(*group); err != nil {
+	if err := tx.Delete(*group); err != nil {
 		log.Error("Error deleting group '%s': %s", group.Name, err.Error())
 		return ErrorFrom(err)
 	}
 
 	heartbeatStore.CleanupHeartbeats()
-	GroupCache.Update()
+	GroupCache.Update(tx)
 	log.Info("Deleting group '%s'", group.Name)
 	return nil
 }
 
-func (s *groupStoreObject) CleanupDeadScripts() *Error {
-	groups := s.AllGroups()
-	for _, group := range groups {
-		i := len(group.ScriptIDs) - 1
-		for i >= 0 {
-			script := ScriptStore.ScriptWithID(group.ScriptIDs[i])
-			if script == nil {
-				log.Warn("Removing non-existant script '%s' from group '%s'", group.ScriptIDs[i], group.Name)
-				group.ScriptIDs = append(group.ScriptIDs[:i], group.ScriptIDs[i+1:]...)
+func (s *groupStoreObject) CleanupDeadScripts(scriptStoreTx ds.IReadTransaction) *Error {
+	err := s.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+		groups := s.allGroups(tx)
+		for _, group := range groups {
+			i := len(group.ScriptIDs) - 1
+			for i >= 0 {
+				script := ScriptStore.scriptWithID(scriptStoreTx, group.ScriptIDs[i])
+				if script == nil {
+					log.Warn("Removing non-existant script '%s' from group '%s'", group.ScriptIDs[i], group.Name)
+					group.ScriptIDs = append(group.ScriptIDs[:i], group.ScriptIDs[i+1:]...)
+				}
+				i--
 			}
-			i--
+			if err := tx.Update(group); err != nil {
+				return err
+			}
 		}
-		s.Table.Update(group)
-	}
-
-	return nil
+		return nil
+	})
+	return ErrorFrom(err)
 }

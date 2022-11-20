@@ -1,6 +1,9 @@
 package server
 
-import "github.com/ecnepsnai/otto/server/environ"
+import (
+	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
+)
 
 // Group describes a group object
 type Group struct {
@@ -37,7 +40,9 @@ func (g *Group) Scripts() ([]Script, *Error) {
 			})
 			group := *g
 			group.ScriptIDs = append(group.ScriptIDs[:i], group.ScriptIDs[i+1:]...)
-			GroupStore.Table.Update(group)
+			GroupStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+				return tx.Update(group)
+			})
 			return group.Scripts()
 		}
 		scripts[i] = *script
