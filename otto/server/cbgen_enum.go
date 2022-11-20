@@ -8,44 +8,44 @@ const (
 	AgentActionPing = "ping"
 	// AgentActionRunScript Run the script on the host
 	AgentActionRunScript = "run_script"
+	// AgentActionReloadConfig Reload the configuration of the agent
+	AgentActionReloadConfig = "reload_config"
 	// AgentActionExitAgent Exit the agent on the host
 	AgentActionExitAgent = "exit_agent"
 	// AgentActionReboot Reboot the host
 	AgentActionReboot = "reboot"
 	// AgentActionShutdown Power off the host
 	AgentActionShutdown = "shutdown"
-	// AgentActionUpdateIdentity Update the server identity on the agent
-	AgentActionUpdateIdentity = "update_identity"
 )
 
 // AllAgentAction all AgentAction values
 var AllAgentAction = []string{
 	AgentActionPing,
 	AgentActionRunScript,
+	AgentActionReloadConfig,
 	AgentActionExitAgent,
 	AgentActionReboot,
 	AgentActionShutdown,
-	AgentActionUpdateIdentity,
 }
 
 // AgentActionMap map AgentAction keys to values
 var AgentActionMap = map[string]string{
-	AgentActionPing:           "ping",
-	AgentActionRunScript:      "run_script",
-	AgentActionExitAgent:      "exit_agent",
-	AgentActionReboot:         "reboot",
-	AgentActionShutdown:       "shutdown",
-	AgentActionUpdateIdentity: "update_identity",
+	AgentActionPing:         "ping",
+	AgentActionRunScript:    "run_script",
+	AgentActionReloadConfig: "reload_config",
+	AgentActionExitAgent:    "exit_agent",
+	AgentActionReboot:       "reboot",
+	AgentActionShutdown:     "shutdown",
 }
 
 // AgentActionNameMap map AgentAction keys to values
 var AgentActionNameMap = map[string]string{
-	"Ping":           "ping",
-	"RunScript":      "run_script",
-	"ExitAgent":      "exit_agent",
-	"Reboot":         "reboot",
-	"Shutdown":       "shutdown",
-	"UpdateIdentity": "update_identity",
+	"Ping":         "ping",
+	"RunScript":    "run_script",
+	"ReloadConfig": "reload_config",
+	"ExitAgent":    "exit_agent",
+	"Reboot":       "reboot",
+	"Shutdown":     "shutdown",
 }
 
 // IsAgentAction is the provided value a valid AgentAction
@@ -67,6 +67,11 @@ var AgentActionSchema = []map[string]interface{}{
 		"value":       "run_script",
 	},
 	{
+		"name":        "ReloadConfig",
+		"description": "Reload the configuration of the agent",
+		"value":       "reload_config",
+	},
+	{
 		"name":        "ExitAgent",
 		"description": "Exit the agent on the host",
 		"value":       "exit_agent",
@@ -80,11 +85,6 @@ var AgentActionSchema = []map[string]interface{}{
 		"name":        "Shutdown",
 		"description": "Power off the host",
 		"value":       "shutdown",
-	},
-	{
-		"name":        "UpdateIdentity",
-		"description": "Update the server identity on the agent",
-		"value":       "update_identity",
 	},
 }
 

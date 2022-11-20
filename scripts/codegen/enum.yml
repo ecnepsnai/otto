@@ -13,12 +13,15 @@
 - name: AgentAction
   type: string
   values:
-    - key: Ping
+    - key: Ping # special: does not map to otto agent action
       description: Ping the host
       value: '"ping"'
-    - key: RunScript
+    - key: RunScript # special: does not map to otto agent action
       description: Run the script on the host
       value: '"run_script"'
+    - key: ReloadConfig
+      description: Reload the configuration of the agent
+      value: '"reload_config"'
     - key: ExitAgent
       description: Exit the agent on the host
       value: '"exit_agent"'
@@ -28,9 +31,6 @@
     - key: Shutdown
       description: Power off the host
       value: '"shutdown"'
-    - key: UpdateIdentity
-      description: Update the server identity on the agent
-      value: '"update_identity"'
 - name: ScheduleResult
   type: int
   values:

@@ -23,10 +23,11 @@ type ScriptResult struct {
 }
 
 var agentActionMap = map[string]uint32{
-	AgentActionRunScript: otto.ActionRunScript,
-	AgentActionExitAgent: otto.ActionUploadFileAndExitAgent,
-	AgentActionReboot:    otto.ActionReboot,
-	AgentActionShutdown:  otto.ActionShutdown,
+	AgentActionReloadConfig: otto.ActionReloadConfig,
+	AgentActionRunScript:    otto.ActionRunScript,
+	AgentActionExitAgent:    otto.ActionUploadFileAndExitAgent,
+	AgentActionReboot:       otto.ActionReboot,
+	AgentActionShutdown:     otto.ActionShutdown,
 }
 
 type hostConnection struct {
