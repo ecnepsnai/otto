@@ -1,7 +1,7 @@
 github.com/ecnepsnai/cron v1.3.3 h1:olHZd8AmtQ8aICcCONVyDC9t1A4envDcQNlpMD3/7FI=
 github.com/ecnepsnai/cron v1.3.3/go.mod h1:CACa8yKlQ79jB2kfcPdGtwsYXorqktug+TEkV6zPRkg=
-github.com/ecnepsnai/ds v1.8.0 h1:IQD4Wo8YJSjAc3kPPEg1AdyOCgCuMOrcI8IYO15x5M8=
-github.com/ecnepsnai/ds v1.8.0/go.mod h1:AzM3h2WCliyjCGvYh00C1xHI4XbeRKIq+Axq2U1hp0M=
+github.com/ecnepsnai/ds v1.8.1 h1:OXrOMC+Lq1SMzWa750UEyOQH0RAFUFqSa+fEXHiqBjE=
+github.com/ecnepsnai/ds v1.8.1/go.mod h1:AzM3h2WCliyjCGvYh00C1xHI4XbeRKIq+Axq2U1hp0M=
 github.com/ecnepsnai/limits v1.0.1 h1:DL9i0eSGkpaKZg1DM5z/Bn6KL6c5UKMM8jy5jic4pys=
 github.com/ecnepsnai/limits v1.0.1/go.mod h1:tmAlM5HiekbtbOyo83T0sG3bhvvzSMrnxPxvE9oWqJg=
 github.com/ecnepsnai/logtic v1.9.2 h1:RoPIpBRjY5gGN4/WuOwBpYXNH+lIfmj4TwqvLz1CCoQ=
