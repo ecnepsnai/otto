@@ -48,12 +48,12 @@ func RouterSetup() {
 	h := handle{}
 	v := view{}
 
-	server.HTTP.Static("/static/", Directories.Static)
-	server.HTTP.Static(fmt.Sprintf("/otto%s/", Version), Directories.Static)
-	server.HTTP.Static("/agents/", Directories.Agents)
+	server.HTTPEasy.Static("/static/", Directories.Static)
+	server.HTTPEasy.Static(fmt.Sprintf("/otto%s/", Version), Directories.Static)
+	server.HTTPEasy.Static("/agents/", Directories.Agents)
 
 	// Authentication
-	server.HTTP.GET("/login", v.Login, unauthenticatedOptions)
+	server.HTTPEasy.GET("/login", v.Login, unauthenticatedOptions)
 	server.API.POST("/api/login", h.Login, unauthenticatedOptions)
 	server.API.POST("/api/logout", h.Logout, authenticatedOptions(true))
 
@@ -72,7 +72,7 @@ func RouterSetup() {
 	server.API.DELETE("/api/hosts/host/:id", h.HostDelete, authenticatedOptions(false))
 
 	// Register
-	server.HTTP.PUT("/api/register", v.Register, unauthenticatedOptions)
+	server.HTTPEasy.PUT("/api/register", v.Register, unauthenticatedOptions)
 	// Register Rules
 	server.API.GET("/api/register/rules", h.RegisterRuleList, authenticatedOptions(false))
 	server.API.PUT("/api/register/rules/rule", h.RegisterRuleNew, authenticatedOptions(false))
@@ -122,7 +122,7 @@ func RouterSetup() {
 	server.API.GET("/api/attachments", h.AttachmentList, authenticatedOptions(false))
 	server.API.PUT("/api/attachments", h.AttachmentUpload, authenticatedOptions(false))
 	server.API.GET("/api/attachments/attachment/:id", h.AttachmentGet, authenticatedOptions(false))
-	server.HTTP.GET("/api/attachments/attachment/:id/download", v.AttachmentDownload, authenticatedOptions(false))
+	server.HTTPEasy.GET("/api/attachments/attachment/:id/download", v.AttachmentDownload, authenticatedOptions(false))
 	server.API.POST("/api/attachments/attachment/:id", h.AttachmentEdit, authenticatedOptions(false))
 	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions(false))
 
@@ -154,9 +154,9 @@ func RouterSetup() {
 	server.API.POST("/api/search/system", h.SystemSearch, authenticatedOptions(false))
 
 	// Redirect
-	server.HTTP.GET("/", v.Redirect, unauthenticatedOptions)
+	server.HTTPEasy.GET("/", v.Redirect, unauthenticatedOptions)
 
-	server.HTTP.GET("/favicon.ico", v.Favicon, unauthenticatedOptions)
+	server.HTTPEasy.GET("/favicon.ico", v.Favicon, unauthenticatedOptions)
 
 	server.NotFoundHandler = func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
@@ -200,7 +200,7 @@ func RouterSetup() {
 		"/events",
 	}
 	for _, route := range ngRoutes {
-		server.HTTP.GET(route, v.JavaScript, authenticatedOptions(false))
+		server.HTTPEasy.GET(route, v.JavaScript, authenticatedOptions(false))
 	}
 
 	server.Start()

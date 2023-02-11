@@ -7,7 +7,7 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
+func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	type requestParams struct {
@@ -18,48 +18,48 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.Error) {
 
 	r := requestParams{}
 	if err := request.DecodeJSON(&r); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	host := HostCache.ByID(r.HostID)
 	if host == nil {
-		return nil, web.ValidationError("No host with ID %s", r.HostID)
+		return nil, nil, web.ValidationError("No host with ID %s", r.HostID)
 	}
 
 	if !IsAgentAction(r.Action) {
-		return nil, web.ValidationError("Unknown action %s", r.Action)
+		return nil, nil, web.ValidationError("Unknown action %s", r.Action)
 	}
 
 	if r.Action == AgentActionPing {
 		if err := host.Ping(); err != nil {
-			return false, nil
+			return false, nil, nil
 		}
-		return true, nil
+		return true, nil, nil
 	} else if r.Action == AgentActionRunScript {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
-			return nil, web.ValidationError("No script with ID %s", r.ScriptID)
+			return nil, nil, web.ValidationError("No script with ID %s", r.ScriptID)
 		}
 
 		result, err := host.RunScript(script, nil, nil)
 		if err != nil {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 
-		return result, nil
+		return result, nil, nil
 	} else if r.Action == AgentActionExitAgent {
 		if err := host.ExitAgent(); err != nil {
-			return false, nil
+			return false, nil, nil
 		}
-		return true, nil
+		return true, nil, nil
 	}
 
-	return nil, nil
+	return nil, nil, nil
 }
 
-func (h handle) RequestStream(request web.Request, conn web.WSConn) {
+func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	const (
 		requestResponseCodeOutput    = 100
 		requestResponseCodeKeepalive = 101

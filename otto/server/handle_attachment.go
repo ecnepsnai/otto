@@ -8,11 +8,11 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) AttachmentList(request web.Request) (interface{}, *web.Error) {
-	return AttachmentStore.AllAttachments(), nil
+func (h *handle) AttachmentList(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	return AttachmentStore.AllAttachments(), nil, nil
 }
 
-func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error) {
+func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	pathStr := request.HTTP.FormValue("Path")
@@ -24,21 +24,21 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 
 	uid, err := strconv.Atoi(uidStr)
 	if err != nil {
-		return nil, web.ValidationError("Invalid uid '%s'", uidStr)
+		return nil, nil, web.ValidationError("Invalid uid '%s'", uidStr)
 	}
 	gid, err := strconv.Atoi(gidStr)
 	if err != nil {
-		return nil, web.ValidationError("Invalid gid '%s'", gidStr)
+		return nil, nil, web.ValidationError("Invalid gid '%s'", gidStr)
 	}
 	mode, err := strconv.ParseUint(modeStr, 10, 32)
 	if err != nil {
-		return nil, web.ValidationError("Invalid mode '%s'", modeStr)
+		return nil, nil, web.ValidationError("Invalid mode '%s'", modeStr)
 	}
 
 	fileUpload, info, err := request.HTTP.FormFile("file")
 	if err != nil {
 		log.Error("Error getting form file: %s", err.Error())
-		return nil, web.CommonErrors.BadRequest
+		return nil, nil, web.CommonErrors.BadRequest
 	}
 
 	req := newAttachmentParameters{
@@ -58,21 +58,21 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.Error)
 	attachment, erro := AttachmentStore.NewAttachment(req)
 	if erro != nil {
 		if erro.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(erro.Message)
+		return nil, nil, web.ValidationError(erro.Message)
 	}
 	EventStore.AttachmentAdded(attachment, session.Username)
 
-	return attachment, nil
+	return attachment, nil, nil
 }
 
-func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.Error) {
+func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	attachmentID := request.Parameters["id"]
-	return AttachmentStore.AttachmentWithID(attachmentID), nil
+	return AttachmentStore.AttachmentWithID(attachmentID), nil, nil
 }
 
-func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (response web.HTTPResponse) {
+func (v *view) AttachmentDownload(request web.Request) (response web.HTTPResponse) {
 	attachmentID := request.Parameters["id"]
 
 	attachment := AttachmentStore.AttachmentWithID(attachmentID)
@@ -89,7 +89,7 @@ func (v *view) AttachmentDownload(request web.Request, writer web.Writer) (respo
 	return
 }
 
-func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
+func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	attachmentID := request.Parameters["id"]
@@ -103,21 +103,21 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 
 	uid, err := strconv.Atoi(uidStr)
 	if err != nil {
-		return nil, web.ValidationError("Invalid uid '%s'", uidStr)
+		return nil, nil, web.ValidationError("Invalid uid '%s'", uidStr)
 	}
 	gid, err := strconv.Atoi(gidStr)
 	if err != nil {
-		return nil, web.ValidationError("Invalid gid '%s'", gidStr)
+		return nil, nil, web.ValidationError("Invalid gid '%s'", gidStr)
 	}
 	mode, err := strconv.ParseUint(modeStr, 10, 32)
 	if err != nil {
-		return nil, web.ValidationError("Invalid mode '%s'", modeStr)
+		return nil, nil, web.ValidationError("Invalid mode '%s'", modeStr)
 	}
 
 	fileUpload, info, err := request.HTTP.FormFile("file")
 	if err != nil && err.Error() != "http: no such file" {
 		log.Error("Error getting form file: %s", err.Error())
-		return nil, web.CommonErrors.BadRequest
+		return nil, nil, web.CommonErrors.BadRequest
 	}
 
 	req := editAttachmentParams{
@@ -140,29 +140,29 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.Error) {
 	attachment, erro := AttachmentStore.EditAttachment(attachmentID, req)
 	if erro != nil {
 		if erro.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(erro.Message)
+		return nil, nil, web.ValidationError(erro.Message)
 	}
 
 	EventStore.AttachmentModified(attachment, session.Username)
 
-	return attachment, nil
+	return attachment, nil, nil
 }
 
-func (h *handle) AttachmentDelete(request web.Request) (interface{}, *web.Error) {
+func (h *handle) AttachmentDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	attachmentID := request.Parameters["id"]
 
 	if err := AttachmentStore.DeleteAttachment(attachmentID); err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 
 	EventStore.AttachmentDeleted(attachmentID, session.Username)
 
-	return true, nil
+	return true, nil, nil
 }

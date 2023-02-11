@@ -6,53 +6,53 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) GroupList(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupList(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	groups := GroupStore.AllGroups()
 	sort.Slice(groups, func(i int, j int) bool {
 		return groups[i].Name < groups[j].Name
 	})
 
-	return groups, nil
+	return groups, nil, nil
 }
 
-func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.Error) {
-	return GroupCache.Membership(), nil
+func (h *handle) GroupGetMembership(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	return GroupCache.Membership(), nil, nil
 }
 
-func (h *handle) GroupGet(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
-	return group, nil
+	return group, nil, nil
 }
 
-func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupGetHosts(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
 	hosts, err := group.Hosts()
 	if err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 	sort.Slice(hosts, func(i int, j int) bool {
 		return hosts[i].Name < hosts[j].Name
 	})
 
-	return hosts, nil
+	return hosts, nil, nil
 }
 
-func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
 
 	type params struct {
@@ -61,12 +61,12 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 
 	r := params{}
 	if err := request.DecodeJSON(&r); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
 	var addedHosts []string
@@ -101,7 +101,7 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			GroupIDs:    append(host.GroupIDs, id),
 			Environment: host.Environment,
 		}); err != nil {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
 	}
 	for _, hostID := range removedHosts {
@@ -118,44 +118,44 @@ func (h *handle) GroupSetHosts(request web.Request) (interface{}, *web.Error) {
 			GroupIDs:    filterStringSlice(id, host.GroupIDs),
 			Environment: host.Environment,
 		}); err != nil {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
 	}
 
 	hosts, err := group.Hosts()
 	if err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 
-	return hosts, nil
+	return hosts, nil, nil
 }
 
-func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupGetScripts(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
 	scripts, err := group.Scripts()
 	if err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 	sort.Slice(scripts, func(i int, j int) bool {
 		return scripts[i].Name < scripts[j].Name
 	})
 
-	return scripts, nil
+	return scripts, nil, nil
 }
 
-func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
 
 	schedules := ScheduleStore.AllSchedulesForGroup(id)
@@ -163,76 +163,76 @@ func (h *handle) GroupGetSchedules(request web.Request) (interface{}, *web.Error
 		return schedules[i].Name < schedules[j].Name
 	})
 
-	return schedules, nil
+	return schedules, nil, nil
 }
 
-func (h *handle) GroupNew(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	params := newGroupParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	group, err := GroupStore.NewGroup(params)
 	if err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 
 	EventStore.GroupAdded(group, session.Username)
 
-	return group, nil
+	return group, nil, nil
 }
 
-func (h *handle) GroupEdit(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
 	params := editGroupParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	group, err := GroupStore.EditGroup(group, params)
 	if err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 
 	EventStore.GroupModified(group, session.Username)
 
-	return group, nil
+	return group, nil, nil
 }
 
-func (h *handle) GroupDelete(request web.Request) (interface{}, *web.Error) {
+func (h *handle) GroupDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	id := request.Parameters["id"]
 
 	group := GroupCache.ByID(id)
 	if group == nil {
-		return nil, web.ValidationError("No group with ID %s", id)
+		return nil, nil, web.ValidationError("No group with ID %s", id)
 	}
 
 	if err := GroupStore.DeleteGroup(group); err != nil {
 		if err.Server {
-			return nil, web.CommonErrors.ServerError
+			return nil, nil, web.CommonErrors.ServerError
 		}
-		return nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Message)
 	}
 
 	EventStore.GroupDeleted(group, session.Username)
 
-	return true, nil
+	return true, nil, nil
 }

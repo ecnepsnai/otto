@@ -6,21 +6,21 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) OptionsGet(request web.Request) (interface{}, *web.Error) {
-	return Options, nil
+func (h *handle) OptionsGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	return Options, nil, nil
 }
 
-func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
+func (h *handle) OptionsSet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
 	options := OttoOptions{}
 
 	if err := request.DecodeJSON(&options); err != nil {
-		return nil, web.CommonErrors.BadRequest
+		return nil, nil, web.CommonErrors.BadRequest
 	}
 
 	if !strings.HasPrefix(options.General.ServerURL, "http") {
-		return nil, web.ValidationError("Server URL must include protocol")
+		return nil, nil, web.ValidationError("Server URL must include protocol")
 	}
 
 	if !strings.HasSuffix(options.General.ServerURL, "/") {
@@ -28,7 +28,7 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 	}
 
 	if err := options.Validate(); err != nil {
-		return nil, web.ValidationError(err.Error())
+		return nil, nil, web.ValidationError(err.Error())
 	}
 
 	hash, didChange := options.Save()
@@ -36,5 +36,5 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.Error) {
 		EventStore.ServerOptionsModified(hash, session.Username)
 	}
 
-	return options, nil
+	return options, nil, nil
 }

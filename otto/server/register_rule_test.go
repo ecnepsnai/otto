@@ -252,7 +252,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    randomString(6),
 			DistributionVersion: randomString(6),
 		},
-	}), web.Writer{}); webReply.Status != 200 {
+	})); webReply.Status != 200 {
 		t.Fatalf("[default] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(defaultAddress) == nil {
@@ -271,7 +271,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    "CentOS Linux",
 			DistributionVersion: "8",
 		},
-	}), web.Writer{}); webReply.Status != 200 {
+	})); webReply.Status != 200 {
 		t.Fatalf("[centos 8] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(centos8address) == nil {
@@ -293,7 +293,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    "CentOS Linux",
 			DistributionVersion: "8",
 		},
-	}), web.Writer{}); webReply.Status == 200 {
+	})); webReply.Status == 200 {
 		t.Fatalf("[incorrect] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(incorrectKeyAddress) != nil {

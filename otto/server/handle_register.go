@@ -11,7 +11,7 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (v *view) Register(request web.Request, writer web.Writer) web.HTTPResponse {
+func (v *view) Register(request web.Request) web.HTTPResponse {
 	if !Options.Register.Enabled {
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"remote_addr": request.HTTP.RemoteAddr,

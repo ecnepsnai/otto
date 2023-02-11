@@ -2,15 +2,15 @@ package server
 
 import "github.com/ecnepsnai/web"
 
-func (h *handle) SystemSearch(request web.Request) (interface{}, *web.Error) {
+func (h *handle) SystemSearch(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	type systemSearchRequest struct {
 		Query string
 	}
 
 	req := systemSearchRequest{}
 	if err := request.DecodeJSON(&req); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return SystemSearch(req.Query), nil
+	return SystemSearch(req.Query), nil, nil
 }

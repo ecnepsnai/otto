@@ -7,7 +7,7 @@ import (
 	"github.com/ecnepsnai/web"
 )
 
-func (h *handle) State(request web.Request) (interface{}, *web.Error) {
+func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	type runtimeType struct {
 		ServerFQDN string
 		Version    string
@@ -42,9 +42,9 @@ func (h *handle) State(request web.Request) (interface{}, *web.Error) {
 		}
 	}
 
-	return s, nil
+	return s, nil, nil
 }
 
-func (h *handle) Stats(request web.Request) (interface{}, *web.Error) {
-	return Stats.GetCounterValues(), nil
+func (h *handle) Stats(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	return Stats.GetCounterValues(), nil, nil
 }
