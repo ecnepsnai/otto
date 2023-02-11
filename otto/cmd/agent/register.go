@@ -121,7 +121,7 @@ func tryAutoRegister() {
 	if response.StatusCode != 200 {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(response.Request.Body)
-		rlog.Fatalf("HTTP Error %d from otto server. Response: %s", response.StatusCode, buf.String())
+		rlog.Fatalf("HTTP Error %d from otto server. Response hex: %X", response.StatusCode, buf.Bytes())
 	}
 
 	registerResponse := otto.RegisterResponse{}

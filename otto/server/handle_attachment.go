@@ -22,11 +22,11 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.APIRes
 	gidStr := request.HTTP.FormValue("GID")
 	modeStr := request.HTTP.FormValue("Mode")
 
-	uid, err := strconv.Atoi(uidStr)
+	uid, err := strconv.ParseUint(uidStr, 10, 32)
 	if err != nil {
 		return nil, nil, web.ValidationError("Invalid uid '%s'", uidStr)
 	}
-	gid, err := strconv.Atoi(gidStr)
+	gid, err := strconv.ParseUint(gidStr, 10, 32)
 	if err != nil {
 		return nil, nil, web.ValidationError("Invalid gid '%s'", gidStr)
 	}
@@ -101,11 +101,11 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.APIRespo
 	gidStr := request.HTTP.FormValue("GID")
 	modeStr := request.HTTP.FormValue("Mode")
 
-	uid, err := strconv.Atoi(uidStr)
+	uid, err := strconv.ParseUint(uidStr, 10, 32)
 	if err != nil {
 		return nil, nil, web.ValidationError("Invalid uid '%s'", uidStr)
 	}
-	gid, err := strconv.Atoi(gidStr)
+	gid, err := strconv.ParseUint(gidStr, 10, 32)
 	if err != nil {
 		return nil, nil, web.ValidationError("Invalid gid '%s'", gidStr)
 	}
