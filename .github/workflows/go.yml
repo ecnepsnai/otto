@@ -36,12 +36,10 @@ jobs:
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@17573ee1cc1b9d061760f3a006fc4aac4f944fd5 # pin@v2.2.4
-        working-directory: otto
         with:
           languages: ${{ matrix.language }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@17573ee1cc1b9d061760f3a006fc4aac4f944fd5 # pin@2.2.4
-        working-directory: otto
         with:
           category: "/language:${{matrix.language}}"
