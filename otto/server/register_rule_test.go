@@ -22,6 +22,19 @@ func encryptRegistrationRequest(request otto.RegisterRequest, key string) ([]byt
 	return secutil.Encryption.AES_256_GCM.Encrypt(decryptedData, key)
 }
 
+func decryptRegistrationResponse(data []byte, key string) (*otto.RegisterResponse, error) {
+	plainText, err := secutil.Encryption.AES_256_GCM.Decrypt(data, key)
+	if err != nil {
+		return nil, err
+	}
+	response := otto.RegisterResponse{}
+	if err := json.Unmarshal(plainText, &response); err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}
+
 func TestAddGetRegisterRule(t *testing.T) {
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name:      randomString(6),
@@ -240,11 +253,13 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	}
 
 	// Test that a host that doesn't match any rules gets added to the default group
+	nonce := secutil.RandomString(6)
 	defaultAddress := "127.0.0.1"
 	v := view{}
-	if webReply := v.Register(mockRequest(defaultAddress, Key, otto.RegisterRequest{
+	webReply := v.Register(mockRequest(defaultAddress, Key, otto.RegisterRequest{
 		AgentIdentity: mustIdentity().PublicKeyString(),
 		Port:          12444,
+		Nonce:         nonce,
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -252,8 +267,20 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionName:    randomString(6),
 			DistributionVersion: randomString(6),
 		},
-	})); webReply.Status != 200 {
+	}))
+	if webReply.Status != 200 {
 		t.Fatalf("[default] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
+	}
+	encryptedReply, erro := io.ReadAll(webReply.Reader)
+	if erro != nil {
+		t.Errorf("[default] error reading response: %s", erro.Error())
+	}
+	registerResponse, erro := decryptRegistrationResponse(encryptedReply, Key)
+	if erro != nil {
+		t.Errorf("[default] error reading response: %s", erro.Error())
+	}
+	if registerResponse.Nonce != nonce {
+		t.Errorf("[default] bad nonce")
 	}
 	if HostStore.HostWithAddress(defaultAddress) == nil {
 		t.Errorf("[default] Host was not registered")
@@ -264,6 +291,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	if webReply := v.Register(mockRequest(centos8address, Key, otto.RegisterRequest{
 		AgentIdentity: mustIdentity().PublicKeyString(),
 		Port:          12444,
+		Nonce:         secutil.RandomString(6),
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -286,6 +314,7 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	if webReply := v.Register(mockRequest(incorrectKeyAddress, randomString(12), otto.RegisterRequest{
 		AgentIdentity: mustIdentity().PublicKeyString(),
 		Port:          12444,
+		Nonce:         secutil.RandomString(6),
 		Properties: otto.RegisterRequestProperties{
 			Hostname:            randomString(6),
 			KernelName:          randomString(6),
@@ -294,9 +323,48 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 			DistributionVersion: "8",
 		},
 	})); webReply.Status == 200 {
-		t.Fatalf("[incorrect] Unexpected error trying to register valid host: HTTP %d", webReply.Status)
+		t.Fatalf("[incorrect] Unexpected HTTP status trying to register host with invalid key: HTTP %d", webReply.Status)
 	}
 	if HostStore.HostWithAddress(incorrectKeyAddress) != nil {
 		t.Errorf("[incorrect] Host was registered when one was not expected")
+	}
+
+	// Test that a reused nonce does not get registered
+	duplicateNonceAddress := "127.0.0.4"
+	if webReply := v.Register(mockRequest(duplicateNonceAddress, Key, otto.RegisterRequest{
+		AgentIdentity: mustIdentity().PublicKeyString(),
+		Port:          12444,
+		Nonce:         nonce,
+		Properties: otto.RegisterRequestProperties{
+			Hostname:            randomString(6),
+			KernelName:          randomString(6),
+			KernelVersion:       randomString(6),
+			DistributionName:    "CentOS Linux",
+			DistributionVersion: "8",
+		},
+	})); webReply.Status == 200 {
+		t.Fatalf("[duplicate nonce] Unexpected HTTP status trying to register host with duplicate nonce: HTTP %d", webReply.Status)
+	}
+	if HostStore.HostWithAddress(duplicateNonceAddress) != nil {
+		t.Errorf("[duplicate nonce] Host was registered when one was not expected")
+	}
+
+	// Test that a reused nonce does not get registered
+	noNonceAddress := "127.0.0.4"
+	if webReply := v.Register(mockRequest(noNonceAddress, Key, otto.RegisterRequest{
+		AgentIdentity: mustIdentity().PublicKeyString(),
+		Port:          12444,
+		Properties: otto.RegisterRequestProperties{
+			Hostname:            randomString(6),
+			KernelName:          randomString(6),
+			KernelVersion:       randomString(6),
+			DistributionName:    "CentOS Linux",
+			DistributionVersion: "8",
+		},
+	})); webReply.Status == 200 {
+		t.Fatalf("[no nonce] Unexpected HTTP status trying to register host with no nonce: HTTP %d", webReply.Status)
+	}
+	if HostStore.HostWithAddress(noNonceAddress) != nil {
+		t.Errorf("[no nonce] Host was registered when one was not expected")
 	}
 }
