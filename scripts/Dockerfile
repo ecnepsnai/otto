@@ -1,4 +1,5 @@
-FROM docker.io/library/alpine:3.16
+ARG ALPINE_HASH
+FROM docker.io/library/alpine@sha256:${ALPINE_HASH}
 LABEL maintainer="Ian Spence <ian@ecnepsnai.com>"
 LABEL org.opencontainers.image.authors="Ian Spence <ian@ecnepsnai.com>"
 LABEL org.opencontainers.image.source=https://github.com/ecnepsnai/otto

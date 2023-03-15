@@ -3,8 +3,10 @@ set -e
 
 CPU_ARCH=$(uname -m)
 ARCH="amd64"
+ALPINE_HASH="e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501" # https://hub.docker.com/_/alpine/tags
 if [[ ${CPU_ARCH} == 'aarch64' ]]; then
     ARCH="arm64"
+    ALPINE_HASH="c41ab5c992deb4fe7e5da09f67a8804a46bd0592bfdf0b1847dde0e0889d2bff"
 fi
 
 ROOT_PATH=$(realpath ../)
@@ -32,6 +34,7 @@ cd ../
 ${DOCKER_CMD} build \
     --squash \
     --no-cache \
+    --build-arg "ALPINE_HASH=${ALPINE_HASH}" \
     --label "org.opencontainers.image.created=${DATETIME}" \
     --label "org.opencontainers.image.version=${VERSION}" \
     --label "org.opencontainers.image.revision=${REVISION}" \
