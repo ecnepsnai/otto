@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"strconv"
 
 	"github.com/ecnepsnai/otto/shared/otto"
+	"github.com/ecnepsnai/secutil"
 )
 
 func createDirectoryForOttoFile(file otto.File) error {
@@ -58,28 +57,59 @@ func uploadFile(file otto.File) error {
 		return fmt.Errorf("invalid file permissions: %s", err.Error())
 	}
 
-	f, err := os.OpenFile(file.Path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, mode)
-	if err != nil {
-		log.Error("Error opening file: path='%s' error='%s'", file.Path, err.Error())
+	atomicFilePath := file.Path + "_" + secutil.RandomString(3)
+	if err := os.WriteFile(atomicFilePath, file.Data, mode); err != nil {
+		log.PError("Error writing file", map[string]interface{}{
+			"path":  atomicFilePath,
+			"error": err.Error(),
+		})
 		return err
 	}
-	defer f.Close()
 
-	n, err := io.Copy(f, bytes.NewReader(file.Data))
-	if err != nil {
-		log.Error("Error writing to file: path='%s' error='%s'", file.Path, err.Error())
-		return err
-	}
 	// Only chown if we need to
 	if !file.Owner.Inherit && !compareUIDandGID(file.Owner.UID, file.Owner.GID) {
-		if err := f.Chown(int(file.Owner.UID), int(file.Owner.GID)); err != nil {
-			log.Error("Error chowning file: path='%s' error='%s'", file.Path, err.Error())
+		if err := os.Chown(atomicFilePath, int(file.Owner.UID), int(file.Owner.GID)); err != nil {
+			log.PError("Error setting file owner", map[string]interface{}{
+				"path":  atomicFilePath,
+				"error": err.Error(),
+			})
 			return err
 		}
-		log.Debug("Chowned file: path='%s' uid=%d gid=%d", file.Path, file.Owner.UID, file.Owner.GID)
+		log.PDebug("Set file owner", map[string]interface{}{
+			"path": atomicFilePath,
+			"uid":  file.Owner.UID,
+			"gid":  file.Owner.GID,
+		})
+	}
+	log.PDebug("Created file", map[string]interface{}{
+		"path": atomicFilePath,
+	})
+
+	checksum, err := getFileSHA256Checksum(atomicFilePath)
+	if err != nil {
+		log.PError("Error calculating file checksum", map[string]interface{}{
+			"path":  atomicFilePath,
+			"error": err.Error(),
+		})
+		os.Remove(atomicFilePath)
+		return err
+	}
+	if checksum != file.Checksum {
+		log.PError("File checksum validation failed!", map[string]interface{}{
+			"path":              atomicFilePath,
+			"expected_checksum": file.Checksum,
+			"actual_checksum":   checksum,
+		})
+		os.Remove(atomicFilePath)
+		return fmt.Errorf("checksum validation failed")
 	}
 
-	log.Debug("Wrote %d bytes to '%s'", n, file.Path)
+	if err := os.Rename(atomicFilePath, file.Path); err != nil {
+		log.PError("Error renaming atomic file", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
 
 	return nil
 }

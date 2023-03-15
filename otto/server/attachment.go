@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -21,11 +23,25 @@ type Attachment struct {
 	Mode        uint32
 	Size        uint64
 	AfterScript bool
+	Checksum    string
+}
+
+// GetChecksum get the real checksum for the file path
+func (attachment Attachment) GetChecksum() (string, error) {
+	checksum, err := getFileSHA256Checksum(attachment.FilePath())
+	if err != nil {
+		log.PError("Error calculating attachment checksum", map[string]interface{}{
+			"attachment": attachment.ID,
+			"error":      err.Error(),
+		})
+		return "", err
+	}
+	return checksum, nil
 }
 
 // OttoFile return an otto common file
 func (attachment Attachment) OttoFile() (*otto.File, error) {
-	f, err := os.OpenFile(attachment.FilePath(), os.O_RDONLY, 0644)
+	f, err := os.Open(attachment.FilePath())
 	if err != nil {
 		log.Error("Error opening script file '%s': %s", attachment.ID, err.Error())
 		return nil, err
@@ -37,6 +53,16 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 		return nil, err
 	}
 
+	checksum := fmt.Sprintf("%x", sha256.Sum256(fileData))
+	if attachment.Checksum != checksum {
+		log.PError("Attachment file checksum verification failed", map[string]interface{}{
+			"attachment":        attachment.ID,
+			"expected_checksum": attachment.Checksum,
+			"actual_checksum":   checksum,
+		})
+		return nil, fmt.Errorf("file verification failed: %s", attachment.ID)
+	}
+
 	ottoFile := otto.File{
 		Path: attachment.Path,
 		Mode: attachment.Mode,
@@ -46,6 +72,7 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 			Inherit: attachment.Owner.Inherit,
 		},
 		Data:        fileData,
+		Checksum:    checksum,
 		AfterScript: attachment.AfterScript,
 	}
 	return &ottoFile, nil
@@ -54,4 +81,9 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 // FilePath returns the absolute path for this attachment
 func (attachment Attachment) FilePath() string {
 	return path.Join(Directories.Attachments, attachment.ID)
+}
+
+// AtomicFilePath returns the absolute path for this attachment
+func (attachment Attachment) AtomicFilePath() string {
+	return path.Join(Directories.Attachments, ".atomic_"+attachment.ID)
 }

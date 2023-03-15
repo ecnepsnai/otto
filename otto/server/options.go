@@ -145,7 +145,7 @@ func optionsFileHash() string {
 		return ""
 	}
 
-	h, err := hashFile(configPath)
+	h, err := getFileSHA256Checksum(configPath)
 	if err != nil {
 		log.Panic("Error hasing config file: %s", err.Error())
 	}

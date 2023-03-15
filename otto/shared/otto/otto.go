@@ -164,6 +164,7 @@ type File struct {
 	Owner       RunAs  `json:"owner"`
 	Mode        uint32 `json:"mode"`
 	Data        []byte `json:"data"`
+	Checksum    string `json:"checksum"`
 	AfterScript bool   `json:"after_script"`
 }
 

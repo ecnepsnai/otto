@@ -47,3 +47,7 @@ the default mode for the directory, and set the owner to the same as the attachm
 
 Attachments can be owned by specific UID/GID or inherit the UID/GID that the script runs as, and have a specific
 permission mode. Attachments have a maximum file size of 100MiB.
+
+Attachment files are compared against a SHA-256 hash calculated when the file is uploaded to the Otto server. This check
+occurs both on the server and the client. Do not modify the attachment file inside the Otto server's data directory
+directly, as the attachment will be deleted automatically. Always update the attachment through the Otto server web UI.

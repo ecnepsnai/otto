@@ -48,6 +48,7 @@ func startup() {
 	CommonSetup()
 	storeSetup()
 	dataStoreSetup()
+	AttachmentStore.Cleanup()
 	CacheSetup()
 	CronSetup()
 	checkFirstRun()

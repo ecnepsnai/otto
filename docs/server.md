@@ -12,7 +12,7 @@ Docker.
 If you were using Podman, you can run the container with:
 
 ```bash
-podman run --user root -p 8080:8080 -v <data dir>:/otto_data:Z ghcr.io/ecnepsnai/otto:latest
+podman run -p 8080:8080 -v <data dir>:/otto_data ghcr.io/ecnepsnai/otto:latest
 ```
 
 *Note:* Substitute `podman` with `docker` if you're using Docker.
@@ -21,7 +21,7 @@ Replace `<data dir>` with a directory where you want Otto to store all server da
 entirely if you don't care about persistence
 
 Navigating to `http://localhost:8080` in your web browser and use the default credentials of `admin`:`admin` to log in.
-You will need to change your password the first time you log in.
+**You are required to change your password the first time you log in.**
 
 We recommend using a reverse proxy such as NGINX and configuring TLS.
 

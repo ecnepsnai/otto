@@ -134,18 +134,38 @@ func (s attachmentStoreObject) newAttachment(tx ds.IReadWriteTransaction, params
 
 	f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
+		log.PError("Error writing attachment file", map[string]interface{}{
+			"attachment": attachment.FilePath(),
+			"error":      err.Error(),
+		})
 		return nil, ErrorFrom(err)
 	}
-	defer f.Close()
 
 	if _, err := io.Copy(f, params.Data); err != nil {
-		log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
+		log.PError("Error writing attachment file", map[string]interface{}{
+			"attachment": attachment.FilePath(),
+			"error":      err.Error(),
+		})
+		f.Close()
 		return nil, ErrorFrom(err)
 	}
+	f.Close()
+
+	checksum, err := getFileSHA256Checksum(attachment.FilePath())
+	if err != nil {
+		log.PError("Error calculating attachment checksum", map[string]interface{}{
+			"attachment": attachment.FilePath(),
+			"error":      err.Error(),
+		})
+		return nil, ErrorFrom(err)
+	}
+	attachment.Checksum = checksum
 
 	if err := tx.Add(attachment); err != nil {
-		log.Error("Error saving script attachment '%s': %s", attachment.ID, err.Error())
+		log.PError("Error saving attachment", map[string]interface{}{
+			"attachment": attachment.ID,
+			"error":      err.Error(),
+		})
 		return nil, ErrorFrom(err)
 	}
 
@@ -184,25 +204,57 @@ func (s attachmentStoreObject) editAttachment(tx ds.IReadWriteTransaction, id st
 	attachment.AfterScript = params.AfterScript
 
 	if params.Data != nil {
-		f, err := os.OpenFile(attachment.FilePath(), os.O_CREATE|os.O_RDWR, 0644)
+		f, err := os.OpenFile(attachment.AtomicFilePath(), os.O_CREATE|os.O_RDWR, 0644)
 		if err != nil {
-			log.Error("Error opening attachment file '%s': %s", attachment.FilePath(), err.Error())
+			log.PError("Error writing updated attachment file", map[string]interface{}{
+				"attachment": attachment.ID,
+				"file_path":  attachment.AtomicFilePath(),
+				"error":      err.Error(),
+			})
 			return nil, ErrorFrom(err)
 		}
-		defer f.Close()
 
 		if _, err := io.Copy(f, params.Data); err != nil {
-			log.Error("Error writing attachment file '%s': %s", attachment.FilePath(), err.Error())
+			log.PError("Error writing updated attachment file", map[string]interface{}{
+				"attachment": attachment.ID,
+				"file_path":  attachment.AtomicFilePath(),
+				"error":      err.Error(),
+			})
+			f.Close()
+			return nil, ErrorFrom(err)
+		}
+		f.Close()
+
+		checksum, err := getFileSHA256Checksum(attachment.AtomicFilePath())
+		if err != nil {
+			log.PError("Error calculating attachment checksum", map[string]interface{}{
+				"attachment": attachment.ID,
+				"file_path":  attachment.AtomicFilePath(),
+				"error":      err.Error(),
+			})
+			return nil, ErrorFrom(err)
+		}
+
+		if err := os.Rename(attachment.AtomicFilePath(), attachment.FilePath()); err != nil {
+			log.PError("Error writing updated attachment file", map[string]interface{}{
+				"attachment": attachment.ID,
+				"file_path":  attachment.AtomicFilePath(),
+				"error":      err.Error(),
+			})
 			return nil, ErrorFrom(err)
 		}
 
 		attachment.Name = params.Name
 		attachment.Size = params.Size
+		attachment.Checksum = checksum
 		attachment.MimeType = params.MimeType
 	}
 
 	if err := tx.Update(*attachment); err != nil {
-		log.Error("Error updating script attachment '%s': %s", attachment.ID, err.Error())
+		log.PError("Error updating attachment", map[string]interface{}{
+			"attachment": attachment.ID,
+			"error":      err.Error(),
+		})
 		return nil, ErrorFrom(err)
 	}
 
@@ -244,6 +296,39 @@ func (s attachmentStoreObject) Cleanup() (rerr *Error) {
 		attachmentsWithScripts := map[string]bool{}
 		attachments := s.allAttachments(tx)
 		scripts := ScriptStore.AllScripts()
+
+		for i := len(attachments) - 1; i >= 0; i-- {
+			attachment := attachments[i]
+
+			if !FileExists(attachment.FilePath()) {
+				log.PWarn("Dead attachment found", map[string]interface{}{
+					"attachment_id": attachment.ID,
+				})
+				s.deleteAttachment(tx, attachment.ID)
+				attachments = append(attachments[:i], attachments[i+1:]...)
+				continue
+			}
+
+			checksum, err := getFileSHA256Checksum(attachment.FilePath())
+			if err != nil {
+				log.PError("Error calculating attachment checksum", map[string]interface{}{
+					"attachment_id": attachment.ID,
+					"error":         err.Error(),
+				})
+				continue
+			}
+
+			if checksum != attachment.Checksum {
+				log.PError("Attachment checksum verification failed", map[string]interface{}{
+					"attachment_id":     attachment.ID,
+					"expected_checksum": attachment.Checksum,
+					"actual_checksum":   checksum,
+				})
+				s.deleteAttachment(tx, attachment.ID)
+				attachments = append(attachments[:i], attachments[i+1:]...)
+				continue
+			}
+		}
 
 		attachmentIDMap := map[string]bool{}
 		for _, attachment := range attachments {

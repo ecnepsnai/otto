@@ -55,7 +55,7 @@ func sliceFirst(s []string) string {
 	return s[0]
 }
 
-func hashFile(filePath string) (string, error) {
+func getFileSHA256Checksum(filePath string) (string, error) {
 	h := sha256.New()
 
 	f, err := os.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
