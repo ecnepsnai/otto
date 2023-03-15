@@ -57,6 +57,27 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 			Status: 400,
 		}
 	}
+
+	if r.Nonce == "" {
+		log.PWarn("Rejected registration request", map[string]interface{}{
+			"remote_addr": request.HTTP.RemoteAddr,
+			"reason":      "missing nonce",
+		})
+		return web.HTTPResponse{
+			Status: 403,
+		}
+	}
+	if usedRegisterNonces.PreviouslyUsed(r.Nonce) {
+		log.PWarn("Rejected registration request", map[string]interface{}{
+			"remote_addr": request.HTTP.RemoteAddr,
+			"reason":      "previously used nonce",
+		})
+		return web.HTTPResponse{
+			Status: 403,
+		}
+	}
+	usedRegisterNonces.Add(r.Nonce)
+
 	hostIP := request.ClientIPAddress().String()
 	log.PDebug("Incoming host registration request", map[string]interface{}{
 		"HostIP":              hostIP,
@@ -141,6 +162,7 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 
 	responseData, erro := json.Marshal(otto.RegisterResponse{
 		ServerIdentity: serverId.PublicKeyString(),
+		Nonce:          r.Nonce,
 	})
 	if erro != nil {
 		return web.HTTPResponse{

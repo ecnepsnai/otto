@@ -69,6 +69,8 @@ func tryAutoRegister() {
 		rlog.Printf("WARNING - Not using TLS, registration key will be sent in plain-text")
 	}
 
+	nonce := secutil.RandomString(16)
+
 	// Get the current uid and gid for the defaults
 	uid, gid := getUIDandGID()
 
@@ -85,6 +87,7 @@ func tryAutoRegister() {
 	request := otto.RegisterRequest{
 		AgentIdentity: base64.StdEncoding.EncodeToString(signer.PublicKey().Marshal()),
 		Port:          port,
+		Nonce:         nonce,
 		Properties:    registerProperties,
 	}
 	data, err := json.Marshal(request)
@@ -139,6 +142,9 @@ func tryAutoRegister() {
 	}
 	if registerResponse.ServerIdentity == "" {
 		rlog.Fatalf("No server identity returned from otto server")
+	}
+	if registerResponse.Nonce != nonce {
+		rlog.Fatalf("Unexpected response from otto server: bad nonce")
 	}
 	rlog.Printf("Server identity: %s", registerResponse.ServerIdentity)
 

@@ -171,6 +171,7 @@ type File struct {
 type RegisterRequest struct {
 	AgentIdentity string                    `json:"identity"`
 	Port          uint32                    `json:"port"`
+	Nonce         string                    `json:"nonce"`
 	Properties    RegisterRequestProperties `json:"properties"`
 }
 
@@ -186,6 +187,7 @@ type RegisterRequestProperties struct {
 // RegisterResponse describes the response to a register request
 type RegisterResponse struct {
 	ServerIdentity string `json:"identity"`
+	Nonce          string `json:"nonce"`
 }
 
 func readFrame(r io.Reader) ([]byte, error) {
