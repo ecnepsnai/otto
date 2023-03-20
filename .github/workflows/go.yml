@@ -31,11 +31,11 @@ jobs:
         working-directory: otto
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@16964e90ba004cdf0cd845b866b5df21038b7723 # pin@v2.2.6
+        uses: github/codeql-action/init@168b99b3c22180941ae7dbdd5f5c9678ede476ba # pin@v2.2.7
         with:
           languages: go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@16964e90ba004cdf0cd845b866b5df21038b7723 # pin@2.2.6
+        uses: github/codeql-action/analyze@168b99b3c22180941ae7dbdd5f5c9678ede476ba # pin@2.2.7
         with:
           category: "/language:go"
