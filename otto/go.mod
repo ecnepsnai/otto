@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/ecnepsnai/cron v1.3.3
-	github.com/ecnepsnai/ds v1.8.2
+	github.com/ecnepsnai/ds v1.8.3
 	github.com/ecnepsnai/limits v1.0.1
 	github.com/ecnepsnai/logtic v1.9.2
 	github.com/ecnepsnai/osquery v1.0.0

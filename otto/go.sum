@@ -1,8 +1,8 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/ecnepsnai/cron v1.3.3 h1:olHZd8AmtQ8aICcCONVyDC9t1A4envDcQNlpMD3/7FI=
 github.com/ecnepsnai/cron v1.3.3/go.mod h1:CACa8yKlQ79jB2kfcPdGtwsYXorqktug+TEkV6zPRkg=
-github.com/ecnepsnai/ds v1.8.2 h1:ATOEp0aKnJI0x8VPRdkzUFJ3OHCLThGuLdUsDSDr9GE=
-github.com/ecnepsnai/ds v1.8.2/go.mod h1:anRzS4vH82VzOZx6FVS9Li0g0QHn0/ImBMH9pWJ+bBE=
+github.com/ecnepsnai/ds v1.8.3 h1:EEbk5XsVC0V1br4buBXGQ+ol5VSE3kQ+W8ncjlPmp38=
+github.com/ecnepsnai/ds v1.8.3/go.mod h1:anRzS4vH82VzOZx6FVS9Li0g0QHn0/ImBMH9pWJ+bBE=
 github.com/ecnepsnai/limits v1.0.1 h1:DL9i0eSGkpaKZg1DM5z/Bn6KL6c5UKMM8jy5jic4pys=
 github.com/ecnepsnai/limits v1.0.1/go.mod h1:tmAlM5HiekbtbOyo83T0sG3bhvvzSMrnxPxvE9oWqJg=
 github.com/ecnepsnai/logtic v1.9.2 h1:RoPIpBRjY5gGN4/WuOwBpYXNH+lIfmj4TwqvLz1CCoQ=
