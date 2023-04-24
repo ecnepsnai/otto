@@ -23,8 +23,8 @@ github.com/ecnepsnai/stats v1.0.0 h1:9QClYW65H3rM3zQL57tWticogc+zLz9f2GlEsRYPoVc
 github.com/ecnepsnai/stats v1.0.0/go.mod h1:dYNPtuy1sByJwtwi6H+WA0dkJPXH5OdQZVKa4RLw1FM=
 github.com/ecnepsnai/store v1.3.0 h1:2Jxk64qIM2wYLzjte6AZdouKh2bmfD0Qgp5cR48WbjE=
 github.com/ecnepsnai/store v1.3.0/go.mod h1:zIUpkE70+y8HniRAcE8GRgcrNnbRltfcbUBXO7pRjks=
-github.com/ecnepsnai/web v1.11.0 h1:z9bei9MezSGUJ73iFfxv3KygECDfOwhNxEfigsfSqtY=
-github.com/ecnepsnai/web v1.11.0/go.mod h1:0Wcbo5I4w0r0tm2XYzL5PL4xYRfucOaNw0NClKPtxEM=
+github.com/ecnepsnai/web v1.11.1 h1:ZIeD9KSIlBdjwtgyi1rJzYcoSYRobRuuTzNgChnx75s=
+github.com/ecnepsnai/web v1.11.1/go.mod h1:0Wcbo5I4w0r0tm2XYzL5PL4xYRfucOaNw0NClKPtxEM=
 github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
