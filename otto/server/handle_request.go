@@ -49,24 +49,12 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 
 		return result, nil, nil
-	} else if r.Action == AgentActionExitAgent {
-		if err := host.ExitAgent(); err != nil {
-			return false, nil, nil
-		}
-		return true, nil, nil
 	}
 
 	return nil, nil, nil
 }
 
 func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
-	const (
-		requestResponseCodeOutput    = 100
-		requestResponseCodeKeepalive = 101
-		requestResponseCodeError     = 400
-		requestResponseCodeFinished  = 200
-	)
-
 	session := request.UserData.(*Session)
 	defer conn.Close()
 
@@ -95,7 +83,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	r := requestParams{}
 	if err := conn.ReadJSON(&r); err != nil {
 		writeMessage(requestResponse{
-			Code:  requestResponseCodeError,
+			Code:  RequestResponseCodeError,
 			Error: "Invalid request",
 		})
 		return
@@ -104,7 +92,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	host := HostCache.ByID(r.HostID)
 	if host == nil {
 		writeMessage(requestResponse{
-			Code:  requestResponseCodeError,
+			Code:  RequestResponseCodeError,
 			Error: fmt.Sprintf("No host with ID %s", r.HostID),
 		})
 		return
@@ -112,7 +100,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 
 	if !IsAgentAction(r.Action) {
 		writeMessage(requestResponse{
-			Code:  requestResponseCodeError,
+			Code:  RequestResponseCodeError,
 			Error: fmt.Sprintf("Unknown action %s", r.Action),
 		})
 		return
@@ -121,8 +109,8 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	if r.Action == AgentActionPing {
 		if err := host.Ping(); err != nil {
 			writeMessage(requestResponse{
-				Code:  requestResponseCodeError,
-				Error: fmt.Sprintf("Error pinging host %s", err.Error),
+				Code:  RequestResponseCodeError,
+				Error: fmt.Sprintf("Error pinging host %s", err.Error()),
 			})
 			return
 		}
@@ -132,7 +120,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 		script := ScriptStore.ScriptWithID(r.ScriptID)
 		if script == nil {
 			writeMessage(requestResponse{
-				Code:  requestResponseCodeError,
+				Code:  RequestResponseCodeError,
 				Error: fmt.Sprintf("No script with ID %s", r.ScriptID),
 			})
 			return
@@ -168,7 +156,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 			for running {
 				if time.Since(lastKA) > 10*time.Second {
 					writeMessage(requestResponse{
-						Code: requestResponseCodeKeepalive,
+						Code: RequestResponseCodeKeepalive,
 					})
 					lastKA = time.Now()
 				}
@@ -178,15 +166,15 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 
 		result, err := host.RunScript(script, func(stdout, stderr []byte) {
 			writeMessage(requestResponse{
-				Code:   requestResponseCodeOutput,
+				Code:   RequestResponseCodeOutput,
 				Stdout: string(stdout),
 				Stderr: string(stderr),
 			})
 		}, cancel)
 		if err != nil {
 			writeMessage(requestResponse{
-				Code:  requestResponseCodeError,
-				Error: err.Message,
+				Code:  RequestResponseCodeError,
+				Error: err.Error(),
 			})
 			running = false
 			return
@@ -194,17 +182,10 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 		writeMessage(requestResponse{
-			Code:   requestResponseCodeFinished,
+			Code:   RequestResponseCodeFinished,
 			Result: result,
 		})
 		running = false
-		return
-	} else if r.Action == AgentActionExitAgent {
-		if err := host.ExitAgent(); err != nil {
-			writeMessage(requestResponse{Code: requestResponseCodeFinished})
-			return
-		}
-		writeMessage(requestResponse{Code: requestResponseCodeFinished})
 		return
 	}
 }

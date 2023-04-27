@@ -40,20 +40,25 @@ func (attachment Attachment) GetChecksum() (string, error) {
 }
 
 // OttoFile return an otto common file
-func (attachment Attachment) OttoFile() (*otto.File, error) {
+func (attachment Attachment) FileInfo() (*otto.FileInfo, error) {
 	f, err := os.Open(attachment.FilePath())
 	if err != nil {
 		log.Error("Error opening script file '%s': %s", attachment.ID, err.Error())
 		return nil, err
 	}
 	defer f.Close()
-	fileData, err := io.ReadAll(f)
+	info, err := f.Stat()
 	if err != nil {
-		log.Error("Error reading file '%s': %s", attachment.ID, err.Error())
+		log.Error("Error opening script file '%s': %s", attachment.ID, err.Error())
 		return nil, err
 	}
 
-	checksum := fmt.Sprintf("%x", sha256.Sum256(fileData))
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		log.Error("Error opening script file '%s': %s", attachment.ID, err.Error())
+		return nil, err
+	}
+	checksum := fmt.Sprintf("%x", h.Sum(nil))
 	if attachment.Checksum != checksum {
 		log.PError("Attachment file checksum verification failed", map[string]interface{}{
 			"attachment":        attachment.ID,
@@ -63,7 +68,7 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 		return nil, fmt.Errorf("file verification failed: %s", attachment.ID)
 	}
 
-	ottoFile := otto.File{
+	return &otto.FileInfo{
 		Path: attachment.Path,
 		Mode: attachment.Mode,
 		Owner: otto.RunAs{
@@ -71,11 +76,14 @@ func (attachment Attachment) OttoFile() (*otto.File, error) {
 			GID:     attachment.Owner.GID,
 			Inherit: attachment.Owner.Inherit,
 		},
-		Data:        fileData,
+		Length:      uint64(info.Size()),
 		Checksum:    checksum,
 		AfterScript: attachment.AfterScript,
-	}
-	return &ottoFile, nil
+	}, nil
+}
+
+func (attachment Attachment) Reader() (io.ReadCloser, error) {
+	return os.Open(attachment.FilePath())
 }
 
 // FilePath returns the absolute path for this attachment

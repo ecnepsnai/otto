@@ -1,9 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -20,14 +22,6 @@ type ScriptResult struct {
 	Environment []environ.Variable
 	Result      otto.ScriptResult
 	RunError    string
-}
-
-var agentActionMap = map[string]uint32{
-	AgentActionReloadConfig: otto.ActionReloadConfig,
-	AgentActionRunScript:    otto.ActionRunScript,
-	AgentActionExitAgent:    otto.ActionUploadFileAndExitAgent,
-	AgentActionReboot:       otto.ActionReboot,
-	AgentActionShutdown:     otto.ActionShutdown,
 }
 
 type hostConnection struct {
@@ -105,32 +99,51 @@ func (hc *hostConnection) Close() {
 	hc.Conn.Close()
 }
 
-// TriggerAction will trigger the given action on the host
-func (host *Host) TriggerAction(action otto.MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.MessageActionResult, *Error) {
-	conn, err := host.connect()
+func (conn *hostConnection) UploadFile(attachment Attachment) error {
+	fileInfo, err := attachment.FileInfo()
 	if err != nil {
-		heartbeatStore.UpdateHostReachability(host, false)
-		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
-		return nil, ErrorFrom(err)
+		log.PError("Error uploading file", map[string]interface{}{
+			"attachment_id": attachment.ID,
+			"error":         err.Error(),
+		})
+		return err
 	}
-	defer conn.Close()
-
-	result, err := conn.Conn.TriggerAction(action, actionOutput, cancel)
+	reader, err := attachment.Reader()
 	if err != nil {
-		return nil, ErrorUser(err.Error())
+		log.PError("Error uploading file", map[string]interface{}{
+			"attachment_id": attachment.ID,
+			"error":         err.Error(),
+		})
+		return err
 	}
-	heartbeatStore.UpdateHostReachability(host, true)
 
+	if err := conn.Conn.TriggerActionUploadFile(*fileInfo, reader); err != nil {
+		log.PError("Error uploading file", map[string]interface{}{
+			"attachment_id": attachment.ID,
+			"error":         err.Error(),
+		})
+		return err
+	}
+
+	return nil
+}
+
+// TODO: change this to read the script as a file
+func (conn *hostConnection) RunScript(scriptInfo otto.ScriptInfo, scriptData []byte, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.MessageActionResult, error) {
+	result, err := conn.Conn.TriggerActionRunScript(scriptInfo, io.NopCloser(bytes.NewReader(scriptData)), actionOutput, cancel)
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
 // Ping ping the host
-func (host *Host) Ping() *Error {
+func (host *Host) Ping() error {
 	conn, err := host.connect()
 	if err != nil {
 		log.Error("Error sending heartbeat request to host '%s': %s", host.ID, err.Error())
 		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorFrom(err)
+		return err
 	}
 	defer conn.Close()
 
@@ -142,7 +155,7 @@ func (host *Host) Ping() *Error {
 			"error":   err.Error(),
 		})
 		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorFrom(err)
+		return err
 	}
 	if reply.Nonce != nonce {
 		log.PError("Unexpected nonce in heartbeat reply", map[string]interface{}{
@@ -151,7 +164,7 @@ func (host *Host) Ping() *Error {
 			"actual_nonce":   reply.Nonce,
 		})
 		heartbeatStore.UpdateHostReachability(host, false)
-		return ErrorServer("invalid nonce")
+		return fmt.Errorf("invalid nonce")
 	}
 	heartbeatStore.RegisterHeartbeatReply(host, *reply)
 
@@ -160,15 +173,177 @@ func (host *Host) Ping() *Error {
 
 // RunScript run the script on the host. Error will only ever be populated with internal server
 // errors, such as being unable to read from the database.
-func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte), cancel chan bool) (*ScriptResult, *Error) {
+func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte), cancel chan bool) (*ScriptResult, error) {
 	start := time.Now()
+	log.PInfo("Running script on host", map[string]interface{}{
+		"host_id":   host.ID,
+		"script_id": script.ID,
+	})
 
-	sr, err := script.OttoScript()
+	scriptRequest := script.ScriptInfo()
+
+	variables := host.environmentVariablesForScript(script)
+	scriptRequest.Environment = environ.Map(variables)
+
+	attachments, aerr := script.Attachments()
+	if aerr != nil {
+		return nil, aerr.Error
+	}
+
+	conn, err := host.connect()
 	if err != nil {
+		log.PError("Error running script on host", map[string]interface{}{
+			"script_id": script.ID,
+			"host_id":   host.ID,
+			"error":     err.Error(),
+		})
+		heartbeatStore.UpdateHostReachability(host, false)
 		return nil, err
 	}
-	scriptRequest := *sr
 
+	// Pre-execution files
+	for _, attachment := range attachments {
+		if attachment.AfterScript {
+			continue
+		}
+
+		log.PInfo("Uploading script attachment", map[string]interface{}{
+			"script_id":     script.ID,
+			"attachment_id": attachment.ID,
+			"host_id":       host.ID,
+		})
+		if err := conn.UploadFile(attachment); err != nil {
+			log.PError("Error running script on host", map[string]interface{}{
+				"script_id": script.ID,
+				"host_id":   host.ID,
+				"error":     err.Error(),
+			})
+			return nil, err
+		}
+	}
+
+	// Execute script
+	log.PInfo("Executing script", map[string]interface{}{
+		"script_id": script.ID,
+		"host_id":   host.ID,
+	})
+	result, err := conn.RunScript(script.ScriptInfo(), []byte(script.Script), scriptOutput, cancel)
+	if result == nil && err == nil {
+		err = fmt.Errorf("unexpected end of connection")
+	}
+	if err != nil {
+		log.PError("Error running script on host", map[string]interface{}{
+			"host_id":   host.ID,
+			"script_id": script.ID,
+			"error":     err.Error(),
+		})
+		return &ScriptResult{
+			ScriptID:    script.ID,
+			Duration:    time.Since(start),
+			Environment: variables,
+			Result: otto.ScriptResult{
+				Success: false,
+			},
+			RunError: err.Error(),
+		}, nil
+	}
+
+	if !result.ScriptResult.Success {
+		log.PError("Error running script on host", map[string]interface{}{
+			"host_id":   host.ID,
+			"script_id": script.ID,
+			"error":     result.ScriptResult.ExecError,
+		})
+		return &ScriptResult{
+			ScriptID:    script.ID,
+			Duration:    time.Since(start),
+			Environment: variables,
+			Result:      result.ScriptResult,
+		}, nil
+	}
+
+	// Post-execution files
+	for _, attachment := range attachments {
+		if !attachment.AfterScript {
+			continue
+		}
+
+		log.PInfo("Uploading script attachment", map[string]interface{}{
+			"script_id":     script.ID,
+			"attachment_id": attachment.ID,
+			"host_id":       host.ID,
+		})
+		if err := conn.UploadFile(attachment); err != nil {
+			log.PError("Error running script on host", map[string]interface{}{
+				"script_id": script.ID,
+				"host_id":   host.ID,
+				"error":     err.Error(),
+			})
+			return nil, err
+		}
+	}
+
+	heartbeatStore.UpdateHostReachability(host, true)
+
+	// After execution actions
+	switch script.AfterExecution {
+	case AgentActionReloadConfig:
+		err = conn.Conn.TriggerActionReloadConfig()
+	case AgentActionExitAgent:
+		err = conn.Conn.TriggerActionExitAgent()
+	case AgentActionReboot:
+		err = conn.Conn.TriggerActionReboot()
+	case AgentActionShutdown:
+		err = conn.Conn.TriggerActionShutdown()
+	case "":
+		// Noop
+		err = nil
+	default:
+		log.PError("Unknown post-execution action", map[string]interface{}{
+			"action":    script.AfterExecution,
+			"script_id": script.ID,
+		})
+		return &ScriptResult{
+			ScriptID:    script.ID,
+			Duration:    time.Since(start),
+			Environment: variables,
+			Result: otto.ScriptResult{
+				Success: false,
+			},
+			RunError: fmt.Sprintf("unknown post-execution action %s", script.AfterExecution),
+		}, nil
+	}
+	if err != nil {
+		log.PError("Error running script post-execution action on host", map[string]interface{}{
+			"host_id":   host.ID,
+			"script_id": script.ID,
+			"error":     result.ScriptResult.ExecError,
+		})
+		return &ScriptResult{
+			ScriptID:    script.ID,
+			Duration:    time.Since(start),
+			Environment: variables,
+			Result: otto.ScriptResult{
+				Success: false,
+			},
+			RunError: err.Error(),
+		}, nil
+	}
+
+	log.PInfo("Finished running script on host", map[string]interface{}{
+		"host_id":   host.ID,
+		"script_id": script.ID,
+		"elapsed":   time.Since(start).String(),
+	})
+	return &ScriptResult{
+		ScriptID:    script.ID,
+		Duration:    time.Since(start),
+		Environment: variables,
+		Result:      result.ScriptResult,
+	}, nil
+}
+
+func (host *Host) environmentVariablesForScript(script *Script) []environ.Variable {
 	variables := environ.Merge(staticEnvironment(), []environ.Variable{
 		environ.New("OTTO_HOST_ADDRESS", host.Address),
 		environ.New("OTTO_HOST_PORT", fmt.Sprintf("%d", host.Port)),
@@ -183,7 +358,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 	// 3. Group environment variables
 	groups, err := host.Groups()
 	if err != nil {
-		return nil, err
+		groups = []Group{}
 	}
 	for _, group := range groups {
 		variables = environ.Merge(variables, group.Environment)
@@ -204,103 +379,25 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		log.Debug("Script variables: %s", strings.Join(varStr, " "))
 	}
 
-	scriptRequest.Environment = environ.Map(variables)
-
-	log.Info("Executing script '%s' on host '%s'", script.Name, host.Address)
-	result, err := host.TriggerAction(otto.MessageTriggerAction{
-		Action: otto.ActionRunScript,
-		Script: scriptRequest,
-	}, scriptOutput, cancel)
-	if result == nil && err == nil {
-		err = ErrorServer("Unexpected end of connection")
-	}
-	if err != nil {
-		log.Error("Error running script on host '%s': %s", host.Address, err.Message)
-		return &ScriptResult{
-			ScriptID:    script.ID,
-			Duration:    time.Since(start),
-			Environment: variables,
-			Result: otto.ScriptResult{
-				Success: false,
-			},
-			RunError: err.Message,
-		}, nil
-	}
-
-	if result.ScriptResult.Success {
-		if script.AfterExecution != "" {
-			agentAction, ok := agentActionMap[script.AfterExecution]
-			if !ok {
-				log.PError("Unknown post-execution action", map[string]interface{}{
-					"action":    script.AfterExecution,
-					"script_id": script.ID,
-				})
-				return &ScriptResult{
-					ScriptID:    script.ID,
-					Duration:    time.Since(start),
-					Environment: variables,
-					Result: otto.ScriptResult{
-						Success: false,
-					},
-					RunError: fmt.Sprintf("unknown post-execution action %s", script.AfterExecution),
-				}, nil
-			}
-
-			log.Info("Performing post-execution action '%s' on host '%s'", script.AfterExecution, host.Address)
-			_, err = host.TriggerAction(otto.MessageTriggerAction{
-				Action: agentAction,
-			}, nil, cancel)
-			if err != nil {
-				log.Error("Error running post-execution from script '%s' on host '%s': %s", script.Name, host.Address, result.ScriptResult.ExecError)
-				return &ScriptResult{
-					ScriptID:    script.ID,
-					Duration:    time.Since(start),
-					Environment: variables,
-					Result: otto.ScriptResult{
-						Success: false,
-					},
-					RunError: err.Message,
-				}, nil
-			}
-		}
-	} else {
-		log.Error("Error running script '%s' on host '%s': %s", script.Name, host.Address, result.ScriptResult.ExecError)
-	}
-
-	return &ScriptResult{
-		ScriptID:    script.ID,
-		Duration:    time.Since(start),
-		Environment: variables,
-		Result:      result.ScriptResult,
-	}, nil
+	return variables
 }
 
-// ExitAgent exit the otto agent on the host
-func (host *Host) ExitAgent() *Error {
-	_, err := host.TriggerAction(otto.MessageTriggerAction{
-		Action: otto.ActionExitAgent,
-	}, nil, nil)
-	if err != nil {
-		log.Error("Error exiting otto agent on host '%s': %s", host.Address, err.Message)
-		return err
-	}
-	return nil
-}
-
-func (host *Host) RotateIdentity() (string, string, *Error) {
+// RotateIdentity will rotate the identity for both the server and client. Returns the server public key, client public
+// key, or an error
+func (host *Host) RotateIdentity() (string, string, error) {
 	serverId, iderr := otto.NewIdentity()
 	if iderr != nil {
 		log.PError("Error generating new identity", map[string]interface{}{
 			"error": iderr.Error(),
 		})
-		return "", "", ErrorFrom(iderr)
+		return "", "", iderr
 	}
 
 	conn, err := host.connect()
 	if err != nil {
 		heartbeatStore.UpdateHostReachability(host, false)
 		log.Error("Error triggering action on host '%s': %s", host.ID, err.Error())
-		return "", "", ErrorFrom(err)
+		return "", "", err
 	}
 	defer conn.Close()
 
@@ -312,21 +409,21 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 			"host":  host.ID,
 			"error": err.Error,
 		})
-		return "", "", ErrorFrom(err)
+		return "", "", err
 	}
 	if reply.Error != "" {
 		log.PError("Error requesting agent update identity", map[string]interface{}{
 			"host":  host.ID,
 			"error": reply.Error,
 		})
-		return "", "", ErrorServer(reply.Error)
+		return "", "", fmt.Errorf(reply.Error)
 	}
 	if reply.PublicKey == "" {
 		log.PError("Error requesting agent update identity", map[string]interface{}{
 			"host":  host.ID,
 			"error": "no public key in response",
 		})
-		return "", "", ErrorServer("no public key in response")
+		return "", "", fmt.Errorf("no public key in response")
 	}
 
 	agentPublicKey := reply.PublicKey
@@ -341,7 +438,7 @@ func (host *Host) RotateIdentity() (string, string, *Error) {
 			"host":  host.ID,
 			"error": err.Message,
 		})
-		return "", "", err
+		return "", "", err.Error
 	}
 
 	log.PInfo("Rotated host identities", map[string]interface{}{

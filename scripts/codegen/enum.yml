@@ -61,6 +61,17 @@
     - key: DistributionVersion
       description: Distribution Version
       value: '"distribution_version"'
+- name: RequestResponseCode
+  type: int
+  values:
+    - key: Output
+      value: "100"
+    - key: Keepalive
+      value: "101"
+    - key: Error
+      value: "400"
+    - key: Finished
+      value: "200"
 - name: EventType
   type: string
   values:

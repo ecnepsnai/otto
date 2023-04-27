@@ -154,10 +154,7 @@ func (h *handle) HostRotateID(request web.Request) (interface{}, *web.APIRespons
 
 	serverKey, hostKey, err := host.RotateIdentity()
 	if err != nil {
-		if err.Server {
-			return nil, nil, web.CommonErrors.ServerError
-		}
-		return nil, nil, web.ValidationError(err.Message)
+		return nil, nil, web.ValidationError(err.Error())
 	}
 
 	EventStore.HostIdentityRotated(host, hostKey, serverKey, session.Username)

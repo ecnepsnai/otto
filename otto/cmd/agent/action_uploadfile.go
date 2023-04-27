@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"strconv"
@@ -10,8 +11,8 @@ import (
 	"github.com/ecnepsnai/secutil"
 )
 
-func createDirectoryForOttoFile(file otto.File) error {
-	dirName := path.Dir(file.Path)
+func createDirectoryForOttoFile(fileInfo otto.FileInfo) error {
+	dirName := path.Dir(fileInfo.Path)
 	info, err := os.Stat(dirName)
 	if err == nil && info.IsDir() {
 		return nil
@@ -27,8 +28,8 @@ func createDirectoryForOttoFile(file otto.File) error {
 		return err
 	}
 
-	if !file.Owner.Inherit && !compareUIDandGID(file.Owner.UID, file.Owner.GID) {
-		if err := os.Chown(dirName, int(file.Owner.UID), int(file.Owner.GID)); err != nil {
+	if !fileInfo.Owner.Inherit && !compareUIDandGID(fileInfo.Owner.UID, fileInfo.Owner.GID) {
+		if err := os.Chown(dirName, int(fileInfo.Owner.UID), int(fileInfo.Owner.GID)); err != nil {
 			log.Error("Error chowning directory: directory='%s' error='%s'", dirName, err.Error())
 			return err
 		}
@@ -38,37 +39,46 @@ func createDirectoryForOttoFile(file otto.File) error {
 	return nil
 }
 
-func uploadFile(file otto.File) error {
+func uploadFile(fileInfo otto.FileInfo, writeFunc func(f io.Writer) error) error {
 	Stats.FilesUploaded++
 
-	if err := createDirectoryForOttoFile(file); err != nil {
+	if err := createDirectoryForOttoFile(fileInfo); err != nil {
 		return err
 	}
 
-	if file.Path == "" {
+	if fileInfo.Path == "" {
 		return fmt.Errorf("invalid file path")
 	}
-	if file.Path[0] != '/' {
+	if fileInfo.Path[0] != '/' {
 		return fmt.Errorf("file path must be absolute")
 	}
 
-	mode, err := intToFileMode(file.Mode)
+	mode, err := intToFileMode(fileInfo.Mode)
 	if err != nil {
 		return fmt.Errorf("invalid file permissions: %s", err.Error())
 	}
 
-	atomicFilePath := file.Path + "_" + secutil.RandomString(3)
-	if err := os.WriteFile(atomicFilePath, file.Data, mode); err != nil {
+	atomicFilePath := fileInfo.Path + "_" + secutil.RandomString(3)
+	f, err := os.OpenFile(atomicFilePath, os.O_CREATE|os.O_RDWR, mode)
+	if err != nil {
 		log.PError("Error writing file", map[string]interface{}{
 			"path":  atomicFilePath,
 			"error": err.Error(),
 		})
 		return err
 	}
+	if err := writeFunc(f); err != nil {
+		log.PError("Error writing file", map[string]interface{}{
+			"path":  atomicFilePath,
+			"error": err.Error(),
+		})
+		return err
+	}
+	f.Close()
 
 	// Only chown if we need to
-	if !file.Owner.Inherit && !compareUIDandGID(file.Owner.UID, file.Owner.GID) {
-		if err := os.Chown(atomicFilePath, int(file.Owner.UID), int(file.Owner.GID)); err != nil {
+	if !fileInfo.Owner.Inherit && !compareUIDandGID(fileInfo.Owner.UID, fileInfo.Owner.GID) {
+		if err := os.Chown(atomicFilePath, int(fileInfo.Owner.UID), int(fileInfo.Owner.GID)); err != nil {
 			log.PError("Error setting file owner", map[string]interface{}{
 				"path":  atomicFilePath,
 				"error": err.Error(),
@@ -77,8 +87,8 @@ func uploadFile(file otto.File) error {
 		}
 		log.PDebug("Set file owner", map[string]interface{}{
 			"path": atomicFilePath,
-			"uid":  file.Owner.UID,
-			"gid":  file.Owner.GID,
+			"uid":  fileInfo.Owner.UID,
+			"gid":  fileInfo.Owner.GID,
 		})
 	}
 	log.PDebug("Created file", map[string]interface{}{
@@ -94,17 +104,17 @@ func uploadFile(file otto.File) error {
 		os.Remove(atomicFilePath)
 		return err
 	}
-	if checksum != file.Checksum {
+	if checksum != fileInfo.Checksum {
 		log.PError("File checksum validation failed!", map[string]interface{}{
 			"path":              atomicFilePath,
-			"expected_checksum": file.Checksum,
+			"expected_checksum": fileInfo.Checksum,
 			"actual_checksum":   checksum,
 		})
 		os.Remove(atomicFilePath)
 		return fmt.Errorf("checksum validation failed")
 	}
 
-	if err := os.Rename(atomicFilePath, file.Path); err != nil {
+	if err := os.Rename(atomicFilePath, fileInfo.Path); err != nil {
 		log.PError("Error renaming atomic file", map[string]interface{}{
 			"error": err.Error(),
 		})

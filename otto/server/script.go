@@ -155,21 +155,8 @@ func (s *Script) Attachments() ([]Attachment, *Error) {
 	return attachments, nil
 }
 
-func (s Script) OttoScript() (*otto.Script, *Error) {
-	fileIDs, err := s.Attachments()
-	if err != nil {
-		return nil, err
-	}
-	files := make([]otto.File, len(s.AttachmentIDs))
-	for i, file := range fileIDs {
-		file, erro := file.OttoFile()
-		if erro != nil {
-			return nil, ErrorFrom(erro)
-		}
-		files[i] = *file
-	}
-
-	return &otto.Script{
+func (s Script) ScriptInfo() otto.ScriptInfo {
+	return otto.ScriptInfo{
 		Name: s.Name,
 		RunAs: otto.RunAs{
 			UID:     s.RunAs.UID,
@@ -177,9 +164,16 @@ func (s Script) OttoScript() (*otto.Script, *Error) {
 			Inherit: s.RunAs.Inherit,
 		},
 		Executable:       s.Executable,
-		Data:             []byte(s.Script),
+		Length:           uint64(len(s.Script)),
 		WorkingDirectory: s.WorkingDirectory,
-		Environment:      map[string]string{},
-		Files:            files,
-	}, nil
+		Environment:      map[string]string{}, // Populated during execution
+	}
+}
+
+func (s Script) WriteTo(conn *otto.Connection) error {
+	if _, err := conn.WriteData([]byte(s.Script)); err != nil {
+		log.Error("Error writing script file '%s': %s", s.ID, err.Error())
+		return err
+	}
+	return nil
 }

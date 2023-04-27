@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/ecnepsnai/secutil"
@@ -93,13 +92,4 @@ func newAPIKey() string {
 		panic(err)
 	}
 	return "otto_" + id
-}
-
-func stripPortFromRemoteAddr(remoteAddr string) string {
-	pattern := regexp.MustCompile(`\:[0-9]+$`)
-	ip := pattern.ReplaceAllString(remoteAddr, "")
-	if ip[0] == '[' && ip[len(ip)-1] == ']' {
-		return ip[1 : len(ip)-1]
-	}
-	return ip
 }

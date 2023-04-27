@@ -16,7 +16,6 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 	type stateType struct {
 		Runtime  runtimeType
 		User     *User
-		Enums    map[string]interface{}
 		Warnings []string
 		Options  *OttoOptions
 	}
@@ -31,7 +30,6 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 			Config:     runtime.GOOS + "_" + runtime.GOARCH,
 		},
 		User:     user,
-		Enums:    AllEnums,
 		Warnings: []string{},
 		Options:  Options,
 	}

@@ -1,20 +1,20 @@
 package server
 
-// This file is was generated automatically by Codegen v1.10.1
+// This file is was generated automatically by Codegen v1.11.0
 // Do not make changes to this file as they will be lost
 
 const (
-	// AgentActionPing Ping the host
+	// Ping the host
 	AgentActionPing = "ping"
-	// AgentActionRunScript Run the script on the host
+	// Run the script on the host
 	AgentActionRunScript = "run_script"
-	// AgentActionReloadConfig Reload the configuration of the agent
+	// Reload the configuration of the agent
 	AgentActionReloadConfig = "reload_config"
-	// AgentActionExitAgent Exit the agent on the host
+	// Exit the agent on the host
 	AgentActionExitAgent = "exit_agent"
-	// AgentActionReboot Reboot the host
+	// Reboot the host
 	AgentActionReboot = "reboot"
-	// AgentActionShutdown Power off the host
+	// Power off the host
 	AgentActionShutdown = "shutdown"
 )
 
@@ -38,126 +38,89 @@ var AgentActionMap = map[string]string{
 	AgentActionShutdown:     "shutdown",
 }
 
-// AgentActionNameMap map AgentAction keys to values
-var AgentActionNameMap = map[string]string{
-	"Ping":         "ping",
-	"RunScript":    "run_script",
-	"ReloadConfig": "reload_config",
-	"ExitAgent":    "exit_agent",
-	"Reboot":       "reboot",
-	"Shutdown":     "shutdown",
-}
-
 // IsAgentAction is the provided value a valid AgentAction
 func IsAgentAction(q string) bool {
 	_, k := AgentActionMap[q]
 	return k
 }
 
-// AgentActionSchema the AgentAction schema.
-var AgentActionSchema = []map[string]interface{}{
-	{
-		"name":        "Ping",
-		"description": "Ping the host",
-		"value":       "ping",
-	},
-	{
-		"name":        "RunScript",
-		"description": "Run the script on the host",
-		"value":       "run_script",
-	},
-	{
-		"name":        "ReloadConfig",
-		"description": "Reload the configuration of the agent",
-		"value":       "reload_config",
-	},
-	{
-		"name":        "ExitAgent",
-		"description": "Exit the agent on the host",
-		"value":       "exit_agent",
-	},
-	{
-		"name":        "Reboot",
-		"description": "Reboot the host",
-		"value":       "reboot",
-	},
-	{
-		"name":        "Shutdown",
-		"description": "Power off the host",
-		"value":       "shutdown",
-	},
+// ForEachAgentAction call m for each AgentAction
+func ForEachAgentAction(m func(value string)) {
+	for _, v := range AllAgentAction {
+		m(v)
+	}
 }
 
 const (
-	// EventTypeUserLoggedIn UserLoggedIn event
+	// UserLoggedIn event
 	EventTypeUserLoggedIn = "UserLoggedIn"
-	// EventTypeUserIncorrectPassword UserIncorrectPassword event
+	// UserIncorrectPassword event
 	EventTypeUserIncorrectPassword = "UserIncorrectPassword"
-	// EventTypeUserLoggedOut UserLoggedOut event
+	// UserLoggedOut event
 	EventTypeUserLoggedOut = "UserLoggedOut"
-	// EventTypeUserAdded UserAdded event
+	// UserAdded event
 	EventTypeUserAdded = "UserAdded"
-	// EventTypeUserModified UserModified event
+	// UserModified event
 	EventTypeUserModified = "UserModified"
-	// EventTypeUserResetPassword UserResetPassword event
+	// UserResetPassword event
 	EventTypeUserResetPassword = "UserResetPassword"
-	// EventTypeUserResetAPIKey UserResetAPIKey event
+	// UserResetAPIKey event
 	EventTypeUserResetAPIKey = "UserResetAPIKey"
-	// EventTypeUserDeleted UserDeleted event
+	// UserDeleted event
 	EventTypeUserDeleted = "UserDeleted"
-	// EventTypeHostAdded HostAdded event
+	// HostAdded event
 	EventTypeHostAdded = "HostAdded"
-	// EventTypeHostModified HostModified event
+	// HostModified event
 	EventTypeHostModified = "HostModified"
-	// EventTypeHostDeleted HostDeleted event
+	// HostDeleted event
 	EventTypeHostDeleted = "HostDeleted"
-	// EventTypeHostRegisterSuccess HostRegisterSuccess event
+	// HostRegisterSuccess event
 	EventTypeHostRegisterSuccess = "HostRegisterSuccess"
-	// EventTypeHostRegisterIncorrectKey HostRegisterIncorrectKey event
+	// HostRegisterIncorrectKey event
 	EventTypeHostRegisterIncorrectKey = "HostRegisterIncorrectKey"
-	// EventTypeHostTrustModified HostTrustModified event
+	// HostTrustModified event
 	EventTypeHostTrustModified = "HostTrustModified"
-	// EventTypeHostIdentityRotated HostIdentityRotated event
+	// HostIdentityRotated event
 	EventTypeHostIdentityRotated = "HostIdentityRotated"
-	// EventTypeHostBecameReachable HostBecameReachable event
+	// HostBecameReachable event
 	EventTypeHostBecameReachable = "HostBecameReachable"
-	// EventTypeHostBecameUnreachable HostBecameUnreachable event
+	// HostBecameUnreachable event
 	EventTypeHostBecameUnreachable = "HostBecameUnreachable"
-	// EventTypeGroupAdded GroupAdded event
+	// GroupAdded event
 	EventTypeGroupAdded = "GroupAdded"
-	// EventTypeGroupModified GroupModified event
+	// GroupModified event
 	EventTypeGroupModified = "GroupModified"
-	// EventTypeGroupDeleted GroupDeleted event
+	// GroupDeleted event
 	EventTypeGroupDeleted = "GroupDeleted"
-	// EventTypeScheduleAdded ScheduleAdded event
+	// ScheduleAdded event
 	EventTypeScheduleAdded = "ScheduleAdded"
-	// EventTypeScheduleModified ScheduleModified event
+	// ScheduleModified event
 	EventTypeScheduleModified = "ScheduleModified"
-	// EventTypeScheduleDeleted ScheduleDeleted event
+	// ScheduleDeleted event
 	EventTypeScheduleDeleted = "ScheduleDeleted"
-	// EventTypeAttachmentAdded AttachmentAdded event
+	// AttachmentAdded event
 	EventTypeAttachmentAdded = "AttachmentAdded"
-	// EventTypeAttachmentModified AttachmentModified event
+	// AttachmentModified event
 	EventTypeAttachmentModified = "AttachmentModified"
-	// EventTypeAttachmentDeleted AttachmentDeleted event
+	// AttachmentDeleted event
 	EventTypeAttachmentDeleted = "AttachmentDeleted"
-	// EventTypeScriptAdded ScriptAdded event
+	// ScriptAdded event
 	EventTypeScriptAdded = "ScriptAdded"
-	// EventTypeScriptModified ScriptModified event
+	// ScriptModified event
 	EventTypeScriptModified = "ScriptModified"
-	// EventTypeScriptDeleted ScriptDeleted event
+	// ScriptDeleted event
 	EventTypeScriptDeleted = "ScriptDeleted"
-	// EventTypeScriptRun ScriptRun event
+	// ScriptRun event
 	EventTypeScriptRun = "ScriptRun"
-	// EventTypeServerStarted ServerStarted event
+	// ServerStarted event
 	EventTypeServerStarted = "ServerStarted"
-	// EventTypeServerOptionsModified ServerOptionsModified event
+	// ServerOptionsModified event
 	EventTypeServerOptionsModified = "ServerOptionsModified"
-	// EventTypeRegisterRuleAdded RegisterRuleAdded event
+	// RegisterRuleAdded event
 	EventTypeRegisterRuleAdded = "RegisterRuleAdded"
-	// EventTypeRegisterRuleModified RegisterRuleModified event
+	// RegisterRuleModified event
 	EventTypeRegisterRuleModified = "RegisterRuleModified"
-	// EventTypeRegisterRuleDeleted RegisterRuleDeleted event
+	// RegisterRuleDeleted event
 	EventTypeRegisterRuleDeleted = "RegisterRuleDeleted"
 )
 
@@ -239,236 +202,25 @@ var EventTypeMap = map[string]string{
 	EventTypeRegisterRuleDeleted:      "RegisterRuleDeleted",
 }
 
-// EventTypeNameMap map EventType keys to values
-var EventTypeNameMap = map[string]string{
-	"UserLoggedIn":             "UserLoggedIn",
-	"UserIncorrectPassword":    "UserIncorrectPassword",
-	"UserLoggedOut":            "UserLoggedOut",
-	"UserAdded":                "UserAdded",
-	"UserModified":             "UserModified",
-	"UserResetPassword":        "UserResetPassword",
-	"UserResetAPIKey":          "UserResetAPIKey",
-	"UserDeleted":              "UserDeleted",
-	"HostAdded":                "HostAdded",
-	"HostModified":             "HostModified",
-	"HostDeleted":              "HostDeleted",
-	"HostRegisterSuccess":      "HostRegisterSuccess",
-	"HostRegisterIncorrectKey": "HostRegisterIncorrectKey",
-	"HostTrustModified":        "HostTrustModified",
-	"HostIdentityRotated":      "HostIdentityRotated",
-	"HostBecameReachable":      "HostBecameReachable",
-	"HostBecameUnreachable":    "HostBecameUnreachable",
-	"GroupAdded":               "GroupAdded",
-	"GroupModified":            "GroupModified",
-	"GroupDeleted":             "GroupDeleted",
-	"ScheduleAdded":            "ScheduleAdded",
-	"ScheduleModified":         "ScheduleModified",
-	"ScheduleDeleted":          "ScheduleDeleted",
-	"AttachmentAdded":          "AttachmentAdded",
-	"AttachmentModified":       "AttachmentModified",
-	"AttachmentDeleted":        "AttachmentDeleted",
-	"ScriptAdded":              "ScriptAdded",
-	"ScriptModified":           "ScriptModified",
-	"ScriptDeleted":            "ScriptDeleted",
-	"ScriptRun":                "ScriptRun",
-	"ServerStarted":            "ServerStarted",
-	"ServerOptionsModified":    "ServerOptionsModified",
-	"RegisterRuleAdded":        "RegisterRuleAdded",
-	"RegisterRuleModified":     "RegisterRuleModified",
-	"RegisterRuleDeleted":      "RegisterRuleDeleted",
-}
-
 // IsEventType is the provided value a valid EventType
 func IsEventType(q string) bool {
 	_, k := EventTypeMap[q]
 	return k
 }
 
-// EventTypeSchema the EventType schema.
-var EventTypeSchema = []map[string]interface{}{
-	{
-		"name":        "UserLoggedIn",
-		"description": "UserLoggedIn event",
-		"value":       "UserLoggedIn",
-	},
-	{
-		"name":        "UserIncorrectPassword",
-		"description": "UserIncorrectPassword event",
-		"value":       "UserIncorrectPassword",
-	},
-	{
-		"name":        "UserLoggedOut",
-		"description": "UserLoggedOut event",
-		"value":       "UserLoggedOut",
-	},
-	{
-		"name":        "UserAdded",
-		"description": "UserAdded event",
-		"value":       "UserAdded",
-	},
-	{
-		"name":        "UserModified",
-		"description": "UserModified event",
-		"value":       "UserModified",
-	},
-	{
-		"name":        "UserResetPassword",
-		"description": "UserResetPassword event",
-		"value":       "UserResetPassword",
-	},
-	{
-		"name":        "UserResetAPIKey",
-		"description": "UserResetAPIKey event",
-		"value":       "UserResetAPIKey",
-	},
-	{
-		"name":        "UserDeleted",
-		"description": "UserDeleted event",
-		"value":       "UserDeleted",
-	},
-	{
-		"name":        "HostAdded",
-		"description": "HostAdded event",
-		"value":       "HostAdded",
-	},
-	{
-		"name":        "HostModified",
-		"description": "HostModified event",
-		"value":       "HostModified",
-	},
-	{
-		"name":        "HostDeleted",
-		"description": "HostDeleted event",
-		"value":       "HostDeleted",
-	},
-	{
-		"name":        "HostRegisterSuccess",
-		"description": "HostRegisterSuccess event",
-		"value":       "HostRegisterSuccess",
-	},
-	{
-		"name":        "HostRegisterIncorrectKey",
-		"description": "HostRegisterIncorrectKey event",
-		"value":       "HostRegisterIncorrectKey",
-	},
-	{
-		"name":        "HostTrustModified",
-		"description": "HostTrustModified event",
-		"value":       "HostTrustModified",
-	},
-	{
-		"name":        "HostIdentityRotated",
-		"description": "HostIdentityRotated event",
-		"value":       "HostIdentityRotated",
-	},
-	{
-		"name":        "HostBecameReachable",
-		"description": "HostBecameReachable event",
-		"value":       "HostBecameReachable",
-	},
-	{
-		"name":        "HostBecameUnreachable",
-		"description": "HostBecameUnreachable event",
-		"value":       "HostBecameUnreachable",
-	},
-	{
-		"name":        "GroupAdded",
-		"description": "GroupAdded event",
-		"value":       "GroupAdded",
-	},
-	{
-		"name":        "GroupModified",
-		"description": "GroupModified event",
-		"value":       "GroupModified",
-	},
-	{
-		"name":        "GroupDeleted",
-		"description": "GroupDeleted event",
-		"value":       "GroupDeleted",
-	},
-	{
-		"name":        "ScheduleAdded",
-		"description": "ScheduleAdded event",
-		"value":       "ScheduleAdded",
-	},
-	{
-		"name":        "ScheduleModified",
-		"description": "ScheduleModified event",
-		"value":       "ScheduleModified",
-	},
-	{
-		"name":        "ScheduleDeleted",
-		"description": "ScheduleDeleted event",
-		"value":       "ScheduleDeleted",
-	},
-	{
-		"name":        "AttachmentAdded",
-		"description": "AttachmentAdded event",
-		"value":       "AttachmentAdded",
-	},
-	{
-		"name":        "AttachmentModified",
-		"description": "AttachmentModified event",
-		"value":       "AttachmentModified",
-	},
-	{
-		"name":        "AttachmentDeleted",
-		"description": "AttachmentDeleted event",
-		"value":       "AttachmentDeleted",
-	},
-	{
-		"name":        "ScriptAdded",
-		"description": "ScriptAdded event",
-		"value":       "ScriptAdded",
-	},
-	{
-		"name":        "ScriptModified",
-		"description": "ScriptModified event",
-		"value":       "ScriptModified",
-	},
-	{
-		"name":        "ScriptDeleted",
-		"description": "ScriptDeleted event",
-		"value":       "ScriptDeleted",
-	},
-	{
-		"name":        "ScriptRun",
-		"description": "ScriptRun event",
-		"value":       "ScriptRun",
-	},
-	{
-		"name":        "ServerStarted",
-		"description": "ServerStarted event",
-		"value":       "ServerStarted",
-	},
-	{
-		"name":        "ServerOptionsModified",
-		"description": "ServerOptionsModified event",
-		"value":       "ServerOptionsModified",
-	},
-	{
-		"name":        "RegisterRuleAdded",
-		"description": "RegisterRuleAdded event",
-		"value":       "RegisterRuleAdded",
-	},
-	{
-		"name":        "RegisterRuleModified",
-		"description": "RegisterRuleModified event",
-		"value":       "RegisterRuleModified",
-	},
-	{
-		"name":        "RegisterRuleDeleted",
-		"description": "RegisterRuleDeleted event",
-		"value":       "RegisterRuleDeleted",
-	},
+// ForEachEventType call m for each EventType
+func ForEachEventType(m func(value string)) {
+	for _, v := range AllEventType {
+		m(v)
+	}
 }
 
 const (
-	// IPVersionOptionAuto IPv4 or IPv6 as chosen by the system automatically
+	// IPv4 or IPv6 as chosen by the system automatically
 	IPVersionOptionAuto = "auto"
-	// IPVersionOptionIPv4 IPv4 only
+	// IPv4 only
 	IPVersionOptionIPv4 = "ipv4"
-	// IPVersionOptionIPv6 IPv6 only
+	// IPv6 only
 	IPVersionOptionIPv6 = "ipv6"
 )
 
@@ -486,48 +238,29 @@ var IPVersionOptionMap = map[string]string{
 	IPVersionOptionIPv6: "ipv6",
 }
 
-// IPVersionOptionNameMap map IPVersionOption keys to values
-var IPVersionOptionNameMap = map[string]string{
-	"Auto": "auto",
-	"IPv4": "ipv4",
-	"IPv6": "ipv6",
-}
-
 // IsIPVersionOption is the provided value a valid IPVersionOption
 func IsIPVersionOption(q string) bool {
 	_, k := IPVersionOptionMap[q]
 	return k
 }
 
-// IPVersionOptionSchema the IPVersionOption schema.
-var IPVersionOptionSchema = []map[string]interface{}{
-	{
-		"name":        "Auto",
-		"description": "IPv4 or IPv6 as chosen by the system automatically",
-		"value":       "auto",
-	},
-	{
-		"name":        "IPv4",
-		"description": "IPv4 only",
-		"value":       "ipv4",
-	},
-	{
-		"name":        "IPv6",
-		"description": "IPv6 only",
-		"value":       "ipv6",
-	},
+// ForEachIPVersionOption call m for each IPVersionOption
+func ForEachIPVersionOption(m func(value string)) {
+	for _, v := range AllIPVersionOption {
+		m(v)
+	}
 }
 
 const (
-	// RegisterRulePropertyHostname Hostname
+	// Hostname
 	RegisterRulePropertyHostname = "hostname"
-	// RegisterRulePropertyKernelName Kernel Name
+	// Kernel Name
 	RegisterRulePropertyKernelName = "kernel_name"
-	// RegisterRulePropertyKernelVersion Kernel Version
+	// Kernel Version
 	RegisterRulePropertyKernelVersion = "kernel_version"
-	// RegisterRulePropertyDistributionName Distribution Name
+	// Distribution Name
 	RegisterRulePropertyDistributionName = "distribution_name"
-	// RegisterRulePropertyDistributionVersion Distribution Version
+	// Distribution Version
 	RegisterRulePropertyDistributionVersion = "distribution_version"
 )
 
@@ -549,56 +282,61 @@ var RegisterRulePropertyMap = map[string]string{
 	RegisterRulePropertyDistributionVersion: "distribution_version",
 }
 
-// RegisterRulePropertyNameMap map RegisterRuleProperty keys to values
-var RegisterRulePropertyNameMap = map[string]string{
-	"Hostname":            "hostname",
-	"KernelName":          "kernel_name",
-	"KernelVersion":       "kernel_version",
-	"DistributionName":    "distribution_name",
-	"DistributionVersion": "distribution_version",
-}
-
 // IsRegisterRuleProperty is the provided value a valid RegisterRuleProperty
 func IsRegisterRuleProperty(q string) bool {
 	_, k := RegisterRulePropertyMap[q]
 	return k
 }
 
-// RegisterRulePropertySchema the RegisterRuleProperty schema.
-var RegisterRulePropertySchema = []map[string]interface{}{
-	{
-		"name":        "Hostname",
-		"description": "Hostname",
-		"value":       "hostname",
-	},
-	{
-		"name":        "KernelName",
-		"description": "Kernel Name",
-		"value":       "kernel_name",
-	},
-	{
-		"name":        "KernelVersion",
-		"description": "Kernel Version",
-		"value":       "kernel_version",
-	},
-	{
-		"name":        "DistributionName",
-		"description": "Distribution Name",
-		"value":       "distribution_name",
-	},
-	{
-		"name":        "DistributionVersion",
-		"description": "Distribution Version",
-		"value":       "distribution_version",
-	},
+// ForEachRegisterRuleProperty call m for each RegisterRuleProperty
+func ForEachRegisterRuleProperty(m func(value string)) {
+	for _, v := range AllRegisterRuleProperty {
+		m(v)
+	}
 }
 
 const (
-	// ScheduleResultSuccess All hosts executed the script successfully
+	RequestResponseCodeOutput    = 100
+	RequestResponseCodeKeepalive = 101
+	RequestResponseCodeError     = 400
+	RequestResponseCodeFinished  = 200
+)
+
+// AllRequestResponseCode all RequestResponseCode values
+var AllRequestResponseCode = []int{
+	RequestResponseCodeOutput,
+	RequestResponseCodeKeepalive,
+	RequestResponseCodeError,
+	RequestResponseCodeFinished,
+}
+
+// RequestResponseCodeMap map RequestResponseCode keys to values
+var RequestResponseCodeMap = map[int]int{
+	RequestResponseCodeOutput:    100,
+	RequestResponseCodeKeepalive: 101,
+	RequestResponseCodeError:     400,
+	RequestResponseCodeFinished:  200,
+}
+
+// IsRequestResponseCode is the provided value a valid RequestResponseCode
+func IsRequestResponseCode(q int) bool {
+	_, k := RequestResponseCodeMap[q]
+	return k
+}
+
+// ForEachRequestResponseCode call m for each RequestResponseCode
+func ForEachRequestResponseCode(m func(value int)) {
+	for _, v := range AllRequestResponseCode {
+		m(v)
+	}
+}
+
+const (
+	// All hosts executed the script successfully
 	ScheduleResultSuccess = 0
-	// ScheduleResultPartialSuccess Some hosts did not execute the script successfully
+	// Some hosts did not execute the script successfully
 	ScheduleResultPartialSuccess = 1
-	// ScheduleResultFail No hosts executed the script successfully
+	// No hosts executed the script successfully
 	ScheduleResultFail = 2
 )
 
@@ -616,43 +354,15 @@ var ScheduleResultMap = map[int]int{
 	ScheduleResultFail:           2,
 }
 
-// ScheduleResultNameMap map ScheduleResult keys to values
-var ScheduleResultNameMap = map[string]int{
-	"Success":        0,
-	"PartialSuccess": 1,
-	"Fail":           2,
-}
-
 // IsScheduleResult is the provided value a valid ScheduleResult
 func IsScheduleResult(q int) bool {
 	_, k := ScheduleResultMap[q]
 	return k
 }
 
-// ScheduleResultSchema the ScheduleResult schema.
-var ScheduleResultSchema = []map[string]interface{}{
-	{
-		"name":        "Success",
-		"description": "All hosts executed the script successfully",
-		"value":       0,
-	},
-	{
-		"name":        "PartialSuccess",
-		"description": "Some hosts did not execute the script successfully",
-		"value":       1,
-	},
-	{
-		"name":        "Fail",
-		"description": "No hosts executed the script successfully",
-		"value":       2,
-	},
-}
-
-// AllEnums map of all enums
-var AllEnums = map[string]interface{}{
-	"AgentAction":          AgentActionSchema,
-	"EventType":            EventTypeSchema,
-	"IPVersionOption":      IPVersionOptionSchema,
-	"RegisterRuleProperty": RegisterRulePropertySchema,
-	"ScheduleResult":       ScheduleResultSchema,
+// ForEachScheduleResult call m for each ScheduleResult
+func ForEachScheduleResult(m func(value int)) {
+	for _, v := range AllScheduleResult {
+		m(v)
+	}
 }

@@ -96,7 +96,7 @@ func (h *Host) RotateIdentityIfNeeded() *Error {
 			"host_name": h.Name,
 			"error":     err.Error,
 		})
-		return err
+		return ErrorFrom(err)
 	}
 
 	EventStore.HostIdentityRotated(h, hostID, serverID, systemUsername)

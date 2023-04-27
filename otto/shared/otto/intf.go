@@ -77,21 +77,25 @@ func (conn *Connection) RotateIdentity(request MessageRotateIdentityRequest) (*M
 	return &response, nil
 }
 
-// TriggerAction will trigger an action on the host. Returns a result or an error.
-// actionOutput is called whenever there is output on the action and may be called multiple times.
-// Send a message to cancel to abort the action.
-func (conn *Connection) TriggerAction(action MessageTriggerAction, actionOutput func(stdout, stderr []byte), cancel chan bool) (*MessageActionResult, error) {
-	if err := conn.WriteMessage(MessageTypeTriggerAction, action); err != nil {
+func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader io.ReadCloser, actionOutput func(stdout, stderr []byte), cancel chan bool) (*MessageActionResult, error) {
+	if err := conn.WriteMessage(MessageTypeTriggerActionRunScript, script); err != nil {
 		log.PError("Error writing message", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return nil, err
 	}
+	if _, err := io.Copy(conn.w, scriptReader); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	scriptReader.Close()
 
 	go func() {
 		for {
 			<-cancel
-			conn.WriteMessage(MessageTypeCancelAction, MessageCancelAction{})
+			conn.WriteMessage(MessageTypeCancelAction, nil)
 		}
 	}()
 
@@ -124,3 +128,63 @@ func (conn *Connection) TriggerAction(action MessageTriggerAction, actionOutput 
 		}
 	}
 }
+
+func (conn *Connection) TriggerActionReloadConfig() error {
+	if err := conn.WriteMessage(MessageTypeTriggerActionReloadConfig, nil); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	return nil
+}
+
+func (conn *Connection) TriggerActionUploadFile(file FileInfo, fileReader io.Reader) error {
+	if err := conn.WriteMessage(MessageTypeTriggerActionUploadFile, file); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	if _, err := io.Copy(conn.w, fileReader); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	return nil
+}
+
+func (conn *Connection) TriggerActionExitAgent() error {
+	if err := conn.WriteMessage(MessageTypeTriggerActionExitAgent, nil); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	return nil
+}
+
+func (conn *Connection) TriggerActionReboot() error {
+	if err := conn.WriteMessage(MessageTypeTriggerActionReboot, nil); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	return nil
+}
+
+func (conn *Connection) TriggerActionShutdown() error {
+	if err := conn.WriteMessage(MessageTypeTriggerActionShutdown, nil); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	return nil
+}
+
+func (conn *Connection) ActionOutput() {}
+
+func (conn *Connection) ActionResult() {}

@@ -128,7 +128,7 @@ func (s Schedule) RunNow() {
 				"schedule_id": s.ID,
 				"script_id":   s.ScriptID,
 				"host_id":     host.ID,
-				"error":       err.Message,
+				"error":       err.Error(),
 			})
 			report.HostResult[host.ID] = 1
 			continue

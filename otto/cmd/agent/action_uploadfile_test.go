@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"path"
 	"testing"
 
@@ -16,17 +17,21 @@ func TestUploadFile(t *testing.T) {
 	data := secutil.RandomBytes(32)
 	checksum := fmt.Sprintf("%x", sha256.Sum256(data))
 
-	file := otto.File{
+	file := otto.FileInfo{
 		Path: filePath,
 		Owner: otto.RunAs{
 			Inherit: true,
 		},
 		Mode:     644,
-		Data:     data,
+		Length:   uint64(len(data)),
 		Checksum: checksum,
 	}
 
-	if err := uploadFile(file); err != nil {
+	err := uploadFile(file, func(f io.Writer) error {
+		_, e := f.Write(data)
+		return e
+	})
+	if err != nil {
 		t.Fatalf("Error uploading otto file: %s", err.Error())
 	}
 
@@ -43,17 +48,21 @@ func TestUploadFile(t *testing.T) {
 	data = secutil.RandomBytes(32)
 	checksum = fmt.Sprintf("%x", sha256.Sum256(data))
 
-	file = otto.File{
+	file = otto.FileInfo{
 		Path: filePath,
 		Owner: otto.RunAs{
 			Inherit: true,
 		},
 		Mode:     644,
-		Data:     data,
+		Length:   uint64(len(data)),
 		Checksum: checksum,
 	}
 
-	if err := uploadFile(file); err != nil {
+	err = uploadFile(file, func(f io.Writer) error {
+		_, e := f.Write(data)
+		return e
+	})
+	if err != nil {
 		t.Fatalf("Error uploading otto file: %s", err.Error())
 	}
 
@@ -72,31 +81,39 @@ func TestUploadFileBadChecksum(t *testing.T) {
 	data := secutil.RandomBytes(32)
 	checksum := secutil.RandomString(32)
 
-	file := otto.File{
+	file := otto.FileInfo{
 		Path: filePath,
 		Owner: otto.RunAs{
 			Inherit: true,
 		},
 		Mode:     644,
-		Data:     data,
+		Length:   uint64(len(data)),
 		Checksum: checksum,
 	}
 
-	if err := uploadFile(file); err == nil {
+	err := uploadFile(file, func(f io.Writer) error {
+		_, e := f.Write(data)
+		return e
+	})
+	if err == nil {
 		t.Fatalf("No error seen when one expected for uploading file with bad checksum")
 	}
 
-	file = otto.File{
+	file = otto.FileInfo{
 		Path: filePath,
 		Owner: otto.RunAs{
 			Inherit: true,
 		},
 		Mode:     644,
-		Data:     data,
+		Length:   uint64(len(data)),
 		Checksum: "",
 	}
 
-	if err := uploadFile(file); err == nil {
+	err = uploadFile(file, func(f io.Writer) error {
+		_, e := f.Write(data)
+		return e
+	})
+	if err == nil {
 		t.Fatalf("No error seen when one expected for uploading file with no checksum")
 	}
 }

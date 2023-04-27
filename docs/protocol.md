@@ -1,63 +1,48 @@
 # Otto Protocol
 
-The Otto server communicates with agents using the Otto protocol. The protocol is a message based system where a
-'frame' encapsulates each 'message'. The Otto protocol uses SSH as the transport layer, providing strong and reliable
-encryption.
+The Otto protocol is the shared protocol used for communication between the Otto hosts and the Otto server. The Otto
+protocol uses SSH as the transport layer, providing strong and reliable encryption.
 
-# Protocol Components
-
-## Frame
-
-The goal of the frame is to transport the message contents.
-
-### Structure
-
-Each frame includes a version number, length of the data, and the message.
+## Message structure
 
 ```
 |---------------------------------------------|
 | Protocol Version                            |
 | (4 bytes - network byte order)              |
 |---------------------------------------------|
-| Data Length                                 |
+| Message Type                                |
+| (4 bytes - network byte order)              |
+|---------------------------------------------|
+| Message Length                              |
 | (4 bytes - network byte order)              |
 |---------------------------------------------|
 | Message Data                                |
-| (binary)                                    |
+| (binary, optional)                          |
 |                                             |
-|  |---------------------------------------|  |
-|  | Message Type                          |  |
-|  | ( 4 bytes - network byte order)       |  |
-|  |---------------------------------------|  |
-|  | Message Data                          |  |
-|  | (binary)                              |  |
-|  |                                       |  |
-|  |                                       |  |
-|  |                                       |  |
-|  |---------------------------------------|  |
+|                                             |
+|                                             |
+|---------------------------------------------|
+| Additional Data                             |
+| (undetermined, optional)                    |
+|                                             |
+|                                             |
 |                                             |
 |---------------------------------------------|
 ```
 
-## Message
+A message is a self-contained set of information sent by either the Otto host or Otto server. Each message must always
+contain a protocol version, message type, and message length.
 
-The message contains instructions or results. Messages are defined by a message type, and each type has a corresponding
-direction, indicating who is the sender and the recipient.
+The message type field is used to indicate what action to take with the given message. It must be a
+[valid enum value](https://pkg.go.dev/github.com/ecnepsnai/otto#MessageType).
 
-### Structure
+Messages can have two forms of data associated with them: a well-defined data structure and additional undefined data.
 
-Otto messages includes the message type, and binary data that corresponds with the data structure associated with the
-message type.
+The message length field of an Otto message describes the length of a defined message structure. Within that structure
+may be a length property to describe how much additional data is included.
 
-|Message Type|Direction|Description|
-|-|-|-|
-|`HEARTBEAT_REQUEST`|Server to Agent|A heartbeat request|
-|`HEARTBEAT_RESPONSE`|Agent to Server|A heartbeat response, includes the agent version|
-|`TRIGGER_ACTION`|Server to Agent|A request to trigger a specific action on the agent|
-|`CANCEL_ACTION`|Server to Agent|Cancel any in-progress action|
-|`ACTION_OUTPUT`|Agent to Server|A portion of, or the entire output (both stdout and stderr) from the action|
-|`ACTION_RESULT`|Agent to Server|The result of the action|
-|`GENERAL_FAILURE`|Agent to Server|A message to indicate a general error|
+For example, when uploading a file to an Otto host, metadata about the file is contained within the message data, but
+the actual file contents is included as additonal data following the metadata.
 
 # Encryption
 
@@ -73,23 +58,3 @@ verify the public key matches the one it was configured to trust, and if it matc
 
 **Note:** While the SSH protocol is used, the Otto agent does not actually use OpenSSH or any SSH identites or
 configuration files on the system.
-
-# Process
-
-Except in host registration (which does not use the Otto protocol), Otto Servers always connect to Otto agents, however
-the Otto protocol is not request then reply, such as HTTP.
-
-When a message is received the recipient must first determine wether or not it can understand the message by checking
-the protocol version. Otto agents will refuse messages using different protocol versions.
-
-If the protocol version matches, the agent will then collect the length of the encrypted data, then read all of that
-data into memory. The otto protocol requires fully-formed messages and does not currently support streaming.
-
-With the message in hand, the agent can determine what data type the message data is by using the message type
-value. The binary data of the message is a [gob](https://golang.org/pkg/encoding/gob/) encoded byte-slice.
-
-The connection is then used for further messages from either the Otto agent to server. For example, the server may tell
-the agent to cancel a running script after it has started.
-
-Some actions will happen after the agent has closed the connection, for example agents may exit after closing the
-connection when requested by the server.

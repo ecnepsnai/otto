@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"io"
-	"os"
-	"os/exec"
 	"os/user"
 	"strconv"
 	"sync"
@@ -63,14 +61,21 @@ func handle(conn *otto.Connection) {
 		log.Debug("Message from %s: %d", conn.RemoteAddr().String(), messageType)
 
 		switch messageType {
+		case otto.MessageTypeKeepalive:
+			// Noop
 		case otto.MessageTypeHeartbeatRequest:
 			handleHeartbeatRequest(conn, message.(otto.MessageHeartbeatRequest))
-		case otto.MessageTypeTriggerAction:
-			go handleTriggerAction(conn, message.(otto.MessageTriggerAction), cancel)
-		case otto.MessageTypeCancelAction:
-			cancel <- true
 		case otto.MessageTypeRotateIdentityRequest:
 			handleRotateIdentity(conn, message.(otto.MessageRotateIdentityRequest))
+		case otto.MessageTypeTriggerActionRunScript,
+			otto.MessageTypeTriggerActionReloadConfig,
+			otto.MessageTypeTriggerActionUploadFile,
+			otto.MessageTypeTriggerActionExitAgent,
+			otto.MessageTypeTriggerActionReboot,
+			otto.MessageTypeTriggerActionShutdown:
+			handleTriggerAction(conn, messageType, message, cancel)
+		case otto.MessageTypeCancelAction:
+			cancel <- true
 		default:
 			log.Warn("Unexpected message with type %d from %s", messageType, conn.RemoteAddr().String())
 		}
@@ -101,60 +106,6 @@ func handleHeartbeatRequest(conn *otto.Connection, message otto.MessageHeartbeat
 
 	if err := conn.WriteMessage(otto.MessageTypeHeartbeatResponse, response); err != nil {
 		log.Error("Error writing heartbeat response to '%s': %s", conn.RemoteAddr().String(), err.Error())
-	}
-}
-
-func handleTriggerAction(conn *otto.Connection, message otto.MessageTriggerAction, cancel chan bool) {
-	reply := otto.MessageActionResult{
-		AgentVersion: Version,
-	}
-	switch message.Action {
-	case otto.ActionReloadConfig, otto.ActionExitAgent, otto.ActionReboot, otto.ActionShutdown:
-		// No action
-		break
-	case otto.ActionRunScript:
-		reply.ScriptResult = runScript(conn, message.Script, cancel)
-	case otto.ActionUploadFile, otto.ActionUploadFileAndExitAgent:
-		if err := uploadFile(message.File); err != nil {
-			reply.Error = err.Error()
-		}
-	default:
-		log.Error("Unknown action %d", message.Action)
-		return
-	}
-
-	log.Debug("Trigger complete, writing reply")
-	if err := conn.WriteMessage(otto.MessageTypeActionResult, reply); err != nil {
-		log.Error("Error writing reply to '%s': %s", conn.RemoteAddr().String(), err.Error())
-		return
-	}
-
-	if message.Action == otto.ActionReloadConfig {
-		if err := loadConfig(); err != nil {
-			reply.Error = err.Error()
-		}
-
-		restartServer = true
-		mustLoadIdentity()
-		conn.Close()
-		defer listener.Close()
-		return
-	}
-
-	if message.Action == otto.ActionUploadFileAndExitAgent || message.Action == otto.ActionExitAgent {
-		conn.Close()
-		log.Warn("Exiting at request of '%s'", conn.RemoteAddr().String())
-		os.Exit(1)
-	}
-
-	if message.Action == otto.ActionReboot {
-		conn.Close()
-		log.Warn("Rebooting at request of '%s'", conn.RemoteAddr().String())
-		exec.Command("/usr/sbin/reboot").Run()
-	} else if message.Action == otto.ActionShutdown {
-		conn.Close()
-		log.Warn("Shutting down at request of '%s'", conn.RemoteAddr().String())
-		exec.Command("/usr/sbin/halt").Run()
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
-	fuzz "github.com/google/gofuzz"
+	googlefuzz "github.com/google/gofuzz"
 )
 
 func MockOttoConnection(buf *bytes.Buffer) *otto.Connection {
@@ -93,7 +93,7 @@ func TestUnsupportedProtocolVersion(t *testing.T) {
 func TestMalformedMessageType(t *testing.T) {
 	t.Parallel()
 
-	f := fuzz.New()
+	f := googlefuzz.New()
 
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
@@ -102,7 +102,7 @@ func TestMalformedMessageType(t *testing.T) {
 	f.Fuzz(&messageType)
 
 	heartbeatRequest := otto.MessageHeartbeatRequest{Version: "foo"}
-	if err := conn.WriteMessage(messageType, heartbeatRequest); err != nil {
+	if err := conn.WriteMessage(otto.MessageType(messageType), heartbeatRequest); err != nil {
 		t.Fatalf("Error writing message: %s", err.Error())
 	}
 
@@ -116,7 +116,7 @@ func TestMalformedMessageType(t *testing.T) {
 func TestMalformedMessageData(t *testing.T) {
 	t.Parallel()
 
-	f := fuzz.New()
+	f := googlefuzz.New()
 
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
@@ -237,6 +237,24 @@ func TestIncorrectDataLength(t *testing.T) {
 	}
 }
 
+// Test that otto behaves in an expected mannor when the reported message type and message data don't match
+func TestMismatchedMessageDataAndType(t *testing.T) {
+	t.Parallel()
+
+	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
+	message := otto.MessageTriggerActionRunScript{}
+	if err := conn.WriteMessage(otto.MessageTypeHeartbeatRequest, message); err != nil {
+		t.Fatalf("Error writing message: %s", err.Error())
+	}
+
+	_, _, err := conn.ReadMessage()
+	if err == nil {
+		t.Fatalf("No error seen when one expected for mismatched message type and data")
+	}
+}
+
 func TestConnection(t *testing.T) {
 	listenerIdentity, err := otto.NewIdentity()
 	if err != nil {
@@ -289,4 +307,19 @@ func TestConnection(t *testing.T) {
 		t.Errorf("Unexpected message type")
 	}
 	c.Close()
+}
+
+func FuzzConnection_ReadMessage(f *testing.F) {
+	f.Add(secutil.RandomBytes(6))
+	f.Fuzz(func(t *testing.T, a []byte) {
+		buf := bytes.NewBuffer(a)
+		conn := MockOttoConnection(buf)
+		_, message, err := conn.ReadMessage()
+		if err == nil {
+			t.Fatalf("No error seen with fuzzed message.")
+		}
+		if message != nil {
+			t.Fatalf("Message returned with fuzzed data")
+		}
+	})
 }

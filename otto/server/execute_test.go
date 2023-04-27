@@ -88,7 +88,7 @@ func TestExecutePing(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Fatalf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Error())
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -108,8 +108,19 @@ func TestExecuteAction(t *testing.T) {
 	version := randomString(4)
 	agentId, _ := otto.NewIdentity()
 
+	scriptName := randomString(4)
+	script, err := ScriptStore.NewScript(newScriptParameters{
+		Name:       scriptName,
+		Executable: "/bin/sh",
+		Script:     "echo 'hello world'",
+	})
+	if err != nil {
+		t.Fatalf("Error making script: %s", err.Message)
+	}
+
 	group, err := GroupStore.NewGroup(newGroupParameters{
-		Name: randomString(6),
+		Name:      randomString(6),
+		ScriptIDs: []string{script.ID},
 	})
 	if err != nil {
 		t.Fatalf("Error making group: %s", err.Message)
@@ -125,8 +136,6 @@ func TestExecuteAction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error making host: %s", err.Message)
 	}
-
-	actionType := otto.ActionRunScript
 
 	_, allowFrom, _ := net.ParseCIDR("0.0.0.0/0")
 	l, listenErr := otto.SetupListener(&otto.ListenOptions{
@@ -146,20 +155,20 @@ func TestExecuteAction(t *testing.T) {
 	}, func(conn *otto.Connection) {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
-			panic("Error reading message: " + err.Error())
+			t.Fatalf("Error reading message: " + err.Error())
 		}
-		if messageType != otto.MessageTypeTriggerAction {
-			panic("Incorrect message type")
+		if messageType != otto.MessageTypeTriggerActionRunScript {
+			t.Fatalf("Incorrect message type")
 		}
-		action, ok := message.(otto.MessageTriggerAction)
+		scriptInfo, ok := message.(otto.MessageTriggerActionRunScript)
 		if !ok {
-			panic("Incorrect message type")
+			t.Fatalf("Incorrect message type")
 		}
-		if action.Action != actionType {
-			panic("Incorrect action type")
+		if scriptInfo.Name != scriptName {
+			t.Fatalf("Bad script name")
 		}
-		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{AgentVersion: version}); err != nil {
-			panic("Error writing message: " + err.Error())
+		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ScriptResult: otto.ScriptResult{Success: true}, AgentVersion: version}); err != nil {
+			t.Fatalf("Error writing message: " + err.Error())
 		}
 		conn.Close()
 	})
@@ -178,13 +187,13 @@ func TestExecuteAction(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	result, err := host.TriggerAction(otto.MessageTriggerAction{Action: actionType}, nil, nil)
-	if err != nil {
-		t.Fatalf("Error triggering action: %s", err.Message)
+	result, serr := host.RunScript(script, nil, nil)
+	if serr != nil {
+		t.Fatalf("Error triggering action: %s", serr.Error())
 	}
 
-	if result.AgentVersion != version {
-		t.Errorf("Unexpected version for host. Expected '%s' got '%s'", version, result.AgentVersion)
+	if !result.Result.Success {
+		t.Errorf("Unexpected result status")
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -393,7 +402,7 @@ func TestExecuteReconnect(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Fatalf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Error())
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -408,7 +417,7 @@ func TestExecuteReconnect(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Fatalf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Error())
 	}
 
 	hb = heartbeatStore.LastHeartbeat(host)
@@ -491,7 +500,7 @@ func TestExecuteUpdateIdentity(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	if err := host.Ping(); err != nil {
-		t.Fatalf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Error())
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
@@ -511,7 +520,7 @@ func TestExecuteUpdateIdentity(t *testing.T) {
 	IdentityStore.Set(host.ID, newId)
 
 	if err := host.Ping(); err != nil {
-		t.Fatalf("Error pinging host: %s", err.Message)
+		t.Fatalf("Error pinging host: %s", err.Error())
 	}
 
 	hb = heartbeatStore.LastHeartbeat(host)

@@ -22,37 +22,42 @@ import (
 var log = logtic.Log.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
-const ProtocolVersion = uint32(3)
+const ProtocolVersion = uint32(4)
 
 func init() {
+	gob.Register(ScriptInfo{})
+	gob.Register(ScriptResult{})
+	gob.Register(FileInfo{})
+	gob.Register(MessageGeneralFailure{})
 	gob.Register(MessageHeartbeatRequest{})
 	gob.Register(MessageHeartbeatResponse{})
-	gob.Register(MessageTriggerAction{})
-	gob.Register(MessageCancelAction{})
-	gob.Register(MessageActionOutput{})
-	gob.Register(MessageActionResult{})
 	gob.Register(MessageRotateIdentityRequest{})
 	gob.Register(MessageRotateIdentityResponse{})
-	gob.Register(MessageGeneralFailure{})
-
-	gob.Register(Script{})
-	gob.Register(ScriptResult{})
-	gob.Register(File{})
+	gob.Register(MessageTriggerActionRunScript{})
+	gob.Register(MessageTriggerActionUploadFile{})
+	gob.Register(MessageActionOutput{})
+	gob.Register(MessageActionResult{})
 }
 
-// Message types
+type MessageType uint32
+
+// Otto message types
 const (
-	MessageTypeKeepalive uint32 = iota + 1
+	MessageTypeGeneralFailure = MessageType(0)
+	MessageTypeKeepalive      = MessageType(iota)
 	MessageTypeHeartbeatRequest
 	MessageTypeHeartbeatResponse
-	MessageTypeTriggerAction
+	MessageTypeRotateIdentityRequest
+	MessageTypeRotateIdentityResponse
+	MessageTypeTriggerActionRunScript
+	MessageTypeTriggerActionReloadConfig
+	MessageTypeTriggerActionUploadFile
+	MessageTypeTriggerActionExitAgent
+	MessageTypeTriggerActionReboot
+	MessageTypeTriggerActionShutdown
 	MessageTypeCancelAction
 	MessageTypeActionOutput
 	MessageTypeActionResult
-	MessageTypeRotateIdentityRequest
-	MessageTypeRotateIdentityResponse
-
-	MessageTypeGeneralFailure = uint32(0xFFFFFFFF)
 )
 
 // MessageHeartbeatRequest describes a heartbeat request
@@ -68,15 +73,15 @@ type MessageHeartbeatResponse struct {
 	Nonce        string            `json:"nonce"`
 }
 
-// MessageTriggerAction describes an action trigger
-type MessageTriggerAction struct {
-	Action uint32 `json:"action"`
-	Script Script `json:"script"`
-	File   File   `json:"file"`
+// MessageTriggerActionRunScript
+type MessageTriggerActionRunScript struct {
+	ScriptInfo
 }
 
-// MessageCancelAction describes a request to cancel an action
-type MessageCancelAction struct{}
+// MessageTriggerActionUploadFile
+type MessageTriggerActionUploadFile struct {
+	FileInfo
+}
 
 // MessageActionOutput describes output from an action
 type MessageActionOutput struct {
@@ -88,7 +93,6 @@ type MessageActionOutput struct {
 type MessageActionResult struct {
 	ScriptResult ScriptResult `json:"script_result"`
 	Error        string       `json:"error"`
-	File         File         `json:"file"`
 	AgentVersion string       `json:"agent_version"`
 }
 
@@ -108,26 +112,14 @@ type MessageGeneralFailure struct {
 	Error string `json:"error"`
 }
 
-// Actions
-const (
-	ActionRunScript uint32 = iota + 1
-	ActionReloadConfig
-	ActionUploadFile
-	ActionUploadFileAndExitAgent
-	ActionExitAgent
-	ActionReboot
-	ActionShutdown
-)
-
-// Script describes a script
-type Script struct {
+// ScriptInfo describes information about a script
+type ScriptInfo struct {
 	Name             string            `json:"name"`
 	RunAs            RunAs             `json:"run_as"`
 	Environment      map[string]string `json:"environment"`
 	WorkingDirectory string            `json:"working_directory"`
 	Executable       string            `json:"executable"`
-	Files            []File            `json:"files"`
-	Data             []byte            `json:"data"`
+	Length           uint64            `json:"length"`
 }
 
 // RunAs describes the user to run a script as
@@ -158,14 +150,14 @@ func (sr ScriptResult) String() string {
 	})
 }
 
-// File Describes a file
-type File struct {
+// FileInfo describes information about file
+type FileInfo struct {
 	Path        string `json:"path"`
 	Owner       RunAs  `json:"owner"`
 	Mode        uint32 `json:"mode"`
-	Data        []byte `json:"data"`
 	Checksum    string `json:"checksum"`
 	AfterScript bool   `json:"after_script"`
+	Length      uint64 `json:"length"`
 }
 
 // RegisterRequest describes a register request
@@ -191,16 +183,19 @@ type RegisterResponse struct {
 	Nonce          string `json:"nonce"`
 }
 
-func readFrame(r io.Reader) ([]byte, error) {
+// ReadMessage try to read a message from the given reader. Returns the message type, the message data, or an error.
+// Depending on the message type, there may be additional data to read following the message. It is up to the caller to
+// continue reading any additional data.
+func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 	versionBuf := make([]byte, 4)
-	if _, err := io.ReadFull(r, versionBuf); err != nil {
+	if _, err := io.ReadFull(c.w, versionBuf); err != nil {
 		if err == io.EOF {
 			// Agent closed - nothing to read
-			return nil, nil
+			return 0, nil, err
 		}
 
 		log.Error("Error reading version: %s", err.Error())
-		return nil, err
+		return 0, nil, err
 	}
 	version := binary.BigEndian.Uint32(versionBuf)
 	if version > ProtocolVersion {
@@ -208,221 +203,172 @@ func readFrame(r io.Reader) ([]byte, error) {
 			"frame_version":     version,
 			"supported_version": ProtocolVersion,
 		})
-		return nil, fmt.Errorf("unsupported protocol version %d", version)
+		return 0, nil, fmt.Errorf("unsupported protocol version %d", version)
 	}
 	if version < ProtocolVersion {
 		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
 	}
+	messageTypeBuf := make([]byte, 4)
+	if _, err := io.ReadFull(c.w, messageTypeBuf); err != nil {
+		if err == io.EOF {
+			// Agent closed - nothing to read
+			return 0, nil, err
+		}
 
+		log.Error("Error reading message type: %s", err.Error())
+		return 0, nil, err
+	}
+	messageType := MessageType(binary.BigEndian.Uint32(messageTypeBuf))
 	dataLengthBuf := make([]byte, 4)
-	if _, err := io.ReadFull(r, dataLengthBuf); err != nil {
+	if _, err := io.ReadFull(c.w, dataLengthBuf); err != nil {
+		if err == io.EOF {
+			// Agent closed - nothing to read
+			return 0, nil, err
+		}
+
 		log.Error("Error reading data length: %s", err.Error())
-		return nil, err
+		return 0, nil, err
 	}
 	dataLength := binary.BigEndian.Uint32(dataLengthBuf)
-	log.PDebug("Read frame", map[string]interface{}{
-		"version":     version,
-		"data_length": dataLength,
-	})
 	if dataLength == 0 {
-		return []byte{}, nil
+		return messageType, nil, nil
 	}
 
-	data := make([]byte, dataLength)
-	readLength, err := io.ReadFull(r, data)
-	if err != nil {
-		if err == io.ErrUnexpectedEOF {
-			log.PError("Incorrect data length", map[string]interface{}{
-				"reported": dataLength,
-				"actual":   readLength,
-			})
-			return nil, fmt.Errorf("bad request length")
+	log.PDebug("Read message", map[string]interface{}{
+		"version":      version,
+		"message_type": messageType,
+		"data_length":  dataLength,
+	})
+
+	decoder := gob.NewDecoder(c.w)
+
+	switch messageType {
+	case MessageTypeGeneralFailure:
+		message := MessageGeneralFailure{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeGeneralFailure: %s", err.Error())
+			return 0, nil, err
 		}
-		log.Error("Error reading data: %s", err.Error())
-		return nil, err
+		return messageType, message, nil
+	case MessageTypeHeartbeatRequest:
+		message := MessageHeartbeatRequest{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeHeartbeatRequest: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeHeartbeatResponse:
+		message := MessageHeartbeatResponse{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeHeartbeatResponse: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeRotateIdentityRequest:
+		message := MessageRotateIdentityRequest{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeRotateIdentityRequest: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeRotateIdentityResponse:
+		message := MessageRotateIdentityResponse{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeRotateIdentityResponse: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeTriggerActionRunScript:
+		message := MessageTriggerActionRunScript{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeTriggerActionRunScript: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeTriggerActionUploadFile:
+		message := MessageTriggerActionUploadFile{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeTriggerActionUploadFile: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeActionOutput:
+		message := MessageActionOutput{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeActionOutput: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
+	case MessageTypeActionResult:
+		message := MessageActionResult{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageTypeActionResult: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
 	}
-
-	return data, nil
+	log.Error("Unknown message type '%d'", messageType)
+	return messageType, nil, fmt.Errorf("unknown message type %d", messageType)
 }
 
-// ReadMessage try to read a message from the given reader. Returns the message type, the message data, or an error
-func (c *Connection) ReadMessage() (uint32, interface{}, error) {
-	data, err := readFrame(c.w)
-	if err != nil {
-		log.Error("Error reading data: %s", err.Error())
-		return 0, nil, err
-	}
-	if data == nil {
-		return 0, nil, nil
-	}
-
-	messageType := binary.BigEndian.Uint32(data[:4])
-	log.PDebug("Read message", map[string]interface{}{
-		"message_type": messageType,
-		"data_length":  len(data) - 4,
-	})
-	message, err := DecodeMessage(messageType, data[4:])
-	if err != nil {
-		log.Error("Error decoding message data: %s", err.Error())
-		return 0, nil, err
-	}
-
-	return messageType, message, nil
+// ReadData will read len(p) bytes from the connection.
+func (c *Connection) ReadData(p []byte) (int, error) {
+	return c.w.Read(p)
 }
 
 // WriteMessage try to write a message to the given writer.
-func (c *Connection) WriteMessage(messageType uint32, message interface{}) error {
-	messageData, err := EncodeMessage(messageType, message)
-	if err != nil {
-		log.Error("Error encoding message: %s", err.Error())
-		return err
+func (c *Connection) WriteMessage(messageType MessageType, message interface{}) error {
+	messageData := []byte{}
+	messageLength := uint32(0)
+	if message != nil {
+		data, err := encodeMessageData(message)
+		if err != nil {
+			log.Error("Error encoding message: %s", err.Error())
+			return err
+		}
+		messageData = data
+		messageLength = uint32(len(data))
 	}
-
+	versionBuf := make([]byte, 4)
+	binary.BigEndian.PutUint32(versionBuf, ProtocolVersion)
 	messageTypeBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(messageTypeBuf, messageType)
-
-	messageDataLength := len(messageTypeBuf)
-	dataLength := messageDataLength + len(messageData)
-	data := make([]byte, dataLength)
-	i := 0
-	for _, b := range messageTypeBuf {
-		data[i] = b
-		i++
-	}
-	for _, b := range messageData {
-		data[i] = b
-		i++
-	}
+	binary.BigEndian.PutUint32(messageTypeBuf, uint32(messageType))
+	messageLengthBuf := make([]byte, 4)
+	binary.BigEndian.PutUint32(messageLengthBuf, messageLength)
 
 	log.PDebug("Preparing message", map[string]interface{}{
 		"message_type":        messageType,
-		"message_data_length": messageDataLength,
-		"total_length":        dataLength,
+		"message_data_length": messageLength,
 	})
-	return writeFrame(data, c.w)
-}
 
-func writeFrame(data []byte, w io.Writer) error {
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, ProtocolVersion)
-
-	dataLength := len(data)
-	lenBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(lenBuf, uint32(dataLength))
-
-	replyLength := len(versionBuf) + len(lenBuf) + dataLength
-	replyBuf := make([]byte, replyLength)
-	i := 0
-	for _, b := range versionBuf {
-		replyBuf[i] = b
-		i++
-	}
-	for _, b := range lenBuf {
-		replyBuf[i] = b
-		i++
-	}
-	for _, b := range data {
-		replyBuf[i] = b
-		i++
-	}
-
-	wrote, err := w.Write(replyBuf)
-	log.PDebug("Wrote frame", map[string]interface{}{
-		"data_length": dataLength,
-		"version":     ProtocolVersion,
-		"total":       wrote,
-	})
-	if wrote != replyLength {
-		log.Error("Unable to write all of reply: wrote=%d total=%d", wrote, replyLength)
-		return fmt.Errorf("out of space")
-	}
-	if err != nil {
-		log.Error("Error writing data: %s", err.Error())
+	if _, err := c.w.Write(versionBuf); err != nil {
+		log.Error("Error writing version: %s", err.Error())
 		return err
+	}
+	if _, err := c.w.Write(messageTypeBuf); err != nil {
+		log.Error("Error writing message type: %s", err.Error())
+		return err
+	}
+	if _, err := c.w.Write(messageLengthBuf); err != nil {
+		log.Error("Error writing message length: %s", err.Error())
+		return err
+	}
+	if messageLength > 0 {
+		if _, err := c.w.Write(messageData); err != nil {
+			log.Error("Error writing message data: %s", err.Error())
+			return err
+		}
 	}
 	return nil
 }
 
-// DecodeMessage try to decode the given message. The returned object should match the message struct for the message
-// type.
-func DecodeMessage(messageType uint32, data []byte) (interface{}, error) {
-	switch messageType {
-	case MessageTypeKeepalive:
-		return nil, nil
-	case MessageTypeHeartbeatRequest:
-		message := MessageHeartbeatRequest{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageHeartbeatRequest: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeHeartbeatResponse:
-		message := MessageHeartbeatResponse{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageHeartbeatResponse: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeTriggerAction:
-		message := MessageTriggerAction{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageTriggerAction: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeCancelAction:
-		message := MessageCancelAction{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageCancelAction: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeActionOutput:
-		message := MessageActionOutput{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageActionOutput: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeActionResult:
-		message := MessageActionResult{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageActionResult: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeRotateIdentityRequest:
-		message := MessageRotateIdentityRequest{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageRotateIdentityRequest: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeRotateIdentityResponse:
-		message := MessageRotateIdentityResponse{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageRotateIdentityResponse: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	case MessageTypeGeneralFailure:
-		message := MessageGeneralFailure{}
-		if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&message); err != nil {
-			log.Error("Error decoding MessageGeneralFailure: %s", err.Error())
-			return nil, err
-		}
-		return message, nil
-	}
-
-	return nil, fmt.Errorf("unknown message type %d", messageType)
+// WriteData will write raw data to the connection. This data must only be written after a message that is appropriate
+// for raw data.
+func (c *Connection) WriteData(p []byte) (int, error) {
+	return c.w.Write(p)
 }
 
-// EncodeMessage try to encode the given message
-func EncodeMessage(messageType uint32, message interface{}) ([]byte, error) {
-	if message == nil {
-		return []byte{}, nil
-	}
-
+func encodeMessageData(message interface{}) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
 	if err := gob.NewEncoder(buf).Encode(message); err != nil {
