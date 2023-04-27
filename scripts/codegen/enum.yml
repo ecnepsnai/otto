@@ -1,5 +1,6 @@
 - name: IPVersionOption
   type: string
+  include_typescript: true
   values:
     - key: Auto
       description: IPv4 or IPv6 as chosen by the system automatically
@@ -12,6 +13,7 @@
       value: '"ipv6"'
 - name: AgentAction
   type: string
+  include_typescript: true
   values:
     - key: Ping # special: does not map to otto agent action
       description: Ping the host
@@ -33,6 +35,7 @@
       value: '"shutdown"'
 - name: ScheduleResult
   type: int
+  include_typescript: true
   values:
     - key: Success
       description: All hosts executed the script successfully
@@ -45,6 +48,7 @@
       value: "2"
 - name: RegisterRuleProperty
   type: string
+  include_typescript: true
   values:
     - key: Hostname
       description: Hostname
@@ -63,6 +67,7 @@
       value: '"distribution_version"'
 - name: RequestResponseCode
   type: int
+  include_typescript: true
   values:
     - key: Output
       value: "100"

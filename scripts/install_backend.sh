@@ -17,8 +17,7 @@ echo -en "Building backend... "
 cd ${SCRIPTS_PATH}/codegen/
 cbgen -n server
 mv *.go ${OTTO_PATH}/server
-cd ${OTTO_PATH}/cmd/agent
-cbgen -n main
+mv *.ts ${OTTO_PATH}/frontend/src/types
 cd ${OTTO_PATH}/
 go build -v ./... >> ${LOG} 2>&1
 go test -v ./... >> ${LOG} 2>&1
