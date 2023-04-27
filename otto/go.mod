@@ -23,7 +23,7 @@ require (
 require (
 	github.com/ecnepsnai/ring v1.0.5 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/lithammer/fuzzysearch v1.1.2 // indirect
+	github.com/lithammer/fuzzysearch v1.1.5 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
