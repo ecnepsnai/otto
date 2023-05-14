@@ -2,7 +2,6 @@ import { API } from '../services/API';
 
 export interface UserType {
     Username?: string;
-    Email?: string;
     Password?: string;
     CanLogIn?: boolean;
     MustChangePassword?: boolean;

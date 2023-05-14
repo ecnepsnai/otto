@@ -35,33 +35,6 @@ func (s *userStoreObject) userWithUsername(tx ds.IReadTransaction, username stri
 	return &user
 }
 
-func (s *userStoreObject) UserWithEmail(email string) (user *User) {
-	s.Table.StartRead(func(tx ds.IReadTransaction) error {
-		user = s.userWithEmail(tx, email)
-		return nil
-	})
-	return
-}
-
-func (s *userStoreObject) userWithEmail(tx ds.IReadTransaction, email string) *User {
-	object, err := tx.GetUnique("Email", email)
-	if err != nil {
-		log.PError("Error getting user by email", map[string]interface{}{
-			"email": email,
-			"error": err.Error(),
-		})
-		return nil
-	}
-	if object == nil {
-		return nil
-	}
-	user, ok := object.(User)
-	if !ok {
-		log.Panic("Invalid object type in user store")
-	}
-	return &user
-}
-
 func (s *userStoreObject) AllUsers() (users []User) {
 	s.Table.StartRead(func(tx ds.IReadTransaction) error {
 		users = s.allUsers(tx)
@@ -93,7 +66,6 @@ func (s *userStoreObject) allUsers(tx ds.IReadTransaction) []User {
 
 type newUserParameters struct {
 	Username           string `max:"32" min:"1"`
-	Email              string `max:"128" min:"1"`
 	Password           string
 	MustChangePassword bool
 }
@@ -111,10 +83,6 @@ func (s *userStoreObject) newUser(tx ds.IReadWriteTransaction, params newUserPar
 		log.Warn("User with username '%s' already exists", params.Username)
 		return nil, ErrorUser("User with username '%s' already exists", params.Username)
 	}
-	if s.userWithEmail(tx, params.Email) != nil {
-		log.Warn("User with email '%s' already exists", params.Email)
-		return nil, ErrorUser("User with email '%s' already exists", params.Email)
-	}
 
 	hashedPassword, err := secutil.HashPassword([]byte(params.Password))
 	if err != nil {
@@ -124,7 +92,6 @@ func (s *userStoreObject) newUser(tx ds.IReadWriteTransaction, params newUserPar
 
 	user := User{
 		Username:           params.Username,
-		Email:              params.Email,
 		CanLogIn:           true,
 		MustChangePassword: params.MustChangePassword,
 	}
@@ -134,18 +101,17 @@ func (s *userStoreObject) newUser(tx ds.IReadWriteTransaction, params newUserPar
 	}
 
 	if err := tx.Add(user); err != nil {
-		log.Error("Error adding new user '%s': %s", params.Email, err.Error())
+		log.Error("Error adding new user '%s': %s", params.Username, err.Error())
 		return nil, ErrorFrom(err)
 	}
 	ShadowStore.Set(user.Username, *hashedPassword)
 
 	UserCache.Update(tx)
-	log.Info("New user added: username='%s' email='%s'", params.Username, params.Email)
+	log.Info("New user added: username='%s'", params.Username)
 	return &user, nil
 }
 
 type editUserParameters struct {
-	Email              string `max:"128" min:"1"`
 	Password           string
 	CanLogIn           bool
 	MustChangePassword bool
@@ -160,12 +126,6 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (newUs
 }
 
 func (s *userStoreObject) editUser(tx ds.IReadWriteTransaction, user *User, params editUserParameters) (*User, *Error) {
-	if existingUser := s.userWithEmail(tx, params.Email); existingUser != nil && existingUser.Username != user.Username {
-		log.Warn("User with email '%s' already exists", params.Email)
-		return nil, ErrorUser("User with email '%s' already exists", params.Email)
-	}
-
-	user.Email = params.Email
 	user.CanLogIn = params.CanLogIn
 	user.MustChangePassword = params.MustChangePassword
 	if params.Password != "" {
@@ -179,7 +139,7 @@ func (s *userStoreObject) editUser(tx ds.IReadWriteTransaction, user *User, para
 	}
 
 	if err := tx.Update(*user); err != nil {
-		log.Error("Error updating user '%s': %s", params.Email, err.Error())
+		log.Error("Error updating user '%s': %s", user.Username, err.Error())
 		return nil, ErrorFrom(err)
 	}
 
@@ -257,13 +217,13 @@ func (s *userStoreObject) DeleteUser(user *User) (err *Error) {
 
 func (s *userStoreObject) deleteUser(tx ds.IReadWriteTransaction, user *User) *Error {
 	if err := tx.Delete(*user); err != nil {
-		log.Error("Error deleting user '%s': %s", user.Email, err.Error())
+		log.Error("Error deleting user '%s': %s", user.Username, err.Error())
 		return ErrorFrom(err)
 	}
 	ShadowStore.Delete(user.Username)
 
 	UserCache.Update(tx)
-	log.Warn("User deleted: username='%s' email='%s'", user.Username, user.Email)
+	log.Warn("User deleted: username='%s'", user.Username)
 	return nil
 }
 

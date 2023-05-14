@@ -41,7 +41,6 @@ export const SystemUsers: React.FC = () => {
     const newUser = (user: UserType) => {
         User.New({
             Username: user.Username,
-            Email: user.Email,
             Password: user.Password,
             MustChangePassword: user.MustChangePassword,
         }).then(() => {
@@ -95,11 +94,6 @@ export const SystemUsers: React.FC = () => {
             sort: 'Username'
         },
         {
-            title: 'Email',
-            value: 'Email',
-            sort: 'Email'
-        },
-        {
             title: 'Can Login',
             value: (v: UserType) => {
                 return (<EnabledBadge value={v.CanLogIn} />);
@@ -149,13 +143,6 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
     const changeUsername = (Username: string) => {
         setUser(user => {
             user.Username = Username;
-            return { ...user };
-        });
-    };
-
-    const changeEmail = (Email: string) => {
-        setUser(user => {
-            user.Email = Email;
             return { ...user };
         });
     };
@@ -254,12 +241,6 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
                 defaultValue={user.Username}
                 onChange={changeUsername}
                 disabled={props.user != undefined}
-                required />
-            <Input.Text
-                type="email"
-                label="Email"
-                defaultValue={user.Email}
-                onChange={changeEmail}
                 required />
             {passwordField()}
             {resetAPIKey()}

@@ -2,7 +2,6 @@ package server
 
 var defaultUser = newUserParameters{
 	Username:           "admin",
-	Email:              "admin@localhost",
 	Password:           "admin",
 	MustChangePassword: true,
 }
