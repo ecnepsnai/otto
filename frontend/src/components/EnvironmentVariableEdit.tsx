@@ -180,10 +180,10 @@ const EnvironmentVariableEditModal: React.FC<EnvironmentVariableEditModalProps> 
                 onChange={changeValue}
                 fixedWidth />
             <Input.Checkbox
-                label="Secret"
+                label="Hidden"
                 defaultValue={secret}
                 onChange={changeSecret}
-                helpText="If checked then the value of this variable is obscured" />
+                helpText="If checked then the value of this variable is hidden in the web interface." />
         </ModalForm>
     );
 };

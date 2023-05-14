@@ -30,8 +30,9 @@ Lastly, there are a number of implicit variables that are automatically included
 |`OTTO_HOST_ADDRESS`|The configured address of the host this script is executing on.|
 |`OTTO_HOST_PORT`|The configured port of the host this script is executing on.|
 
-When creating an environment variable you can mark the variable as "secret". This will hide the value of the variable in
-the web interface.
+When creating an environment variable you can mark the variable as "hidden". This will hide the value of the variable in
+the web interface. Take note, however, that hidden environment variables are not obfuscated from script output. Take
+care not to print any hidden environment variables to stdout ot stderr.
 
 ## Attachments
 
