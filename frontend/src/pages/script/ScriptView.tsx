@@ -21,6 +21,7 @@ import { Formatter } from '../../services/Formatter';
 import { Nothing } from '../../components/Nothing';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 interface DedupedScriptEnabledHost {
     GroupName: string;
@@ -158,7 +159,7 @@ export const ScriptView: React.FC = () => {
                             <Link to={'/groups/group/' + scriptHost.GroupID} className="ms-1">{scriptHost.GroupName}</Link>
                         </div>
                         <div>
-                            <SmallPlayButton onClick={runScriptGroupClick(scriptHost.GroupID)} />
+                            { Permissions.UserCanRunScript(script.RunLevel) ? (<SmallPlayButton onClick={runScriptGroupClick(scriptHost.GroupID)} />) : null }
                         </div>
                     </div>
                     {
@@ -170,7 +171,7 @@ export const ScriptView: React.FC = () => {
                                     <Link to={'/hosts/host/' + host.HostID} className="ms-1">{host.HostName}</Link>
                                 </div>
                                 <div>
-                                    <SmallPlayButton onClick={runScriptHostClick(host.HostID)} />
+                                    { Permissions.UserCanRunScript(script.RunLevel) ? (<SmallPlayButton onClick={runScriptHostClick(host.HostID)} />) : null }
                                 </div>
                             </div>);
                         })
@@ -186,9 +187,9 @@ export const ScriptView: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <EditButton to={'/scripts/script/' + script.ID + '/edit'} />
-            <DeleteButton onClick={deleteClick} />
-            <Button color={Style.Palette.Success} outline onClick={executeClick}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
+            <EditButton to={'/scripts/script/' + script.ID + '/edit'} disabled={!Permissions.UserCan(UserAction.ModifyScripts)} />
+            <DeleteButton onClick={deleteClick} disabled={!Permissions.UserCan(UserAction.ModifyScripts)} />
+            <Button color={Style.Palette.Success} outline onClick={executeClick} disabled={!Permissions.UserCanRunScript(script.RunLevel)}><Icon.Label icon={<Icon.PlayCircle />} label="Run Script" /></Button>
         </React.Fragment>
     );
 

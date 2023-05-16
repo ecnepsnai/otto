@@ -68,6 +68,8 @@ const (
 	EventTypeUserResetAPIKey = "UserResetAPIKey"
 	// UserDeleted event
 	EventTypeUserDeleted = "UserDeleted"
+	// UserPermissionDenied event
+	EventTypeUserPermissionDenied = "UserPermissionDenied"
 	// HostAdded event
 	EventTypeHostAdded = "HostAdded"
 	// HostModified event
@@ -134,6 +136,7 @@ var AllEventType = []string{
 	EventTypeUserResetPassword,
 	EventTypeUserResetAPIKey,
 	EventTypeUserDeleted,
+	EventTypeUserPermissionDenied,
 	EventTypeHostAdded,
 	EventTypeHostModified,
 	EventTypeHostDeleted,
@@ -173,6 +176,7 @@ var EventTypeMap = map[string]string{
 	EventTypeUserResetPassword:        "UserResetPassword",
 	EventTypeUserResetAPIKey:          "UserResetAPIKey",
 	EventTypeUserDeleted:              "UserDeleted",
+	EventTypeUserPermissionDenied:     "UserPermissionDenied",
 	EventTypeHostAdded:                "HostAdded",
 	EventTypeHostModified:             "HostModified",
 	EventTypeHostDeleted:              "HostDeleted",
@@ -363,6 +367,43 @@ func IsScheduleResult(q int) bool {
 // ForEachScheduleResult call m for each ScheduleResult
 func ForEachScheduleResult(m func(value int)) {
 	for _, v := range AllScheduleResult {
+		m(v)
+	}
+}
+
+// Permission level for users to run scripts
+const (
+	// No scripts can be executed
+	ScriptRunLevelNone = 0
+	// Only scripts mark as read only can be executed
+	ScriptRunLevelReadOnly = 1
+	// All scripts can be executed
+	ScriptRunLevelReadWrite = 2
+)
+
+// AllScriptRunLevel all ScriptRunLevel values
+var AllScriptRunLevel = []int{
+	ScriptRunLevelNone,
+	ScriptRunLevelReadOnly,
+	ScriptRunLevelReadWrite,
+}
+
+// ScriptRunLevelMap map ScriptRunLevel keys to values
+var ScriptRunLevelMap = map[int]int{
+	ScriptRunLevelNone:      0,
+	ScriptRunLevelReadOnly:  1,
+	ScriptRunLevelReadWrite: 2,
+}
+
+// IsScriptRunLevel is the provided value a valid ScriptRunLevel
+func IsScriptRunLevel(q int) bool {
+	_, k := ScriptRunLevelMap[q]
+	return k
+}
+
+// ForEachScriptRunLevel call m for each ScriptRunLevel
+func ForEachScriptRunLevel(m func(value int)) {
+	for _, v := range AllScriptRunLevel {
 		m(v)
 	}
 }

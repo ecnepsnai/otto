@@ -80,7 +80,7 @@ func (s *scheduleStoreObject) allSchedulesForGroup(tx ds.IReadTransaction, group
 	matchedSchedules := []Schedule{}
 	schedules := s.allSchedules(tx)
 	for _, schedule := range schedules {
-		if stringSliceContains(groupID, schedule.Scope.GroupIDs) {
+		if sliceContains(groupID, schedule.Scope.GroupIDs) {
 			matchedSchedules = append(matchedSchedules, schedule)
 		}
 	}
@@ -110,7 +110,7 @@ func (s *scheduleStoreObject) allSchedulesForHost(tx ds.IReadTransaction, hostID
 				}
 			}
 		} else if len(schedule.Scope.HostIDs) > 0 {
-			if stringSliceContains(hostID, schedule.Scope.HostIDs) {
+			if sliceContains(hostID, schedule.Scope.HostIDs) {
 				matchedSchedules = append(matchedSchedules, schedule)
 			}
 		}

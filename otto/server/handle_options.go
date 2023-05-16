@@ -7,11 +7,23 @@ import (
 )
 
 func (h *handle) OptionsGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifySystem {
+		EventStore.UserPermissionDenied(session.User().Username, "Access system settings")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	return Options, nil, nil
 }
 
 func (h *handle) OptionsSet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifySystem {
+		EventStore.UserPermissionDenied(session.User().Username, "Modify system settings")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	options := OttoOptions{}
 

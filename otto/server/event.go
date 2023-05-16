@@ -79,7 +79,6 @@ func (s *eventStoreObject) UserLoggedOut(username string) {
 func (s *eventStoreObject) UserAdded(newUser *User, currentUser string) {
 	event := newEvent(EventTypeUserAdded, map[string]string{
 		"username": newUser.Username,
-		"email":    newUser.Email,
 		"added_by": currentUser,
 	})
 
@@ -107,6 +106,15 @@ func (s *eventStoreObject) UserResetAPIKey(modifiedUsername string, currentUser 
 	event := newEvent(EventTypeUserResetAPIKey, map[string]string{
 		"username": modifiedUsername,
 		"reset_by": currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) UserPermissionDenied(modifiedUsername string, attemptedAction string) {
+	event := newEvent(EventTypeUserPermissionDenied, map[string]string{
+		"username":         modifiedUsername,
+		"attempted_action": attemptedAction,
 	})
 
 	event.Save()

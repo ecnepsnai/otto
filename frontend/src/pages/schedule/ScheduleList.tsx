@@ -12,6 +12,7 @@ import { DateLabel } from '../../components/DateLabel';
 import { Icon } from '../../components/Icon';
 import { DefaultSort } from '../../services/Sort';
 import { SchedulePattern } from './SchedulePattern';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const ScheduleList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
@@ -50,7 +51,7 @@ export const ScheduleList: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <CreateButton to="/schedules/schedule/" />
+            <CreateButton to="/schedules/schedule/" disabled={!Permissions.UserCan(UserAction.ModifySchedules)} />
         </React.Fragment>
     );
 
@@ -132,12 +133,14 @@ const ScheduleTableContextMenu = (schedule: ScheduleType, onReload: () => void):
             title: 'Edit',
             icon: (<Icon.Edit />),
             href: '/schedules/schedule/' + schedule.ID + '/edit',
+            disabled: !Permissions.UserCan(UserAction.ModifySchedules),
         },
         'separator',
         {
             title: 'Delete',
             icon: (<Icon.Delete />),
             onClick: deleteMenuClick,
+            disabled: !Permissions.UserCan(UserAction.ModifySchedules),
         },
     ];
 };

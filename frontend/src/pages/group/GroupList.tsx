@@ -9,6 +9,7 @@ import { ContextMenuItem } from '../../components/ContextMenu';
 import { Icon } from '../../components/Icon';
 import { Formatter } from '../../services/Formatter';
 import { DefaultSort } from '../../services/Sort';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const GroupList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
@@ -43,7 +44,7 @@ export const GroupList: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <CreateButton to="/groups/group/" />
+            <CreateButton to="/groups/group/" disabled={!Permissions.UserCan(UserAction.ModifyGroups)} />
         </React.Fragment>
     );
 
@@ -96,12 +97,14 @@ const GroupTableContextMenu = (group: GroupType, onReload: () => (void)): (Conte
             title: 'Edit',
             icon: (<Icon.Edit />),
             href: '/groups/group/' + group.ID + '/edit',
+            disabled: !Permissions.UserCan(UserAction.ModifyGroups),
         },
         'separator',
         {
             title: 'Delete',
             icon: (<Icon.Delete />),
             onClick: deleteMenuClick,
+            disabled: !Permissions.UserCan(UserAction.ModifyGroups),
         },
     ];
 };

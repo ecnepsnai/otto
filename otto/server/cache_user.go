@@ -11,7 +11,6 @@ type cacheTypeUser struct {
 	all        []User
 	enabled    []User
 	byUsername map[string]User
-	byEmail    map[string]User
 }
 
 // UserCache the user cache
@@ -25,7 +24,6 @@ func (c *cacheTypeUser) Update(tx ds.IReadTransaction) {
 	c.all = []User{}
 	c.enabled = []User{}
 	c.byUsername = map[string]User{}
-	c.byEmail = map[string]User{}
 	users := UserStore.allUsers(tx)
 
 	c.all = users
@@ -34,7 +32,6 @@ func (c *cacheTypeUser) Update(tx ds.IReadTransaction) {
 			c.enabled = append(c.enabled, user)
 		}
 		c.byUsername[user.Username] = user
-		c.byEmail[user.Email] = user
 	}
 
 	log.Debug("Updated user cache")
@@ -69,14 +66,5 @@ func (c *cacheTypeUser) ByUsername(username string) (User, bool) {
 	defer c.lock.RUnlock()
 
 	a, k := c.byUsername[username]
-	return a, k
-}
-
-// ByEmail get an user by its email
-func (c *cacheTypeUser) ByEmail(username string) (User, bool) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-
-	a, k := c.byEmail[username]
 	return a, k
 }

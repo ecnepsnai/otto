@@ -15,8 +15,8 @@ func generateSessionSecret() string {
 	return secutil.RandomString(64)
 }
 
-// stringSliceContains does this slice of strings contain n?
-func stringSliceContains(n string, h []string) bool {
+// sliceContains does slice h contain n?
+func sliceContains[T string](n T, h []T) bool {
 	for _, s := range h {
 		if s == n {
 			return true
@@ -25,8 +25,8 @@ func stringSliceContains(n string, h []string) bool {
 	return false
 }
 
-// stringSliceContainsFold does this slice of strings contain n? (cast insensitive)
-func stringSliceContainsFold(n string, h []string) bool {
+// sliceContainsFold does this slice of strings contain n? (cast insensitive)
+func sliceContainsFold(n string, h []string) bool {
 	for _, s := range h {
 		if strings.EqualFold(s, n) {
 			return true
@@ -35,9 +35,9 @@ func stringSliceContainsFold(n string, h []string) bool {
 	return false
 }
 
-// filterStringSlice remove any occurrence of `r` from `s`, returning a new slice
-func filterStringSlice(r string, s []string) []string {
-	sl := []string{}
+// filterSlice remove any occurrence of `r` from `s`, returning a new slice
+func filterSlice[T string](r T, s []T) []T {
+	sl := []T{}
 	for _, i := range s {
 		if i == r {
 			continue
@@ -45,13 +45,6 @@ func filterStringSlice(r string, s []string) []string {
 		sl = append(sl, i)
 	}
 	return sl
-}
-
-func sliceFirst(s []string) string {
-	if len(s) == 0 {
-		return ""
-	}
-	return s[0]
 }
 
 func getFileSHA256Checksum(filePath string) (string, error) {
@@ -86,6 +79,7 @@ func newPlainID() string {
 	return id
 }
 
+// newAPIKey returns a 64-character string suitable for an otto API key. Keys are always prefixed with `otto_`.
 func newAPIKey() string {
 	id, err := nanoid.Generate("BCDFGHJKLMNPQRSTVWXYZbcdfghjklmnpqrstvwxyz1234567890", 59)
 	if err != nil {

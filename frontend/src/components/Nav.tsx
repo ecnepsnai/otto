@@ -7,6 +7,7 @@ import { StateManager } from '../services/StateManager';
 import { Style } from './Style';
 import { UserManager } from '../pages/system/users/SystemUsers';
 import { SystemSearch } from './SystemSearch';
+import { Permissions, UserAction } from '../services/Permissions';
 import '../../css/nav.scss';
 
 export const Nav: React.FC = () => {
@@ -26,7 +27,7 @@ export const Nav: React.FC = () => {
                             <NavItem link="/groups" icon={<Icon.LayerGroup />} label="Groups" />
                             <NavItem link="/scripts" icon={<Icon.Scroll />} label="Scripts" />
                             <NavItem link="/schedules" icon={<Icon.Calendar />} label="Schedules" />
-                            <NavItem link="/events" icon={<Icon.List />} label="Event Log" />
+                            { Permissions.UserCan(UserAction.AccessAuditLog) ? <NavItem link="/events" icon={<Icon.List />} label="Event Log" /> : null }
                         </ul>
                         <div className="d-flex">
                             <SystemSearch />
@@ -70,6 +71,30 @@ export const NavItem: React.FC<NavItemProps> = (props: NavItemProps) => {
 };
 
 export const SystemMenu: React.FC = () => {
+    const optionsMenu = () => {
+        if (!Permissions.UserCan(UserAction.ModifySystem)) {
+            return (<span className="dropdown-item disabled"><Icon.Label icon={<Icon.Wrench />} label="Options" /></span>);
+        }
+
+        return (<Link to="/system/options" className="dropdown-item"><Icon.Label icon={<Icon.Wrench />} label="Options" /></Link>);
+    };
+
+    const usersMenu = () => {
+        if (!Permissions.UserCan(UserAction.ModifyUsers)) {
+            return (<span className="dropdown-item disabled"><Icon.Label icon={<Icon.User />} label="Users" /></span>);
+        }
+
+        return (<Link to="/system/users" className="dropdown-item"><Icon.Label icon={<Icon.User />} label="Users" /></Link>);
+    };
+
+    const registerMenu = () => {
+        if (!Permissions.UserCan(UserAction.ModifyAutoregister)) {
+            return (<span className="dropdown-item disabled"><Icon.Label icon={<Icon.Magic />} label="Host Registration" /></span>);
+        }
+
+        return (<Link to="/system/register" className="dropdown-item"><Icon.Label icon={<Icon.Magic />} label="Host Registration" /></Link>);
+    };
+
     return (
         <ul className="navbar-nav navbar-links">
             <li className="nav-item dropdown">
@@ -77,9 +102,9 @@ export const SystemMenu: React.FC = () => {
                     <Icon.Label icon={<Icon.Cog />} label="System" />
                 </a>
                 <div className="dropdown-menu dropdown-menu-end" aria-labelledby="navSystemDropdown">
-                    <Link to="/system/options" className="dropdown-item"><Icon.Label icon={<Icon.Wrench />} label="Options" /></Link>
-                    <Link to="/system/users" className="dropdown-item"><Icon.Label icon={<Icon.User />} label="Users" /></Link>
-                    <Link to="/system/register" className="dropdown-item"><Icon.Label icon={<Icon.Magic />} label="Host Registration" /></Link>
+                    { optionsMenu() }
+                    { usersMenu() }
+                    { registerMenu() }
                     <div className="dropdown-divider"></div>
                     <h6 className="dropdown-header">Otto {StateManager.Current().Runtime.Version}</h6>
                     <a className="dropdown-item" href={'https://github.com/ecnepsnai/otto/tree/' + StateManager.Current().Runtime.Version + '/docs'} target="_blank" rel="noreferrer">

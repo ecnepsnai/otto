@@ -12,6 +12,7 @@ import { Formatter } from '../../services/Formatter';
 import { Rand } from '../../services/Rand';
 import { DefaultSort } from '../../services/Sort';
 import { RunModal } from '../run/RunModal';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const ScriptList: React.FC = () => {
     const [loading, setLoading] = React.useState<boolean>(true);
@@ -34,7 +35,7 @@ export const ScriptList: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <CreateButton to="/scripts/script/" />
+            <CreateButton to="/scripts/script/" disabled={!Permissions.UserCan(UserAction.ModifyScripts)} />
         </React.Fragment>
     );
 
@@ -87,17 +88,20 @@ const ScriptTableContextMenu = (script: ScriptType, onReload: () => void): (Cont
             title: 'Run Script',
             icon: (<Icon.PlayCircle />),
             onClick: executeScriptMenuClick,
+            disabled: !Permissions.UserCanRunScript(script.RunLevel),
         },
         {
             title: 'Edit',
             icon: (<Icon.Edit />),
             href: '/scripts/script/' + script.ID + '/edit',
+            disabled: !Permissions.UserCan(UserAction.ModifyScripts),
         },
         'separator',
         {
             title: 'Delete',
             icon: (<Icon.Delete />),
             onClick: deleteMenuClick,
+            disabled: !Permissions.UserCan(UserAction.ModifyScripts),
         },
     ];
 };

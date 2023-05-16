@@ -72,6 +72,31 @@ create the default account of `admin` with the password `admin`.
 You can add users in the Options tab of the web interface. There needs to be at least one user for Otto to function,
 but you can delete the `admin` user if you create a new user.
 
+### Permissions
+
+Users can have granular permissions to perform actions or access data in the Otto server. The permissions are:
+
+- User can modify any of each: hosts, groups, scripts, or schedules.
+- User can access the system audit log.
+- User can add, remove, or modify other users.
+- User can modify auto registration settings.
+- User can access or modify Otto system settings.
+
+In addition, users can have a permissable script run level associated with them, which can be: None (No scripts can be
+executed), Read-Only, Read-Write.
+
+#### Notes about Permissions
+
+If an environment variable is marked as hidden and the user does not have permission to modify it, the value of that
+variabe is omitted by the Otto server. Take care not to log out environment variable values from scripts, as this
+could expose hidden variable values.
+
+If a user does not have permission to modify scripts, then the user cannot add, modify, delete, or download any script
+attachments.
+
+A user who can permission to modify users can change their own permissions. Take care when assigning this permission to
+users.
+
 ### Resetting a forgotten password
 
 **Reset the Password for Somebody Else**

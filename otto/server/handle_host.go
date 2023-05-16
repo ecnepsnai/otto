@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -8,20 +9,43 @@ import (
 )
 
 func (h *handle) HostList(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+
 	hosts := HostStore.AllHosts()
 	sort.Slice(hosts, func(i int, j int) bool {
 		return hosts[i].Name < hosts[j].Name
 	})
+
+	// Hide secret environment variables if the user cannot modify them
+	if !session.User().Permissions.CanModifyHosts {
+		for i, host := range hosts {
+			for y, env := range host.Environment {
+				if env.Secret {
+					hosts[i].Environment[y].Value = ""
+				}
+			}
+		}
+	}
 
 	return hosts, nil, nil
 }
 
 func (h *handle) HostGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	id := request.Parameters["id"]
+	session := request.UserData.(*Session)
 
 	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, nil, web.ValidationError("No host with ID %s", id)
+	}
+
+	// Hide secret environment variables if the user cannot modify them
+	if !session.User().Permissions.CanModifyHosts {
+		for i, env := range host.Environment {
+			if env.Secret {
+				host.Environment[i].Value = ""
+			}
+		}
 	}
 
 	return host, nil, nil
@@ -96,6 +120,11 @@ func (h *handle) HostUpdateTrust(request web.Request) (interface{}, *web.APIResp
 	id := request.Parameters["id"]
 	session := request.UserData.(*Session)
 
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify trust for host %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, nil, web.ValidationError("No host with ID %s", id)
@@ -147,6 +176,11 @@ func (h *handle) HostRotateID(request web.Request) (interface{}, *web.APIRespons
 	id := request.Parameters["id"]
 	session := request.UserData.(*Session)
 
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify trust for host %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	host := HostCache.ByID(id)
 	if host == nil {
 		return nil, nil, web.ValidationError("No host with ID %s", id)
@@ -172,7 +206,7 @@ func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.APIRespo
 
 	scripts := host.Scripts()
 	sort.Slice(scripts, func(i int, j int) bool {
-		return scripts[i].ScriptName < scripts[j].ScriptName
+		return scripts[i].Script.Name < scripts[j].Script.Name
 	})
 
 	return scripts, nil, nil
@@ -180,6 +214,11 @@ func (h *handle) HostGetScripts(request web.Request) (interface{}, *web.APIRespo
 
 func (h *handle) HostNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, "Create new host")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	params := newHostParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
@@ -201,8 +240,12 @@ func (h *handle) HostNew(request web.Request) (interface{}, *web.APIResponse, *w
 
 func (h *handle) HostEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify host %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	host := HostCache.ByID(id)
 	if host == nil {
@@ -229,8 +272,12 @@ func (h *handle) HostEdit(request web.Request) (interface{}, *web.APIResponse, *
 
 func (h *handle) HostDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Delete host %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	host := HostCache.ByID(id)
 	if host == nil {

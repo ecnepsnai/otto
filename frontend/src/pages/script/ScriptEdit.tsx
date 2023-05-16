@@ -12,6 +12,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Variable } from '../../types/Variable';
 import { AttachmentList } from './attachment/AttachmentList';
+import { ScriptRunLevel } from '../../types/cbgen_enum';
 
 export const ScriptEdit: React.FC = () => {
     const { id } = useParams() as URLParams;
@@ -103,6 +104,13 @@ export const ScriptEdit: React.FC = () => {
         });
     };
 
+    const changeRunLevel = (RunLevel: ScriptRunLevel) => {
+        setScript(script => {
+            script.RunLevel = RunLevel;
+            return { ...script };
+        });
+    };
+
     const formSave = () => {
         let promise: Promise<ScriptType>;
         if (isNew) {
@@ -152,6 +160,7 @@ export const ScriptEdit: React.FC = () => {
                     onChange={changeName}
                     required />
                 <Input.RunAsInput inheritLabel="Run As Specific User" label="Run As" defaultValue={script.RunAs} onChange={changeRunAs} />
+                <Input.RunLevel defaultValue={script.RunLevel} onChange={changeRunLevel} />
                 <Input.Text
                     label="Working Directory"
                     type="text"

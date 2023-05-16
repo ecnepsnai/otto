@@ -1,6 +1,10 @@
 package server
 
-import "github.com/ecnepsnai/web"
+import (
+	"fmt"
+
+	"github.com/ecnepsnai/web"
+)
 
 func (h *handle) RegisterRuleList(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	return RegisterRuleStore.AllRules(), nil, nil
@@ -8,6 +12,11 @@ func (h *handle) RegisterRuleList(request web.Request) (interface{}, *web.APIRes
 
 func (h *handle) RegisterRuleNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifyAutoregister {
+		EventStore.UserPermissionDenied(session.User().Username, "Create register rule")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	params := newRegisterRuleParams{}
 	if err := request.DecodeJSON(&params); err != nil {
@@ -40,8 +49,13 @@ func (h *handle) RegisterRuleGet(request web.Request) (interface{}, *web.APIResp
 
 func (h *handle) RegisterRuleEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyAutoregister {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify register rule %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	params := editRegisterRuleParams{}
 	if err := request.DecodeJSON(&params); err != nil {
 		return nil, nil, err
@@ -62,8 +76,13 @@ func (h *handle) RegisterRuleEdit(request web.Request) (interface{}, *web.APIRes
 
 func (h *handle) RegisterRuleDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyAutoregister {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Delete register rule %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	rule, err := RegisterRuleStore.DeleteRule(id)
 	if err != nil {
 		if err.Server {

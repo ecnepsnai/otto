@@ -9,6 +9,7 @@ import { Notification } from '../../components/Notification';
 import { GlobalModalFrame, Modal, ModalForm } from '../../components/Modal';
 import { Pre } from '../../components/Pre';
 import { Input } from '../../components/input/Input';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 interface HostTrustProps {
     host: HostType;
@@ -93,11 +94,11 @@ export const HostTrust: React.FC<HostTrustProps> = (props: HostTrustProps) => {
         return badge;
     }
 
-    const setIdentityMenu = (<Menu.Item icon={<Icon.Plus />} label="Add Trusted Identity" onClick={addTrust} />);
-    const untrustIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Unlock />} label="Remove Trusted Identity" onClick={removeTrust} />) : null;
-    const trustPendingMenu = props.host.Trust.UntrustedIdentity ? (<Menu.Item icon={<Icon.Lock />} label="Confirm Pending Identity" onClick={trustPending} />) : null;
+    const setIdentityMenu = (<Menu.Item icon={<Icon.Plus />} label="Add Trusted Identity" onClick={addTrust} disabled={!Permissions.UserCan(UserAction.ModifyHosts)} />);
+    const untrustIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Unlock />} label="Remove Trusted Identity" onClick={removeTrust} disabled={!Permissions.UserCan(UserAction.ModifyHosts)} />) : null;
+    const trustPendingMenu = props.host.Trust.UntrustedIdentity ? (<Menu.Item icon={<Icon.Lock />} label="Confirm Pending Identity" onClick={trustPending} disabled={!Permissions.UserCan(UserAction.ModifyHosts)} />) : null;
     const copyServerIdentityMenu = (<Menu.Item icon={<Icon.Clipboard />} label="Copy Server Identity" onClick={copyServerIdentity} />);
-    const rotateIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Random />} label="Rotate Identity" onClick={rotateIdentity} />) : null;
+    const rotateIdentityMenu = props.host.Trust.TrustedIdentity ? (<Menu.Item icon={<Icon.Random />} label="Rotate Identity" onClick={rotateIdentity} disabled={!Permissions.UserCan(UserAction.ModifyHosts)} />) : null;
 
     return (
         <span className="badges">

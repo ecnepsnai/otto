@@ -7,12 +7,17 @@ import (
 )
 
 func (h *handle) EventsGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
-	countStr := sliceFirst(request.HTTP.URL.Query()["c"])
-	if countStr == "" {
-		return nil, nil, web.ValidationError("Must specify max number of events")
+	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanAccessAuditLog {
+		EventStore.UserPermissionDenied(session.User().Username, "Access audit log")
+		return nil, nil, web.ValidationError("Permission denied")
 	}
 
-	count, cerr := strconv.Atoi(countStr)
+	if len(request.HTTP.URL.Query()["c"]) < 1 {
+		return nil, nil, web.ValidationError("Must specify max number of events")
+	}
+	count, cerr := strconv.Atoi(request.HTTP.URL.Query()["c"][0])
 	if cerr != nil {
 		return nil, nil, web.ValidationError("Invalid count")
 	}

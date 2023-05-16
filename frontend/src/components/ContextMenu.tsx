@@ -39,6 +39,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps)
             const item = props.items[idx] as ContextMenuItem;
 
             GlobalContextMenuFrame.removeMenu();
+            if (item.disabled) {
+                return;
+            }
 
             if (item.href) {
                 navigate(item.href);

@@ -17,6 +17,7 @@ type Script struct {
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
+	RunLevel         int
 }
 
 // RunAs describes the properties of which user runs a script

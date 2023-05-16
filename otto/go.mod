@@ -2,6 +2,8 @@ module github.com/ecnepsnai/otto
 
 go 1.20
 
+replace github.com/ecnepsnai/web => /home/ian/Development/web
+
 require (
 	github.com/ecnepsnai/cron v1.3.3
 	github.com/ecnepsnai/ds v1.8.3

@@ -12,7 +12,7 @@ var usedRegisterNonces = &registerNonceT{&sync.Mutex{}, []string{}}
 func (t *registerNonceT) PreviouslyUsed(nonce string) bool {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	return stringSliceContains(nonce, t.nonces)
+	return sliceContains(nonce, t.nonces)
 }
 
 func (t *registerNonceT) Add(nonce string) {

@@ -5,6 +5,7 @@ import { GroupType } from './Group';
 import { Variable } from './Variable';
 import { ScheduleType } from './Schedule';
 import { AttachmentType } from './Attachment';
+import { ScriptRunLevel } from './cbgen_enum';
 
 export interface ScriptType {
     ID?: string;
@@ -16,6 +17,7 @@ export interface ScriptType {
     WorkingDirectory?: string;
     AfterExecution?: string;
     AttachmentIDs?: string[];
+    RunLevel: ScriptRunLevel;
 }
 
 export class Script {
@@ -36,6 +38,7 @@ export class Script {
             AfterExecution: '',
             Environment: [],
             AttachmentIDs: [],
+            RunLevel: ScriptRunLevel.ReadOnly,
         };
     }
 

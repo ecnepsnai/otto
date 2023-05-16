@@ -4,6 +4,7 @@ var defaultUser = newUserParameters{
 	Username:           "admin",
 	Password:           "admin",
 	MustChangePassword: true,
+	Permissions:        UserPermissionsMax(),
 }
 
 var defaultGroup = newGroupParameters{

@@ -26,7 +26,6 @@ func TestAuthenticationLogin(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
@@ -48,7 +47,6 @@ func TestAuthenticationIncorrectPassword(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
@@ -65,7 +63,6 @@ func TestAuthenticationUnknownUsername(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
@@ -108,7 +105,6 @@ func TestAuthenticationDisabledUser(t *testing.T) {
 	password := randomString(6)
 	user, erro := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	})
 	if erro != nil {
@@ -116,7 +112,6 @@ func TestAuthenticationDisabledUser(t *testing.T) {
 	}
 
 	if _, err := UserStore.EditUser(user, editUserParameters{
-		Email:    user.Email,
 		CanLogIn: false,
 	}); err != nil {
 		t.Fatalf("Error updating user: %s", err.Message)
@@ -133,7 +128,6 @@ func TestAuthenticationDeletedUser(t *testing.T) {
 	password := randomString(6)
 	user, erro := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	})
 	if erro != nil {
@@ -162,7 +156,6 @@ func TestAuthenticationExpiredSession(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
@@ -207,7 +200,6 @@ func TestAuthenticationPartialSession(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username:           username,
-		Email:              randomString(6),
 		Password:           password,
 		MustChangePassword: true,
 	}); err != nil {
@@ -239,7 +231,6 @@ func TestAuthenticationAPIKey(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)
@@ -295,7 +286,6 @@ func TestAuthenticationIncorrectAPIKey(t *testing.T) {
 	password := randomString(6)
 	if _, err := UserStore.NewUser(newUserParameters{
 		Username: username,
-		Email:    randomString(6),
 		Password: password,
 	}); err != nil {
 		t.Fatalf("Error making user: %s", err.Message)

@@ -306,7 +306,7 @@ func (s *hostStoreObject) DeleteHost(host *Host) (rerr *Error) {
 			if len(schedule.Scope.HostIDs) == 0 {
 				continue
 			}
-			if stringSliceContainsFold(host.ID, schedule.Scope.HostIDs) {
+			if sliceContainsFold(host.ID, schedule.Scope.HostIDs) {
 				rerr = ErrorUser("Host belongs to schedule %s", schedule.Name)
 				return nil
 			}

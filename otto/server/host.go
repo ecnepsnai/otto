@@ -36,10 +36,9 @@ func (h Host) Groups() ([]Group, *Error) {
 
 // ScriptEnabledGroup describes a host where a script is enabled on it by a group
 type ScriptEnabledGroup struct {
-	ScriptID   string
-	ScriptName string
-	GroupID    string
-	GroupName  string
+	Script    Script
+	GroupID   string
+	GroupName string
 }
 
 // Scripts return all scripts for this host
@@ -62,10 +61,9 @@ func (h Host) Scripts() []ScriptEnabledGroup {
 		ehabledGroups := make([]ScriptEnabledGroup, len(scripts))
 		for i, script := range scripts {
 			ehabledGroups[i] = ScriptEnabledGroup{
-				ScriptID:   script.ID,
-				ScriptName: script.Name,
-				GroupID:    group.ID,
-				GroupName:  group.Name,
+				Script:    script,
+				GroupID:   group.ID,
+				GroupName: group.Name,
 			}
 		}
 		hostScripts = append(hostScripts, ehabledGroups...)

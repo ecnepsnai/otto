@@ -7,6 +7,7 @@ import { Radio } from './Radio';
 import { Select } from './Select';
 import { Text } from './Text';
 import { Textarea } from './Textarea';
+import { RunLevel } from './RunLevel';
 
 export interface InputProps {
     thin?: boolean;
@@ -50,4 +51,8 @@ export class Input {
      * An input for a password with a generate random button
      */
     public static Password = Password;
+    /**
+     * An input for script run levels
+     */
+    public static RunLevel = RunLevel;
 }

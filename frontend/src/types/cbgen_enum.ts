@@ -54,3 +54,13 @@ export enum ScheduleResult {
     Fail = 2,
 }
 
+/** Permission level for users to run scripts */
+export enum ScriptRunLevel { 
+    /** No scripts can be executed */
+    None = 0,
+    /** Only scripts mark as read only can be executed */
+    ReadOnly = 1,
+    /** All scripts can be executed */
+    ReadWrite = 2,
+}
+

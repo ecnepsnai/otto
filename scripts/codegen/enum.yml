@@ -77,6 +77,20 @@
       value: "400"
     - key: Finished
       value: "200"
+- name: ScriptRunLevel
+  type: int
+  description: "Permission level for users to run scripts"
+  include_typescript: true
+  values:
+    - key: None
+      value: "0"
+      description: "No scripts can be executed"
+    - key: ReadOnly
+      value: "1"
+      description: "Only scripts mark as read only can be executed"
+    - key: ReadWrite
+      value: "2"
+      description: "All scripts can be executed"
 - name: EventType
   type: string
   values:
@@ -104,6 +118,9 @@
     - key: UserDeleted
       description: UserDeleted event
       value: '"UserDeleted"'
+    - key: UserPermissionDenied
+      description: UserPermissionDenied event
+      value: '"UserPermissionDenied"'
     - key: HostAdded
       description: HostAdded event
       value: '"HostAdded"'

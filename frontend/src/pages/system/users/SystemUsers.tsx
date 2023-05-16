@@ -9,8 +9,10 @@ import { Page } from '../../../components/Page';
 import { Style } from '../../../components/Style';
 import { Column, Table } from '../../../components/Table';
 import { StateManager } from '../../../services/StateManager';
-import { User, UserType } from '../../../types/User';
+import { User, UserPermissions, UserType } from '../../../types/User';
 import { ContextMenuItem } from '../../../components/ContextMenu';
+import { ScriptRunLevel } from '../../../types/cbgen_enum';
+import { Permissions, UserAction } from '../../../services/Permissions';
 
 export class UserManager {
     public static EditCurrentUser(): Promise<UserType> {
@@ -109,7 +111,7 @@ export const SystemUsers: React.FC = () => {
 };
 
 const UserTableContextMenu = (user: UserType, didEditUser: () => void, didDeleteUser: () => void): (ContextMenuItem | 'separator')[] => {
-    const contextMenu: (ContextMenuItem | 'separator')[]  = [
+    const contextMenu: (ContextMenuItem | 'separator')[] = [
         {
             title: 'Edit',
             icon: (<Icon.Edit />),
@@ -143,6 +145,13 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
     const changeUsername = (Username: string) => {
         setUser(user => {
             user.Username = Username;
+            return { ...user };
+        });
+    };
+
+    const changePermissions = (Permissions: UserPermissions) => {
+        setUser(user => {
+            user.Permissions = Permissions;
             return { ...user };
         });
     };
@@ -212,6 +221,14 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
         );
     };
 
+    const permissionEdit = () => {
+        if (!Permissions.UserCan(UserAction.ModifyUsers)) {
+            return null;
+        }
+
+        return (<UserPermissionsEdit permissions={user.Permissions} onUpdate={changePermissions} />);
+    };
+
     const canLogInCheckbox = () => {
         if (props.user && StateManager.Current().User.Username == props.user.Username) {
             return null;
@@ -246,6 +263,7 @@ export const OptionsUsersModal: React.FC<OptionsUsersModalProps> = (props: Optio
             {resetAPIKey()}
             {canLogInCheckbox()}
             {mustChangePasswordCheckbox()}
+            {permissionEdit()}
         </ModalForm>
     );
 };
@@ -278,3 +296,134 @@ const UserAPIKeyEdit: React.FC<UserAPIKeyEditProps> = (props: UserAPIKeyEditProp
     return (<ConfirmButton color={Style.Palette.Warning} size={Style.Size.S} outline onClick={resetAPIKey} disabled={loading}><Icon.Label icon={<Icon.Undo />} label="Reset API Key" /></ConfirmButton>);
 };
 
+interface UserPermissionsEditProps {
+    permissions: UserPermissions;
+    onUpdate: (value: UserPermissions) => void;
+}
+const UserPermissionsEdit: React.FC<UserPermissionsEditProps> = (props: UserPermissionsEditProps) => {
+    const [Permissions, SetPermissions] = React.useState<UserPermissions>(props.permissions);
+
+    React.useEffect(() => {
+        if (!Permissions) {
+            return;
+        }
+
+        props.onUpdate(Permissions);
+    }, [Permissions]);
+
+    const scriptRunLevelOptions = [
+        {
+            value: ScriptRunLevel.None,
+            label: 'None'
+        },
+        {
+            value: ScriptRunLevel.ReadOnly,
+            label: 'Read Only'
+        },
+        {
+            value: ScriptRunLevel.ReadWrite,
+            label: 'Read Write'
+        }
+    ];
+
+    const canActions = [
+        {
+            label: 'Can Modify Hosts',
+            value: Permissions.CanModifyHosts,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifyHosts = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify Groups',
+            value: Permissions.CanModifyGroups,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifyGroups = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify Scripts',
+            value: Permissions.CanModifyScripts,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifyScripts = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify Schedules',
+            value: Permissions.CanModifySchedules,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifySchedules = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Access Event Log',
+            value: Permissions.CanAccessAuditLog,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanAccessAuditLog = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify Users',
+            value: Permissions.CanModifyUsers,
+            helpText: 'Users can always change their own password and API key',
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifyUsers = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify Auto-Register Rules',
+            value: Permissions.CanModifyAutoregister,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifyAutoregister = v;
+                    return { ...p };
+                });
+            }
+        },
+        {
+            label: 'Can Modify System Settings',
+            value: Permissions.CanModifySystem,
+            update: (v: boolean) => {
+                SetPermissions(p => {
+                    p.CanModifySystem = v;
+                    return { ...p };
+                });
+            }
+        },
+    ];
+
+    const onChangeScriptRunLevel = (level: ScriptRunLevel) => {
+        SetPermissions(p => {
+            p.ScriptRunLevel = level;
+            return { ...p };
+        });
+    };
+
+    return (<div className="mt-2">
+        <h5>Permissions</h5>
+        <Input.Radio label='Can run scripts' choices={scriptRunLevelOptions} buttons defaultValue={Permissions.ScriptRunLevel} onChange={onChangeScriptRunLevel} />
+        <div className="checkboxes">
+            {canActions.map((action, idx) => {
+                return (<Input.Checkbox key={idx} label={action.label} helpText={action.helpText} defaultValue={action.value} onChange={action.update} />);
+            })}
+        </div>
+    </div>);
+};

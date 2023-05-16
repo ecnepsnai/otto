@@ -18,6 +18,7 @@ import { Icon } from '../../components/Icon';
 import { Style } from '../../components/Style';
 import { Nothing } from '../../components/Nothing';
 import { GlobalModalFrame, Modal } from '../../components/Modal';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const ScheduleView: React.FC = () => {
     const { id } = useParams() as URLParams;
@@ -122,8 +123,8 @@ export const ScheduleView: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <EditButton to={'/schedules/schedule/' + schedule.ID + '/edit'} />
-            <DeleteButton onClick={deleteClick} />
+            <EditButton to={'/schedules/schedule/' + schedule.ID + '/edit'} disabled={!Permissions.UserCan(UserAction.ModifySchedules)} />
+            <DeleteButton onClick={deleteClick} disabled={!Permissions.UserCan(UserAction.ModifySchedules)} />
         </React.Fragment>
     );
 

@@ -11,6 +11,7 @@ interface CommonButtonProps {
 
 interface CommonButtonLinkProps {
     to: string;
+    disabled?: boolean;
 }
 
 interface ButtonProps {
@@ -130,13 +131,13 @@ export const AddButton: React.FC<CommonButtonProps> = (props: CommonButtonProps)
 };
 
 export const CreateButton: React.FC<CommonButtonLinkProps> = (props: CommonButtonLinkProps) => {
-    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
+    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S} disabled={props.disabled}>
         <Icon.Label label="Create New" icon={<Icon.Plus />} />
     </ButtonLink>);
 };
 
 export const EditButton: React.FC<CommonButtonLinkProps> = (props: CommonButtonLinkProps) => {
-    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S}>
+    return (<ButtonLink to={props.to} color={Style.Palette.Primary} outline size={Style.Size.S} disabled={props.disabled}>
         <Icon.Label label="Edit" icon={<Icon.Edit />} />
     </ButtonLink>);
 };

@@ -116,7 +116,7 @@ export const HostView: React.FC = () => {
                 </Layout.Column>
                 <Layout.Column>
                     <GroupListCard groups={groups} className="mb-3" />
-                    <ScriptListCard scripts={scripts} hostIDs={[host.ID]} className="mb-3" />
+                    <ScriptListCard scripts={scripts.map(s => s.Script)} hostIDs={[host.ID]} className="mb-3" />
                 </Layout.Column>
             </Layout.Row>
         </Page>

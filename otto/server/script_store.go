@@ -95,6 +95,7 @@ type newScriptParameters struct {
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
+	RunLevel         int
 }
 
 func (s *scriptStoreObject) NewScript(params newScriptParameters) (script *Script, err *Error) {
@@ -118,6 +119,10 @@ func (s *scriptStoreObject) newScript(tx ds.IReadWriteTransaction, params newScr
 		return nil, ErrorUser(err.Error())
 	}
 
+	if !IsScriptRunLevel(params.RunLevel) {
+		return nil, ErrorUser("Invalid run level %d", params.RunLevel)
+	}
+
 	script := Script{
 		ID:               newID(),
 		Name:             params.Name,
@@ -128,6 +133,7 @@ func (s *scriptStoreObject) newScript(tx ds.IReadWriteTransaction, params newScr
 		WorkingDirectory: params.WorkingDirectory,
 		AfterExecution:   params.AfterExecution,
 		AttachmentIDs:    params.AttachmentIDs,
+		RunLevel:         params.RunLevel,
 	}
 	if err := limits.Check(script); err != nil {
 		return nil, ErrorUser(err.Error())
@@ -152,6 +158,7 @@ type editScriptParameters struct {
 	WorkingDirectory string
 	AfterExecution   string
 	AttachmentIDs    []string
+	RunLevel         int
 }
 
 func (s *scriptStoreObject) EditScript(script *Script, params editScriptParameters) (newScript *Script, err *Error) {
@@ -175,6 +182,10 @@ func (s *scriptStoreObject) editScript(tx ds.IReadWriteTransaction, script *Scri
 		return nil, ErrorUser(err.Error())
 	}
 
+	if !IsScriptRunLevel(params.RunLevel) {
+		return nil, ErrorUser("Invalid run level %d", params.RunLevel)
+	}
+
 	script.Name = params.Name
 	script.Executable = params.Executable
 	script.Script = params.Script
@@ -183,6 +194,7 @@ func (s *scriptStoreObject) editScript(tx ds.IReadWriteTransaction, script *Scri
 	script.WorkingDirectory = params.WorkingDirectory
 	script.AfterExecution = params.AfterExecution
 	script.AttachmentIDs = params.AttachmentIDs
+	script.RunLevel = params.RunLevel
 	if err := limits.Check(script); err != nil {
 		return nil, ErrorUser(err.Error())
 	}

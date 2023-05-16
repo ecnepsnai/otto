@@ -35,15 +35,21 @@ export namespace Menu {
     interface ItemProps {
         icon?: JSX.Element;
         label: string;
+        disabled?: boolean;
         onClick: () => (void);
     }
     export const Item: React.FC<ItemProps> = (props: ItemProps) => {
         const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+            if (props.disabled) {
+                return;
+            }
+
             event.preventDefault();
             props.onClick();
         };
+        const className = 'dropdown-item' + (props.disabled ? ' disabled' : '');
         return (
-            <li><a className="dropdown-item" href="#" onClick={onClick}>{props.icon}<span className="ms-1">{props.label}</span></a></li>
+            <li><a className={className} href="#" onClick={onClick}>{props.icon}<span className="ms-1">{props.label}</span></a></li>
         );
     };
 

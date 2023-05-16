@@ -68,6 +68,7 @@ type newUserParameters struct {
 	Username           string `max:"32" min:"1"`
 	Password           string
 	MustChangePassword bool
+	Permissions        UserPermissions
 }
 
 func (s *userStoreObject) NewUser(params newUserParameters) (user *User, err *Error) {
@@ -90,10 +91,16 @@ func (s *userStoreObject) newUser(tx ds.IReadWriteTransaction, params newUserPar
 		return nil, ErrorFrom(err)
 	}
 
+	if !IsScriptRunLevel(params.Permissions.ScriptRunLevel) {
+		log.Warn("Invalid script run level %d", params.Permissions.ScriptRunLevel)
+		return nil, ErrorUser("Invalid script run level %d", params.Permissions.ScriptRunLevel)
+	}
+
 	user := User{
 		Username:           params.Username,
 		CanLogIn:           true,
 		MustChangePassword: params.MustChangePassword,
+		Permissions:        params.Permissions,
 	}
 
 	if err := limits.Check(user); err != nil {
@@ -115,6 +122,7 @@ type editUserParameters struct {
 	Password           string
 	CanLogIn           bool
 	MustChangePassword bool
+	Permissions        UserPermissions
 }
 
 func (s *userStoreObject) EditUser(user *User, params editUserParameters) (newUser *User, err *Error) {
@@ -126,8 +134,13 @@ func (s *userStoreObject) EditUser(user *User, params editUserParameters) (newUs
 }
 
 func (s *userStoreObject) editUser(tx ds.IReadWriteTransaction, user *User, params editUserParameters) (*User, *Error) {
+	if !IsScriptRunLevel(params.Permissions.ScriptRunLevel) {
+		log.Warn("Invalid script run level %d", params.Permissions.ScriptRunLevel)
+		return nil, ErrorUser("Invalid script run level %d", params.Permissions.ScriptRunLevel)
+	}
 	user.CanLogIn = params.CanLogIn
 	user.MustChangePassword = params.MustChangePassword
+	user.Permissions = params.Permissions
 	if params.Password != "" {
 		hashedPassword, err := secutil.HashPassword([]byte(params.Password))
 		if err != nil {

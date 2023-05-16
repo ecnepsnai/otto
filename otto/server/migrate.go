@@ -26,35 +26,41 @@ func migrateIfNeeded() {
 		i++
 
 		results := ds.Migrate(ds.MigrateParams{
-			TablePath: path.Join(Directories.Data, "attachment.db"),
-			NewPath:   path.Join(Directories.Data, "attachment.db"),
-			OldType:   Attachment{},
-			NewType:   Attachment{},
+			TablePath: path.Join(Directories.Data, "user.db"),
+			NewPath:   path.Join(Directories.Data, "user.db"),
+			OldType:   User{},
+			NewType:   User{},
 			MigrateObject: func(old interface{}) (interface{}, error) {
-				attachment, ok := old.(Attachment)
+				user, ok := old.(User)
 				if !ok {
 					panic("Invalid type")
 				}
-				if attachment.Checksum != "" {
-					return attachment, nil
-				}
-
-				checksum, err := attachment.GetChecksum()
-				if err != nil {
-					log.PError("Error calculating checksum of attachment file", map[string]interface{}{
-						"path":  attachment.FilePath(),
-						"error": err.Error(),
-					})
-					return nil, nil
-				}
-
-				attachment.Checksum = checksum
-				return attachment, nil
+				user.Permissions = UserPermissionsMax()
+				return user, nil
 			},
 		})
 
 		if results.Error != nil {
-			log.Fatal("Error migrating attachment database: %s", results.Error.Error())
+			log.Fatal("Error migrating user database: %s", results.Error.Error())
+		}
+
+		results = ds.Migrate(ds.MigrateParams{
+			TablePath: path.Join(Directories.Data, "script.db"),
+			NewPath:   path.Join(Directories.Data, "script.db"),
+			OldType:   Script{},
+			NewType:   Script{},
+			MigrateObject: func(old interface{}) (interface{}, error) {
+				script, ok := old.(Script)
+				if !ok {
+					panic("Invalid type")
+				}
+				script.RunLevel = ScriptRunLevelReadWrite
+				return script, nil
+			},
+		})
+
+		if results.Error != nil {
+			log.Fatal("Error migrating script database: %s", results.Error.Error())
 		}
 	}
 

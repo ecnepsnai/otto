@@ -1,19 +1,35 @@
 import { API } from '../services/API';
+import { ScriptRunLevel } from './cbgen_enum';
 
 export interface UserType {
     Username?: string;
     Password?: string;
     CanLogIn?: boolean;
     MustChangePassword?: boolean;
+    Permissions?: UserPermissions;
+}
+
+export interface UserPermissions {
+    ScriptRunLevel?: ScriptRunLevel;
+    CanModifyHosts?: boolean;
+    CanModifyGroups?: boolean;
+    CanModifyScripts?: boolean;
+    CanModifySchedules?: boolean;
+    CanAccessAuditLog?: boolean;
+    CanModifyUsers?: boolean;
+    CanModifyAutoregister?: boolean;
+    CanModifySystem?: boolean;
 }
 
 export class User {
     public static Blank(): UserType {
         return {
             Username: '',
-            Email: '',
             CanLogIn: true,
             MustChangePassword: false,
+            Permissions: {
+                ScriptRunLevel: ScriptRunLevel.ReadOnly,
+            }
         };
     }
 
@@ -44,14 +60,14 @@ export class User {
 
 export interface NewUserParameters {
     Username: string;
-    Email: string;
     Password: string;
     MustChangePassword: boolean;
+    Permissions?: UserPermissions;
 }
 
 export interface EditUserParameters {
-    Email: string;
     Password?: string;
     CanLogIn: boolean;
     MustChangePassword: boolean;
+    Permissions?: UserPermissions;
 }

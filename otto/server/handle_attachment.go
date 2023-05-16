@@ -15,6 +15,11 @@ func (h *handle) AttachmentList(request web.Request) (interface{}, *web.APIRespo
 func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, "Upload attachment")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	pathStr := request.HTTP.FormValue("Path")
 	inheritStr := request.HTTP.FormValue("Inherit")
 	inherit := inheritStr == "true"
@@ -74,6 +79,13 @@ func (h *handle) AttachmentGet(request web.Request) (interface{}, *web.APIRespon
 
 func (v *view) AttachmentDownload(request web.Request) (response web.HTTPResponse) {
 	attachmentID := request.Parameters["id"]
+	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Download attachment %s", attachmentID))
+		response.Status = 403
+		return
+	}
 
 	attachment := AttachmentStore.AttachmentWithID(attachmentID)
 	f, err := os.OpenFile(attachment.FilePath(), os.O_RDONLY, 0644)
@@ -91,8 +103,12 @@ func (v *view) AttachmentDownload(request web.Request) (response web.HTTPRespons
 
 func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	attachmentID := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify attachment %s", attachmentID))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	pathStr := request.HTTP.FormValue("Path")
 	inheritStr := request.HTTP.FormValue("Inherit")
@@ -152,8 +168,12 @@ func (h *handle) AttachmentEdit(request web.Request) (interface{}, *web.APIRespo
 
 func (h *handle) AttachmentDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	attachmentID := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifyHosts {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Delete attachment %s", attachmentID))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	if err := AttachmentStore.DeleteAttachment(attachmentID); err != nil {
 		if err.Server {

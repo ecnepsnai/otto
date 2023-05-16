@@ -31,7 +31,9 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 		},
 		User:     user,
 		Warnings: []string{},
-		Options:  Options,
+	}
+	if user.Permissions.CanModifySystem {
+		s.Options = Options
 	}
 
 	if user.Username == defaultUser.Username {

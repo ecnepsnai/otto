@@ -16,6 +16,7 @@ import { Nothing } from '../../components/Nothing';
 import { ScriptListCard } from '../../components/ScriptListCard';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const GroupView: React.FC = () => {
     const { id } = useParams() as URLParams;
@@ -72,8 +73,8 @@ export const GroupView: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <EditButton to={'/groups/group/' + group.ID + '/edit'} />
-            <DeleteButton onClick={deleteClick} />
+            <EditButton to={'/groups/group/' + group.ID + '/edit'} disabled={!Permissions.UserCan(UserAction.ModifyGroups)} />
+            <DeleteButton onClick={deleteClick} disabled={!Permissions.UserCan(UserAction.ModifyGroups)} />
         </React.Fragment>
     );
 

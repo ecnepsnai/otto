@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { RunModal } from '../pages/run/RunModal';
 import { Rand } from '../services/Rand';
-import { ScriptEnabledGroup } from '../types/Host';
 import { ScriptType } from '../types/Script';
 import { SmallPlayButton } from './Button';
 import { Card } from './Card';
@@ -10,15 +9,12 @@ import { Icon } from './Icon';
 import { ListGroup } from './ListGroup';
 import { GlobalModalFrame } from './Modal';
 import { Nothing } from './Nothing';
+import { Permissions } from '../services/Permissions';
 
 interface ScriptListCardProps {
-    scripts: ScriptEnabledGroup[] | ScriptType[];
+    scripts: ScriptType[];
     hostIDs: string[];
     className?: string;
-}
-interface CommonScriptType {
-    ID: string;
-    Name: string;
 }
 export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListCardProps) => {
     const runScriptClick = (scriptID: string, hostIDs: string[]) => {
@@ -32,16 +28,7 @@ export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListC
             return (<Card.Body><Nothing /></Card.Body>);
         }
 
-        const scripts: CommonScriptType[] = [];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        props.scripts.forEach((s: any) => {
-            scripts.push({
-                Name: s.ScriptName || s.Name || '',
-                ID: s.ScriptID || s.ID || '',
-            });
-        });
-
-        return (<ListGroup.List>{scripts.map((script, index) => {
+        return (<ListGroup.List>{props.scripts.map((script, index) => {
             return (
                 <ListGroup.Item key={index}>
                     <div className="d-flex justify-content-between">
@@ -50,7 +37,7 @@ export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListC
                             <Link to={'/scripts/script/' + script.ID} className="ms-1">{script.Name}</Link>
                         </div>
                         <div>
-                            <SmallPlayButton onClick={runScriptClick(script.ID, props.hostIDs)} />
+                            { Permissions.UserCanRunScript(script.RunLevel) ? (<SmallPlayButton onClick={runScriptClick(script.ID, props.hostIDs)} />) : null }
                         </div>
                     </div>
                 </ListGroup.Item>

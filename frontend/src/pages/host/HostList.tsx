@@ -13,6 +13,7 @@ import { HeartbeatBadge } from '../../components/Badge';
 import { AgentVersion } from '../../components/AgentVersion';
 import { ContextMenuItem } from '../../components/ContextMenu';
 import { Icon } from '../../components/Icon';
+import { Permissions, UserAction } from '../../services/Permissions';
 
 export const HostList: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
@@ -47,7 +48,7 @@ export const HostList: React.FC = () => {
 
     const toolbar = (
         <React.Fragment>
-            <CreateButton to="/hosts/host/" />
+            <CreateButton to="/hosts/host/" disabled={!Permissions.UserCan(UserAction.ModifyHosts)} />
         </React.Fragment>
     );
 
@@ -114,12 +115,14 @@ const HostTableContextMenu = (host: HostType, onReload: () => (void)): (ContextM
             title: 'Edit',
             icon: (<Icon.Edit />),
             href: '/hosts/host/' + host.ID + '/edit',
+            disabled: !Permissions.UserCan(UserAction.ModifyHosts),
         },
         'separator',
         {
             title: 'Delete',
             icon: (<Icon.Delete />),
             onClick: deleteMenuClick,
+            disabled: !Permissions.UserCan(UserAction.ModifyHosts),
         },
     ];
 };

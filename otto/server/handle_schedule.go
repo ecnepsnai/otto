@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/ecnepsnai/web"
@@ -90,6 +91,11 @@ func (h *handle) ScheduleGetScript(request web.Request) (interface{}, *web.APIRe
 func (h *handle) ScheduleNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
+	if !session.User().Permissions.CanModifySchedules {
+		EventStore.UserPermissionDenied(session.User().Username, "Create new schedule")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	params := newScheduleParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
 		return nil, nil, err
@@ -110,8 +116,12 @@ func (h *handle) ScheduleNew(request web.Request) (interface{}, *web.APIResponse
 
 func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifySchedules {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify schedule %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {
@@ -138,8 +148,12 @@ func (h *handle) ScheduleEdit(request web.Request) (interface{}, *web.APIRespons
 
 func (h *handle) ScheduleDelete(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	id := request.Parameters["id"]
+
+	if !session.User().Permissions.CanModifySchedules {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Delete schedule %s", id))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	schedule := ScheduleCache.ByID(id)
 	if schedule == nil {

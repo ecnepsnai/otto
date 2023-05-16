@@ -5,6 +5,7 @@ import { GroupType } from './Group';
 import { Variable } from './Variable';
 import { ScheduleType } from './Schedule';
 import { HeartbeatType } from './Heartbeat';
+import { ScriptType } from './Script';
 
 export interface HostType {
     ID?: string;
@@ -183,8 +184,7 @@ export interface EditHostParameters {
 }
 
 export interface ScriptEnabledGroup {
-    ScriptID: string;
-    ScriptName: string;
+    Script: ScriptType;
     GroupID: string;
     GroupName: string;
 }

@@ -126,6 +126,15 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 			return
 		}
 
+		if session.User().Permissions.ScriptRunLevel < script.RunLevel {
+			writeMessage(requestResponse{
+				Code:  RequestResponseCodeError,
+				Error: "Permission denied",
+			})
+			EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Run script %s", script.ID))
+			return
+		}
+
 		running := true
 		cancel := make(chan bool)
 		go func() {

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/ecnepsnai/limits"
@@ -30,6 +31,11 @@ func (h *handle) UserGet(request web.Request) (interface{}, *web.APIResponse, *w
 func (h *handle) UserNew(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
 
+	if !session.User().Permissions.CanModifyUsers {
+		EventStore.UserPermissionDenied(session.User().Username, "Create new user")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
 	params := newUserParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
 		return nil, nil, err
@@ -54,8 +60,12 @@ func (h *handle) UserNew(request web.Request) (interface{}, *web.APIResponse, *w
 
 func (h *handle) UserEdit(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	session := request.UserData.(*Session)
-
 	username := request.Parameters["username"]
+
+	if username != session.User().Username && !session.User().Permissions.CanModifyUsers {
+		EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Modify user %s", username))
+		return nil, nil, web.ValidationError("Permission denied")
+	}
 
 	user := UserStore.UserWithUsername(username)
 	if user == nil {
@@ -65,6 +75,14 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.APIResponse, *
 	params := editUserParameters{}
 	if err := request.DecodeJSON(&params); err != nil {
 		return nil, nil, err
+	}
+
+	// Stop the user from changing their own permissions if they don't have the CanModifyUsers permission
+	if username == session.User().Username &&
+		!session.User().Permissions.CanModifyUsers &&
+		!session.User().Permissions.EqualTo(params.Permissions) {
+		EventStore.UserPermissionDenied(session.User().Username, "Modify own permissions")
+		return nil, nil, web.ValidationError("Permission denied")
 	}
 
 	user, err := UserStore.EditUser(user, params)
