@@ -1,12 +1,14 @@
 package server
 
 import (
+	"encoding/json"
+	"os"
 	"path"
 
 	"github.com/ecnepsnai/ds"
 )
 
-var neededTableVersion = 12
+var neededTableVersion = 13
 
 func migrateIfNeeded() {
 	currentVersion := State.GetTableVersion()
@@ -61,6 +63,32 @@ func migrateIfNeeded() {
 
 		if results.Error != nil {
 			log.Fatal("Error migrating script database: %s", results.Error.Error())
+		}
+
+		if FileExists(path.Join(Directories.Data, configFileName)) {
+			type oldOttoOptions struct {
+				General        OptionsGeneral
+				Authentication OptionsAuthentication
+				Network        OptionsNetwork
+				Register       OptionsRegister
+				Security       OptionsSecurity
+			}
+			f, err := os.OpenFile(path.Join(Directories.Data, configFileName), os.O_RDONLY, os.ModePerm)
+			if err != nil {
+				log.Fatal("Unable to open Otto config file: %s", err.Error())
+			}
+			oldOptions := oldOttoOptions{}
+			if err := json.NewDecoder(f).Decode(&oldOptions); err != nil {
+				log.Fatal("Unable to open Otto config file: %s", err.Error())
+			}
+			oldOptions.Register.Save()
+			newOptions := OttoOptions{
+				General:        oldOptions.General,
+				Authentication: oldOptions.Authentication,
+				Network:        oldOptions.Network,
+				Security:       oldOptions.Security,
+			}
+			newOptions.Save()
 		}
 	}
 

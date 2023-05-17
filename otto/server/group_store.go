@@ -209,7 +209,7 @@ func (s *groupStoreObject) deleteGroup(tx ds.IReadWriteTransaction, group *Group
 		return ErrorUser("Can't delete group with hosts")
 	}
 
-	if Options.Register.DefaultGroupID == group.ID {
+	if AutoRegisterOptions.DefaultGroupID == group.ID {
 		log.Error("Can't delete group '%s' that is the default group for host registration", group.Name)
 		return ErrorUser("Can't delete group that is the default group for host registration")
 	}

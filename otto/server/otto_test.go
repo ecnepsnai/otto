@@ -48,6 +48,7 @@ func testSetup() {
 	statsSetup()
 	CacheSetup()
 	LoadOptions()
+	LoadAutoRegisterOptions()
 }
 
 // Close everything and delete the operating directory

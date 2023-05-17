@@ -79,6 +79,8 @@ func RouterSetup() {
 	server.API.GET("/api/register/rules/rule/:id", h.RegisterRuleGet, authenticatedOptions(false))
 	server.API.POST("/api/register/rules/rule/:id", h.RegisterRuleEdit, authenticatedOptions(false))
 	server.API.DELETE("/api/register/rules/rule/:id", h.RegisterRuleDelete, authenticatedOptions(false))
+	server.API.GET("/api/register/options", h.AutoRegisterOptionsGet, authenticatedOptions(false))
+	server.API.POST("/api/register/options", h.AutoRegisterOptionsUpdate, authenticatedOptions(false))
 
 	// Groups
 	server.API.GET("/api/groups", h.GroupList, authenticatedOptions(false))

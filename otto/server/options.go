@@ -17,7 +17,6 @@ type OttoOptions struct {
 	General        OptionsGeneral
 	Authentication OptionsAuthentication
 	Network        OptionsNetwork
-	Register       OptionsRegister
 	Security       OptionsSecurity
 }
 
@@ -51,13 +50,6 @@ type OptionsNetwork struct {
 	HeartbeatFrequency int64
 }
 
-// OptionsRegister describes register options
-type OptionsRegister struct {
-	Enabled        bool
-	Key            string
-	DefaultGroupID string
-}
-
 // Options the global options
 var Options *OttoOptions
 var optionsLock = sync.Mutex{}
@@ -77,9 +69,6 @@ func LoadOptions() {
 			ForceIPVersion:     IPVersionOptionAuto,
 			Timeout:            10,
 			HeartbeatFrequency: 5,
-		},
-		Register: OptionsRegister{
-			Enabled: false,
 		},
 		Security: OptionsSecurity{
 			RotateID: OptionsRotateID{
@@ -123,7 +112,7 @@ func (o *OttoOptions) Save() (string, bool) {
 	if err != nil {
 		log.Panic("Error opening config file: %s", err.Error())
 	}
-	if err := json.NewEncoder(f).Encode(o); err != nil {
+	if err := prettyJsonEncoder(f).Encode(o); err != nil {
 		f.Close()
 		log.Panic("Error encoding options: %s", err.Error())
 	}
@@ -163,11 +152,6 @@ func (o *OttoOptions) Validate() error {
 	}
 	if !IsIPVersionOption(o.Network.ForceIPVersion) {
 		return fmt.Errorf("invalid value for IP version")
-	}
-	if o.Register.Enabled {
-		if o.Register.Key == "" {
-			return fmt.Errorf("a register key is required if auto registration is enabled")
-		}
 	}
 	if o.Security.RotateID.Enabled {
 		if o.Security.RotateID.FrequencyDays == 0 {

@@ -55,8 +55,15 @@ func TestEditGroup(t *testing.T) {
 }
 
 func TestDeleteGroup(t *testing.T) {
-	name := randomString(6)
+	// Make a dummy group since there must be at least one group
+	_, err := GroupStore.NewGroup(newGroupParameters{
+		Name: randomString(6),
+	})
+	if err != nil {
+		t.Fatalf("Error making new group: %s", err.Message)
+	}
 
+	name := randomString(6)
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name: name,
 	})

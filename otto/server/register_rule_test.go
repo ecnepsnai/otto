@@ -218,10 +218,10 @@ func TestRegisterRuleEndToEnd(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("Error making new rule: %s", err.Message)
 	}
-	o := Options
-	o.Register.Enabled = true
-	o.Register.DefaultGroupID = defaultGroup.ID
-	o.Register.Key = Key
+	o := AutoRegisterOptions
+	o.Enabled = true
+	o.DefaultGroupID = defaultGroup.ID
+	o.Key = Key
 	o.Save()
 
 	mockRequest := func(remoteAddr string, key string, params otto.RegisterRequest) web.Request {

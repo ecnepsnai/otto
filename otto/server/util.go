@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -86,4 +87,10 @@ func newAPIKey() string {
 		panic(err)
 	}
 	return "otto_" + id
+}
+
+func prettyJsonEncoder(w io.Writer) (e *json.Encoder) {
+	e = json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	return
 }

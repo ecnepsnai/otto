@@ -29,6 +29,7 @@ func CommonSetup() {
 	stateSetup()
 	migrateIfNeeded()
 	LoadOptions()
+	LoadAutoRegisterOptions()
 	statsSetup()
 }
 

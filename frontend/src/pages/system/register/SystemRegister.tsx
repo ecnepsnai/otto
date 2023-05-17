@@ -42,8 +42,8 @@ export const SystemRegister: React.FC = () => {
     };
 
     const loadOptions = () => {
-        return Options.Options.Get().then(o => {
-            setOptions(o.Register);
+        return RegisterRule.GetOptions().then(o => {
+            setOptions(o);
         });
     };
 
@@ -54,11 +54,8 @@ export const SystemRegister: React.FC = () => {
     };
 
     const onSubmit = () => {
-        return Options.Options.Get().then(o => {
-            o.Register = options;
-            Options.Options.Save(o).then(() => {
-                Notification.success('Changes Saved');
-            });
+        return RegisterRule.SetOptions(options).then(() => {
+            Notification.success('Changes Saved');
         });
     };
 

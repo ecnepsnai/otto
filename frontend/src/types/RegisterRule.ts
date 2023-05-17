@@ -1,6 +1,7 @@
 import { API } from '../services/API';
 import { Modal } from '../components/Modal';
 import { Notification } from '../components/Notification';
+import { Options } from './Options';
 
 export interface RegisterRuleClauseType {
     Property?: string;
@@ -96,6 +97,16 @@ export class RegisterRule {
     public static async List(): Promise<RegisterRuleType[]> {
         const data = await API.GET('/api/register/rules');
         return data as RegisterRuleType[];
+    }
+
+    public static async GetOptions(): Promise<Options.Register> {
+        const data = await API.GET('/api/register/options');
+        return data as Options.Register;
+    }
+
+    public static async SetOptions(options: Options.Register): Promise<boolean> {
+        const data = await API.POST('/api/register/options', options);
+        return data as boolean;
     }
 }
 

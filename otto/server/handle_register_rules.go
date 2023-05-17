@@ -95,3 +95,32 @@ func (h *handle) RegisterRuleDelete(request web.Request) (interface{}, *web.APIR
 
 	return true, nil, nil
 }
+
+func (h *handle) AutoRegisterOptionsGet(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+	if !session.User().Permissions.CanModifyAutoregister {
+		EventStore.UserPermissionDenied(session.User().Username, "Access auto register settings")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
+	return AutoRegisterOptions, nil, nil
+}
+
+func (h *handle) AutoRegisterOptionsUpdate(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+	if !session.User().Permissions.CanModifyAutoregister {
+		EventStore.UserPermissionDenied(session.User().Username, "Modify auto register settings")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
+	options := OptionsRegister{}
+	if err := request.DecodeJSON(&options); err != nil {
+		return nil, nil, err
+	}
+
+	if err := options.Validate(); err != nil {
+		return nil, nil, web.ValidationError(err.Error())
+	}
+	options.Save()
+	return true, nil, nil
+}

@@ -176,9 +176,9 @@ func postBootstrapArgs() {
 			if err != nil {
 				panic(err.Message)
 			}
-			o := Options
-			o.Register.Enabled = true
-			o.Register.Key = secutil.RandomString(6)
+			o := AutoRegisterOptions
+			o.Enabled = true
+			o.Key = secutil.RandomString(6)
 			o.Save()
 		} else if arg == "--static-dir" {
 			if i == count-1 {

@@ -12,7 +12,7 @@ import (
 )
 
 func (v *view) Register(request web.Request) web.HTTPResponse {
-	if !Options.Register.Enabled {
+	if !AutoRegisterOptions.Enabled {
 		log.PWarn("Rejected registration request", map[string]interface{}{
 			"remote_addr": request.HTTP.RemoteAddr,
 			"reason":      "registration disabled",
@@ -39,7 +39,7 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 			Status: 400,
 		}
 	}
-	decryptedData, erro := secutil.Encryption.AES_256_GCM.Decrypt(encryptedData, Options.Register.Key)
+	decryptedData, erro := secutil.Encryption.AES_256_GCM.Decrypt(encryptedData, AutoRegisterOptions.Key)
 	if erro != nil {
 		EventStore.HostRegisterIncorrectKey(request.HTTP.RemoteAddr)
 		log.PWarn("Rejected registration request", map[string]interface{}{
@@ -110,7 +110,7 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 		}
 	}
 
-	groupID := Options.Register.DefaultGroupID
+	groupID := AutoRegisterOptions.DefaultGroupID
 	var matchedRule *RegisterRule
 	for _, rule := range RegisterRuleStore.AllRules() {
 		if !rule.Matches(r.Properties) {
@@ -169,7 +169,7 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 			Status: 500,
 		}
 	}
-	encryptedResponse, erro := secutil.Encryption.AES_256_GCM.Encrypt(responseData, Options.Register.Key)
+	encryptedResponse, erro := secutil.Encryption.AES_256_GCM.Encrypt(responseData, AutoRegisterOptions.Key)
 	if erro != nil {
 		return web.HTTPResponse{
 			Status: 500,
