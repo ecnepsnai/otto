@@ -33,14 +33,18 @@ func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 			return nil
 		}
 
-		user := UserStore.UserWithUsername(apiUsername)
-		if user == nil {
-			log.Warn("API request for non-existant user: username='%s'", apiUsername)
+		user, ok := UserCache.ByUsername(apiUsername)
+		if !ok {
+			log.PWarn("API request for non-existant user", map[string]interface{}{
+				"username": apiUsername,
+			})
 			return nil
 		}
 
 		if !ShadowStore.Compare("api_"+user.Username, []byte(apiKey)) {
-			log.Warn("API request with incorrect API key: username='%s'", apiUsername)
+			log.PWarn("API request with incorrect API key", map[string]interface{}{
+				"username": apiUsername,
+			})
 			return nil
 		}
 
@@ -49,24 +53,38 @@ func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 			ShortID:  newPlainID(),
 			Username: user.Username,
 		}
-		log.Info("HTTP request: api_session method='%s' url='%s' username='%s'", r.Method, r.URL.String(), session.Username)
+		log.PInfo("HTTP api request", map[string]interface{}{
+			"method":   r.Method,
+			"url":      r.URL.String(),
+			"username": session.Username,
+		})
 		return &session
 	}
 
 	sessionKey := sessionCookie.Value
 	session := SessionStore.SessionWithID(sessionKey)
 	if session == nil {
-		log.Debug("No session found: session_key='%s'", sessionKey)
+		log.PDebug("No session found", map[string]interface{}{
+			"session_key": sessionKey,
+		})
 		return nil
 	}
 
 	if time.Since(session.Expires) > 0 {
-		log.Warn("Session expired: session_id='%s' username='%s' expired_on='%s'", session.ShortID, session.Username, session.Expires)
+		log.PWarn("Session expired", map[string]interface{}{
+			"session_id": session.ShortID,
+			"username":   session.Username,
+			"expired_on": session.Expires.String(),
+		})
 		return nil
 	}
 
-	if user := UserStore.UserWithUsername(session.Username); user == nil {
-		log.Warn("Session for nonexistant user: session_id='%s' username='%s'", session.ShortID, session.Username)
+	user, ok := UserCache.ByUsername(session.Username)
+	if !ok {
+		log.PWarn("Session for nonexistant user", map[string]interface{}{
+			"session_id": session.ShortID,
+			"username":   session.Username,
+		})
 		return nil
 	}
 
@@ -74,7 +92,11 @@ func sessionForHTTPRequest(r *http.Request, allowPartial bool) *Session {
 		return nil
 	}
 
-	log.Info("HTTP request: session_id='%s' method='%s' url='%s' username='%s'", session.ShortID, r.Method, r.URL.String(), session.Username)
+	log.PInfo("HTTP request", map[string]interface{}{
+		"method":   r.Method,
+		"url":      r.URL.String(),
+		"username": user.Username,
+	})
 	updatedSession := SessionStore.UpdateSessionExpiry(session.Key)
 	return &updatedSession
 }
