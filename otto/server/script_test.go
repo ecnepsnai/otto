@@ -23,6 +23,7 @@ func TestAddGetScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -56,6 +57,7 @@ func TestEditScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -78,6 +80,7 @@ func TestEditScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error editing script: %s", err.Message)
@@ -109,6 +112,7 @@ func TestDeleteScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -145,6 +149,7 @@ func TestAddDuplicateScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -167,6 +172,7 @@ func TestAddDuplicateScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err == nil {
 		t.Fatalf("Should return error")
@@ -190,6 +196,7 @@ func TestRenameDuplicateScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -212,6 +219,7 @@ func TestRenameDuplicateScript(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)

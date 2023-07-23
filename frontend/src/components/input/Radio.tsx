@@ -39,6 +39,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
             }
         });
         if (!found) {
+            console.error('Of all possible options the default value was not found', { choices: props.choices, defaultValue: props.defaultValue });
             throw new Error('default value not a valid choice');
         }
     }

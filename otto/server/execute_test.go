@@ -113,6 +113,7 @@ func TestExecuteAction(t *testing.T) {
 		Name:       scriptName,
 		Executable: "/bin/sh",
 		Script:     "echo 'hello world'",
+		RunLevel:   ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making script: %s", err.Message)

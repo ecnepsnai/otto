@@ -180,6 +180,7 @@ func TestHostRemoveWithSchedule(t *testing.T) {
 		Name:       "script",
 		Executable: "a",
 		Script:     "a",
+		RunLevel:   ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)

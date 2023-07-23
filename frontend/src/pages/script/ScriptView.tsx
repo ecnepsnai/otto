@@ -22,6 +22,8 @@ import { Nothing } from '../../components/Nothing';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 import { Permissions, UserAction } from '../../services/Permissions';
+import { ScriptRunLevel } from '../../types/cbgen_enum';
+import { Badge } from '../../components/Badge';
 
 interface DedupedScriptEnabledHost {
     GroupName: string;
@@ -203,6 +205,17 @@ export const ScriptView: React.FC = () => {
         }
     ];
 
+    const runLevel = () => {
+        switch (script.RunLevel) {
+            case ScriptRunLevel.ReadOnly:
+                return (<Badge color={Style.Palette.Primary} outline>Read-Only</Badge>);
+            case ScriptRunLevel.ReadWrite:
+                return (<Badge color={Style.Palette.Warning} outline>Read-Write</Badge>);
+            default:
+                return (<Badge color={Style.Palette.Secondary} outline>Unknown</Badge>);
+        }
+    };
+
     return (
         <Page title={breadcrumbs} toolbar={toolbar}>
             <Layout.Row>
@@ -214,6 +227,7 @@ export const ScriptView: React.FC = () => {
                             {runAs()}
                             <ListGroup.TextItem title="Working Directory">{script.WorkingDirectory}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Executable">{script.Executable}</ListGroup.TextItem>
+                            <ListGroup.TextItem title="Scope">{runLevel()}</ListGroup.TextItem>
                         </ListGroup.List>
                     </Card.Card>
                     <EnvironmentVariableCard variables={script.Environment} className="mb-3" />

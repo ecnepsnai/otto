@@ -21,6 +21,7 @@ func TestAddGetScheduleGroup(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -92,6 +93,7 @@ func TestAddGetScheduleHost(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -151,6 +153,7 @@ func TestEditSchedule(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -231,6 +234,7 @@ func TestDeleteSchedule(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -302,6 +306,7 @@ func TestAddDuplicateSchedule(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)
@@ -377,6 +382,7 @@ func TestRenameDuplicateSchedule(t *testing.T) {
 			UID: 0,
 			GID: 0,
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		t.Fatalf("Error making new script: %s", err.Message)

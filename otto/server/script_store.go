@@ -119,7 +119,7 @@ func (s *scriptStoreObject) newScript(tx ds.IReadWriteTransaction, params newScr
 		return nil, ErrorUser(err.Error())
 	}
 
-	if !IsScriptRunLevel(params.RunLevel) {
+	if !IsScriptRunLevel(params.RunLevel) || params.RunLevel == ScriptRunLevelNone {
 		return nil, ErrorUser("Invalid run level %d", params.RunLevel)
 	}
 
@@ -182,7 +182,7 @@ func (s *scriptStoreObject) editScript(tx ds.IReadWriteTransaction, script *Scri
 		return nil, ErrorUser(err.Error())
 	}
 
-	if !IsScriptRunLevel(params.RunLevel) {
+	if !IsScriptRunLevel(params.RunLevel) || params.RunLevel == ScriptRunLevelNone {
 		return nil, ErrorUser("Invalid run level %d", params.RunLevel)
 	}
 

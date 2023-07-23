@@ -85,6 +85,23 @@ func (h *handle) UserEdit(request web.Request) (interface{}, *web.APIResponse, *
 		return nil, nil, web.ValidationError("Permission denied")
 	}
 
+	// Stop the user from removing the CanModifyUsers permission if no other users have that permission
+	if !params.Permissions.CanModifyUsers {
+		atLeastOneUserCanModifyUsers := false
+		for _, u := range UserCache.Enabled() {
+			if u.Username == username {
+				continue
+			}
+			if u.Permissions.CanModifyUsers {
+				atLeastOneUserCanModifyUsers = true
+				break
+			}
+		}
+		if !atLeastOneUserCanModifyUsers {
+			return nil, nil, web.ValidationError("At least one user must have permission to modify users")
+		}
+	}
+
 	user, err := UserStore.EditUser(user, params)
 	if err != nil {
 		if err.Server {

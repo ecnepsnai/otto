@@ -18,6 +18,7 @@ var defaultScript = newScriptParameters{
 	RunAs: RunAs{
 		Inherit: true,
 	},
+	RunLevel: ScriptRunLevelReadOnly,
 }
 
 func atLeastOneUser() bool {

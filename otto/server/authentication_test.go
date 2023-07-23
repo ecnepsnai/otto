@@ -281,6 +281,40 @@ func TestAuthenticationIncorrectAPIUsername(t *testing.T) {
 	}
 }
 
+func TestAuthenticationBlankAPIUsername(t *testing.T) {
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+	req.Header.Add(ottoAPIUsernameHeader, "")
+	req.Header.Add(ottoAPIKeyheader, "")
+
+	if sessionForHTTPRequest(req, false) != nil {
+		t.Fatalf("Should not return a session for API request with a blank username header")
+	}
+}
+
+func TestAuthenticationBlankAPIKey(t *testing.T) {
+	username := randomString(6)
+	if _, err := UserStore.NewUser(newUserParameters{
+		Username: username,
+		Password: randomString(6),
+	}); err != nil {
+		t.Fatalf("Error making user: %s", err.Message)
+	}
+
+	req, erro := http.NewRequest("GET", "/api/blah", nil)
+	if erro != nil {
+		panic("invalid request")
+	}
+	req.Header.Add(ottoAPIUsernameHeader, username)
+	req.Header.Add(ottoAPIKeyheader, "")
+
+	if sessionForHTTPRequest(req, false) != nil {
+		t.Fatalf("Should not return a session for API request with a blank API key header")
+	}
+}
+
 func TestAuthenticationIncorrectAPIKey(t *testing.T) {
 	username := randomString(6)
 	password := randomString(6)

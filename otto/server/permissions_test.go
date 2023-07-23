@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ecnepsnai/ds"
 	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/web"
 )
@@ -165,6 +166,7 @@ func TestPermissionsCanModifyScripts(t *testing.T) {
 				Secret: true,
 			},
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		panic(err)
@@ -237,6 +239,7 @@ func TestPermissionsCanModifySchedules(t *testing.T) {
 				Secret: true,
 			},
 		},
+		RunLevel: ScriptRunLevelReadOnly,
 	})
 	if err != nil {
 		panic(err)
@@ -359,6 +362,15 @@ func TestPermissionsCanAccessAuditLog(t *testing.T) {
 }
 
 func TestPermissionsCanModifyUsers(t *testing.T) {
+	// Make other user with full permissions to avoid lockout errors
+	if _, err := UserStore.NewUser(newUserParameters{
+		Username:    randomString(3),
+		Password:    randomString(6),
+		Permissions: UserPermissionsMax(),
+	}); err != nil {
+		panic(err)
+	}
+
 	user, err := UserStore.NewUser(newUserParameters{
 		Username:    randomString(3),
 		Password:    randomString(6),
@@ -550,5 +562,40 @@ func TestPermissionsCanModifySystem(t *testing.T) {
 	}
 	if data == nil {
 		t.Fatalf("No data returned when some expected")
+	}
+}
+
+func TestPermissionsCantRemoveUserPermissions(t *testing.T) {
+	for _, user := range UserCache.All() {
+		user.Permissions.CanModifyUsers = false
+		UserStore.Table.StartWrite(func(tx ds.IReadWriteTransaction) error {
+			return tx.Update(user)
+		})
+	}
+
+	user, err := UserStore.NewUser(newUserParameters{
+		Username:    randomString(3),
+		Password:    randomString(6),
+		Permissions: UserPermissionsMax(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	user.Permissions.CanModifyUsers = false
+	params := editUserParameters{
+		CanLogIn:           true,
+		MustChangePassword: false,
+		Permissions:        user.Permissions,
+	}
+
+	session := SessionStore.NewSessionForUser(user)
+	h := handle{}
+
+	data, _, werr := h.UserEdit(web.MockRequest(web.MockRequestParameters{UserData: &session, JSONBody: params}))
+	if werr == nil {
+		t.Fatalf("No error seen when one expected")
+	}
+	if data != nil {
+		t.Fatalf("Data returned when none expected")
 	}
 }

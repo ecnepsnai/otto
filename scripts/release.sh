@@ -38,6 +38,7 @@ function build_server() {
     cp -r ${FRONTEND_PATH}/build static
     mkdir agents
     cp ${ROOT_PATH}/artifacts/ottoagent* agents
+    cp ${ROOT_PATH}/artifacts/otto-agent* agents
 
     NAME=${PRODUCT_NAME}-${VERSION}_${1}_${2}
     tar -czf ${NAME}.tar.gz ${PRODUCT_NAME} static agents

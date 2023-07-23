@@ -97,6 +97,9 @@ attachments.
 A user who can permission to modify users can change their own permissions. Take care when assigning this permission to
 users.
 
+At least one user must have permission to modify users. The server will check for this whenever user permissions are
+modified.
+
 ### Resetting a forgotten password
 
 **Reset the Password for Somebody Else**
