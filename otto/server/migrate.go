@@ -27,42 +27,46 @@ func migrateIfNeeded() {
 	for i <= neededTableVersion {
 		i++
 
-		results := ds.Migrate(ds.MigrateParams{
-			TablePath: path.Join(Directories.Data, "user.db"),
-			NewPath:   path.Join(Directories.Data, "user.db"),
-			OldType:   User{},
-			NewType:   User{},
-			MigrateObject: func(old interface{}) (interface{}, error) {
-				user, ok := old.(User)
-				if !ok {
-					panic("Invalid type")
-				}
-				user.Permissions = UserPermissionsMax()
-				return user, nil
-			},
-		})
+		if FileExists(path.Join(Directories.Data, "user.db")) {
+			results := ds.Migrate(ds.MigrateParams{
+				TablePath: path.Join(Directories.Data, "user.db"),
+				NewPath:   path.Join(Directories.Data, "user.db"),
+				OldType:   User{},
+				NewType:   User{},
+				MigrateObject: func(old interface{}) (interface{}, error) {
+					user, ok := old.(User)
+					if !ok {
+						panic("Invalid type")
+					}
+					user.Permissions = UserPermissionsMax()
+					return user, nil
+				},
+			})
 
-		if results.Error != nil {
-			log.Fatal("Error migrating user database: %s", results.Error.Error())
+			if results.Error != nil {
+				log.Fatal("Error migrating user database: %s", results.Error.Error())
+			}
 		}
 
-		results = ds.Migrate(ds.MigrateParams{
-			TablePath: path.Join(Directories.Data, "script.db"),
-			NewPath:   path.Join(Directories.Data, "script.db"),
-			OldType:   Script{},
-			NewType:   Script{},
-			MigrateObject: func(old interface{}) (interface{}, error) {
-				script, ok := old.(Script)
-				if !ok {
-					panic("Invalid type")
-				}
-				script.RunLevel = ScriptRunLevelReadWrite
-				return script, nil
-			},
-		})
+		if FileExists(path.Join(Directories.Data, "script.db")) {
+			results := ds.Migrate(ds.MigrateParams{
+				TablePath: path.Join(Directories.Data, "script.db"),
+				NewPath:   path.Join(Directories.Data, "script.db"),
+				OldType:   Script{},
+				NewType:   Script{},
+				MigrateObject: func(old interface{}) (interface{}, error) {
+					script, ok := old.(Script)
+					if !ok {
+						panic("Invalid type")
+					}
+					script.RunLevel = ScriptRunLevelReadWrite
+					return script, nil
+				},
+			})
 
-		if results.Error != nil {
-			log.Fatal("Error migrating script database: %s", results.Error.Error())
+			if results.Error != nil {
+				log.Fatal("Error migrating script database: %s", results.Error.Error())
+			}
 		}
 
 		if FileExists(path.Join(Directories.Data, configFileName)) {
