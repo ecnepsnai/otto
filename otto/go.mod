@@ -1,6 +1,7 @@
 module github.com/ecnepsnai/otto
 
 go 1.20
+toolchain go1.21.0
 
 require (
 	github.com/ecnepsnai/cron v1.3.3
@@ -13,7 +14,7 @@ require (
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/snapshot v1.0.0
 	github.com/ecnepsnai/stats v1.0.0
-	github.com/ecnepsnai/store v1.3.0
+	github.com/ecnepsnai/store v1.4.0
 	github.com/ecnepsnai/web v1.11.2
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
