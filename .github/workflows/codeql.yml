@@ -1,10 +1,8 @@
-name: Go
+name: "Perform CodeQL Analysis"
 
 on:
-  push:
-    branches: [pre-release]
-  pull_request:
-    branches: [pre-release]
+  schedule:
+    - cron: "16 16 */2 * *"
 
 permissions:
   actions: read
@@ -16,19 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.20"
-
-      - name: Build
-        run: go build -v ./...
-        working-directory: otto
-
-      - name: Test
-        run: go test -v ./...
-        working-directory: otto
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
