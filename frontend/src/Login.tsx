@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Alert } from './components/Alert';
 import '../css/login.scss';
 
@@ -219,7 +219,6 @@ export const Login: React.FC = () => {
     );
 };
 
-ReactDOM.render(
-    <Login />,
-    document.getElementById('login')
-);
+const container = document.getElementById('login');
+const root = createRoot(container);
+root.render(<Login />);

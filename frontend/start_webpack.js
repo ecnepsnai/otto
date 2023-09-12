@@ -4,7 +4,7 @@ const os = require('os');
 let watch = false;
 let mode = 'development';
 
-for (var i = 0; i < process.argv.length; i++) {
+for (let i = 0; i < process.argv.length; i++) {
     const arg = process.argv[i];
     if (arg === '--watch') {
         watch = true;
@@ -14,12 +14,12 @@ for (var i = 0; i < process.argv.length; i++) {
     }
 }
 
-var startWebpack = (configFile) => {
+const startWebpack = (configFile) => {
     return new Promise(resolve => {
         let file = 'npx';
         const args = ['webpack', '--config', configFile];
         if (os.platform() === 'win32') {
-            file = "node_modules\\.bin\\webpack.cmd";
+            file = 'node_modules\\.bin\\webpack.cmd';
             args.splice(0, 1);
         }
         const env = process.env;
@@ -34,21 +34,37 @@ var startWebpack = (configFile) => {
 
         console.log(file, args);
 
-        const electron = spawn(file, args, { stdio: 'inherit', env: env });
-        electron.on('close', () => {
-            resolve();
+        const ps = spawn(file, args, { stdio: 'inherit', env: env });
+        ps.on('close', code => {
+            console.log(file, args, 'exit ' + code);
+            if (code === 0) {
+                resolve([true]);
+            } else {
+                resolve([false, 'Exit ' + code]);
+            }
         });
     });
-}
+};
 
-var startApp = () => {
+const startApp = () => {
     return startWebpack('webpack.app.js');
 };
 
-var startLogin = () => {
+const startLogin = () => {
     return startWebpack('webpack.login.js');
 };
 
 (async () => {
-    await Promise.all([startApp(), startLogin()]);
+    const results = await Promise.all([startApp(), startLogin()]);
+    const appResult = results[0];
+    const loginResult = results[1];
+
+    if (!appResult[0]) {
+        console.error('building app failed', appResult[1]);
+        throw 'failed';
+    }
+    if (!loginResult[0]) {
+        console.error('building login failed', loginResult[1]);
+        throw 'failed';
+    }
 })();
