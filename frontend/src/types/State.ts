@@ -8,7 +8,6 @@ export interface State {
     Hostname: string;
     Warnings: ('default_user_password')[];
     Options: Options.OttoOptions;
-    Enums: { [name: string]: { [key: string]: string; }[]; };
 }
 
 interface Runtime {

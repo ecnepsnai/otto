@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { AddButton, Button } from '../../../components/Button';
-import { ContextMenuItem } from '../../../components/ContextMenu';
-import { Input } from '../../../components/input/Input';
-import { Icon } from '../../../components/Icon';
-import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { Column, Table } from '../../../components/Table';
-import { StateManager } from '../../../services/StateManager';
-import { GroupType } from '../../../types/Group';
-import { RegisterRuleType, RegisterRuleClauseType } from '../../../types/RegisterRule';
+import { ContextMenuItem } from '../../../components/ContextMenu';
+import { DefaultSort } from '../../../services/Sort';
 import { Formatter } from '../../../services/Formatter';
+import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
+import { GroupType } from '../../../types/Group';
+import { Icon } from '../../../components/Icon';
+import { Input } from '../../../components/input/Input';
+import { RegisterRulePropertyConfig } from '../../../types/cbgen_enum';
+import { RegisterRuleType, RegisterRuleClauseType } from '../../../types/RegisterRule';
 import { Style } from '../../../components/Style';
 import '../../../../css/registerrules.scss';
-import { DefaultSort } from '../../../services/Sort';
 
 interface RegisterRulesProps {
     rules: RegisterRuleType[];
@@ -243,12 +243,10 @@ const RuleClauseEdit: React.FC<RuleClauseEditProps> = (props: RuleClauseEditProp
         });
     };
 
-    const state = StateManager.Current();
-    const properties = state.Enums['RegisterRuleProperty'];
-    const radioChoices = properties.map(property => {
+    const radioChoices = RegisterRulePropertyConfig().map(property => {
         return {
-            value: property['value'],
-            label: property['description'],
+            value: property.value,
+            label: property.description,
         };
     });
 
