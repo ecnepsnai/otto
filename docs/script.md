@@ -8,6 +8,9 @@ For example: `bash <script>`, `python <python file>`.
 An Otto agent can run multiple scripts in parallel, and scripts can be aborted by the user during execution. Aborted
 scripts are killed with SIGTERM.
 
+By default scripts run with their working directory set to a temporary directory, unless the working directory is
+specified by the script configuration.
+
 ## Environment Variables
 
 Environment variables are run-time variables that are passed to the script when it is run on the host. Variables can be

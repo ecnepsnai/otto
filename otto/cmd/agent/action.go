@@ -69,6 +69,11 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	Stats.ScriptsExecuted++
 	Stats.LastScriptExecuted = time.Now().UTC().Unix()
 
+	tmpDir, err := os.MkdirTemp("", "otto")
+	if err != nil {
+		panic(err)
+	}
+
 	tmp, err := os.CreateTemp("", "otto")
 	if err != nil {
 		panic(err)
@@ -140,6 +145,8 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 
 	if message.WorkingDirectory != "" {
 		cmd.Dir = message.WorkingDirectory
+	} else {
+		cmd.Dir = tmpDir
 	}
 
 	result := otto.ScriptResult{}
@@ -215,6 +222,7 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 
 	result.Success = true
 	canCancel = false
+	os.RemoveAll(tmpDir)
 	return result
 }
 
