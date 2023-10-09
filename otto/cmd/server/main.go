@@ -11,11 +11,18 @@ import (
 )
 
 func main() {
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	killSignal := make(chan os.Signal, 1)
+	signal.Notify(killSignal, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		<-sigs
+		<-killSignal
 		stop()
+	}()
+
+	printSignal := make(chan os.Signal, 1)
+	signal.Notify(printSignal, syscall.SIGTRAP)
+	go func() {
+		<-printSignal
+		runtime.Breakpoint()
 	}()
 	start()
 }
