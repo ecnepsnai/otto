@@ -170,11 +170,3 @@ func (s Script) ScriptInfo() otto.ScriptInfo {
 		Environment:      map[string]string{}, // Populated during execution
 	}
 }
-
-func (s Script) WriteTo(conn *otto.Connection) error {
-	if _, err := conn.WriteData([]byte(s.Script)); err != nil {
-		log.Error("Error writing script file '%s': %s", s.ID, err.Error())
-		return err
-	}
-	return nil
-}

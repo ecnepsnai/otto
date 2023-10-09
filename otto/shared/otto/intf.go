@@ -84,12 +84,22 @@ func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader i
 		})
 		return nil, err
 	}
-	if _, err := io.Copy(conn.w, scriptReader); err != nil {
+	wrote, err := io.Copy(conn.w, scriptReader)
+	if err != nil {
 		log.PError("Error writing message", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return nil, err
 	}
+	if err := conn.WriteFinished(); err != nil {
+		log.PError("Error writing message", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	log.PDebug("Wrote script data", map[string]interface{}{
+		"script_length": wrote,
+	})
 	scriptReader.Close()
 
 	go func() {
@@ -147,7 +157,13 @@ func (conn *Connection) TriggerActionUploadFile(file FileInfo, fileReader io.Rea
 		return err
 	}
 	if _, err := io.Copy(conn.w, fileReader); err != nil {
-		log.PError("Error writing message", map[string]interface{}{
+		log.PError("Error writing file data", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return err
+	}
+	if err := conn.WriteFinished(); err != nil {
+		log.PError("Error writing file data", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return err

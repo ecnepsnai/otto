@@ -85,9 +85,9 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	}
 	defer os.Remove(tmp.Name())
 
-	totalCopied := uint64(0)
-	var scriptBuffer = make([]byte, 1024)
-	for totalCopied < message.Length {
+	totalScriptWrote := uint64(0)
+	var scriptBuffer = make([]byte, min(message.ScriptInfo.Length, 1024))
+	for totalScriptWrote < message.ScriptInfo.Length {
 		read, err := conn.ReadData(scriptBuffer)
 		if err != nil && err != io.EOF {
 			tmp.Close()
@@ -101,10 +101,38 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 				Elapsed:   time.Since(start),
 			}
 		}
-		tmp.Write(scriptBuffer[0:read])
-		totalCopied += uint64(read)
+		if read == 0 {
+			break
+		}
+		if _, err := tmp.Write(scriptBuffer[0:read]); err != nil {
+			tmp.Close()
+			log.PError("Error writing script data", map[string]interface{}{
+				"error": err.Error(),
+			})
+			canCancel = false
+			return otto.ScriptResult{
+				Success:   false,
+				ExecError: "Error copying script data",
+				Elapsed:   time.Since(start),
+			}
+		}
+		totalScriptWrote += uint64(read)
 	}
 	tmp.Close()
+
+	if totalScriptWrote != message.ScriptInfo.Length {
+		log.PError("Unexpected end of script data", map[string]interface{}{
+			"script_length": message.ScriptInfo.Length,
+			"data_length":   totalScriptWrote,
+		})
+		canCancel = false
+		return otto.ScriptResult{
+			Success:   false,
+			ExecError: "Error copying script data",
+			Elapsed:   time.Since(start),
+		}
+	}
+
 	cmd := exec.Command(message.Executable, tmp.Name())
 	log.Debug("Exec: %s %s", message.Executable, tmp.Name())
 

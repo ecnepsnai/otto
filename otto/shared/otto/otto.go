@@ -187,8 +187,8 @@ type RegisterResponse struct {
 // Depending on the message type, there may be additional data to read following the message. It is up to the caller to
 // continue reading any additional data.
 func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
-	versionBuf := make([]byte, 4)
-	if _, err := io.ReadFull(c.w, versionBuf); err != nil {
+	headerBuf := make([]byte, 4*3)
+	if _, err := io.ReadFull(c.w, headerBuf); err != nil {
 		if err == io.EOF {
 			// Agent closed - nothing to read
 			return 0, nil, err
@@ -197,7 +197,11 @@ func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 		log.Error("Error reading version: %s", err.Error())
 		return 0, nil, err
 	}
-	version := binary.BigEndian.Uint32(versionBuf)
+
+	version := binary.BigEndian.Uint32(headerBuf[0:4])
+	messageType := MessageType(binary.BigEndian.Uint32(headerBuf[4:8]))
+	dataLength := binary.BigEndian.Uint32(headerBuf[8:12])
+
 	if version > ProtocolVersion {
 		log.PError("Unsupported protocol version", map[string]interface{}{
 			"frame_version":     version,
@@ -208,37 +212,16 @@ func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 	if version < ProtocolVersion {
 		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
 	}
-	messageTypeBuf := make([]byte, 4)
-	if _, err := io.ReadFull(c.w, messageTypeBuf); err != nil {
-		if err == io.EOF {
-			// Agent closed - nothing to read
-			return 0, nil, err
-		}
-
-		log.Error("Error reading message type: %s", err.Error())
-		return 0, nil, err
-	}
-	messageType := MessageType(binary.BigEndian.Uint32(messageTypeBuf))
-	dataLengthBuf := make([]byte, 4)
-	if _, err := io.ReadFull(c.w, dataLengthBuf); err != nil {
-		if err == io.EOF {
-			// Agent closed - nothing to read
-			return 0, nil, err
-		}
-
-		log.Error("Error reading data length: %s", err.Error())
-		return 0, nil, err
-	}
-	dataLength := binary.BigEndian.Uint32(dataLengthBuf)
-	if dataLength == 0 {
-		return messageType, nil, nil
-	}
 
 	log.PDebug("Read message", map[string]interface{}{
 		"version":      version,
 		"message_type": messageType,
 		"data_length":  dataLength,
 	})
+
+	if dataLength == 0 {
+		return messageType, nil, nil
+	}
 
 	decoder := gob.NewDecoder(c.w)
 
@@ -329,28 +312,19 @@ func (c *Connection) WriteMessage(messageType MessageType, message interface{}) 
 		messageData = data
 		messageLength = uint32(len(data))
 	}
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, ProtocolVersion)
-	messageTypeBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(messageTypeBuf, uint32(messageType))
-	messageLengthBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(messageLengthBuf, messageLength)
+
+	headerBuf := make([]byte, 4*3)
+	binary.BigEndian.PutUint32(headerBuf[0:], ProtocolVersion)
+	binary.BigEndian.PutUint32(headerBuf[4:], uint32(messageType))
+	binary.BigEndian.PutUint32(headerBuf[8:], messageLength)
 
 	log.PDebug("Preparing message", map[string]interface{}{
 		"message_type":        messageType,
 		"message_data_length": messageLength,
 	})
 
-	if _, err := c.w.Write(versionBuf); err != nil {
+	if _, err := c.w.Write(headerBuf); err != nil {
 		log.Error("Error writing version: %s", err.Error())
-		return err
-	}
-	if _, err := c.w.Write(messageTypeBuf); err != nil {
-		log.Error("Error writing message type: %s", err.Error())
-		return err
-	}
-	if _, err := c.w.Write(messageLengthBuf); err != nil {
-		log.Error("Error writing message length: %s", err.Error())
 		return err
 	}
 	if messageLength > 0 {
@@ -363,9 +337,14 @@ func (c *Connection) WriteMessage(messageType MessageType, message interface{}) 
 }
 
 // WriteData will write raw data to the connection. This data must only be written after a message that is appropriate
-// for raw data.
+// for raw data. Note, you must call Connection.WriteFinished() when you've written all your data.
 func (c *Connection) WriteData(p []byte) (int, error) {
 	return c.w.Write(p)
+}
+
+// WriteFinished will signal that all data has been written. This does not close the connection.
+func (c *Connection) WriteFinished() error {
+	return c.w.CloseWrite()
 }
 
 func encodeMessageData(message interface{}) ([]byte, error) {
@@ -380,17 +359,22 @@ func encodeMessageData(message interface{}) ([]byte, error) {
 
 const sshChannelName = "otto"
 
+type ReadWriteCloserFinisher interface {
+	io.ReadWriteCloser
+	CloseWrite() error
+}
+
 // Connection describes a connection between the Otto Server and Otto Host
 type Connection struct {
 	id             int
-	w              io.ReadWriteCloser
+	w              ReadWriteCloserFinisher
 	remoteAddr     net.Addr
 	localAddr      net.Addr
 	remoteIdentity []byte
 	localIdentity  []byte
 }
 
-func MockConnection(w io.ReadWriteCloser) *Connection {
+func MockConnection(w ReadWriteCloserFinisher) *Connection {
 	return &Connection{
 		w: w,
 	}

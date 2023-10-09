@@ -34,6 +34,10 @@ func (m mockConnectionType) Close() error {
 	return nil
 }
 
+func (m mockConnectionType) CloseWrite() error {
+	return nil
+}
+
 func TestMain(m *testing.M) {
 	for _, arg := range os.Args {
 		if arg == "-test.v=true" {
