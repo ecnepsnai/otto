@@ -14,6 +14,22 @@ import (
 func handleTriggerAction(conn *otto.Connection, messageType otto.MessageType, message interface{}, cancel chan bool) {
 	switch messageType {
 	case otto.MessageTypeTriggerActionRunScript:
+		finished := false
+		startTime := time.Now().Unix()
+		timeoutSeconds := int64(600)
+		if config.ScriptTimeout != nil {
+			timeoutSeconds = *config.ScriptTimeout
+		}
+
+		go func() {
+			for !finished {
+				time.Sleep(100 * time.Millisecond)
+				if time.Now().Unix()-startTime > timeoutSeconds {
+					cancel <- true
+				}
+			}
+		}()
+
 		result := handleTriggerActionRunScript(conn, message.(otto.MessageTriggerActionRunScript), cancel)
 		conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{
 			ScriptResult: result,
@@ -53,6 +69,7 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 					syscall.Kill(-pgid, 15)
 					log.Warn("Killed running script")
 				}
+				conn.Close()
 			default:
 				//
 			}
@@ -295,11 +312,19 @@ func handleTriggerActionExitAgent(conn *otto.Connection) {
 func handleTriggerActionReboot(conn *otto.Connection) {
 	conn.Close()
 	log.Warn("Rebooting at request of '%s'", conn.RemoteAddr().String())
-	exec.Command("/usr/sbin/reboot").Run()
+	command := "/usr/sbin/reboot"
+	if config.RebootCommand != nil {
+		command = *config.RebootCommand
+	}
+	exec.Command(command).Run()
 }
 
 func handleTriggerActionShutdown(conn *otto.Connection) {
 	conn.Close()
 	log.Warn("Shutting down at request of '%s'", conn.RemoteAddr().String())
-	exec.Command("/usr/sbin/halt").Run()
+	command := "/usr/sbin/halt"
+	if config.ShutdownCommand != nil {
+		command = *config.ShutdownCommand
+	}
+	exec.Command(command).Run()
 }

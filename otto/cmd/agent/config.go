@@ -14,14 +14,17 @@ import (
 )
 
 type agentConfig struct {
-	ListenAddr     string   `json:"listen_addr"`
-	IdentityPath   string   `json:"identity_path"`
-	ServerIdentity string   `json:"server_identity"`
-	LogPath        string   `json:"log_path"`
-	DefaultUID     uint32   `json:"default_uid"`
-	DefaultGID     uint32   `json:"default_gid"`
-	Path           string   `json:"path"`
-	AllowFrom      []string `json:"allow_from"`
+	ListenAddr      string   `json:"listen_addr"`
+	IdentityPath    string   `json:"identity_path"`
+	ServerIdentity  string   `json:"server_identity"`
+	LogPath         string   `json:"log_path"`
+	DefaultUID      uint32   `json:"default_uid"`
+	DefaultGID      uint32   `json:"default_gid"`
+	Path            string   `json:"path"`
+	AllowFrom       []string `json:"allow_from"`
+	ScriptTimeout   *int64   `json:"script_timeout,omitempty"`
+	RebootCommand   *string  `json:"reboot_command,omitempty"`
+	ShutdownCommand *string  `json:"shutdown_command,omitempty"`
 }
 
 var config *agentConfig

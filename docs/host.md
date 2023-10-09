@@ -4,7 +4,7 @@ An Otto host is a individual host that is running the Otto agent daemon. Scripts
 
 ## Installing the Agent
 
-Agent binaries are provided by the Otto server at `/agents`. Otto servers only provide the same version of agent as
+Agent binaries are provided by the Otto server at `/agents/`. Otto servers only provide the same version of agent as
 the server itself.
 
 ### System Requirements
@@ -56,6 +56,9 @@ binary.
 |`default_gid`|No|number|The GID for scripts to run as.|The current GID of the Otto agent process|
 |`path`|No|string|The value of the $PATH environment variable used when running scripts.|Value of `$PATH`|
 |`allow_from`|No|[]string|Array of CIDR addresses where connections from Otto Servers will be allowed from.|`["0.0.0.0/0", "::/0"]`
+|`script_timeout`|No|number|Maximum number of seconds a script can run before it is automatically aborted.|600 (10 minutes)|
+|`reboot_command`|No|string|Path to executable to run when rebooting the host.|`/usr/sbin/reboot`|
+|`shutdown_command`|No|string|Path to executable to run when shutting down the host.|`/usr/sbin/halt`|
 
 **Example:**
 
