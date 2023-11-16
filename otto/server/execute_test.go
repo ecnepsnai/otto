@@ -168,6 +168,7 @@ func TestExecuteAction(t *testing.T) {
 		if scriptInfo.Name != scriptName {
 			t.Fatalf("Bad script name")
 		}
+		conn.WriteMessage(otto.MessageTypeReadyForData, nil)
 		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ScriptResult: otto.ScriptResult{Success: true}, AgentVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}

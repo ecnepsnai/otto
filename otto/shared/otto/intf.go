@@ -84,6 +84,14 @@ func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader i
 		})
 		return nil, err
 	}
+
+	log.Debug("Waiting for agent")
+	if messageType, _, _ := conn.ReadMessage(); messageType != MessageTypeReadyForData {
+		log.Error("Unexpected message from agent when waiting for MessageTypeReadyForData: %d", messageType)
+		return nil, fmt.Errorf("error writing script data: unexpected message from agent %d", messageType)
+	}
+	log.Debug("Agent is ready for script data")
+
 	wrote, err := io.Copy(conn.w, scriptReader)
 	if err != nil {
 		log.PError("Error writing message", map[string]interface{}{

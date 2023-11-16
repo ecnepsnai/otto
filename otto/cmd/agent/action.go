@@ -77,14 +77,6 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	}()
 
 	start := time.Now()
-	log.PInfo("Executing script", map[string]interface{}{
-		"remote_addr": conn.RemoteAddr().String(),
-		"name":        message.Name,
-		"wd":          message.WorkingDirectory,
-		"exec":        message.Executable,
-	})
-	Stats.ScriptsExecuted++
-	Stats.LastScriptExecuted = time.Now().UTC().Unix()
 
 	tmpDir, err := os.MkdirTemp("", "otto")
 	if err != nil {
@@ -104,6 +96,22 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 
 	totalScriptWrote := uint64(0)
 	var scriptBuffer = make([]byte, min(message.ScriptInfo.Length, 1024))
+	log.Debug("Allocating %dB for script buffer", len(scriptBuffer))
+	readAttempts := 0
+
+	log.Debug("Telling server we're ready for script data")
+	if err := conn.WriteMessage(otto.MessageTypeReadyForData, nil); err != nil {
+		log.PError("Error replying to server", map[string]interface{}{
+			"error": err.Error(),
+		})
+		canCancel = false
+		return otto.ScriptResult{
+			Success:   false,
+			ExecError: "Error copying script data",
+			Elapsed:   time.Since(start),
+		}
+	}
+
 	for totalScriptWrote < message.ScriptInfo.Length {
 		read, err := conn.ReadData(scriptBuffer)
 		if err != nil && err != io.EOF {
@@ -118,10 +126,22 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 				Elapsed:   time.Since(start),
 			}
 		}
+
+		// If no data but we haven't finished copying yet, give the server a bit more time
 		if read == 0 {
+			if totalScriptWrote < message.ScriptInfo.Length && readAttempts < 15 {
+				log.Debug("No script data yet, waiting for server (%d/15)", readAttempts+1)
+				time.Sleep(50 * time.Millisecond)
+				readAttempts++
+				continue
+			}
+
+			log.Debug("Finished reading script")
 			break
 		}
-		if _, err := tmp.Write(scriptBuffer[0:read]); err != nil {
+
+		wrote, err := tmp.Write(scriptBuffer[0:read])
+		if err != nil {
 			tmp.Close()
 			log.PError("Error writing script data", map[string]interface{}{
 				"error": err.Error(),
@@ -134,13 +154,14 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 			}
 		}
 		totalScriptWrote += uint64(read)
+		log.Debug("Wrote %dB of script data to %s", wrote, tmp.Name())
 	}
 	tmp.Close()
 
 	if totalScriptWrote != message.ScriptInfo.Length {
 		log.PError("Unexpected end of script data", map[string]interface{}{
 			"script_length": message.ScriptInfo.Length,
-			"data_length":   totalScriptWrote,
+			"wrote_length":  totalScriptWrote,
 		})
 		canCancel = false
 		return otto.ScriptResult{
@@ -149,6 +170,15 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 			Elapsed:   time.Since(start),
 		}
 	}
+
+	log.PInfo("Executing script", map[string]interface{}{
+		"remote_addr": conn.RemoteAddr().String(),
+		"name":        message.Name,
+		"wd":          message.WorkingDirectory,
+		"exec":        message.Executable,
+	})
+	Stats.ScriptsExecuted++
+	Stats.LastScriptExecuted = time.Now().UTC().Unix()
 
 	cmd := exec.Command(message.Executable, tmp.Name())
 	log.Debug("Exec: %s %s", message.Executable, tmp.Name())
@@ -285,6 +315,14 @@ func handleTriggerActionReloadConfig(conn *otto.Connection) string {
 
 func handleTriggerActionUploadFile(conn *otto.Connection, message otto.MessageTriggerActionUploadFile) string {
 	err := uploadFile(message.FileInfo, func(f io.Writer) error {
+		log.Debug("Telling server we're ready for script data")
+		if err := conn.WriteMessage(otto.MessageTypeReadyForData, nil); err != nil {
+			log.PError("Error replying to server", map[string]interface{}{
+				"error": err.Error(),
+			})
+			return err
+		}
+
 		totalCopied := uint64(0)
 		var fileBuffer = make([]byte, 1024)
 		for totalCopied < message.Length {

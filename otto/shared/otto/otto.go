@@ -58,6 +58,7 @@ const (
 	MessageTypeCancelAction
 	MessageTypeActionOutput
 	MessageTypeActionResult
+	MessageTypeReadyForData
 )
 
 // MessageHeartbeatRequest describes a heartbeat request
