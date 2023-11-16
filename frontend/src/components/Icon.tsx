@@ -32,6 +32,7 @@ import {
     faPaperclip,
     faPlayCircle,
     faPlus,
+    faPuzzlePiece,
     faQuestionCircle,
     faRandom,
     faScroll,
@@ -90,6 +91,7 @@ export namespace Icon {
     export const ChevronRight: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faChevronRight, options: props });
     export const Clipboard: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faClipboard, options: props });
     export const Cog: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCog, options: props });
+    export const Delete: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTrashAlt, options: props });
     export const Desktop: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faDesktop, options: props });
     export const Download: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faDownload, options: props });
     export const Edit: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faEdit, options: props });
@@ -110,6 +112,7 @@ export namespace Icon {
     export const Paperclip: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faPaperclip, options: props });
     export const PlayCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faPlayCircle, options: props });
     export const Plus: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faPlus, options: props });
+    export const PuzzlePiece: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faPuzzlePiece, options: props });
     export const QuestionCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faQuestionCircle, options: props });
     export const Random: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faRandom, options: props });
     export const Scroll: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faScroll, options: props });
@@ -119,7 +122,6 @@ export namespace Icon {
     export const StarOfLife: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faStarOfLife, options: props });
     export const Terminal: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTerminal, options: props });
     export const TimesCircle: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTimesCircle, options: props });
-    export const Delete: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faTrashAlt, options: props });
     export const Undo: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUndo, options: props });
     export const Unlock: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUnlock, options: props });
     export const User: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faUser, options: props });

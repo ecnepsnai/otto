@@ -3,6 +3,7 @@ package server
 import (
 	"strings"
 
+	"github.com/ecnepsnai/logtic"
 	"github.com/ecnepsnai/web"
 )
 
@@ -49,4 +50,39 @@ func (h *handle) OptionsSet(request web.Request) (interface{}, *web.APIResponse,
 	}
 
 	return options, nil, nil
+}
+
+func (h *handle) OptionsSetVerbose(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+
+	if !session.User().Permissions.CanModifySystem {
+		EventStore.UserPermissionDenied(session.User().Username, "Modify system settings")
+		return nil, nil, web.ValidationError("Permission denied")
+	}
+
+	type verboseOptionsType struct {
+		Enabled bool
+	}
+
+	options := verboseOptionsType{}
+
+	if err := request.DecodeJSON(&options); err != nil {
+		return nil, nil, web.CommonErrors.BadRequest
+	}
+
+	previousSetting := verboseEnabled
+	newSetting := options.Enabled
+
+	verboseEnabled = newSetting
+
+	if !previousSetting && newSetting { // Enabling
+		logtic.Log.Level = logtic.LevelDebug
+		log.Warn("User %s enabled verbose logging", session.User().Username)
+	}
+	if previousSetting && !newSetting { // Disabling
+		logtic.Log.Level = logtic.LevelInfo
+		log.Warn("User %s disabled verbose logging", session.User().Username)
+	}
+
+	return verboseEnabled, nil, nil
 }

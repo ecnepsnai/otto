@@ -53,5 +53,11 @@ export namespace Options {
             await StateManager.Refresh();
             return results as OttoOptions;
         }
+
+        public static async SetVerboseLogging(enabled: boolean): Promise<boolean> {
+            const results = await API.POST('/api/options/verbose', { Enabled: enabled });
+            await StateManager.Refresh();
+            return results as boolean;
+        }
     }
 }

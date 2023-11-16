@@ -12,6 +12,7 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 		ServerFQDN string
 		Version    string
 		Config     string
+		Verbose    bool
 	}
 	type stateType struct {
 		Runtime  runtimeType
@@ -28,6 +29,7 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 			ServerFQDN: hostname,
 			Version:    Version,
 			Config:     runtime.GOOS + "_" + runtime.GOARCH,
+			Verbose:    verboseEnabled,
 		},
 		User:     user,
 		Warnings: []string{},

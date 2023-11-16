@@ -6,6 +6,8 @@ import (
 	"github.com/ecnepsnai/logtic"
 )
 
+var verboseEnabled = false
+
 // Start the app
 func Start() {
 	preBootstrapArgs()

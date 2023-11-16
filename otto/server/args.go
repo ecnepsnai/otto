@@ -46,6 +46,10 @@ func preBootstrapArgs() {
 }
 
 func isVerbose() bool {
+	if verboseEnabled {
+		return true
+	}
+
 	args := os.Args[1:]
 	for _, arg := range args {
 		if arg == "-v" || arg == "--verbose" {

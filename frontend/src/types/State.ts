@@ -14,4 +14,5 @@ interface Runtime {
     ServerFQDN: string;
     Version: string;
     Config: string;
+    Verbose: boolean;
 }

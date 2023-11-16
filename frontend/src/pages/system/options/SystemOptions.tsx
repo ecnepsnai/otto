@@ -8,6 +8,7 @@ import { OptionsAuthentication } from './OptionsAuthentication';
 import { OptionsNetwork } from './OptionsNetwork';
 import { Notification } from '../../../components/Notification';
 import { OptionsSecurity } from './OptionsSecurity';
+import { OptionsAdvanced } from './OptionsAdvanced';
 import { Tabs } from '../../../components/Tabs';
 import { Icon } from '../../../components/Icon';
 
@@ -67,6 +68,9 @@ export const SystemOptions: React.FC = () => {
                     </Tabs.Tab>
                     <Tabs.Tab icon={<Icon.Shield />} title="Security">
                         <OptionsSecurity defaultValue={options.Security} onUpdate={changeSecurity} />
+                    </Tabs.Tab>
+                    <Tabs.Tab icon={<Icon.PuzzlePiece />} title="Advanced">
+                        <OptionsAdvanced />
                     </Tabs.Tab>
                 </Tabs.Tabs>
             </Form>
