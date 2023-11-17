@@ -3,7 +3,6 @@ set -e
 
 ROOT_PATH=$(realpath ../../)
 OTTO_VERSION=${1:?Version required}
-BUILD_DATE=$(date -R)
 DOCKER_CMD=${DOCKER:-"podman"}
 COLOR_NC='\033[0m'
 COLOR_GREEN='\033[0;32m'

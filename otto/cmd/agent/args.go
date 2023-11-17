@@ -23,6 +23,7 @@ func parseArgs() {
 			message := `Otto agent:
 	Version: %s
 	Built On: %s
+	Revision: %s
 	Protocol version: %d
 	Go runtime: %s
 
@@ -33,7 +34,7 @@ Host Information:
 	Distribution Name: %s
 	Distribution Version: %s
 `
-			fmt.Printf(message, Version, BuildDate, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
+			fmt.Printf(message, Version, BuildDate, BuildRevision, otto.ProtocolVersion, runtime.Version(), registerProperties.Hostname, registerProperties.KernelName, registerProperties.KernelVersion, registerProperties.DistributionName, registerProperties.DistributionVersion)
 			os.Exit(0)
 		} else if arg == "-d" || arg == "--debug" {
 			logtic.Log.Level = logtic.LevelDebug

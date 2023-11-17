@@ -4,6 +4,7 @@ set -e
 ROOT_PATH=$(realpath ../../)
 OTTO_VERSION=${1:?Version required}
 BUILD_DATE=$(date -R)
+BUILD_REVISION=$(git rev-parse HEAD)
 DOCKER_CMD=${DOCKER:-"podman"}
 COLOR_NC='\033[0m'
 COLOR_GREEN='\033[0;32m'
@@ -34,7 +35,7 @@ GOLANG_VERSION=$(curl -sS "https://go.dev/dl/?mode=json" | jq -r '.[0].version' 
 podman build --build-arg GOLANG_ARCH=${GOLANG_ARCH} --build-arg GOLANG_VERSION=${GOLANG_VERSION} -t otto_build_rpm:${OTTO_VERSION} . >> ${LOG} 2>&1
 rm -rf rpms
 mkdir -p rpms
-podman run --user root -v $(readlink -f rpms):/root/rpmbuild/RPMS:Z -e OTTO_VERSION=${OTTO_VERSION} -e BUILD_DATE="${BUILD_DATE}" -it otto_build_rpm:${OTTO_VERSION} >> ${LOG} 2>&1
+podman run --user root -v $(readlink -f rpms):/root/rpmbuild/RPMS:Z -e OTTO_VERSION=${OTTO_VERSION} -e BUILD_DATE="${BUILD_DATE} -e BUILD_REVISION="${BUILD_REVISION}" -it otto_build_rpm:${OTTO_VERSION} >> ${LOG} 2>&1
 cp rpms/*/*.rpm .
 mv *.rpm ../../../artifacts
 cd ../

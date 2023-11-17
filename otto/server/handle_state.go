@@ -9,10 +9,12 @@ import (
 
 func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
 	type runtimeType struct {
-		ServerFQDN string
-		Version    string
-		Config     string
-		Verbose    bool
+		ServerFQDN    string
+		Version       string
+		BuildDate     string
+		BuildRevision string
+		Config        string
+		Verbose       bool
 	}
 	type stateType struct {
 		Runtime  runtimeType
@@ -26,10 +28,12 @@ func (h *handle) State(request web.Request) (interface{}, *web.APIResponse, *web
 
 	s := stateType{
 		Runtime: runtimeType{
-			ServerFQDN: hostname,
-			Version:    Version,
-			Config:     runtime.GOOS + "_" + runtime.GOARCH,
-			Verbose:    verboseEnabled,
+			ServerFQDN:    hostname,
+			Version:       Version,
+			BuildDate:     BuildDate,
+			BuildRevision: BuildRevision,
+			Config:        runtime.GOOS + "_" + runtime.GOARCH,
+			Verbose:       verboseEnabled,
 		},
 		User:     user,
 		Warnings: []string{},

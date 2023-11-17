@@ -7,3 +7,7 @@ var Version = "dev"
 // BuildDate the date (in RFC-3339 format) when the Otto server was built.
 // Should be populated at build-time.
 var BuildDate = ""
+
+// BuildRevision the git commit hash.
+// Should be populated at build-time.
+var BuildRevision = ""
