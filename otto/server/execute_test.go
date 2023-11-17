@@ -169,6 +169,8 @@ func TestExecuteAction(t *testing.T) {
 			t.Fatalf("Bad script name")
 		}
 		conn.WriteMessage(otto.MessageTypeReadyForData, nil)
+		var buf = make([]byte, scriptInfo.ScriptInfo.Length)
+		conn.ReadData(buf)
 		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ScriptResult: otto.ScriptResult{Success: true}, AgentVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
 		}
@@ -195,7 +197,7 @@ func TestExecuteAction(t *testing.T) {
 	}
 
 	if !result.Result.Success {
-		t.Errorf("Unexpected result status")
+		t.Errorf("Unexpected result status: %+v", result.Result)
 	}
 
 	hb := heartbeatStore.LastHeartbeat(host)
