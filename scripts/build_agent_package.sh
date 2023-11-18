@@ -35,7 +35,7 @@ go test -v ./... >> ${LOG} 2>&1
 cd ${OTTO_PATH}/cmd/agent
 CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} GOAMD64=v2 go build -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.BuildDate=${BUILD_DATE}' -X 'main.BuildRevision=${BUILD_REVISION}'" -trimpath -buildmode=exe -o ${PRODUCT_NAME} >> ${LOG} 2>&1
 NAME=${PRODUCT_NAME}agent-${VERSION}_linux-${ARCH}
-tar -czf ${NAME}.tar.gz otto
+tar -czf ${NAME}.tar.gz ${PRODUCT_NAME}
 mv ${NAME}.tar.gz ${ROOT_PATH}/artifacts/
 git clean -qxdf
 cd ${ROOT_PATH}

@@ -19,7 +19,7 @@ Otto is an automation toolkit for Unix-like computers. This package provides the
 
 %build
 cd otto/cmd/agent
-CGO_ENABLED=0 GOAMD64=v2 go build -buildmode=exe -trimpath -ldflags="-s -w -X 'main.Version=%{version}' -X 'main.BuildDate=%{_date}'" -v -o agent
+CGO_ENABLED=0 GOAMD64=v2 go build -buildmode=exe -trimpath -ldflags="-s -w -X 'main.Version=%{version}' -X 'main.BuildDate=%{_date}' -X 'main.BuildRevision=%{_revision}'" -v -o agent
 ./agent -v
 
 %install
@@ -36,7 +36,7 @@ CGO_ENABLED=0 GOAMD64=v2 go test -v ./...
 %systemd_post %{name}.service
 
 %posttrans
-if test $(pidof /opt/%{name}/agent) = 1; then
+if test $(readlink /proc/*/exe | grep /opt/%{name}/agent | wc -l) = 1; then
     systemctl restart %{name}.service
 fi
 
