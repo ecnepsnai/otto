@@ -9,6 +9,7 @@ export enum UserAction {
     ModifyGroups,
     ModifyScripts,
     ModifySchedules,
+    ModifyRunbooks,
     AccessAuditLog,
     ModifyUsers,
     ModifyAutoregister,
@@ -36,6 +37,8 @@ export class Permissions {
                 return permissions.CanModifyScripts;
             case UserAction.ModifySchedules:
                 return permissions.CanModifySchedules;
+            case UserAction.ModifyRunbooks:
+                return permissions.CanModifyRunbooks;
             case UserAction.AccessAuditLog:
                 return permissions.CanAccessAuditLog;
             case UserAction.ModifyUsers:

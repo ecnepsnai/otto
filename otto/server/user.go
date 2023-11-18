@@ -17,6 +17,7 @@ type UserPermissions struct {
 	CanModifyGroups       bool
 	CanModifyScripts      bool
 	CanModifySchedules    bool
+	CanModifyRunbooks     bool
 	CanAccessAuditLog     bool
 	CanModifyUsers        bool
 	CanModifyAutoregister bool
@@ -34,6 +35,7 @@ func UserPermissionsMax() UserPermissions {
 		CanModifyGroups:       true,
 		CanModifyScripts:      true,
 		CanModifySchedules:    true,
+		CanModifyRunbooks:     true,
 		CanAccessAuditLog:     true,
 		CanModifyUsers:        true,
 		CanModifyAutoregister: true,
@@ -48,6 +50,7 @@ func UserPermissionsMin() UserPermissions {
 		CanModifyGroups:       false,
 		CanModifyScripts:      false,
 		CanModifySchedules:    false,
+		CanModifyRunbooks:     false,
 		CanAccessAuditLog:     false,
 		CanModifyUsers:        false,
 		CanModifyAutoregister: false,

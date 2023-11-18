@@ -93,6 +93,7 @@
       description: "All scripts can be executed"
 - name: EventType
   type: string
+  description: "Possible events for the audit log"
   values:
     - key: UserLoggedIn
       description: UserLoggedIn event
@@ -166,6 +167,15 @@
     - key: ScheduleDeleted
       description: ScheduleDeleted event
       value: '"ScheduleDeleted"'
+    - key: RunbookAdded
+      description: RunbookAdded event
+      value: '"RunbookAdded"'
+    - key: RunbookModified
+      description: RunbookModified event
+      value: '"RunbookModified"'
+    - key: RunbookDeleted
+      description: RunbookDeleted event
+      value: '"RunbookDeleted"'
     - key: AttachmentAdded
       description: AttachmentAdded event
       value: '"AttachmentAdded"'

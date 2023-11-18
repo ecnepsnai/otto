@@ -11,6 +11,9 @@ counters:
   - name: "NumberSchedules"
     description: "The number of schedules"
 
+  - name: "NumberRunbooks"
+    description: "The number of runbooks"
+
   - name: "NumberUsers"
     description: "The number of users"
 

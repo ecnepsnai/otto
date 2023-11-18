@@ -51,6 +51,7 @@ func ForEachAgentAction(m func(value string)) {
 	}
 }
 
+// Possible events for the audit log
 const (
 	// UserLoggedIn event
 	EventTypeUserLoggedIn = "UserLoggedIn"
@@ -100,6 +101,12 @@ const (
 	EventTypeScheduleModified = "ScheduleModified"
 	// ScheduleDeleted event
 	EventTypeScheduleDeleted = "ScheduleDeleted"
+	// RunbookAdded event
+	EventTypeRunbookAdded = "RunbookAdded"
+	// RunbookModified event
+	EventTypeRunbookModified = "RunbookModified"
+	// RunbookDeleted event
+	EventTypeRunbookDeleted = "RunbookDeleted"
 	// AttachmentAdded event
 	EventTypeAttachmentAdded = "AttachmentAdded"
 	// AttachmentModified event
@@ -152,6 +159,9 @@ var AllEventType = []string{
 	EventTypeScheduleAdded,
 	EventTypeScheduleModified,
 	EventTypeScheduleDeleted,
+	EventTypeRunbookAdded,
+	EventTypeRunbookModified,
+	EventTypeRunbookDeleted,
 	EventTypeAttachmentAdded,
 	EventTypeAttachmentModified,
 	EventTypeAttachmentDeleted,
@@ -192,6 +202,9 @@ var EventTypeMap = map[string]string{
 	EventTypeScheduleAdded:            "ScheduleAdded",
 	EventTypeScheduleModified:         "ScheduleModified",
 	EventTypeScheduleDeleted:          "ScheduleDeleted",
+	EventTypeRunbookAdded:             "RunbookAdded",
+	EventTypeRunbookModified:          "RunbookModified",
+	EventTypeRunbookDeleted:           "RunbookDeleted",
 	EventTypeAttachmentAdded:          "AttachmentAdded",
 	EventTypeAttachmentModified:       "AttachmentModified",
 	EventTypeAttachmentDeleted:        "AttachmentDeleted",

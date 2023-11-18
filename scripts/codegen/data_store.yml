@@ -17,3 +17,7 @@
   object: Event
 - name: RegisterRule
   object: RegisterRule
+- name: Runbook
+  object: Runbook
+- name: RunbookReport
+  object: RunbookReport

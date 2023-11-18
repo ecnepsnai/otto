@@ -74,6 +74,32 @@ func cbgenDataStoreRegisterRegisterRuleStore() {
 	RegisterRuleStore.Table = table
 }
 
+type runbookStoreObject struct{ Table *ds.Table }
+
+// RunbookStore the global runbook store
+var RunbookStore = runbookStoreObject{}
+
+func cbgenDataStoreRegisterRunbookStore() {
+	table, err := ds.Register(Runbook{}, path.Join(Directories.Data, "runbook.db"), &ds.Options{})
+	if err != nil {
+		log.Fatal("Error registering runbook store: %s", err.Error())
+	}
+	RunbookStore.Table = table
+}
+
+type runbookreportStoreObject struct{ Table *ds.Table }
+
+// RunbookReportStore the global runbookreport store
+var RunbookReportStore = runbookreportStoreObject{}
+
+func cbgenDataStoreRegisterRunbookReportStore() {
+	table, err := ds.Register(RunbookReport{}, path.Join(Directories.Data, "runbookreport.db"), &ds.Options{})
+	if err != nil {
+		log.Fatal("Error registering runbookreport store: %s", err.Error())
+	}
+	RunbookReportStore.Table = table
+}
+
 type scheduleStoreObject struct{ Table *ds.Table }
 
 // ScheduleStore the global schedule store
@@ -133,6 +159,8 @@ func dataStoreSetup() {
 	cbgenDataStoreRegisterGroupStore()
 	cbgenDataStoreRegisterHostStore()
 	cbgenDataStoreRegisterRegisterRuleStore()
+	cbgenDataStoreRegisterRunbookStore()
+	cbgenDataStoreRegisterRunbookReportStore()
 	cbgenDataStoreRegisterScheduleStore()
 	cbgenDataStoreRegisterScheduleReportStore()
 	cbgenDataStoreRegisterScriptStore()
@@ -155,6 +183,12 @@ func dataStoreTeardown() {
 	}
 	if RegisterRuleStore.Table != nil {
 		RegisterRuleStore.Table.Close()
+	}
+	if RunbookStore.Table != nil {
+		RunbookStore.Table.Close()
+	}
+	if RunbookReportStore.Table != nil {
+		RunbookReportStore.Table.Close()
 	}
 	if ScheduleStore.Table != nil {
 		ScheduleStore.Table.Close()

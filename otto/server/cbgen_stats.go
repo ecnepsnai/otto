@@ -12,6 +12,7 @@ import (
 type cbgenStatsCounters struct {
 	NumberGroups     *stats.Counter
 	NumberHosts      *stats.Counter
+	NumberRunbooks   *stats.Counter
 	NumberSchedules  *stats.Counter
 	NumberScripts    *stats.Counter
 	NumberUsers      *stats.Counter
@@ -42,6 +43,7 @@ func statsSetup() {
 		Counters: cbgenStatsCounters{
 			NumberGroups:     stats.NewCounter(),
 			NumberHosts:      stats.NewCounter(),
+			NumberRunbooks:   stats.NewCounter(),
 			NumberSchedules:  stats.NewCounter(),
 			NumberScripts:    stats.NewCounter(),
 			NumberUsers:      stats.NewCounter(),
@@ -65,6 +67,7 @@ func (s *cbgenStatsObject) GetCounterValues() map[string]uint64 {
 	return map[string]uint64{
 		"NumberGroups":     s.Counters.NumberGroups.Get(),
 		"NumberHosts":      s.Counters.NumberHosts.Get(),
+		"NumberRunbooks":   s.Counters.NumberRunbooks.Get(),
 		"NumberSchedules":  s.Counters.NumberSchedules.Get(),
 		"NumberScripts":    s.Counters.NumberScripts.Get(),
 		"NumberUsers":      s.Counters.NumberUsers.Get(),

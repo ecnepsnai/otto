@@ -15,6 +15,7 @@ export interface UserPermissions {
     CanModifyGroups?: boolean;
     CanModifyScripts?: boolean;
     CanModifySchedules?: boolean;
+    CanModifyRunbooks?: boolean;
     CanAccessAuditLog?: boolean;
     CanModifyUsers?: boolean;
     CanModifyAutoregister?: boolean;
