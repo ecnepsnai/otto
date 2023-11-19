@@ -18,6 +18,9 @@ import { ScriptView } from './pages/script/ScriptView';
 import { ScheduleEdit } from './pages/schedule/ScheduleEdit';
 import { ScheduleView } from './pages/schedule/ScheduleView';
 import { ScheduleList } from './pages/schedule/ScheduleList';
+import { RunbookEdit } from './pages/runbook/RunbookEdit';
+import { RunbookView } from './pages/runbook/RunbookView';
+import { RunbookList } from './pages/runbook/RunbookList';
 import { EventList } from './pages/event/EventList';
 import { SystemOptions } from './pages/system/options/SystemOptions';
 import { SystemUsers } from './pages/system/users/SystemUsers';
@@ -62,6 +65,10 @@ export const App: React.FC = () => {
                 <Route path="/schedules/schedule/:id" element={<ScheduleView />} />
                 <Route path="/schedules/schedule" element={<ScheduleEdit />} />
                 <Route path="/schedules" element={<ScheduleList />} />
+                <Route path="/runbooks/runbook/:id/edit" element={<RunbookEdit />} />
+                <Route path="/runbooks/runbook/:id" element={<RunbookView />} />
+                <Route path="/runbooks/runbook" element={<RunbookEdit />} />
+                <Route path="/runbooks" element={<RunbookList />} />
                 <Route path="/system/options" element={<SystemOptions />} />
                 <Route path="/system/users" element={<SystemUsers />} />
                 <Route path="/system/register" element={<SystemRegister />} />

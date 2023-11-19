@@ -27,6 +27,7 @@ export const Nav: React.FC = () => {
                             <NavItem link="/groups" icon={<Icon.LayerGroup />} label="Groups" />
                             <NavItem link="/scripts" icon={<Icon.Scroll />} label="Scripts" />
                             <NavItem link="/schedules" icon={<Icon.Calendar />} label="Schedules" />
+                            <NavItem link="/runbooks" icon={<Icon.Book />} label="Runbooks" />
                             { Permissions.UserCan(UserAction.AccessAuditLog) ? <NavItem link="/events" icon={<Icon.List />} label="Event Log" /> : null }
                         </ul>
                         <div className="d-flex">

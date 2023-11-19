@@ -5,6 +5,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import {
     faArrowLeft,
     faBars,
+    faBook,
     faCalendarAlt,
     faCaretDown,
     faCaretUp,
@@ -84,6 +85,7 @@ export namespace Icon {
 
     export const ArrowLeft: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowLeft, options: props });
     export const Bars: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBars, options: props });
+    export const Book: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBook, options: props });
     export const Calendar: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCalendarAlt, options: props });
     export const CaretDown: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCaretDown, options: props });
     export const CaretUp: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCaretUp, options: props });
