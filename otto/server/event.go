@@ -307,6 +307,42 @@ func (s *eventStoreObject) ScheduleDeleted(schedule *Schedule, currentUser strin
 	event.Save()
 }
 
+func (s *eventStoreObject) RunbookAdded(runbook *Runbook, currentUser string) {
+	event := newEvent(EventTypeRunbookAdded, map[string]string{
+		"runbook_id": runbook.ID,
+		"name":       runbook.Name,
+		"group_ids":  strings.Join(runbook.GroupIDs, ", "),
+		"script_ids": strings.Join(runbook.ScriptIDs, ", "),
+		"added_by":   currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) RunbookModified(runbook *Runbook, currentUser string) {
+	event := newEvent(EventTypeRunbookModified, map[string]string{
+		"runbook_id":  runbook.ID,
+		"name":        runbook.Name,
+		"group_ids":   strings.Join(runbook.GroupIDs, ", "),
+		"script_ids":  strings.Join(runbook.ScriptIDs, ", "),
+		"modified_by": currentUser,
+	})
+
+	event.Save()
+}
+
+func (s *eventStoreObject) RunbookDeleted(runbook *Runbook, currentUser string) {
+	event := newEvent(EventTypeRunbookDeleted, map[string]string{
+		"runbook_id": runbook.ID,
+		"name":       runbook.Name,
+		"group_ids":  strings.Join(runbook.GroupIDs, ", "),
+		"script_ids": strings.Join(runbook.ScriptIDs, ", "),
+		"deleted_by": currentUser,
+	})
+
+	event.Save()
+}
+
 func (s *eventStoreObject) AttachmentAdded(attachment *Attachment, currentUser string) {
 	event := newEvent(EventTypeAttachmentAdded, map[string]string{
 		"attachment_id": attachment.ID,

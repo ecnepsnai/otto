@@ -128,6 +128,13 @@ func RouterSetup() {
 	server.API.POST("/api/attachments/attachment/:id", h.AttachmentEdit, authenticatedOptions(false))
 	server.API.DELETE("/api/attachments/attachment/:id", h.AttachmentDelete, authenticatedOptions(false))
 
+	// Runbook
+	server.API.GET("/api/runbooks", h.RunbookList, authenticatedOptions(false))
+	server.API.PUT("/api/runbooks/runbook", h.RunbookNew, authenticatedOptions(false))
+	server.API.GET("/api/runbooks/runbook/:id", h.RunbookGet, authenticatedOptions(false))
+	server.API.POST("/api/runbooks/runbook/:id", h.RunbookEdit, authenticatedOptions(false))
+	server.API.DELETE("/api/runbooks/runbook/:id", h.RunbookDelete, authenticatedOptions(false))
+
 	// Request
 	server.API.PUT("/api/action/sync", h.RequestNew, authenticatedOptions(false))
 	server.Socket("/api/action/async", h.RequestStream, authenticatedOptions(false))

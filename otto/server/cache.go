@@ -20,6 +20,10 @@ func CacheSetup() {
 		ScheduleCache.Update(tx)
 		return nil
 	})
+	RunbookStore.Table.StartRead(func(tx ds.IReadTransaction) error {
+		RunbookCache.Update(tx)
+		return nil
+	})
 	UserStore.Table.StartRead(func(tx ds.IReadTransaction) error {
 		UserCache.Update(tx)
 		return nil
