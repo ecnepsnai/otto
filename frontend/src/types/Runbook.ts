@@ -2,6 +2,9 @@ import { API } from '../services/API';
 import { Modal } from '../components/Modal';
 import { Notification } from '../components/Notification';
 import { ScriptRunLevel } from './cbgen_enum';
+import { GroupType } from './Group';
+import { HostType } from './Host';
+import { ScriptType } from './Script';
 
 export interface RunbookType {
     ID?: string;
@@ -10,6 +13,7 @@ export interface RunbookType {
     ScriptIDs?: string[];
     HaltOnFailure?: boolean;
     RunLevel?: ScriptRunLevel;
+    LastRun?: string;
 }
 
 export class Runbook {
@@ -62,6 +66,30 @@ export class Runbook {
     public static async List(): Promise<RunbookType[]> {
         const data = await API.GET('/api/runbooks');
         return data as RunbookType[];
+    }
+
+    /**
+     * Get all groups for a runbook
+     */
+    public static async Groups(id: string): Promise<GroupType[]> {
+        const data = await API.GET('/api/runbooks/runbook/' + id + '/groups');
+        return data as GroupType[];
+    }
+
+    /**
+     * Get all hosts for a runbook
+     */
+    public static async Hosts(id: string): Promise<HostType[]> {
+        const data = await API.GET('/api/runbooks/runbook/' + id + '/hosts');
+        return data as HostType[];
+    }
+
+    /**
+     * Get all script for a runbook
+     */
+    public static async Scripts(id: string): Promise<ScriptType[]> {
+        const data = await API.GET('/api/runbooks/runbook/' + id + '/scripts');
+        return data as ScriptType[];
     }
 
     /**

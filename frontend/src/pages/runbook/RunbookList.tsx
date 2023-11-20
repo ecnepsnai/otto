@@ -5,7 +5,6 @@ import { Page } from '../../components/Page';
 import { CreateButton } from '../../components/Button';
 import { Column, Table } from '../../components/Table';
 import { Link } from 'react-router-dom';
-import { EnabledBadge } from '../../components/Badge';
 import { ContextMenuItem } from '../../components/ContextMenu';
 import { DateLabel } from '../../components/DateLabel';
 import { Icon } from '../../components/Icon';
@@ -52,15 +51,9 @@ export const RunbookList: React.FC = () => {
         {
             title: 'Last Run',
             value: (v: RunbookType) => {
-                return (<DateLabel date={v.LastRunTime} />);
+                return (<DateLabel date={v.LastRun} />);
             }
-        },
-        {
-            title: 'Status',
-            value: (v: RunbookType) => {
-                return (<EnabledBadge value={v.Enabled} />);
-            }
-        },
+        }
     ];
 
     return (

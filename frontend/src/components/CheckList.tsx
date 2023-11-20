@@ -162,6 +162,7 @@ export const GroupCheckList: React.FC<GroupCheckListProps> = (props: GroupCheckL
 };
 
 interface ScriptCheckListProps {
+    groupIds?: string[];
     selectedScripts: string[],
     onChange: (ids: string[]) => (void),
 }
@@ -170,10 +171,30 @@ export const ScriptCheckList: React.FC<ScriptCheckListProps> = (props: ScriptChe
     const [scripts, setScripts] = React.useState<ScriptType[]>();
 
     const loadScripts = () => {
-        Script.List().then(scripts => {
-            setScripts(scripts);
-            setLoading(false);
-        });
+        if (props.groupIds) {
+            Promise.all(props.groupIds.map(id => {
+                return Group.Scripts(id);
+            })).then(results => {
+                const scripts: ScriptType[] = [];
+                const id: { [id:string]: boolean} = {};
+                results.forEach(r => {
+                    r.forEach(script => {
+                        if (id[script.ID]) {
+                            return;
+                        }
+                        id[script.ID] = true;
+                        scripts.push(script);
+                    });
+                });
+                setScripts(scripts);
+                setLoading(false);
+            });
+        } else {
+            Script.List().then(scripts => {
+                setScripts(scripts);
+                setLoading(false);
+            });
+        }
     };
 
     React.useEffect(() => {

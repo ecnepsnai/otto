@@ -1,5 +1,7 @@
 package server
 
+import "time"
+
 type Runbook struct {
 	ID            string `ds:"primary"`
 	Name          string `ds:"unique" min:"3" max:"128"`
@@ -7,4 +9,5 @@ type Runbook struct {
 	ScriptIDs     []string
 	HaltOnFailure bool
 	RunLevel      int
+	LastRun       time.Time
 }

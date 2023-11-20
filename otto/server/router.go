@@ -134,6 +134,9 @@ func RouterSetup() {
 	server.API.GET("/api/runbooks/runbook/:id", h.RunbookGet, authenticatedOptions(false))
 	server.API.POST("/api/runbooks/runbook/:id", h.RunbookEdit, authenticatedOptions(false))
 	server.API.DELETE("/api/runbooks/runbook/:id", h.RunbookDelete, authenticatedOptions(false))
+	server.API.GET("/api/runbooks/runbook/:id/groups", h.RunbookGetGroups, authenticatedOptions(false))
+	server.API.GET("/api/runbooks/runbook/:id/hosts", h.RunbookGetHosts, authenticatedOptions(false))
+	server.API.GET("/api/runbooks/runbook/:id/scripts", h.RunbookGetScripts, authenticatedOptions(false))
 
 	// Request
 	server.API.PUT("/api/action/sync", h.RequestNew, authenticatedOptions(false))
@@ -204,6 +207,10 @@ func RouterSetup() {
 		"/schedules/schedule",
 		"/schedules/schedule/:id",
 		"/schedules/schedule/:id/edit",
+		"/runbooks/runbook/:id/edit",
+		"/runbooks/runbook/:id",
+		"/runbooks/runbook",
+		"/runbooks",
 		"/system/options",
 		"/system/users",
 		"/system/register",

@@ -109,3 +109,65 @@ func (h *handle) RunbookDelete(request web.Request) (interface{}, *web.APIRespon
 
 	return true, nil, nil
 }
+
+func (h *handle) RunbookGetGroups(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	id := request.Parameters["id"]
+
+	runbook := RunbookStore.RunbookWithID(id)
+	if runbook == nil {
+		return nil, nil, web.ValidationError("No runbook with ID %s", id)
+	}
+
+	groups := make([]Group, len(runbook.GroupIDs))
+	for i, id := range runbook.GroupIDs {
+		group := GroupCache.ByID(id)
+		groups[i] = *group
+	}
+
+	return groups, nil, nil
+}
+
+func (h *handle) RunbookGetHosts(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	id := request.Parameters["id"]
+
+	runbook := RunbookStore.RunbookWithID(id)
+	if runbook == nil {
+		return nil, nil, web.ValidationError("No runbook with ID %s", id)
+	}
+
+	hostIDMap := map[string]bool{}
+
+	for _, groupID := range runbook.GroupIDs {
+		group := GroupCache.ByID(groupID)
+		for _, hostID := range group.HostIDs() {
+			hostIDMap[hostID] = true
+		}
+	}
+
+	hosts := make([]Host, len(hostIDMap))
+	i := 0
+	for id := range hostIDMap {
+		host := HostCache.ByID(id)
+		hosts[i] = *host
+		i++
+	}
+
+	return hosts, nil, nil
+}
+
+func (h *handle) RunbookGetScripts(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	id := request.Parameters["id"]
+
+	runbook := RunbookStore.RunbookWithID(id)
+	if runbook == nil {
+		return nil, nil, web.ValidationError("No runbook with ID %s", id)
+	}
+
+	scripts := make([]Script, len(runbook.ScriptIDs))
+	for i, id := range runbook.ScriptIDs {
+		script := ScriptCache.ByID(id)
+		scripts[i] = *script
+	}
+
+	return scripts, nil, nil
+}
