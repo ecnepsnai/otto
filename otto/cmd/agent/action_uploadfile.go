@@ -11,6 +11,34 @@ import (
 	"github.com/ecnepsnai/secutil"
 )
 
+func handleTriggerActionUploadFile(conn *otto.Connection, message otto.MessageTriggerActionUploadFile) string {
+	err := uploadFile(message.FileInfo, func(f io.Writer) error {
+		log.Debug("Telling server we're ready for script data")
+		if err := conn.WriteMessage(otto.MessageTypeReadyForData, nil); err != nil {
+			log.PError("Error replying to server", map[string]interface{}{
+				"error": err.Error(),
+			})
+			return err
+		}
+
+		totalCopied := uint64(0)
+		var fileBuffer = make([]byte, 1024)
+		for totalCopied < message.Length {
+			read, err := conn.ReadData(fileBuffer)
+			if err != nil && err != io.EOF {
+				return err
+			}
+			f.Write(fileBuffer[0:read])
+			totalCopied += uint64(read)
+		}
+		return nil
+	})
+	if err != nil {
+		return err.Error()
+	}
+	return ""
+}
+
 func createDirectoryForOttoFile(fileInfo otto.FileInfo) error {
 	dirName := path.Dir(fileInfo.Path)
 	info, err := os.Stat(dirName)
