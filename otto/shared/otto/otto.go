@@ -22,7 +22,7 @@ import (
 var log = logtic.Log.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
-const ProtocolVersion = uint32(4)
+const ProtocolVersion uint32 = 4
 
 func init() {
 	gob.Register(ScriptInfo{})

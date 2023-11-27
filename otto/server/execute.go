@@ -184,6 +184,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 
 	variables := host.environmentVariablesForScript(script)
 	scriptRequest.Environment = environ.Map(variables)
+	log.Debug("Environ: %s", scriptRequest.Environment)
 
 	attachments, aerr := script.Attachments()
 	if aerr != nil {
@@ -227,7 +228,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		"script_id": script.ID,
 		"host_id":   host.ID,
 	})
-	result, err := conn.RunScript(script.ScriptInfo(), []byte(script.Script), scriptOutput, cancel)
+	result, err := conn.RunScript(scriptRequest, []byte(script.Script), scriptOutput, cancel)
 	if result == nil && err == nil {
 		err = fmt.Errorf("unexpected end of connection")
 	}
