@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.0
+// This file is was generated automatically by Codegen v1.12.2
 // Do not make changes to this file as they will be lost
 
 import (
@@ -23,17 +23,12 @@ var operatingDirectory = getAPIOperatingDir()
 var dataDirectory = getAPIOperatingDir()
 
 type apiDirectories struct {
-	Base string
-
-	Agents string
-
-	Data string
-
+	Base        string
+	Agents      string
+	Data        string
 	Attachments string
-
-	Logs string
-
-	Static string
+	Logs        string
+	Static      string
 }
 
 // Directories absolute paths of API related directires.
