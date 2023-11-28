@@ -125,6 +125,13 @@ func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 			return 0, nil, err
 		}
 		return messageType, message, nil
+	case MessageTypeCancelAction:
+		message := MessageCancelAction{}
+		if err := decoder.Decode(&message); err != nil {
+			log.Error("Error decoding MessageCancelAction: %s", err.Error())
+			return 0, nil, err
+		}
+		return messageType, message, nil
 	}
 	log.Error("Unknown message type '%d'", messageType)
 	return messageType, nil, fmt.Errorf("unknown message type %d", messageType)

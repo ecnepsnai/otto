@@ -25,6 +25,7 @@ type agentConfig struct {
 	ScriptTimeout   *int64   `json:"script_timeout,omitempty"`
 	RebootCommand   *string  `json:"reboot_command,omitempty"`
 	ShutdownCommand *string  `json:"shutdown_command,omitempty"`
+	KillCommand     *string  `json:"kill_command,omitempty"`
 }
 
 var config *agentConfig

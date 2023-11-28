@@ -73,7 +73,7 @@ func handle(conn *otto.Connection) {
 			otto.MessageTypeTriggerActionShutdown:
 			handleTriggerAction(conn, messageType, message)
 		case otto.MessageTypeCancelAction:
-			handleCancelAction(conn, message.(otto.MessageCancelAction))
+			go handleCancelAction(conn, message.(otto.MessageCancelAction))
 		default:
 			log.Warn("Unexpected message with type %d from %s", messageType, conn.RemoteAddr().String())
 		}

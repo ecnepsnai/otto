@@ -5,11 +5,14 @@ long as the executable itself requires only the first and only parameter being t
 
 For example: `bash <script>`, `python <python file>`.
 
-An Otto agent can run multiple scripts in parallel, and scripts can be aborted by the user during execution. Aborted
-scripts are killed with SIGTERM.
+The Otto agent can run multiple unique scripts in parallel and scripts can be aborted during execution. Aborted scripts
+are terminated with SIGTERM.
 
 By default scripts run with their working directory set to a temporary directory, unless the working directory is
 specified by the script configuration.
+
+When a script is running, its standard output and error are copied to a file within a temporary directory created by the
+agent.
 
 ## Environment Variables
 

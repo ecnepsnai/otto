@@ -7,6 +7,7 @@ import { ScriptRun } from '../../types/Result';
 import { RunOutput, RunResults } from './RunResults';
 import { Style } from '../../components/Style';
 import { ScriptRequest } from '../../services/ScriptRequest';
+import { Script } from '../../types/Script';
 
 interface RunScriptProps {
     hostID: string;
@@ -49,8 +50,18 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
 
     const startScript = () => {
         scriptConnection.Stream((stdout: string, stderr: string) => {
-            setStdout(stdout);
-            setStderr(stderr);
+            if (stdout) {
+                setStdout(s => {
+                    s += stdout;
+                    return s;
+                });
+            }
+            if (stderr) {
+                setStderr(s => {
+                    s += stderr;
+                    return s;
+                });
+            }
         }).then(results => {
             setResults(results);
             setRunningScript(false);
@@ -69,7 +80,7 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
     };
 
     const cancelClick = () => {
-        scriptConnection.Cancel();
+        Script.Cancel(props.hostID, props.scriptID).then();
     };
 
     const content = () => {
@@ -88,7 +99,7 @@ export const RunScript: React.FC<RunScriptProps> = (props: RunScriptProps) => {
 
         return (
             <Card.Body>
-                <ProgressBar intermediate />
+                <ProgressBar intermediate cancelClick={cancelClick} />
             </Card.Body>
         );
     };

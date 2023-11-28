@@ -243,7 +243,7 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	}
 	isRunning := true
 	proc := cmd.Process
-	log.Debug("Waiting for script...")
+	log.Debug("Waiting for script on pid %d...", proc.Pid)
 	scriptLog.Store(message.Name, proc.Pid)
 
 	go func() {
@@ -331,12 +331,23 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 }
 
 func handleCancelAction(conn *otto.Connection, message otto.MessageCancelAction) {
-	pid, found := scriptLog.Load(message.Name)
+	pidO, found := scriptLog.Load(message.Name)
 	if !found {
 		log.Warn("Attempt to cancel unknown script named '%s'", message.Name)
 		return
 	}
+	pid, ok := pidO.(int)
+	if !ok {
+		log.Warn("Unknown value in script log: %#v", pidO)
+		return
+	}
 
-	log.Warn("Cancelling script '%s' on pid %d", message.Name, pid.(int))
-	syscall.Kill(pid.(int), syscall.SIGKILL)
+	command := "/bin/kill"
+	if config.KillCommand != nil {
+		command = *config.KillCommand
+	}
+
+	log.Warn("Sending signal SIGTERM to script '%s' on pid -%d", message.Name, pid)
+	output, _ := exec.Command(command, "-s", "SIGTERM", fmt.Sprintf("-%d", pid)).CombinedOutput()
+	log.Debug("sent SIGTERM -> -%d: %s", pid, output)
 }
