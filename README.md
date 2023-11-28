@@ -4,7 +4,7 @@
 
 ## What is Otto?
 
-Otto is a automatic toolkit for Linux and BSD systems. It allows you to easily run scripts against many servers from a cental interface. At a fundamental level it aims to strike a balance between the scripting power of Ansible with the centralized configuration of Puppet.
+Otto is a automatic toolkit for Linux and BSD systems. It allows you to easily run scripts against many servers from a central interface. At a fundamental level, Otto aims to strike a balance between the scripting power of Ansible with the centralized configuration of Puppet.
 
 ## Who should use it?
 
