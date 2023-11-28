@@ -221,7 +221,7 @@ func TestExecuteAction(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	result, serr := host.RunScript(script, nil, nil)
+	result, serr := host.RunScript(script, nil)
 	if serr != nil {
 		t.Fatalf("Error triggering action: %s", serr.Error())
 	}

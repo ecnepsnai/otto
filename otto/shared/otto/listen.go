@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -188,6 +189,7 @@ func (l *Listener) accept(c net.Conn) {
 			localAddr:      c.LocalAddr(),
 			localIdentity:  localIdentity,
 			remoteIdentity: remoteIdentity,
+			mutex:          sync.Mutex{},
 		})
 		c.Close()
 		channel.Close()

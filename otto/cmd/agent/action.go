@@ -3,34 +3,14 @@ package main
 import (
 	"os"
 	"os/exec"
-	"time"
 
 	"github.com/ecnepsnai/otto/shared/otto"
 )
 
-func handleTriggerAction(conn *otto.Connection, messageType otto.MessageType, message interface{}, cancel chan bool) {
+func handleTriggerAction(conn *otto.Connection, messageType otto.MessageType, message interface{}) {
 	switch messageType {
 	case otto.MessageTypeTriggerActionRunScript:
-		finished := false
-		startTime := time.Now().Unix()
-		timeoutSeconds := int64(600)
-		if config.ScriptTimeout != nil {
-			timeoutSeconds = *config.ScriptTimeout
-		}
-
-		go func() {
-			for !finished {
-				time.Sleep(100 * time.Millisecond)
-				if time.Now().Unix()-startTime > timeoutSeconds {
-					cancel <- true
-				}
-			}
-		}()
-
-		result := handleTriggerActionRunScript(conn, message.(otto.MessageTriggerActionRunScript), cancel)
-		conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{
-			ScriptResult: result,
-		})
+		handleTriggerActionRunScript(conn, message.(otto.MessageTriggerActionRunScript))
 	case otto.MessageTypeTriggerActionReloadConfig:
 		conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{
 			Error: handleTriggerActionReloadConfig(conn),

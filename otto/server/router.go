@@ -130,6 +130,7 @@ func RouterSetup() {
 
 	// Request
 	server.API.PUT("/api/action/sync", h.RequestNew, authenticatedOptions(false))
+	server.API.POST("/api/action/cancel", h.RequestCancel, authenticatedOptions(false))
 	server.Socket("/api/action/async", h.RequestStream, authenticatedOptions(false))
 
 	// State

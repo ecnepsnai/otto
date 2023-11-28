@@ -77,72 +77,81 @@ func (conn *Connection) RotateIdentity(request MessageRotateIdentityRequest) (*M
 	return &response, nil
 }
 
-func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader io.ReadCloser, actionOutput func(stdout, stderr []byte), cancel chan bool) (*MessageActionResult, error) {
+func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader io.ReadCloser, actionOutput func(stdout, stderr []byte)) (*MessageActionResult, *ScriptOutput, error) {
 	if err := conn.WriteMessage(MessageTypeTriggerActionRunScript, script); err != nil {
 		log.PError("Error writing message", map[string]interface{}{
 			"error": err.Error(),
 		})
-		return nil, err
+		return nil, nil, err
 	}
 
-	log.Debug("Waiting for agent")
 	if messageType, _, _ := conn.ReadMessage(); messageType != MessageTypeReadyForData {
 		log.Error("Unexpected message from agent when waiting for MessageTypeReadyForData: %d", messageType)
-		return nil, fmt.Errorf("error writing script data: unexpected message from agent %d", messageType)
+		return nil, nil, fmt.Errorf("error writing script data: unexpected message from agent %d", messageType)
 	}
-	log.Debug("Agent is ready for script data")
 
 	wrote, err := io.Copy(conn.w, scriptReader)
 	if err != nil {
 		log.PError("Error writing message", map[string]interface{}{
 			"error": err.Error(),
 		})
-		return nil, err
-	}
-	if err := conn.WriteFinished(); err != nil {
-		log.PError("Error writing message", map[string]interface{}{
-			"error": err.Error(),
-		})
-		return nil, err
+		return nil, nil, err
 	}
 	log.PDebug("Wrote script data", map[string]interface{}{
 		"script_length": wrote,
 	})
 	scriptReader.Close()
 
-	go func() {
-		for {
-			<-cancel
-			conn.WriteMessage(MessageTypeCancelAction, nil)
-		}
-	}()
-
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err == io.EOF || messageType == 0 {
-			return nil, nil
+			return nil, nil, nil
 		} else if err != nil {
 			log.PError("Error reading message", map[string]interface{}{
 				"error": err.Error(),
 			})
-			return nil, err
+			return nil, nil, err
 		}
 
 		switch messageType {
 		case MessageTypeActionOutput:
 			output := message.(MessageActionOutput)
+			log.Debug("Recieved %dB of output from script", len(output.Data))
 			if actionOutput != nil {
-				actionOutput(output.Stdout, output.Stderr)
+				if output.IsStdErr {
+					actionOutput([]byte{}, output.Data)
+				} else {
+					actionOutput(output.Data, []byte{})
+				}
 			}
 		case MessageTypeActionResult:
 			result := message.(MessageActionResult)
-			return &result, nil
+			outputLen := result.ScriptResult.StdoutLen + result.ScriptResult.StderrLen
+			outputData := make([]byte, outputLen)
+			if err := conn.WriteMessage(MessageTypeReadyForData, nil); err != nil {
+				log.Error("Error sending message: %s", err.Error())
+				return nil, nil, err
+			}
+			if len, err := conn.ReadData(outputData); err != nil {
+				log.PError("Error reading output from script", map[string]interface{}{
+					"error":      err.Error(),
+					"output_len": outputLen,
+					"read_len":   len,
+				})
+				return &result, nil, nil
+			}
+			output := ScriptOutput{
+				StdoutLen: result.ScriptResult.StdoutLen,
+				StderrLen: result.ScriptResult.StderrLen,
+				Data:      outputData,
+			}
+			return &result, &output, nil
 		case MessageTypeGeneralFailure:
 			result := message.(MessageGeneralFailure)
 			log.PError("General error triggering action on host", map[string]interface{}{
 				"error": result.Error,
 			})
-			return nil, fmt.Errorf("%s", result.Error)
+			return nil, nil, fmt.Errorf("%s", result.Error)
 		}
 	}
 }

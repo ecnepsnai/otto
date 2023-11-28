@@ -1,37 +1,52 @@
 package main
 
 import (
-	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path"
+	"sync"
 	"syscall"
 	"time"
 
 	"github.com/ecnepsnai/otto/shared/otto"
 )
 
-func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTriggerActionRunScript, cancel chan bool) otto.ScriptResult {
-	var proc *os.Process
-	canCancel := true
-	go func() {
-		for canCancel {
-			select {
-			case <-cancel:
-				if proc != nil {
-					pgid, err := syscall.Getpgid(proc.Pid)
-					if err != nil {
-						log.Error("Error trying to kill process: %s", err.Error())
-					}
-					syscall.Kill(-pgid, 15)
-					log.Warn("Killed running script")
-				}
-				conn.Close()
-			default:
-				//
-			}
-		}
-	}()
+var scriptLog = &sync.Map{}
+
+type scriptOutputWriter struct {
+	isStderr  bool
+	conn      *otto.Connection
+	file      *os.File
+	lastWrite time.Time
+}
+
+func (w *scriptOutputWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	if err := w.conn.WriteMessage(otto.MessageTypeActionOutput, otto.MessageActionOutput{
+		IsStdErr: w.isStderr,
+		Data:     p,
+	}); err != nil {
+		return n, err
+	}
+	if _, err := w.file.Write(p); err != nil {
+		return n, err
+	}
+	w.lastWrite = time.Now()
+	return n, nil
+}
+
+func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTriggerActionRunScript) {
+	if pid, running := scriptLog.Load(message.Name); running {
+		log.Error("Cannot start script '%s' as it's already running on pid %d", message.Name, pid.(int))
+		conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
+			Success:   false,
+			ExecError: fmt.Sprintf("script '%s' already running on host", message.Name),
+		})
+		conn.Close()
+		return
+	}
 
 	start := time.Now()
 
@@ -39,17 +54,41 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	if err != nil {
 		panic(err)
 	}
+	defer os.RemoveAll(tmpDir)
 
-	tmp, err := os.CreateTemp("", "otto")
+	scriptPath := path.Join(tmpDir, "script")
+	scriptFileWriter, err := os.OpenFile(scriptPath, os.O_CREATE|os.O_RDWR, 0700)
 	if err != nil {
 		panic(err)
 	}
-	log.Debug("Writing script to %s", tmp.Name())
-	if err := tmp.Chmod(0700); err != nil {
-		tmp.Close()
+	log.Debug("Writing script to %s", scriptPath)
+
+	stdoutPath := path.Join(tmpDir, "stdout")
+	stderrPath := path.Join(tmpDir, "stderr")
+	combinedPath := path.Join(tmpDir, "combined")
+	stdoutFile, err := os.OpenFile(stdoutPath, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
 		panic(err)
 	}
-	defer os.Remove(tmp.Name())
+	stderrFile, err := os.OpenFile(stderrPath, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		panic(err)
+	}
+	combinedFile, err := os.OpenFile(combinedPath, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		panic(err)
+	}
+	stdout := &scriptOutputWriter{
+		conn:      conn,
+		file:      stdoutFile,
+		lastWrite: time.Now(),
+	}
+	stderr := &scriptOutputWriter{
+		isStderr:  true,
+		conn:      conn,
+		file:      stderrFile,
+		lastWrite: time.Now(),
+	}
 
 	totalScriptWrote := uint64(0)
 	var scriptBuffer = make([]byte, min(message.ScriptInfo.Length, 1024))
@@ -61,27 +100,29 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 		log.PError("Error replying to server", map[string]interface{}{
 			"error": err.Error(),
 		})
-		canCancel = false
-		return otto.ScriptResult{
+		conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
 			Success:   false,
 			ExecError: "Error copying script data",
 			Elapsed:   time.Since(start),
-		}
+		})
+		conn.Close()
+		return
 	}
 
 	for totalScriptWrote < message.ScriptInfo.Length {
 		read, err := conn.ReadData(scriptBuffer)
 		if err != nil && err != io.EOF {
-			tmp.Close()
+			scriptFileWriter.Close()
 			log.PError("Error reading script data", map[string]interface{}{
 				"error": err.Error(),
 			})
-			canCancel = false
-			return otto.ScriptResult{
+			conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
 				Success:   false,
 				ExecError: "Error copying script data",
 				Elapsed:   time.Since(start),
-			}
+			})
+			conn.Close()
+			return
 		}
 
 		// If no data but we haven't finished copying yet, give the server a bit more time
@@ -97,35 +138,37 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 			break
 		}
 
-		wrote, err := tmp.Write(scriptBuffer[0:read])
+		wrote, err := scriptFileWriter.Write(scriptBuffer[0:read])
 		if err != nil {
-			tmp.Close()
+			scriptFileWriter.Close()
 			log.PError("Error writing script data", map[string]interface{}{
 				"error": err.Error(),
 			})
-			canCancel = false
-			return otto.ScriptResult{
+			conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
 				Success:   false,
 				ExecError: "Error copying script data",
 				Elapsed:   time.Since(start),
-			}
+			})
+			conn.Close()
+			return
 		}
 		totalScriptWrote += uint64(read)
-		log.Debug("Wrote %dB of script data to %s", wrote, tmp.Name())
+		log.Debug("Wrote %dB of script data to %s", wrote, scriptPath)
 	}
-	tmp.Close()
+	scriptFileWriter.Close()
 
 	if totalScriptWrote != message.ScriptInfo.Length {
 		log.PError("Unexpected end of script data", map[string]interface{}{
 			"script_length": message.ScriptInfo.Length,
 			"wrote_length":  totalScriptWrote,
 		})
-		canCancel = false
-		return otto.ScriptResult{
+		conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
 			Success:   false,
 			ExecError: "Error copying script data",
 			Elapsed:   time.Since(start),
-		}
+		})
+		conn.Close()
+		return
 	}
 
 	log.PInfo("Executing script", map[string]interface{}{
@@ -138,8 +181,8 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	Stats.ScriptsExecuted++
 	Stats.LastScriptExecuted = time.Now().UTC().Unix()
 
-	cmd := exec.Command(message.Executable, tmp.Name())
-	log.Debug("Exec: %s %s", message.Executable, tmp.Name())
+	cmd := exec.Command(message.Executable, scriptPath)
+	log.Debug("Exec: %s %s", message.Executable, scriptPath)
 
 	if len(message.Environment) > 0 {
 		env := make([]string, len(message.Environment))
@@ -161,12 +204,13 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	if !message.RunAs.Inherit {
 		if uid, _ := getCurrentUIDandGID(); uid != 0 {
 			log.Error("Cannot run script as specific user without the Otto agent running as root")
-			canCancel = false
-			return otto.ScriptResult{
+			conn.WriteMessage(otto.MessageTypeActionResult, otto.ScriptResult{
 				Success:   false,
 				ExecError: "Running a script as a specific user requires the Otto agent running as root",
 				Elapsed:   time.Since(start),
-			}
+			})
+			conn.Close()
+			return
 		}
 
 		log.Debug("Using UID %d and GID %d\n", message.RunAs.UID, message.RunAs.GID)
@@ -183,13 +227,10 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	}
 
 	result := otto.ScriptResult{}
-
-	stderr := &bytes.Buffer{}
-	stdout := &bytes.Buffer{}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	log.Debug("Running '%s'", tmp.Name())
+	log.Debug("Running '%s' %s", scriptPath, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		result.Success = false
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -200,30 +241,40 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 			result.ExecError = err.Error()
 		}
 	}
-	proc = cmd.Process
+	isRunning := true
+	proc := cmd.Process
 	log.Debug("Waiting for script...")
-	didExit := false
+	scriptLog.Store(message.Name, proc.Pid)
+
 	go func() {
-		lastLen := 0
-		lastKA := time.Now().AddDate(0, 0, -1)
-		for !didExit {
-			outputLength := stdout.Len() + stderr.Len()
-			if outputLength > lastLen {
-				lastLen = outputLength
-				log.Debug("Read %dB from stdout & stderr", outputLength)
-				conn.WriteMessage(otto.MessageTypeActionOutput, otto.MessageActionOutput{
-					Stdout: stdout.Bytes(),
-					Stderr: stderr.Bytes(),
-				})
-			}
-			if time.Since(lastKA) > 10*time.Second {
+		for isRunning {
+			if time.Since(stdout.lastWrite) > 30*time.Second && time.Since(stderr.lastWrite) > 30*time.Second {
 				conn.WriteMessage(otto.MessageTypeKeepalive, nil)
-				lastKA = time.Now()
+				stdout.lastWrite = time.Now()
+				stderr.lastWrite = time.Now()
 			}
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}()
-	err = cmd.Wait()
+
+	cmd.Wait()
+	isRunning = false
+	scriptLog.Delete(message.Name)
+
+	stdoutFile.Sync()
+	stderrFile.Sync()
+	stdoutFile.Seek(0, 0)
+	stderrFile.Seek(0, 0)
+	stdoutLen, _ := io.Copy(combinedFile, stdoutFile)
+	combinedFile.Sync()
+	stdoutFile.Close()
+	os.Remove(stdoutPath)
+	stderrLen, _ := io.Copy(combinedFile, stderrFile)
+	stderrFile.Close()
+	combinedFile.Sync()
+	combinedFile.Seek(0, 0)
+	os.Remove(stderrPath)
+
 	log.PInfo("Finished executing script", map[string]interface{}{
 		"remote_addr": conn.RemoteAddr().String(),
 		"elapsed":     time.Since(start).String(),
@@ -232,29 +283,60 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 		"wd":          message.WorkingDirectory,
 		"exec":        message.Executable,
 	})
-	didExit = true
 
-	result.Stderr = stderr.String()
-	result.Stdout = stdout.String()
+	result.StdoutLen = uint32(stdoutLen)
+	result.StderrLen = uint32(stderrLen)
 	result.Elapsed = time.Since(start)
-	log.Debug("Stdout: %s", result.Stdout)
-	log.Debug("Stderr: %s", result.Stderr)
 
-	if err != nil {
+	if cmd.ProcessState.ExitCode() != 0 {
 		result.Success = false
-		if exitError, ok := err.(*exec.ExitError); ok {
-			result.Code = exitError.ExitCode()
-			log.Error("Script exit code: %d", result.Code)
-		} else {
-			log.Error("Error running script: %s", err.Error())
-			result.ExecError = err.Error()
-		}
-		canCancel = false
-		return result
+		log.Error("Script exit code: %d", cmd.ProcessState.ExitCode())
+	} else {
+		result.Success = true
 	}
 
-	result.Success = true
-	canCancel = false
-	os.RemoveAll(tmpDir)
-	return result
+	if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{
+		ScriptResult: result,
+	}); err != nil {
+		log.PError("Error writing action resuslt", map[string]interface{}{
+			"error": err.Error(),
+		})
+		conn.Close()
+		return
+	}
+
+	messageType, _, err := conn.ReadMessage()
+	if err != nil {
+		log.PError("Error waiting for reply from server", map[string]interface{}{
+			"error": err.Error(),
+		})
+		conn.Close()
+		return
+	}
+	if messageType != otto.MessageTypeReadyForData {
+		log.Error("Unexpected message %d", messageType)
+		conn.Close()
+		return
+	}
+	if _, err := conn.Copy(combinedFile); err != nil {
+		log.PError("Error writing script output", map[string]interface{}{
+			"error": err.Error(),
+		})
+		conn.Close()
+		return
+	}
+	conn.WriteFinished()
+	log.Debug("Finished runscript action, closing connection...")
+	conn.Close()
+}
+
+func handleCancelAction(conn *otto.Connection, message otto.MessageCancelAction) {
+	pid, found := scriptLog.Load(message.Name)
+	if !found {
+		log.Warn("Attempt to cancel unknown script named '%s'", message.Name)
+		return
+	}
+
+	log.Warn("Cancelling script '%s' on pid %d", message.Name, pid.(int))
+	syscall.Kill(pid.(int), syscall.SIGKILL)
 }

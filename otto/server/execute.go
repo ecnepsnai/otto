@@ -21,7 +21,14 @@ type ScriptResult struct {
 	Duration    time.Duration
 	Environment []environ.Variable
 	Result      otto.ScriptResult
+	Output      ScriptOutput
 	RunError    string
+}
+
+// ScriptOutput described script output
+type ScriptOutput struct {
+	Stdout string
+	Stderr string
 }
 
 type hostConnection struct {
@@ -129,12 +136,12 @@ func (conn *hostConnection) UploadFile(attachment Attachment) error {
 }
 
 // TODO: change this to read the script as a file
-func (conn *hostConnection) RunScript(scriptInfo otto.ScriptInfo, scriptData []byte, actionOutput func(stdout, stderr []byte), cancel chan bool) (*otto.MessageActionResult, error) {
-	result, err := conn.Conn.TriggerActionRunScript(scriptInfo, io.NopCloser(bytes.NewReader(scriptData)), actionOutput, cancel)
+func (conn *hostConnection) RunScript(scriptInfo otto.ScriptInfo, scriptData []byte, actionOutput func(stdout, stderr []byte)) (*otto.MessageActionResult, *otto.ScriptOutput, error) {
+	result, output, err := conn.Conn.TriggerActionRunScript(scriptInfo, io.NopCloser(bytes.NewReader(scriptData)), actionOutput)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return result, nil
+	return result, output, nil
 }
 
 // Ping ping the host
@@ -173,7 +180,7 @@ func (host *Host) Ping() error {
 
 // RunScript run the script on the host. Error will only ever be populated with internal server
 // errors, such as being unable to read from the database.
-func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte), cancel chan bool) (*ScriptResult, error) {
+func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []byte)) (*ScriptResult, error) {
 	start := time.Now()
 	log.PInfo("Running script on host", map[string]interface{}{
 		"host_id":   host.ID,
@@ -228,8 +235,8 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		"script_id": script.ID,
 		"host_id":   host.ID,
 	})
-	result, err := conn.RunScript(scriptRequest, []byte(script.Script), scriptOutput, cancel)
-	if result == nil && err == nil {
+	result, output, err := conn.RunScript(scriptRequest, []byte(script.Script), scriptOutput)
+	if result == nil && output == nil && err == nil {
 		err = fmt.Errorf("unexpected end of connection")
 	}
 	if err != nil {
@@ -341,7 +348,26 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		Duration:    time.Since(start),
 		Environment: variables,
 		Result:      result.ScriptResult,
+		Output: ScriptOutput{
+			Stdout: output.Stdout(),
+			Stderr: output.Stderr(),
+		},
 	}, nil
+}
+
+func (host *Host) CancelScript(scriptName string) error {
+	conn, err := host.connect()
+	if err != nil {
+		return err
+	}
+	log.PWarn("Request to cancel running script on host", map[string]interface{}{
+		"host_id":     host.ID,
+		"script_name": scriptName,
+	})
+	conn.Conn.WriteMessage(otto.MessageTypeCancelAction, otto.MessageCancelAction{
+		Name: scriptName,
+	})
+	return nil
 }
 
 func (host *Host) environmentVariablesForScript(script *Script) []environ.Variable {
