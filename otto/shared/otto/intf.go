@@ -127,23 +127,31 @@ func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader i
 		case MessageTypeActionResult:
 			result := message.(MessageActionResult)
 			outputLen := result.ScriptResult.StdoutLen + result.ScriptResult.StderrLen
-			outputData := make([]byte, outputLen)
-			if err := conn.WriteMessage(MessageTypeReadyForData, nil); err != nil {
-				log.Error("Error sending message: %s", err.Error())
-				return nil, nil, err
-			}
-			if len, err := conn.ReadData(outputData); err != nil {
-				log.PError("Error reading output from script", map[string]interface{}{
-					"error":      err.Error(),
-					"output_len": outputLen,
-					"read_len":   len,
-				})
-				return &result, nil, nil
-			}
-			output := ScriptOutput{
-				StdoutLen: result.ScriptResult.StdoutLen,
-				StderrLen: result.ScriptResult.StderrLen,
-				Data:      outputData,
+			var output ScriptOutput
+			if outputLen > 0 {
+				outputData := make([]byte, outputLen)
+				if err := conn.WriteMessage(MessageTypeReadyForData, nil); err != nil {
+					log.Error("Error sending message: %s", err.Error())
+					return nil, nil, err
+				}
+				if len, err := conn.ReadData(outputData); err != nil {
+					log.PError("Error reading output from script", map[string]interface{}{
+						"error":      err.Error(),
+						"output_len": outputLen,
+						"read_len":   len,
+					})
+					return &result, nil, nil
+				}
+				output = ScriptOutput{
+					StdoutLen: result.ScriptResult.StdoutLen,
+					StderrLen: result.ScriptResult.StderrLen,
+					Data:      outputData,
+				}
+			} else {
+				output = ScriptOutput{
+					StdoutLen: 0,
+					StderrLen: 0,
+				}
 			}
 			return &result, &output, nil
 		case MessageTypeGeneralFailure:

@@ -198,7 +198,10 @@ func TestExecuteAction(t *testing.T) {
 			t.Fatalf("Did not find environment variable")
 			return
 		}
-		conn.WriteMessage(otto.MessageTypeReadyForData, nil)
+		if err := conn.WriteMessage(otto.MessageTypeReadyForData, nil); err != nil {
+			t.Fatalf("Error sending message: " + err.Error())
+			return
+		}
 		var buf = make([]byte, scriptInfo.ScriptInfo.Length)
 		conn.ReadData(buf)
 		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ScriptResult: otto.ScriptResult{Success: true}, AgentVersion: version}); err != nil {
