@@ -246,12 +246,23 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	log.Debug("Waiting for script on pid %d...", proc.Pid)
 	scriptLog.Store(message.Name, proc.Pid)
 
+	timeoutSeconds := 30
+	if config.ScriptTimeout != nil {
+		timeoutSeconds = int(*config.ScriptTimeout)
+	}
+
 	go func() {
 		for isRunning {
-			if time.Since(stdout.lastWrite) > 30*time.Second && time.Since(stderr.lastWrite) > 30*time.Second {
+			if time.Since(stdout.lastWrite) > 10*time.Second && time.Since(stderr.lastWrite) > 10*time.Second {
 				conn.WriteMessage(otto.MessageTypeKeepalive, nil)
 				stdout.lastWrite = time.Now()
 				stderr.lastWrite = time.Now()
+			}
+			if timeoutSeconds >= 0 && time.Since(start) > time.Duration(timeoutSeconds)*time.Second {
+				log.Error("Script execution exceeded timeout %dsec", timeoutSeconds)
+				killProcessAndDescendents(cmd.Process.Pid)
+				result.ExecError = "script timeout"
+				break
 			}
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -287,6 +298,7 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	result.StdoutLen = uint32(stdoutLen)
 	result.StderrLen = uint32(stderrLen)
 	result.Elapsed = time.Since(start)
+	result.Code = cmd.ProcessState.ExitCode()
 
 	if cmd.ProcessState.ExitCode() != 0 {
 		result.Success = false
@@ -342,12 +354,16 @@ func handleCancelAction(conn *otto.Connection, message otto.MessageCancelAction)
 		return
 	}
 
+	killProcessAndDescendents(pid)
+}
+
+func killProcessAndDescendents(pid int) {
 	command := "/bin/kill"
 	if config.KillCommand != nil {
 		command = *config.KillCommand
 	}
 
-	log.Warn("Sending signal SIGTERM to script '%s' on pid -%d", message.Name, pid)
+	log.Warn("Sending signal SIGTERM to pid -%d", pid)
 	output, _ := exec.Command(command, "-s", "SIGTERM", fmt.Sprintf("-%d", pid)).CombinedOutput()
 	log.Debug("sent SIGTERM -> -%d: %s", pid, output)
 }

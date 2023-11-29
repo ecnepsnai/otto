@@ -31,6 +31,7 @@ func init() {
 	gob.Register(MessageTriggerActionUploadFile{})
 	gob.Register(MessageActionOutput{})
 	gob.Register(MessageActionResult{})
+	gob.Register(MessageCancelAction{})
 }
 
 type MessageType uint32
