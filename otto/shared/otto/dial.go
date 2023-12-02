@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -87,5 +88,6 @@ func Dial(options DialOptions) (*Connection, error) {
 		localAddr:      client.LocalAddr(),
 		localIdentity:  localIdentity,
 		remoteIdentity: remoteIdentity,
+		mutex:          sync.Mutex{},
 	}, nil
 }

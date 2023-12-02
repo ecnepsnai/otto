@@ -47,8 +47,6 @@ func handle(conn *otto.Connection) {
 	})
 	defer conn.Close()
 
-	cancel := make(chan bool)
-
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err == io.EOF || messageType == 0 {
@@ -73,9 +71,9 @@ func handle(conn *otto.Connection) {
 			otto.MessageTypeTriggerActionExitAgent,
 			otto.MessageTypeTriggerActionReboot,
 			otto.MessageTypeTriggerActionShutdown:
-			handleTriggerAction(conn, messageType, message, cancel)
+			handleTriggerAction(conn, messageType, message)
 		case otto.MessageTypeCancelAction:
-			cancel <- true
+			go handleCancelAction(conn, message.(otto.MessageCancelAction))
 		default:
 			log.Warn("Unexpected message with type %d from %s", messageType, conn.RemoteAddr().String())
 		}

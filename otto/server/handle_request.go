@@ -41,7 +41,7 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 			return nil, nil, web.ValidationError("No script with ID %s", r.ScriptID)
 		}
 
-		result, err := host.RunScript(script, nil, nil)
+		result, err := host.RunScript(script, nil)
 		if err != nil {
 			return nil, nil, web.CommonErrors.ServerError
 		}
@@ -52,6 +52,45 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 	}
 
 	return nil, nil, nil
+}
+
+func (h *handle) RequestCancel(request web.Request) (interface{}, *web.APIResponse, *web.Error) {
+	session := request.UserData.(*Session)
+
+	type tCancelRequest struct {
+		HostID   string
+		ScriptID string
+	}
+	cancelRequest := tCancelRequest{}
+	if err := request.DecodeJSON(&cancelRequest); err != nil {
+		return nil, nil, err
+	}
+
+	script := ScriptCache.ByID(cancelRequest.ScriptID)
+	if script == nil {
+		return nil, nil, web.ValidationError("No script found with id %s", cancelRequest.ScriptID)
+	}
+
+	host := HostCache.ByID(cancelRequest.HostID)
+	if host == nil {
+		return nil, nil, web.ValidationError("No host found with id %s", cancelRequest.HostID)
+	}
+
+	if session.User().Permissions.ScriptRunLevel < script.RunLevel {
+		EventStore.UserPermissionDenied(session.Username, fmt.Sprintf("attempt to cancel script with higher run level: %s", script.Name))
+		return nil, nil, web.CommonErrors.Forbidden
+	}
+
+	if err := host.CancelScript(script.Name); err != nil {
+		log.PError("Error cancelling script on host", map[string]interface{}{
+			"host_id":     host.ID,
+			"script_name": script.Name,
+			"error":       err.Error(),
+		})
+		return nil, nil, web.ValidationError("%s", err.Error())
+	}
+
+	return true, nil, nil
 }
 
 func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
@@ -72,7 +111,6 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	}
 
 	writeMessage := func(m requestResponse) {
-		log.Debug("ws send %d", m.Code)
 		if err := conn.WriteJSON(m); err != nil {
 			log.PError("Error sending websocket message", map[string]interface{}{
 				"error": err.Error(),
@@ -136,30 +174,6 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 		}
 
 		running := true
-		cancel := make(chan bool)
-		go func() {
-			type cancelParams struct {
-				Cancel bool
-			}
-			for running {
-				cancelRequest := cancelParams{}
-				if err := conn.ReadJSON(&cancelRequest); err != nil {
-					log.PError("Error reading from websocket connection", map[string]interface{}{
-						"error": err.Error(),
-					})
-					running = false
-					break
-				}
-				if cancelRequest.Cancel {
-					log.PWarn("Request to cancel running script", map[string]interface{}{
-						"script_id": r.ScriptID,
-						"host_id":   r.HostID,
-					})
-					cancel <- true
-				}
-				time.Sleep(5 * time.Millisecond)
-			}
-		}()
 		go func() {
 			lastKA := time.Now().AddDate(0, 0, -1)
 			for running {
@@ -179,7 +193,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 				Stdout: string(stdout),
 				Stderr: string(stderr),
 			})
-		}, cancel)
+		})
 		if err != nil {
 			writeMessage(requestResponse{
 				Code:  RequestResponseCodeError,

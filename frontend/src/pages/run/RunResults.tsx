@@ -43,7 +43,7 @@ export const RunResults: React.FC<RunResultsProps> = (props: RunResultsProps) =>
                 </ListGroup.List>
             </Card.Card>
             <EnvironmentVariableCard variables={props.results.Environment} />
-            <RunOutput stdout={props.results.Result.stdout} stderr={props.results.Result.stderr} />
+            <RunOutput stdout={props.results.Output.Stdout} stderr={props.results.Output.Stderr} />
         </Card.Body>
     );
 };

@@ -56,7 +56,7 @@ binary.
 |`default_gid`|No|number|The GID for scripts to run as.|The current GID of the Otto agent process|
 |`path`|No|string|The value of the $PATH environment variable used when running scripts.|Value of `$PATH`|
 |`allow_from`|No|[]string|Array of CIDR addresses where connections from Otto Servers will be allowed from.|`["0.0.0.0/0", "::/0"]`
-|`script_timeout`|No|number|Maximum number of seconds a script can run before it is automatically aborted.|600 (10 minutes)|
+|`script_timeout`|No|number|Maximum number of seconds a script can run before it is automatically aborted. Passing a negative number disables the timeout.|600 (10 minutes)|
 |`reboot_command`|No|string|Path to executable to run when rebooting the host.|`/usr/sbin/reboot`|
 |`shutdown_command`|No|string|Path to executable to run when shutting down the host.|`/usr/sbin/halt`|
 

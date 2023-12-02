@@ -121,7 +121,7 @@ func (s Schedule) RunNow() {
 			continue
 		}
 
-		result, err := host.RunScript(script, nil, nil)
+		result, err := host.RunScript(script, nil)
 		if err != nil {
 			fail++
 			log.PError("Error running scheduled script", map[string]interface{}{

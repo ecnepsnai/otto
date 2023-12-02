@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ecnepsnai/ds"
+	"github.com/ecnepsnai/otto/server/environ"
 	"github.com/ecnepsnai/otto/shared/otto"
 	"github.com/ecnepsnai/secutil"
 )
@@ -108,6 +109,9 @@ func TestExecuteAction(t *testing.T) {
 	version := randomString(4)
 	agentId, _ := otto.NewIdentity()
 
+	environKey := randomString(4)
+	environValue := randomString(4)
+
 	scriptName := randomString(4)
 	script, err := ScriptStore.NewScript(newScriptParameters{
 		Name:       scriptName,
@@ -122,6 +126,12 @@ func TestExecuteAction(t *testing.T) {
 	group, err := GroupStore.NewGroup(newGroupParameters{
 		Name:      randomString(6),
 		ScriptIDs: []string{script.ID},
+		Environment: []environ.Variable{
+			{
+				Key:   environKey,
+				Value: environValue,
+			},
+		},
 	})
 	if err != nil {
 		t.Fatalf("Error making group: %s", err.Message)
@@ -154,27 +164,50 @@ func TestExecuteAction(t *testing.T) {
 			return []string{serverId.PublicKeyString()}
 		},
 	}, func(conn *otto.Connection) {
+		defer conn.Close()
+
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			t.Fatalf("Error reading message: " + err.Error())
+			return
 		}
 		if messageType != otto.MessageTypeTriggerActionRunScript {
 			t.Fatalf("Incorrect message type")
+			return
 		}
 		scriptInfo, ok := message.(otto.MessageTriggerActionRunScript)
 		if !ok {
 			t.Fatalf("Incorrect message type")
+			return
 		}
 		if scriptInfo.Name != scriptName {
 			t.Fatalf("Bad script name")
+			return
 		}
-		conn.WriteMessage(otto.MessageTypeReadyForData, nil)
+		if scriptInfo.Environment == nil {
+			t.Fatalf("No environment variables passed")
+			return
+		}
+		foundEnviron := false
+		for key, value := range scriptInfo.Environment {
+			if key == environKey && value == environValue {
+				foundEnviron = true
+			}
+		}
+		if !foundEnviron {
+			t.Fatalf("Did not find environment variable")
+			return
+		}
+		if err := conn.WriteMessage(otto.MessageTypeReadyForData, nil); err != nil {
+			t.Fatalf("Error sending message: " + err.Error())
+			return
+		}
 		var buf = make([]byte, scriptInfo.ScriptInfo.Length)
 		conn.ReadData(buf)
 		if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{ScriptResult: otto.ScriptResult{Success: true}, AgentVersion: version}); err != nil {
 			t.Fatalf("Error writing message: " + err.Error())
+			return
 		}
-		conn.Close()
 	})
 	if listenErr != nil {
 		panic("error listening: " + listenErr.Error())
@@ -191,7 +224,7 @@ func TestExecuteAction(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	result, serr := host.RunScript(script, nil, nil)
+	result, serr := host.RunScript(script, nil)
 	if serr != nil {
 		t.Fatalf("Error triggering action: %s", serr.Error())
 	}

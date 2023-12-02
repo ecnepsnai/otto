@@ -149,6 +149,17 @@ export class Script {
         const data = await API.GET('/api/scripts/script/' + id + '/attachments');
         return data as AttachmentType[];
     }
+
+    /**
+     * Cancel a running script
+     */
+    public static async Cancel(hostID: string, scriptID: string): Promise<boolean> {
+        const data = await API.POST('/api/action/cancel', {
+            HostID: hostID,
+            ScriptID: scriptID,
+        });
+        return data as boolean;
+    }
 }
 
 export interface RunAs {
