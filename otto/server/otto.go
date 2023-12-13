@@ -28,7 +28,7 @@ func CommonSetup() {
 	fsSetup()
 	initLogtic(isVerbose())
 	gobSetup()
-	stateSetup()
+	stateSetup(Directories.Data)
 	migrateIfNeeded()
 	LoadOptions()
 	LoadAutoRegisterOptions()
@@ -49,8 +49,8 @@ func initLogtic(verbose bool) {
 
 func startup() {
 	CommonSetup()
-	storeSetup()
-	dataStoreSetup()
+	storeSetup(Directories.Data)
+	dataStoreSetup(Directories.Data)
 	AttachmentStore.Cleanup()
 	CacheSetup()
 	CronSetup()

@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.2
+// This file is was generated automatically by GenGo v1.13.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -11,21 +11,21 @@ import (
 	"github.com/ecnepsnai/store"
 )
 
-type cbgenStateObject struct {
+type gengoStateObject struct {
 	store *store.Store
 	locks map[string]*sync.RWMutex
 }
 
 // State the global state object
-var State *cbgenStateObject
+var State *gengoStateObject
 
 // stateSetup load the saved state
-func stateSetup() {
-	s, err := store.New(Directories.Data, "state", nil)
+func stateSetup(storageDir string) {
+	s, err := store.New(storageDir, "state", nil)
 	if err != nil {
 		log.Fatal("Error opening state store: %s", err.Error())
 	}
-	state := cbgenStateObject{
+	state := gengoStateObject{
 		store: s,
 		locks: map[string]*sync.RWMutex{
 			"TableVersion": {},
@@ -35,19 +35,19 @@ func stateSetup() {
 }
 
 // Close closes the state session
-func (s *cbgenStateObject) Close() {
+func (s *gengoStateObject) Close() {
 	s.store.Close()
 }
 
 // GetAll will return a map of all current state values
-func (s *cbgenStateObject) GetAll() map[string]interface{} {
+func (s *gengoStateObject) GetAll() map[string]interface{} {
 	return map[string]interface{}{
 		"TableVersion": s.GetTableVersion(),
 	}
 }
 
 // GetTableVersion get the TableVersion value
-func (s *cbgenStateObject) GetTableVersion() int {
+func (s *gengoStateObject) GetTableVersion() int {
 	s.locks["TableVersion"].RLock()
 	defer s.locks["TableVersion"].RUnlock()
 
@@ -55,7 +55,7 @@ func (s *cbgenStateObject) GetTableVersion() int {
 	if d == nil {
 		return 0
 	}
-	v, err := cbgenStateDecodeint(d)
+	v, err := gengoStateDecodeint(d)
 	if err != nil {
 		log.Error("Error decoding %s value for %s: %s", "int", "TableVersion", err.Error())
 		return 0
@@ -65,11 +65,11 @@ func (s *cbgenStateObject) GetTableVersion() int {
 }
 
 // SetTableVersion set the TableVersion value
-func (s *cbgenStateObject) SetTableVersion(value int) {
+func (s *gengoStateObject) SetTableVersion(value int) {
 	s.locks["TableVersion"].Lock()
 	defer s.locks["TableVersion"].Unlock()
 
-	b, err := cbgenStateEncodeint(value)
+	b, err := gengoStateEncodeint(value)
 	if err != nil {
 		log.Error("Error encoding %s value for %s: %s", "int", "TableVersion", err.Error())
 		return
@@ -79,16 +79,16 @@ func (s *cbgenStateObject) SetTableVersion(value int) {
 }
 
 // DefaultTableVersion get the default value for TableVersion
-func (s *cbgenStateObject) DefaultTableVersion() int {
+func (s *gengoStateObject) DefaultTableVersion() int {
 	return 0
 }
 
 // ResetTableVersion resets TableVersion to the default value
-func (s *cbgenStateObject) ResetTableVersion() {
+func (s *gengoStateObject) ResetTableVersion() {
 	s.SetTableVersion(s.DefaultTableVersion())
 }
 
-func cbgenStateEncodeint(o int) ([]byte, error) {
+func gengoStateEncodeint(o int) ([]byte, error) {
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(o)
 	if err != nil {
@@ -96,7 +96,7 @@ func cbgenStateEncodeint(o int) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func cbgenStateDecodeint(data []byte) (*int, error) {
+func gengoStateDecodeint(data []byte) (*int, error) {
 	w := new(int)
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)

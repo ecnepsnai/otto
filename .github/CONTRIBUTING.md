@@ -49,7 +49,7 @@ Directory structure:
 
 ```
 /scripts
-    /codegen   -> Contains definitions for the cbgen golang code generator.
+    /gengo   -> Contains definitions for the gengo golang code generator.
 /otto
     /shared
         /otto  -> Contains the Otto library, shared between the agent and the server

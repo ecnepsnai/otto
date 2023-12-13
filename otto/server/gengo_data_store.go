@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.2
+// This file is was generated automatically by GenGo v1.13.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -14,8 +14,8 @@ type attachmentStoreObject struct{ Table *ds.Table }
 // AttachmentStore the global attachment store
 var AttachmentStore = attachmentStoreObject{}
 
-func cbgenDataStoreRegisterAttachmentStore() {
-	table, err := ds.Register(Attachment{}, path.Join(Directories.Data, "attachment.db"), &ds.Options{DisableSorting: true})
+func gengoDataStoreRegisterAttachmentStore(storageDir string) {
+	table, err := ds.Register(Attachment{}, path.Join(storageDir, "attachment.db"), &ds.Options{DisableSorting: true})
 	if err != nil {
 		log.Fatal("Error registering attachment store: %s", err.Error())
 	}
@@ -27,8 +27,8 @@ type eventStoreObject struct{ Table *ds.Table }
 // EventStore the global event store
 var EventStore = eventStoreObject{}
 
-func cbgenDataStoreRegisterEventStore() {
-	table, err := ds.Register(Event{}, path.Join(Directories.Data, "event.db"), &ds.Options{})
+func gengoDataStoreRegisterEventStore(storageDir string) {
+	table, err := ds.Register(Event{}, path.Join(storageDir, "event.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering event store: %s", err.Error())
 	}
@@ -40,8 +40,8 @@ type groupStoreObject struct{ Table *ds.Table }
 // GroupStore the global group store
 var GroupStore = groupStoreObject{}
 
-func cbgenDataStoreRegisterGroupStore() {
-	table, err := ds.Register(Group{}, path.Join(Directories.Data, "group.db"), &ds.Options{})
+func gengoDataStoreRegisterGroupStore(storageDir string) {
+	table, err := ds.Register(Group{}, path.Join(storageDir, "group.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering group store: %s", err.Error())
 	}
@@ -53,8 +53,8 @@ type hostStoreObject struct{ Table *ds.Table }
 // HostStore the global host store
 var HostStore = hostStoreObject{}
 
-func cbgenDataStoreRegisterHostStore() {
-	table, err := ds.Register(Host{}, path.Join(Directories.Data, "host.db"), &ds.Options{})
+func gengoDataStoreRegisterHostStore(storageDir string) {
+	table, err := ds.Register(Host{}, path.Join(storageDir, "host.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering host store: %s", err.Error())
 	}
@@ -66,8 +66,8 @@ type registerruleStoreObject struct{ Table *ds.Table }
 // RegisterRuleStore the global registerrule store
 var RegisterRuleStore = registerruleStoreObject{}
 
-func cbgenDataStoreRegisterRegisterRuleStore() {
-	table, err := ds.Register(RegisterRule{}, path.Join(Directories.Data, "registerrule.db"), &ds.Options{})
+func gengoDataStoreRegisterRegisterRuleStore(storageDir string) {
+	table, err := ds.Register(RegisterRule{}, path.Join(storageDir, "registerrule.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering registerrule store: %s", err.Error())
 	}
@@ -79,8 +79,8 @@ type runbookStoreObject struct{ Table *ds.Table }
 // RunbookStore the global runbook store
 var RunbookStore = runbookStoreObject{}
 
-func cbgenDataStoreRegisterRunbookStore() {
-	table, err := ds.Register(Runbook{}, path.Join(Directories.Data, "runbook.db"), &ds.Options{})
+func gengoDataStoreRegisterRunbookStore(storageDir string) {
+	table, err := ds.Register(Runbook{}, path.Join(storageDir, "runbook.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering runbook store: %s", err.Error())
 	}
@@ -92,8 +92,8 @@ type runbookreportStoreObject struct{ Table *ds.Table }
 // RunbookReportStore the global runbookreport store
 var RunbookReportStore = runbookreportStoreObject{}
 
-func cbgenDataStoreRegisterRunbookReportStore() {
-	table, err := ds.Register(RunbookReport{}, path.Join(Directories.Data, "runbookreport.db"), &ds.Options{})
+func gengoDataStoreRegisterRunbookReportStore(storageDir string) {
+	table, err := ds.Register(RunbookReport{}, path.Join(storageDir, "runbookreport.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering runbookreport store: %s", err.Error())
 	}
@@ -105,8 +105,8 @@ type scheduleStoreObject struct{ Table *ds.Table }
 // ScheduleStore the global schedule store
 var ScheduleStore = scheduleStoreObject{}
 
-func cbgenDataStoreRegisterScheduleStore() {
-	table, err := ds.Register(Schedule{}, path.Join(Directories.Data, "schedule.db"), &ds.Options{})
+func gengoDataStoreRegisterScheduleStore(storageDir string) {
+	table, err := ds.Register(Schedule{}, path.Join(storageDir, "schedule.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering schedule store: %s", err.Error())
 	}
@@ -118,8 +118,8 @@ type schedulereportStoreObject struct{ Table *ds.Table }
 // ScheduleReportStore the global schedulereport store
 var ScheduleReportStore = schedulereportStoreObject{}
 
-func cbgenDataStoreRegisterScheduleReportStore() {
-	table, err := ds.Register(ScheduleReport{}, path.Join(Directories.Data, "schedulereport.db"), &ds.Options{})
+func gengoDataStoreRegisterScheduleReportStore(storageDir string) {
+	table, err := ds.Register(ScheduleReport{}, path.Join(storageDir, "schedulereport.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering schedulereport store: %s", err.Error())
 	}
@@ -131,8 +131,8 @@ type scriptStoreObject struct{ Table *ds.Table }
 // ScriptStore the global script store
 var ScriptStore = scriptStoreObject{}
 
-func cbgenDataStoreRegisterScriptStore() {
-	table, err := ds.Register(Script{}, path.Join(Directories.Data, "script.db"), &ds.Options{})
+func gengoDataStoreRegisterScriptStore(storageDir string) {
+	table, err := ds.Register(Script{}, path.Join(storageDir, "script.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering script store: %s", err.Error())
 	}
@@ -144,8 +144,8 @@ type userStoreObject struct{ Table *ds.Table }
 // UserStore the global user store
 var UserStore = userStoreObject{}
 
-func cbgenDataStoreRegisterUserStore() {
-	table, err := ds.Register(User{}, path.Join(Directories.Data, "user.db"), &ds.Options{})
+func gengoDataStoreRegisterUserStore(storageDir string) {
+	table, err := ds.Register(User{}, path.Join(storageDir, "user.db"), &ds.Options{})
 	if err != nil {
 		log.Fatal("Error registering user store: %s", err.Error())
 	}
@@ -153,18 +153,18 @@ func cbgenDataStoreRegisterUserStore() {
 }
 
 // dataStoreSetup set up the data store
-func dataStoreSetup() {
-	cbgenDataStoreRegisterAttachmentStore()
-	cbgenDataStoreRegisterEventStore()
-	cbgenDataStoreRegisterGroupStore()
-	cbgenDataStoreRegisterHostStore()
-	cbgenDataStoreRegisterRegisterRuleStore()
-	cbgenDataStoreRegisterRunbookStore()
-	cbgenDataStoreRegisterRunbookReportStore()
-	cbgenDataStoreRegisterScheduleStore()
-	cbgenDataStoreRegisterScheduleReportStore()
-	cbgenDataStoreRegisterScriptStore()
-	cbgenDataStoreRegisterUserStore()
+func dataStoreSetup(storageDir string) {
+	gengoDataStoreRegisterAttachmentStore(storageDir)
+	gengoDataStoreRegisterEventStore(storageDir)
+	gengoDataStoreRegisterGroupStore(storageDir)
+	gengoDataStoreRegisterHostStore(storageDir)
+	gengoDataStoreRegisterRegisterRuleStore(storageDir)
+	gengoDataStoreRegisterRunbookStore(storageDir)
+	gengoDataStoreRegisterRunbookReportStore(storageDir)
+	gengoDataStoreRegisterScheduleStore(storageDir)
+	gengoDataStoreRegisterScheduleReportStore(storageDir)
+	gengoDataStoreRegisterScriptStore(storageDir)
+	gengoDataStoreRegisterUserStore(storageDir)
 }
 
 // dataStoreTeardown tear down the data store

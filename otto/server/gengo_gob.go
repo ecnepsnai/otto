@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.2
+// This file is was generated automatically by GenGo v1.13.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -9,18 +9,18 @@ import (
 	"github.com/ecnepsnai/otto/server/environ"
 )
 
-func cbgenGobRegisterType(o interface{}) {
-	defer cbgenGobPanicRecovery()
+func gengoGobRegisterType(o interface{}) {
+	defer gengoGobPanicRecovery()
 	gob.Register(o)
 }
 
-func cbgenGobPanicRecovery() {
+func gengoGobPanicRecovery() {
 	recover()
 }
 
 // gobSetup register gob types
 func gobSetup() {
 
-	cbgenGobRegisterType(environ.Variable{})
+	gengoGobRegisterType(environ.Variable{})
 
 }

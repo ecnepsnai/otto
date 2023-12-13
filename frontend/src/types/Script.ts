@@ -5,7 +5,7 @@ import { GroupType } from './Group';
 import { Variable } from './Variable';
 import { ScheduleType } from './Schedule';
 import { AttachmentType } from './Attachment';
-import { ScriptRunLevel } from './cbgen_enum';
+import { ScriptRunLevel } from './gengo_enum';
 
 export interface ScriptType {
     ID?: string;

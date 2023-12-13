@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.2
+// This file is was generated automatically by GenGo v1.13.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -26,12 +26,12 @@ var IdentityStore = identityStoreObject{Lock: &sync.Mutex{}}
 var ShadowStore = shadowStoreObject{Lock: &sync.Mutex{}}
 
 // storeSetup sets up all stores
-func storeSetup() {
-	IdentityStore.Store = cbgenStoreNewStore("identity", "")
-	ShadowStore.Store = cbgenStoreNewStore("shadow", "")
-	cbgenStoreRegisterGobTypes()
+func storeSetup(storageDir string) {
+	IdentityStore.Store = gengoStoreNewStore(storageDir, "identity", "")
+	ShadowStore.Store = gengoStoreNewStore(storageDir, "shadow", "")
+	gengoStoreRegisterGobTypes()
 }
-func cbgenStoreRegisterGobTypes() {
+func gengoStoreRegisterGobTypes() {
 }
 
 // storeTeardown tears down all stores
@@ -40,8 +40,8 @@ func storeTeardown() {
 	ShadowStore.Store.Close()
 }
 
-func cbgenStoreNewStore(storeName string, bucketName string) *store.Store {
-	s, err := store.New(Directories.Data, storeName, &store.Options{BucketName: bucketName})
+func gengoStoreNewStore(storageDir, storeName, bucketName string) *store.Store {
+	s, err := store.New(storageDir, storeName, &store.Options{BucketName: bucketName})
 	if err != nil {
 		log.Fatal("Error opening %s store: %s", storeName, err.Error())
 	}

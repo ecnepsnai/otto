@@ -1,7 +1,7 @@
 import { API } from '../services/API';
 import { Modal } from '../components/Modal';
 import { Notification } from '../components/Notification';
-import { ScriptRunLevel } from './cbgen_enum';
+import { ScriptRunLevel } from './gengo_enum';
 import { GroupType } from './Group';
 import { HostType } from './Host';
 import { ScriptType } from './Script';

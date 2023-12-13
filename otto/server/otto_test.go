@@ -42,9 +42,9 @@ func testSetup() {
 	}
 
 	gobSetup()
-	stateSetup()
-	dataStoreSetup()
-	storeSetup()
+	stateSetup(Directories.Data)
+	dataStoreSetup(Directories.Data)
+	storeSetup(Directories.Data)
 	statsSetup()
 	CacheSetup()
 	LoadOptions()

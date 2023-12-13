@@ -8,7 +8,7 @@ import { GlobalModalFrame, ModalForm } from '../../../components/Modal';
 import { GroupType } from '../../../types/Group';
 import { Icon } from '../../../components/Icon';
 import { Input } from '../../../components/input/Input';
-import { RegisterRulePropertyConfig } from '../../../types/cbgen_enum';
+import { RegisterRulePropertyConfig } from '../../../types/gengo_enum';
 import { RegisterRuleType, RegisterRuleClauseType } from '../../../types/RegisterRule';
 import { Style } from '../../../components/Style';
 import '../../../../css/registerrules.scss';

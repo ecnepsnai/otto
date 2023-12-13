@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Input } from './Input';
-import { ScriptRunLevel } from '../../types/cbgen_enum';
+import { ScriptRunLevel } from '../../types/gengo_enum';
 
 interface RunLevelProps {
     defaultValue: ScriptRunLevel;

@@ -1,6 +1,6 @@
 package server
 
-// This file is was generated automatically by Codegen v1.12.2
+// This file is was generated automatically by GenGo v1.13.0
 // Do not make changes to this file as they will be lost
 
 import (
@@ -9,7 +9,7 @@ import (
 	"github.com/ecnepsnai/stats"
 )
 
-type cbgenStatsCounters struct {
+type gengoStatsCounters struct {
 	NumberGroups     *stats.Counter
 	NumberHosts      *stats.Counter
 	NumberRunbooks   *stats.Counter
@@ -22,25 +22,25 @@ type cbgenStatsCounters struct {
 	UntrustedHosts   *stats.Counter
 }
 
-type cbgenStatsTimedCounters struct {
+type gengoStatsTimedCounters struct {
 }
 
-type cbgenStatsTimers struct {
+type gengoStatsTimers struct {
 }
 
-type cbgenStatsObject struct {
-	Counters      cbgenStatsCounters
-	TimedCounters cbgenStatsTimedCounters
-	Timers        cbgenStatsTimers
+type gengoStatsObject struct {
+	Counters      gengoStatsCounters
+	TimedCounters gengoStatsTimedCounters
+	Timers        gengoStatsTimers
 }
 
 // Stats the global stats object
-var Stats *cbgenStatsObject
+var Stats *gengoStatsObject
 
 // statsSetup setup the stats object
 func statsSetup() {
-	Stats = &cbgenStatsObject{
-		Counters: cbgenStatsCounters{
+	Stats = &gengoStatsObject{
+		Counters: gengoStatsCounters{
 			NumberGroups:     stats.NewCounter(),
 			NumberHosts:      stats.NewCounter(),
 			NumberRunbooks:   stats.NewCounter(),
@@ -52,18 +52,18 @@ func statsSetup() {
 			UnreachableHosts: stats.NewCounter(),
 			UntrustedHosts:   stats.NewCounter(),
 		},
-		TimedCounters: cbgenStatsTimedCounters{},
-		Timers:        cbgenStatsTimers{},
+		TimedCounters: gengoStatsTimedCounters{},
+		Timers:        gengoStatsTimers{},
 	}
 }
 
 // Reset reset all volatile stats
-func (s *cbgenStatsObject) Reset() {
+func (s *gengoStatsObject) Reset() {
 	statsSetup()
 }
 
 // GetCounterValues get a map of current counters
-func (s *cbgenStatsObject) GetCounterValues() map[string]uint64 {
+func (s *gengoStatsObject) GetCounterValues() map[string]uint64 {
 	return map[string]uint64{
 		"NumberGroups":     s.Counters.NumberGroups.Get(),
 		"NumberHosts":      s.Counters.NumberHosts.Get(),
@@ -79,21 +79,21 @@ func (s *cbgenStatsObject) GetCounterValues() map[string]uint64 {
 }
 
 // GetTimedCounterValues get a map of all timed counter values
-func (s *cbgenStatsObject) GetTimedCounterValues() map[string]uint64 {
+func (s *gengoStatsObject) GetTimedCounterValues() map[string]uint64 {
 	return map[string]uint64{}
 }
 
 // GetTimedCounterValuesFrom get a map of all timed counter values
-func (s *cbgenStatsObject) GetTimedCounterValuesFrom(d time.Duration) map[string]uint64 {
+func (s *gengoStatsObject) GetTimedCounterValuesFrom(d time.Duration) map[string]uint64 {
 	return map[string]uint64{}
 }
 
 // GetTimerAverages get the average times for all timers
-func (s *cbgenStatsObject) GetTimerAverages() map[string]time.Duration {
+func (s *gengoStatsObject) GetTimerAverages() map[string]time.Duration {
 	return map[string]time.Duration{}
 }
 
 // GetTimerValues get all vaues for all timers
-func (s *cbgenStatsObject) GetTimerValues() map[string][]time.Duration {
+func (s *gengoStatsObject) GetTimerValues() map[string][]time.Duration {
 	return map[string][]time.Duration{}
 }
