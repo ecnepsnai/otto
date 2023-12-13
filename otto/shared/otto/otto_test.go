@@ -83,9 +83,7 @@ func TestUnsupportedProtocolVersion(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	versionBuf := make([]byte, 4)
-	binary.PutVarint(versionBuf, -1)
-	buf.Write(versionBuf)
+	buf.Write([]byte{255})
 	buf.Write(secutil.RandomBytes(128))
 	_, _, err := conn.ReadMessage()
 	if err == nil {
@@ -102,7 +100,7 @@ func TestMalformedMessageType(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	var messageType uint32
+	var messageType uint8
 	f.Fuzz(&messageType)
 
 	heartbeatRequest := otto.MessageHeartbeatRequest{Version: "foo"}
@@ -160,9 +158,41 @@ func TestMalformedMessageWithProtocolVersion(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
-	buf.Write(versionBuf)
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write(secutil.RandomBytes(128))
+	_, _, err := conn.ReadMessage()
+	if err == nil {
+		t.Fatalf("No error seen when one expected for fuzzed message data")
+	}
+}
+
+// Test that otto behaves in an expected mannor when it receives a message that has a valid protocol version number but the rest
+// is fuzzed data
+func TestMalformedMessageWithProtocolVersionAndFlags(t *testing.T) {
+	t.Parallel()
+
+	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write([]byte{0})
+	buf.Write(secutil.RandomBytes(128))
+	_, _, err := conn.ReadMessage()
+	if err == nil {
+		t.Fatalf("No error seen when one expected for fuzzed message data")
+	}
+}
+
+// Test that otto behaves in an expected mannor when it receives a message that has a valid protocol version number but the rest
+// is fuzzed data
+func TestMalformedMessageWithProtocolVersionAndMalformedFlags(t *testing.T) {
+	t.Parallel()
+
+	buf := &bytes.Buffer{}
+	conn := MockOttoConnection(buf)
+
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write([]byte{255})
 	buf.Write(secutil.RandomBytes(128))
 	_, _, err := conn.ReadMessage()
 	if err == nil {
@@ -178,9 +208,8 @@ func TestMalformedMessageWithProtocolAndLength(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
-	buf.Write(versionBuf)
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write([]byte{0, byte(otto.MessageTypeHeartbeatResponse)})
 	lengthBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(lengthBuf, 128)
 	buf.Write(lengthBuf)
@@ -214,14 +243,14 @@ func TestIncorrectDataLength(t *testing.T) {
 	buf := &bytes.Buffer{}
 	conn := MockOttoConnection(buf)
 
-	versionBuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
-	buf.Write(versionBuf)
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write([]byte{0, byte(otto.MessageTypeHeartbeatResponse)})
 	lengthBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(lengthBuf, 32)
 	buf.Write(lengthBuf)
 	buf.Write(secutil.RandomBytes(128))
-	if _, _, err := conn.ReadMessage(); err == nil {
+	_, _, err := conn.ReadMessage()
+	if err == nil {
 		t.Fatalf("No error seen when one expected for false message length")
 	}
 
@@ -229,14 +258,14 @@ func TestIncorrectDataLength(t *testing.T) {
 	buf = &bytes.Buffer{}
 	conn = MockOttoConnection(buf)
 
-	versionBuf = make([]byte, 4)
-	binary.BigEndian.PutUint32(versionBuf, otto.ProtocolVersion)
-	buf.Write(versionBuf)
+	buf.Write([]byte{otto.ProtocolVersion})
+	buf.Write([]byte{0, byte(otto.MessageTypeHeartbeatResponse)})
 	lengthBuf = make([]byte, 4)
 	binary.BigEndian.PutUint32(lengthBuf, 128)
 	buf.Write(lengthBuf)
-	buf.Write(secutil.RandomBytes(6))
-	if _, _, err := conn.ReadMessage(); err == nil {
+	buf.Write(secutil.RandomBytes(32))
+	_, _, err = conn.ReadMessage()
+	if err == nil {
 		t.Fatalf("No error seen when one expected for false message length")
 	}
 }
@@ -283,7 +312,9 @@ func TestConnection(t *testing.T) {
 		if messageType != otto.MessageTypeHeartbeatRequest {
 			t.Errorf("Unexpected message type")
 		}
-		c.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{})
+		c.WriteMessage(otto.MessageTypeHeartbeatResponse, otto.MessageHeartbeatResponse{
+			AgentVersion: secutil.RandomString(2),
+		})
 	})
 	if err != nil {
 		panic(err)
@@ -302,7 +333,9 @@ func TestConnection(t *testing.T) {
 		t.Fatalf("Error dialing: %s", err.Error())
 	}
 
-	c.WriteMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{})
+	c.WriteMessage(otto.MessageTypeHeartbeatRequest, otto.MessageHeartbeatRequest{
+		Version: secutil.RandomString(2),
+	})
 	messageType, _, err := c.ReadMessage()
 	if err != nil {
 		t.Errorf("Error reading message: %s", err.Error())

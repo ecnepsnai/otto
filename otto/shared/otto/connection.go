@@ -17,7 +17,7 @@ func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	headerBuf := make([]byte, 4*3)
+	headerBuf := make([]byte, 7)
 	if _, err := io.ReadFull(c.w, headerBuf); err != nil {
 		if err == io.EOF {
 			// Agent closed - nothing to read
@@ -28,23 +28,29 @@ func (c *Connection) ReadMessage() (MessageType, interface{}, error) {
 		return 0, nil, err
 	}
 
-	version := binary.BigEndian.Uint32(headerBuf[0:4])
-	messageType := MessageType(binary.BigEndian.Uint32(headerBuf[4:8]))
-	dataLength := binary.BigEndian.Uint32(headerBuf[8:12])
+	protocolVersion := uint8(headerBuf[0])
+	messageType := MessageType(uint8(headerBuf[1]))
+	flags := uint8(headerBuf[2])
+	if flags != 0 {
+		// Flags are currently not used so this should always be zero
+		log.Error("Unexpected value in message flags: %d, expected 0", flags)
+		return 0, nil, fmt.Errorf("invalid message flags")
+	}
+	dataLength := binary.BigEndian.Uint32(headerBuf[3:7])
 
-	if version > ProtocolVersion {
+	if protocolVersion > ProtocolVersion {
 		log.PError("Unsupported protocol version", map[string]interface{}{
-			"frame_version":     version,
+			"frame_version":     protocolVersion,
 			"supported_version": ProtocolVersion,
 		})
-		return 0, nil, fmt.Errorf("unsupported protocol version %d", version)
+		return 0, nil, fmt.Errorf("unsupported protocol version %d", protocolVersion)
 	}
-	if version < ProtocolVersion {
-		log.Warn("Unsupported protocol version: %d, wanted: %d", version, ProtocolVersion)
+	if protocolVersion < ProtocolVersion {
+		log.Warn("Unsupported protocol version: %d, wanted: %d", protocolVersion, ProtocolVersion)
 	}
 
 	log.PDebug("Read message", map[string]interface{}{
-		"version":      version,
+		"version":      protocolVersion,
 		"message_type": messageType,
 		"data_length":  dataLength,
 	})
@@ -162,12 +168,13 @@ func (c *Connection) WriteMessage(messageType MessageType, message interface{}) 
 		messageLength = l
 	}
 
-	headerBuf := make([]byte, 4*3)
-	binary.BigEndian.PutUint32(headerBuf[0:], ProtocolVersion)
-	binary.BigEndian.PutUint32(headerBuf[4:], uint32(messageType))
-	binary.BigEndian.PutUint32(headerBuf[8:], messageLength)
+	headerBuf := make([]byte, 7)
+	headerBuf[0] = byte(ProtocolVersion)
+	headerBuf[1] = byte(uint8(messageType))
+	headerBuf[2] = byte(uint8(0))
+	binary.BigEndian.PutUint32(headerBuf[3:], messageLength)
 
-	log.PDebug("Preparing message", map[string]interface{}{
+	log.PDebug("Preparing to send message", map[string]interface{}{
 		"protocol_version":    ProtocolVersion,
 		"message_type":        messageType,
 		"message_data_length": messageLength,

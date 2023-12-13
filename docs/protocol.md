@@ -5,23 +5,19 @@ protocol uses SSH as the transport layer, providing strong and reliable encrypti
 
 ## Message structure
 
+All multi-byte integers are in network byte order.
+
 ```
-|--------------------------------|--------------------------------|--------------------------------|
-| Protocol Version               | Message Type                   | Message Length                 |
-| (4 bytes - network byte order) | (4 bytes - network byte order) | (4 bytes - network byte order) |
-|--------------------------------|--------------------------------|--------------------------------|
-| Message Data                                                                                     |
-| (binary, optional)                                                                               |
-|                                                                                                  |
-|                                                                                                  |
-|                                                                                                  |
-|--------------------------------------------------------------------------------------------------|
-| Additional Data                                                                                  |
-| (undetermined, optional)                                                                         |
-|                                                                                                  |
-|                                                                                                  |
-|                                                                                                  |
-|--------------------------------------------------------------------------------------------------|
+|----------|---------|---------------|---------------------------|
+| Version  | Flags   | Message Type  | Message Length            |
+| 1 Byte   | 1 Byte  | 1 Byte        | 4 Byte                    |
+|----------|---------|---------------|---------------------------|
+| Message Data                                                   |
+| (length varies)                                                |
+|----------------------------------------------------------------|
+| Additional Data                                                |
+| (optional, length varies)                                      |
+|----------------------------------------------------------------|
 ```
 
 A message is a self-contained set of information sent by either the Otto host or Otto server. Each message must always

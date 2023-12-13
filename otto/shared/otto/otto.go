@@ -16,7 +16,7 @@ import (
 var log = logtic.Log.Connect("libotto")
 
 // ProtocolVersion the version of the otto protocol
-const ProtocolVersion uint32 = 5
+const ProtocolVersion uint8 = 5
 
 func init() {
 	gob.Register(ScriptInfo{})
@@ -34,7 +34,12 @@ func init() {
 	gob.Register(MessageCancelAction{})
 }
 
-type MessageType uint32
+// Type definition for Otto message flags. Currently flags are not utilized
+// so this value should always be 0 in a message.
+type MessageFlag uint8
+
+// Type definition for Otto message types
+type MessageType uint8
 
 // Otto message types
 const (
