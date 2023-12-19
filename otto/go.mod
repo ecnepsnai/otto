@@ -17,7 +17,7 @@ require (
 	github.com/ecnepsnai/web v1.11.4
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 )
 
 require (
