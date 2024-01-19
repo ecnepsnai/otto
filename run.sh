@@ -7,7 +7,7 @@ cd $ROOT
 gengo -n server -c scripts/gengo -g otto/server -t frontend/src/types -q
 cd otto/cmd/server
 EXE_NAME=".otto_dev"
-go build -o $EXE_NAME
+go build -ldflags="-X 'github.com/ecnepsnai/otto/server.DangerousSkipForcePasswordChangeForDefaultUser=true'" -o $EXE_NAME
 mv $EXE_NAME $ROOT
 cd $ROOT
 ./$EXE_NAME --no-scheduler --static-dir $(realpath frontend/build) "$@"

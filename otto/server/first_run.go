@@ -1,5 +1,7 @@
 package server
 
+var DangerousSkipForcePasswordChangeForDefaultUser = ""
+
 var defaultUser = newUserParameters{
 	Username:           "admin",
 	Password:           "admin",
@@ -39,7 +41,12 @@ func atLeastOneScript() bool {
 func checkFirstRun() {
 	if !atLeastOneUser() {
 		log.Warn("Creating default user")
-		user, err := UserStore.NewUser(defaultUser)
+		params := defaultUser
+		if DangerousSkipForcePasswordChangeForDefaultUser == "true" {
+			log.Error("[DANGER] Not forcing a password change for default user. This should only be used in a development environment.")
+			params.MustChangePassword = false
+		}
+		user, err := UserStore.NewUser(params)
 		if err != nil {
 			log.Fatal("Unable to make default user: %s", err.Message)
 		}
