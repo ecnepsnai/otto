@@ -3,7 +3,10 @@ import { Style } from './Style';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import {
+    faArrowDown,
     faArrowLeft,
+    faArrowRight,
+    faArrowUp,
     faBars,
     faBook,
     faCalendarAlt,
@@ -83,7 +86,10 @@ export namespace Icon {
         );
     };
 
+    export const ArrowDown: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowDown, options: props });
     export const ArrowLeft: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowLeft, options: props });
+    export const ArrowRight: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowRight, options: props });
+    export const ArrowUp: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faArrowUp, options: props });
     export const Bars: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBars, options: props });
     export const Book: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faBook, options: props });
     export const Calendar: React.FC<IconProps> = (props: IconProps) => EIcon({ icon: faCalendarAlt, options: props });

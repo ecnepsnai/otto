@@ -25,6 +25,7 @@ export class Runbook {
             Name: '',
             ScriptIDs: [],
             GroupIDs: [],
+            RunLevel:  ScriptRunLevel.ReadOnly,
             HaltOnFailure: true,
         };
     }

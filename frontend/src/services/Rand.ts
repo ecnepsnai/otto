@@ -10,7 +10,7 @@ export class Rand {
     public static ID(): string {
         let text = '';
         for (let i = 0; i < 10; i++) {
-            text += this.alphabet.charAt(Math.floor(Math.random() * this.alphabet.length));
+            text += Rand.alphabet.charAt(Math.floor(Math.random() * Rand.alphabet.length));
         }
         return text;
     }

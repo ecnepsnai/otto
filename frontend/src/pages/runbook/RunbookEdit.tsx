@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { Runbook as RunbookAPI, RunbookType } from '../../types/Runbook';
+import { Group as GroupAPI } from '../../types/Group';
 import { useParams, useNavigate } from 'react-router-dom';
 import { URLParams } from '../../services/Params';
 import { Page } from '../../components/Page';
 import { Form } from '../../components/Form';
-import { PageLoading } from '../../components/Loading';
+import { Loading, PageLoading } from '../../components/Loading';
 import { Input } from '../../components/input/Input';
 import { Notification } from '../../components/Notification';
 import { Card } from '../../components/Card';
-import { GroupCheckList, ScriptCheckList } from '../../components/CheckList';
+import { GroupCheckList } from '../../components/CheckList';
+import { LeftRightInput } from '../../components/LeftRightInput';
+import { ScriptType } from '../../types/Script';
+import { RunLevel } from '../../components/input/RunLevel';
+import { ScriptRunLevel } from '../../types/gengo_enum';
 import { Rand } from '../../services/Rand';
 
 export const RunbookEdit: React.FC = () => {
@@ -16,12 +21,41 @@ export const RunbookEdit: React.FC = () => {
     const [IsLoading, SetIsLoading] = React.useState<boolean>(true);
     const [IsNew, SetIsNew] = React.useState<boolean>();
     const [Runbook, SetRunbook] = React.useState<RunbookType>();
-    const [ScriptListID, SetScriptListID] = React.useState(Rand.ID());
+    const [ScriptLoading, SetScriptLoading] = React.useState(true);
+    const [PossibleScripts, SetPossibleScripts] = React.useState<ScriptType[]>([]);
+    const [ScriptReloadID, SetScriptReloadID] = React.useState(Rand.ID());
     const navigate = useNavigate();
 
     React.useEffect(() => {
         loadRunbook();
     }, []);
+
+    React.useEffect(() => {
+        if (!Runbook) {
+            return;
+        }
+
+        if (Runbook.GroupIDs.length == 0) {
+            SetScriptLoading(false);
+            SetPossibleScripts([]);
+        } else {
+            SetScriptLoading(true);
+            Promise.all(Runbook.GroupIDs.map(groupId => {
+                return GroupAPI.Scripts(groupId);
+            })).then(results => {
+                const possibleScripts: ScriptType[] = [];
+                results.forEach(scripts => {
+                    scripts.forEach(script => {
+                        if (possibleScripts.findIndex(s => s.ID == script.ID) == -1) {
+                            possibleScripts.push(script);
+                        }
+                    });
+                });
+                SetPossibleScripts(possibleScripts);
+                SetScriptLoading(false);
+            });
+        }
+    }, [ScriptReloadID]);
 
     const loadRunbook = () => {
         if (id == null) {
@@ -58,12 +92,26 @@ export const RunbookEdit: React.FC = () => {
         });
     };
 
+    const changeScriptFailureMode = (Mode: string) => {
+        SetRunbook(runbook => {
+            runbook.HaltOnFailure = Mode == 'halt';
+            return {...runbook};
+        });
+    };
+
+    const changeRunLevel = (RunLevel: ScriptRunLevel) => {
+        SetRunbook(runbook => {
+            runbook.RunLevel = RunLevel;
+            return {...runbook};
+        });
+    };
+
     const changeGroupIDs = (GroupIDs: string[]) => {
         SetRunbook(runbook => {
             runbook.GroupIDs = GroupIDs;
-            SetScriptListID(Rand.ID());
             return {...runbook};
         });
+        SetScriptReloadID(Rand.ID);
     };
 
     const changeScriptIDs = (ScriptIDs: string[]) => {
@@ -96,6 +144,26 @@ export const RunbookEdit: React.FC = () => {
         });
     }
 
+    const scriptFailureChoices = [
+        {
+            label: 'Stop Runbook',
+            value: 'halt'
+        },
+        {
+            label: 'Continue to Next Script',
+            value: 'continue'
+        }
+    ];
+
+    const scriptChoices = () => {
+        return PossibleScripts.map(s => {
+            return {
+                label: s.Name,
+                value: s.ID,
+            };
+        });
+    };
+
     return (
         <Page title={breadcrumbs}>
             <Form showSaveButton onSubmit={formSave}>
@@ -105,6 +173,17 @@ export const RunbookEdit: React.FC = () => {
                     defaultValue={Runbook.Name}
                     onChange={changeName}
                     required />
+                <Input.Radio
+                    label="On Script Failure"
+                    buttons
+                    choices={scriptFailureChoices}
+                    defaultValue={Runbook.HaltOnFailure ? 'halt' : 'continue'}
+                    onChange={changeScriptFailureMode}
+                    />
+                <RunLevel
+                    defaultValue={Runbook.RunLevel}
+                    onChange={changeRunLevel}
+                    />
                 <Card.Card className="mt-3">
                     <Card.Header>Groups</Card.Header>
                     <Card.Body>
@@ -112,9 +191,9 @@ export const RunbookEdit: React.FC = () => {
                     </Card.Body>
                 </Card.Card>
                 <Card.Card className="mt-3">
-                    <Card.Header>Scripts (Available to Groups)</Card.Header>
+                    <Card.Header>Scripts</Card.Header>
                     <Card.Body>
-                        <ScriptCheckList selectedScripts={Runbook.ScriptIDs} groupIds={Runbook.GroupIDs} onChange={changeScriptIDs} key={ScriptListID} />
+                        { ScriptLoading ? (<Loading />) : (<LeftRightInput leftLabel="Availble Scripts" rightLabel="Selected Scripts" choices={scriptChoices()} selected={Runbook.ScriptIDs} onChange={changeScriptIDs} />) }
                     </Card.Body>
                 </Card.Card>
             </Form>
