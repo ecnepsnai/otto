@@ -7,18 +7,20 @@ on:
     branches: [ pre-release ]
 
 permissions:
+  actions: read
   contents: read
+  security-events: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v4
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #pin v4.1.2
 
       - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # pin@v5
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 #pin v5.0.0
         with:
-          go-version: "1.21"
+          go-version: "1.22"
           cache-dependency-path: otto/go.sum
 
       - name: Build
@@ -28,3 +30,13 @@ jobs:
       - name: Test
         run: go test -v ./...
         working-directory: otto
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@05963f47d870e2cb19a537396c1f668a348c7d8f #pin v3.24.8
+        with:
+          languages: go
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@05963f47d870e2cb19a537396c1f668a348c7d8f #pin v3.24.8
+        with:
+          category: "/language:go"
