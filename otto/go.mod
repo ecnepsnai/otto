@@ -14,7 +14,7 @@ require (
 	github.com/ecnepsnai/snapshot v1.0.0
 	github.com/ecnepsnai/stats v1.0.0
 	github.com/ecnepsnai/store v1.4.1
-	github.com/ecnepsnai/web v1.11.4
+	github.com/ecnepsnai/web v1.11.5
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
 	golang.org/x/crypto v0.21.0

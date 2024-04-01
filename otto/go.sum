@@ -24,8 +24,8 @@ github.com/ecnepsnai/stats v1.0.0 h1:9QClYW65H3rM3zQL57tWticogc+zLz9f2GlEsRYPoVc
 github.com/ecnepsnai/stats v1.0.0/go.mod h1:dYNPtuy1sByJwtwi6H+WA0dkJPXH5OdQZVKa4RLw1FM=
 github.com/ecnepsnai/store v1.4.1 h1:vYAacuL3dFkNqV49JPP+sxHQqmEyTIgbOZwUvGCbr78=
 github.com/ecnepsnai/store v1.4.1/go.mod h1:qOLq8m3OAdNZaZCNq8+CoMIoqqt1x1UIfaz5IMuB04k=
-github.com/ecnepsnai/web v1.11.4 h1:MCch0svMNUvvKTRT6Hq7JiwwJze2ldjv2I1bWCxus+4=
-github.com/ecnepsnai/web v1.11.4/go.mod h1:px7OCwgKjDHAUh85W4I7QN6E8TePwIfVrA72xMN0Suw=
+github.com/ecnepsnai/web v1.11.5 h1:HOu7dO7NV+wKLTaGuucjRFo2yQp6el0cD7plSorunbA=
+github.com/ecnepsnai/web v1.11.5/go.mod h1:vnzFb4am4/6wCDrycRktPoJuVscDt7rqemyk9QFhUVY=
 github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/gorilla/websocket v1.5.1 h1:gmztn0JnHVt9JZquRuzLw3g4wouNVzKL15iLr/zn/QY=
