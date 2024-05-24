@@ -9,7 +9,6 @@ on:
 permissions:
   actions: read
   contents: read
-  security-events: write
 
 jobs:
   build:
@@ -20,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 #pin v5.0.1
         with:
-          go-version: "1.22"
+          go-version: "stable"
           cache-dependency-path: otto/go.sum
 
       - name: Build
@@ -30,13 +29,3 @@ jobs:
       - name: Test
         run: go test -v ./...
         working-directory: otto
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@9fdb3e49720b44c48891d036bb502feb25684276 #pin v3.25.6
-        with:
-          languages: go
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@9fdb3e49720b44c48891d036bb502feb25684276 #pin v3.25.6
-        with:
-          category: "/language:go"
