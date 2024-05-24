@@ -15,10 +15,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 #pin v4.1.2
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 #pin v4.1.6
 
       - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 #pin v5.0.0
+        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 #pin v5.0.1
         with:
           go-version: "1.22"
           cache-dependency-path: otto/go.sum
@@ -32,11 +32,11 @@ jobs:
         working-directory: otto
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@05963f47d870e2cb19a537396c1f668a348c7d8f #pin v3.24.8
+        uses: github/codeql-action/init@9fdb3e49720b44c48891d036bb502feb25684276 #pin v3.25.6
         with:
           languages: go
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@05963f47d870e2cb19a537396c1f668a348c7d8f #pin v3.24.8
+        uses: github/codeql-action/analyze@9fdb3e49720b44c48891d036bb502feb25684276 #pin v3.25.6
         with:
           category: "/language:go"
