@@ -79,7 +79,7 @@ export const SystemRegister: React.FC = () => {
     };
 
     const showCommand = () => {
-        const registerKey = options.Key.replace('"', '\\"');
+        const registerKey = options.Key.replace(/"/g, '\\"');
         let url = StateManager.Current().Options.General.ServerURL;
         url = url.substr(0, url.length - 1);
         const command = 'REGISTER_KEY="' + registerKey + '" \\\nREGISTER_HOST="' + url + '" \\\n/opt/otto-agent/agent';
