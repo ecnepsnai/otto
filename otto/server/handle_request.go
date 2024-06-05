@@ -11,9 +11,9 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 	session := request.UserData.(*Session)
 
 	type requestParams struct {
-		HostID   string
-		Action   string
-		ScriptID string
+		HostID     string
+		Action     string
+		ResourceID string
 	}
 
 	r := requestParams{}
@@ -36,9 +36,14 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 		}
 		return true, nil, nil
 	} else if r.Action == AgentActionRunScript {
-		script := ScriptStore.ScriptWithID(r.ScriptID)
+		script := ScriptStore.ScriptWithID(r.ResourceID)
 		if script == nil {
-			return nil, nil, web.ValidationError("No script with ID %s", r.ScriptID)
+			return nil, nil, web.ValidationError("No script with ID %s", r.ResourceID)
+		}
+
+		if session.User().Permissions.ScriptRunLevel < script.RunLevel {
+			EventStore.UserPermissionDenied(session.Username, fmt.Sprintf("attempt to cancel script with higher run level: %s", script.Name))
+			return nil, nil, web.CommonErrors.Forbidden
 		}
 
 		result, err := host.RunScript(script, nil)
@@ -49,6 +54,36 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 
 		return result, nil, nil
+	} else if r.Action == AgentActionStartRunbook {
+		runbook := RunbookStore.RunbookWithID(r.ResourceID)
+		if runbook == nil {
+			return nil, nil, web.ValidationError("No runbook with ID %s", r.ResourceID)
+		}
+
+		if session.User().Permissions.ScriptRunLevel < runbook.RunLevel {
+			EventStore.UserPermissionDenied(session.Username, fmt.Sprintf("attempt to cancel runbook with higher run level: %s", runbook.Name))
+			return nil, nil, web.CommonErrors.Forbidden
+		}
+
+		var results []ScriptResult
+
+		for _, scriptId := range runbook.ScriptIDs {
+			script := ScriptStore.ScriptWithID(scriptId)
+			if script == nil {
+				return nil, nil, web.ValidationError("No script with ID %s", r.ResourceID)
+			}
+
+			result, err := host.RunScript(script, nil)
+			if err != nil {
+				return nil, nil, web.CommonErrors.ServerError
+			}
+
+			EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
+
+			results = append(results, *result)
+		}
+
+		return results, nil, nil
 	}
 
 	return nil, nil, nil
@@ -98,16 +133,17 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 	defer conn.Close()
 
 	type requestParams struct {
-		HostID   string
-		Action   string
-		ScriptID string
+		HostID     string
+		Action     string
+		ResourceID string
 	}
 	type requestResponse struct {
-		Code   int           `json:"Code,omitempty"`
-		Error  string        `json:"Error,omitempty"`
-		Stdout string        `json:"Stdout,omitempty"`
-		Stderr string        `json:"Stderr,omitempty"`
-		Result *ScriptResult `json:"Result,omitempty"`
+		Code     int           `json:"Code,omitempty"`
+		Error    string        `json:"Error,omitempty"`
+		Stdout   string        `json:"Stdout,omitempty"`
+		Stderr   string        `json:"Stderr,omitempty"`
+		Result   *ScriptResult `json:"Result,omitempty"`
+		ScriptId string        `json:"ScriptId,omitempty"`
 	}
 
 	writeMessage := func(m requestResponse) {
@@ -155,11 +191,11 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 		writeMessage(requestResponse{Code: 200})
 		return
 	} else if r.Action == AgentActionRunScript {
-		script := ScriptStore.ScriptWithID(r.ScriptID)
+		script := ScriptStore.ScriptWithID(r.ResourceID)
 		if script == nil {
 			writeMessage(requestResponse{
 				Code:  RequestResponseCodeError,
-				Error: fmt.Sprintf("No script with ID %s", r.ScriptID),
+				Error: fmt.Sprintf("No script with ID %s", r.ResourceID),
 			})
 			return
 		}
@@ -172,6 +208,11 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 			EventStore.UserPermissionDenied(session.User().Username, fmt.Sprintf("Run script %s", script.ID))
 			return
 		}
+
+		writeMessage(requestResponse{
+			Code:     RequestResponseCodeStartScript,
+			ScriptId: script.ID,
+		})
 
 		running := true
 		go func() {
@@ -205,7 +246,7 @@ func (h handle) RequestStream(request web.Request, conn *web.WSConn) {
 
 		EventStore.ScriptRun(script, host, &result.Result, nil, session.Username)
 		writeMessage(requestResponse{
-			Code:   RequestResponseCodeFinished,
+			Code:   RequestResponseCodeFinishedScript,
 			Result: result,
 		})
 		running = false

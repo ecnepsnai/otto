@@ -21,6 +21,9 @@
     - key: RunScript # special: does not map to otto agent action
       description: Run the script on the host
       value: '"run_script"'
+    - key: StartRunbook # special: does not map to otto agent action
+      description: Begin a runbook on the host
+      value: '"start_runbook"'
     - key: ReloadConfig
       description: Reload the configuration of the agent
       value: '"reload_config"'
@@ -69,14 +72,18 @@
   type: int
   include_typescript: true
   values:
+    - key: StartScript
+      value: "99"
     - key: Output
       value: "100"
     - key: Keepalive
       value: "101"
     - key: Error
       value: "400"
-    - key: Finished
+    - key: FinishedScript
       value: "200"
+    - key: FinishedRunbook
+      value: "300"
 - name: ScriptRunLevel
   type: int
   description: "Permission level for users to run scripts"

@@ -6,6 +6,8 @@ export enum AgentAction {
     Ping = 'ping',
     /** Run the script on the host */
     RunScript = 'run_script',
+    /** Begin a runbook on the host */
+    StartRunbook = 'start_runbook',
     /** Reload the configuration of the agent */
     ReloadConfig = 'reload_config',
     /** Exit the agent on the host */
@@ -20,6 +22,7 @@ export function AgentActionAll() {
     return [ 
         AgentAction.Ping,
         AgentAction.RunScript,
+        AgentAction.StartRunbook,
         AgentAction.ReloadConfig,
         AgentAction.ExitAgent,
         AgentAction.Reboot,
@@ -38,6 +41,11 @@ export function AgentActionConfig() {
             key: 'RunScript',
             value: 'run_script',
             description: 'Run the script on the host',
+        },
+        {
+            key: 'StartRunbook',
+            value: 'start_runbook',
+            description: 'Begin a runbook on the host',
         },
         {
             key: 'ReloadConfig',
@@ -153,23 +161,32 @@ export function RegisterRulePropertyConfig() {
 }
 
 export enum RequestResponseCode { 
+    StartScript = 99,
     Output = 100,
     Keepalive = 101,
     Error = 400,
-    Finished = 200,
+    FinishedScript = 200,
+    FinishedRunbook = 300,
 }
 
 export function RequestResponseCodeAll() {
     return [ 
+        RequestResponseCode.StartScript,
         RequestResponseCode.Output,
         RequestResponseCode.Keepalive,
         RequestResponseCode.Error,
-        RequestResponseCode.Finished,
+        RequestResponseCode.FinishedScript,
+        RequestResponseCode.FinishedRunbook,
     ];
 }
 
 export function RequestResponseCodeConfig() {
     return [
+        {
+            key: 'StartScript',
+            value: 99,
+            
+        },
         {
             key: 'Output',
             value: 100,
@@ -186,8 +203,13 @@ export function RequestResponseCodeConfig() {
             
         },
         {
-            key: 'Finished',
+            key: 'FinishedScript',
             value: 200,
+            
+        },
+        {
+            key: 'FinishedRunbook',
+            value: 300,
             
         },
     ];

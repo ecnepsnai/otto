@@ -147,13 +147,14 @@ export const RunbookView: React.FC = () => {
                         <ListGroup.List>
                             <ListGroup.TextItem title="Name">{Runbook.Name}</ListGroup.TextItem>
                             <ListGroup.TextItem title="Last Run"><DateLabel date={Runbook.LastRun} /></ListGroup.TextItem>
+                            <ListGroup.TextItem title="On Script Failure">{Runbook.HaltOnFailure ? 'Stop runbook' : 'Continue to next script'}</ListGroup.TextItem>
                             {groupsList()}
                         </ListGroup.List>
                     </Card.Card>
+                    {hostsList()}
                 </Layout.Column>
                 <Layout.Column>
                     {scriptsList()}
-                    {hostsList()}
                 </Layout.Column>
             </Layout.Row>
         </Page>

@@ -8,6 +8,8 @@ const (
 	AgentActionPing = "ping"
 	// Run the script on the host
 	AgentActionRunScript = "run_script"
+	// Begin a runbook on the host
+	AgentActionStartRunbook = "start_runbook"
 	// Reload the configuration of the agent
 	AgentActionReloadConfig = "reload_config"
 	// Exit the agent on the host
@@ -22,6 +24,7 @@ const (
 var AllAgentAction = []string{
 	AgentActionPing,
 	AgentActionRunScript,
+	AgentActionStartRunbook,
 	AgentActionReloadConfig,
 	AgentActionExitAgent,
 	AgentActionReboot,
@@ -32,6 +35,7 @@ var AllAgentAction = []string{
 var AgentActionMap = map[string]string{
 	AgentActionPing:         "ping",
 	AgentActionRunScript:    "run_script",
+	AgentActionStartRunbook: "start_runbook",
 	AgentActionReloadConfig: "reload_config",
 	AgentActionExitAgent:    "exit_agent",
 	AgentActionReboot:       "reboot",
@@ -313,26 +317,32 @@ func ForEachRegisterRuleProperty(m func(value string)) {
 }
 
 const (
-	RequestResponseCodeOutput    = 100
-	RequestResponseCodeKeepalive = 101
-	RequestResponseCodeError     = 400
-	RequestResponseCodeFinished  = 200
+	RequestResponseCodeStartScript     = 99
+	RequestResponseCodeOutput          = 100
+	RequestResponseCodeKeepalive       = 101
+	RequestResponseCodeError           = 400
+	RequestResponseCodeFinishedScript  = 200
+	RequestResponseCodeFinishedRunbook = 300
 )
 
 // AllRequestResponseCode all RequestResponseCode values
 var AllRequestResponseCode = []int{
+	RequestResponseCodeStartScript,
 	RequestResponseCodeOutput,
 	RequestResponseCodeKeepalive,
 	RequestResponseCodeError,
-	RequestResponseCodeFinished,
+	RequestResponseCodeFinishedScript,
+	RequestResponseCodeFinishedRunbook,
 }
 
 // RequestResponseCodeMap map RequestResponseCode keys to values
 var RequestResponseCodeMap = map[int]int{
-	RequestResponseCodeOutput:    100,
-	RequestResponseCodeKeepalive: 101,
-	RequestResponseCodeError:     400,
-	RequestResponseCodeFinished:  200,
+	RequestResponseCodeStartScript:     99,
+	RequestResponseCodeOutput:          100,
+	RequestResponseCodeKeepalive:       101,
+	RequestResponseCodeError:           400,
+	RequestResponseCodeFinishedScript:  200,
+	RequestResponseCodeFinishedRunbook: 300,
 }
 
 // IsRequestResponseCode is the provided value a valid RequestResponseCode
