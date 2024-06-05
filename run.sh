@@ -5,7 +5,7 @@ ROOT=$(dirname $(readlink -f "$0"))
 
 cd $ROOT
 cd scripts/codegen/
-cbgen -n server
+gengo -n server
 mv *.go $ROOT/otto/server
 mv *.ts $ROOT/frontend/src/types
 cd $ROOT/otto/cmd/server

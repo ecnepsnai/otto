@@ -21,7 +21,7 @@ LOG=${ROOT_PATH}/logs/otto-install.log
 cd ${ROOT_PATH}
 git clean -qxdf
 cd ${ROOT_PATH}/scripts
-./install_backend.sh
+./build_go.sh
 cd ${FRONTEND_PATH}
 rm -rf build/
 echo -en "Building frontend... "

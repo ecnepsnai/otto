@@ -1,5 +1,5 @@
 import { API } from '../services/API';
-import { ScriptRunLevel } from './cbgen_enum';
+import { ScriptRunLevel } from './gengo_enum';
 
 export interface UserType {
     Username?: string;

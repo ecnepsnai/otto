@@ -12,7 +12,7 @@ import { Card } from '../../components/Card';
 import { Notification } from '../../components/Notification';
 import { Variable } from '../../types/Variable';
 import { AttachmentList } from './attachment/AttachmentList';
-import { ScriptRunLevel } from '../../types/cbgen_enum';
+import { ScriptRunLevel } from '../../types/gengo_enum';
 
 export const ScriptEdit: React.FC = () => {
     const { id } = useParams() as URLParams;

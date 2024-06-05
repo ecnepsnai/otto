@@ -1,4 +1,4 @@
-import { ScriptRunLevel } from '../types/cbgen_enum';
+import { ScriptRunLevel } from '../types/gengo_enum';
 import { StateManager } from './StateManager';
 
 /**

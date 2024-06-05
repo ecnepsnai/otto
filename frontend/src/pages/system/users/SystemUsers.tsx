@@ -11,7 +11,7 @@ import { Column, Table } from '../../../components/Table';
 import { StateManager } from '../../../services/StateManager';
 import { User, UserPermissions, UserType } from '../../../types/User';
 import { ContextMenuItem } from '../../../components/ContextMenu';
-import { ScriptRunLevel } from '../../../types/cbgen_enum';
+import { ScriptRunLevel } from '../../../types/gengo_enum';
 import { Permissions, UserAction } from '../../../services/Permissions';
 
 export class UserManager {

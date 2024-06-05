@@ -22,7 +22,7 @@ import { Nothing } from '../../components/Nothing';
 import { ScheduleType } from '../../types/Schedule';
 import { ScheduleListCard } from '../../components/ScheduleListCard';
 import { Permissions, UserAction } from '../../services/Permissions';
-import { ScriptRunLevel } from '../../types/cbgen_enum';
+import { ScriptRunLevel } from '../../types/gengo_enum';
 import { Badge } from '../../components/Badge';
 
 interface DedupedScriptEnabledHost {
