@@ -16,7 +16,7 @@ mkdir -p ${LOGS_PATH}
 
 echo -en "Building backend... "
 cd ${OTTO_BACKEND_PATH}/
-gengo -n server -c ${SCRIPTS_PATH}/gengo -t ${OTTO_FRONTEND_PATH}/src/types -q
+gengo -n server -c ${SCRIPTS_PATH}/gengo -g ${OTTO_BACKEND_PATH}/server -t ${OTTO_FRONTEND_PATH}/src/types >> ${LOG} 2>&1
 go build -v ./... >> ${LOG} 2>&1
 go test -v ./... >> ${LOG} 2>&1
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"

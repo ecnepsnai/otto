@@ -1,12 +1,12 @@
 package server
 
-// This file is was generated automatically by GenGo v1.13.0
+// This file is was generated automatically by GenGo v1.14.0
 // Do not make changes to this file as they will be lost
 
 import (
 	"sync"
 
-	"github.com/ecnepsnai/store"
+	"github.com/ecnepsnai/ds/store"
 )
 
 type identityStoreObject struct {

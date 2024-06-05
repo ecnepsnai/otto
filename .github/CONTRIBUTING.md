@@ -62,8 +62,8 @@ the server and capturing signals from the system.
 
 # Running a Development Build
 
-To run a development build of the server you first need to get everything prepared. The `install_backend.sh` and
-`install_frontend.sh` scripts will prepare the codebase and compile a debug version of the app.
+To run a development build of the server you first need to get everything prepared. The `scripts/build_go.sh` and
+`frontend/start_webpack.js` scripts will prepare the codebase and compile a debug version of the app.
 
 To run the Otto server:
 
