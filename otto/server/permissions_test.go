@@ -599,3 +599,95 @@ func TestPermissionsCantRemoveUserPermissions(t *testing.T) {
 		t.Fatalf("Data returned when none expected")
 	}
 }
+
+func TestPermissionCantRunScriptHigherRunLevel(t *testing.T) {
+	user, err := UserStore.NewUser(newUserParameters{
+		Username:    randomString(3),
+		Password:    randomString(6),
+		Permissions: UserPermissionsMin(),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	script, err := ScriptStore.NewScript(newScriptParameters{
+		Name:       randomString(3),
+		Executable: randomString(3),
+		Script:     randomString(3),
+		Environment: []environ.Variable{
+			{
+				Key:    "key",
+				Value:  "value",
+				Secret: true,
+			},
+		},
+		RunLevel: ScriptRunLevelReadOnly,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	group, err := GroupStore.NewGroup(newGroupParameters{
+		Name:      randomString(3),
+		ScriptIDs: []string{script.ID},
+		Environment: []environ.Variable{
+			{
+				Key:    "key",
+				Value:  "value",
+				Secret: true,
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	host, err := HostStore.NewHost(newHostParameters{
+		Name:     randomString(3),
+		Address:  randomString(3),
+		Port:     12444,
+		GroupIDs: []string{group.ID},
+		Environment: []environ.Variable{
+			{
+				Key:    "key",
+				Value:  "value",
+				Secret: true,
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	session := SessionStore.NewSessionForUser(user)
+	h := handle{}
+
+	type requestParams struct {
+		HostID   string
+		Action   string
+		ScriptID string
+	}
+
+	request := web.MockRequestParameters{
+		UserData: &session,
+		JSONBody: requestParams{
+			HostID:   host.ID,
+			Action:   AgentActionRunScript,
+			ScriptID: script.ID,
+		},
+	}
+
+	data, _, werr := h.RequestNew(web.MockRequest(request))
+	if werr == nil {
+		t.Fatalf("No error seen when one expected")
+	}
+	if data != nil {
+		t.Fatalf("Data returned when none expected")
+	}
+	if werr.Code != 403 {
+		t.Fatalf("Unexpected error code")
+	}
+	if werr.Message != "Forbidden" {
+		t.Fatalf("Unexpected error message")
+	}
+}

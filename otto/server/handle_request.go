@@ -46,6 +46,11 @@ func (h *handle) RequestNew(request web.Request) (interface{}, *web.APIResponse,
 			return nil, nil, web.CommonErrors.Forbidden
 		}
 
+		if session.User().Permissions.ScriptRunLevel < script.RunLevel {
+			EventStore.UserPermissionDenied(session.Username, fmt.Sprintf("attempt to run script with higher run level: %s", script.Name))
+			return nil, nil, web.CommonErrors.Forbidden
+		}
+
 		result, err := host.RunScript(script, nil)
 		if err != nil {
 			return nil, nil, web.CommonErrors.ServerError
