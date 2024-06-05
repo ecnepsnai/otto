@@ -136,7 +136,7 @@ export const SystemRegister: React.FC = () => {
             <Input.Text
                 type="text"
                 label="Register Key"
-                helpText="Agents that wish to register with this server must specify this key to authenticate"
+                helpText="Agents that wish to register with this server must specify this key to authenticate. Alphanumeric, dash, underscore, and space allowed."
                 defaultValue={options.Key}
                 onChange={changeKey}
                 key={keyInputKey}

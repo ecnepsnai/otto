@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"sync"
 )
 
@@ -82,6 +83,10 @@ func (o *OptionsRegister) Validate() error {
 	if o.Enabled {
 		if o.Key == "" {
 			return fmt.Errorf("a register key is required if auto registration is enabled")
+		}
+		var disallowedPattern = regexp.MustCompile(`[^a-zA-Z0-9\-_ ]`)
+		if len(disallowedPattern.FindString(o.Key)) > 0 {
+			return fmt.Errorf("invalid characters in the register key")
 		}
 	}
 	return nil
