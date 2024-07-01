@@ -12,7 +12,7 @@ require (
 	github.com/ecnepsnai/secutil v1.0.4
 	github.com/ecnepsnai/set v1.0.0
 	github.com/ecnepsnai/snapshot v1.0.0
-	github.com/ecnepsnai/stats v1.0.0
+	github.com/ecnepsnai/stats v1.0.1
 	github.com/ecnepsnai/web v1.11.5
 	github.com/google/gofuzz v1.2.0
 	github.com/matoous/go-nanoid v1.5.0
