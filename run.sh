@@ -4,10 +4,7 @@ set -e
 ROOT=$(dirname $(readlink -f "$0"))
 
 cd $ROOT
-cd scripts/codegen/
-gengo -n server
-mv *.go $ROOT/otto/server
-mv *.ts $ROOT/frontend/src/types
+gengo -q -n server -c scripts/gengo -g otto/server -t frontend/src/types
 cd $ROOT/otto/cmd/server
 EXE_NAME=".otto_dev"
 go build -o $EXE_NAME

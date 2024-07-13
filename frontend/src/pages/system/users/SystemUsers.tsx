@@ -313,15 +313,15 @@ const UserPermissionsEdit: React.FC<UserPermissionsEditProps> = (props: UserPerm
 
     const scriptRunLevelOptions = [
         {
-            value: ScriptRunLevel.None,
+            value: '' + ScriptRunLevel.None,
             label: 'None'
         },
         {
-            value: ScriptRunLevel.ReadOnly,
+            value: '' + ScriptRunLevel.ReadOnly,
             label: 'Read Only'
         },
         {
-            value: ScriptRunLevel.ReadWrite,
+            value: '' + ScriptRunLevel.ReadWrite,
             label: 'Read Write'
         }
     ];
@@ -410,16 +410,16 @@ const UserPermissionsEdit: React.FC<UserPermissionsEditProps> = (props: UserPerm
         },
     ];
 
-    const onChangeScriptRunLevel = (level: ScriptRunLevel) => {
+    const onChangeScriptRunLevel = (level: string) => {
         SetPermissions(p => {
-            p.ScriptRunLevel = level;
+            p.ScriptRunLevel = parseInt(level);
             return { ...p };
         });
     };
 
     return (<div className="mt-2">
         <h5>Permissions</h5>
-        <Input.Radio label='Can run scripts' choices={scriptRunLevelOptions} buttons defaultValue={Permissions.ScriptRunLevel} onChange={onChangeScriptRunLevel} />
+        <Input.Radio label='Can run scripts' choices={scriptRunLevelOptions} buttons defaultValue={''+Permissions.ScriptRunLevel} onChange={onChangeScriptRunLevel} />
         <div className="checkboxes">
             {canActions.map((action, idx) => {
                 return (<Input.Checkbox key={idx} label={action.label} helpText={action.helpText} defaultValue={action.value} onChange={action.update} />);
