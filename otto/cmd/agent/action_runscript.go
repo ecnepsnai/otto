@@ -344,7 +344,7 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	conn.Close()
 }
 
-func handleCancelAction(conn *otto.Connection, message otto.MessageCancelAction) {
+func handleCancelAction(message otto.MessageCancelAction) {
 	pidO, found := scriptLog.Load(message.Name)
 	if !found {
 		log.Warn("Attempt to cancel unknown script named '%s'", message.Name)
