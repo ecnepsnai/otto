@@ -231,80 +231,82 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 	cmd.Stderr = stderr
 
 	log.Debug("Running '%s' %s", scriptPath, cmd.Args)
-	if err := cmd.Start(); err != nil {
+	startErr := cmd.Start()
+	if startErr != nil {
 		result.Success = false
-		if exitError, ok := err.(*exec.ExitError); ok {
+		if exitError, ok := startErr.(*exec.ExitError); ok {
 			result.Code = exitError.ExitCode()
 			log.Error("Script exit code: %d", result.Code)
 		} else {
-			log.Error("Error running script: %s", err.Error())
-			result.ExecError = err.Error()
+			log.Error("Error running script: %s", startErr.Error())
+			result.ExecError = startErr.Error()
 		}
-	}
-	isRunning := true
-	proc := cmd.Process
-	log.Debug("Waiting for script on pid %d...", proc.Pid)
-	scriptLog.Store(message.Name, proc.Pid)
-
-	timeoutSeconds := 30
-	if config.ScriptTimeout != nil {
-		timeoutSeconds = int(*config.ScriptTimeout)
-	}
-
-	go func() {
-		for isRunning {
-			if time.Since(stdout.lastWrite) > 10*time.Second && time.Since(stderr.lastWrite) > 10*time.Second {
-				conn.WriteMessage(otto.MessageTypeKeepalive, nil)
-				stdout.lastWrite = time.Now()
-				stderr.lastWrite = time.Now()
-			}
-			if timeoutSeconds >= 0 && time.Since(start) > time.Duration(timeoutSeconds)*time.Second {
-				log.Error("Script execution exceeded timeout %dsec", timeoutSeconds)
-				killProcessAndDescendents(cmd.Process.Pid)
-				result.ExecError = "script timeout"
-				break
-			}
-			time.Sleep(10 * time.Millisecond)
-		}
-	}()
-
-	cmd.Wait()
-	isRunning = false
-	scriptLog.Delete(message.Name)
-
-	stdoutFile.Sync()
-	stderrFile.Sync()
-	stdoutFile.Seek(0, 0)
-	stderrFile.Seek(0, 0)
-	stdoutLen, _ := io.Copy(combinedFile, stdoutFile)
-	combinedFile.Sync()
-	stdoutFile.Close()
-	os.Remove(stdoutPath)
-	stderrLen, _ := io.Copy(combinedFile, stderrFile)
-	stderrFile.Close()
-	combinedFile.Sync()
-	combinedFile.Seek(0, 0)
-	os.Remove(stderrPath)
-
-	log.PInfo("Finished executing script", map[string]interface{}{
-		"remote_addr": conn.RemoteAddr().String(),
-		"elapsed":     time.Since(start).String(),
-		"exit_code":   cmd.ProcessState.ExitCode(),
-		"name":        message.Name,
-		"wd":          message.WorkingDirectory,
-		"exec":        message.Executable,
-	})
-
-	result.StdoutLen = uint32(stdoutLen)
-	result.StderrLen = uint32(stderrLen)
-	result.Elapsed = time.Since(start)
-	result.Code = cmd.ProcessState.ExitCode()
-
-	if cmd.ProcessState.ExitCode() != 0 {
-		result.Success = false
-		log.Error("Script exit code: %d", cmd.ProcessState.ExitCode())
 	} else {
-		result.Success = true
+		isRunning := true
+		proc := cmd.Process
+		log.Debug("Waiting for script on pid %d...", proc.Pid)
+		scriptLog.Store(message.Name, proc.Pid)
+
+		timeoutSeconds := 30
+		if config.ScriptTimeout != nil {
+			timeoutSeconds = int(*config.ScriptTimeout)
+		}
+
+		go func() {
+			for isRunning {
+				if time.Since(stdout.lastWrite) > 10*time.Second && time.Since(stderr.lastWrite) > 10*time.Second {
+					conn.WriteMessage(otto.MessageTypeKeepalive, nil)
+					stdout.lastWrite = time.Now()
+					stderr.lastWrite = time.Now()
+				}
+				if timeoutSeconds >= 0 && time.Since(start) > time.Duration(timeoutSeconds)*time.Second {
+					log.Error("Script execution exceeded timeout %dsec", timeoutSeconds)
+					killProcessAndDescendents(cmd.Process.Pid)
+					result.ExecError = "script timeout"
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+
+		cmd.Wait()
+		isRunning = false
+		scriptLog.Delete(message.Name)
+
+		stdoutFile.Sync()
+		stderrFile.Sync()
+		stdoutFile.Seek(0, 0)
+		stderrFile.Seek(0, 0)
+		stdoutLen, _ := io.Copy(combinedFile, stdoutFile)
+		combinedFile.Sync()
+		stdoutFile.Close()
+		os.Remove(stdoutPath)
+		stderrLen, _ := io.Copy(combinedFile, stderrFile)
+		stderrFile.Close()
+		combinedFile.Sync()
+		combinedFile.Seek(0, 0)
+		os.Remove(stderrPath)
+
+		log.PInfo("Finished executing script", map[string]interface{}{
+			"remote_addr": conn.RemoteAddr().String(),
+			"elapsed":     time.Since(start).String(),
+			"exit_code":   cmd.ProcessState.ExitCode(),
+			"name":        message.Name,
+			"wd":          message.WorkingDirectory,
+			"exec":        message.Executable,
+		})
+
+		result.StdoutLen = uint32(stdoutLen)
+		result.StderrLen = uint32(stderrLen)
+		result.Elapsed = time.Since(start)
+		result.Code = cmd.ProcessState.ExitCode()
+
+		if cmd.ProcessState.ExitCode() != 0 {
+			result.Success = false
+			log.Error("Script exit code: %d", cmd.ProcessState.ExitCode())
+		} else {
+			result.Success = true
+		}
 	}
 
 	if err := conn.WriteMessage(otto.MessageTypeActionResult, otto.MessageActionResult{
