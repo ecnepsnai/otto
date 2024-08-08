@@ -11,7 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build_go:
+    name: "Build & Test (Go)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #pin v4.1.7
@@ -29,3 +30,35 @@ jobs:
       - name: Test
         run: go test -v ./...
         working-directory: otto
+  build_node:
+    name: "Build & Test (Node)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #pin v4.1.7
+
+      - name: Prepare
+        id: cache_key
+        run: |
+          cd frontend
+          echo "NPM_KEY=NPM_$(shasum package-lock.json | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore NPM Packages
+        id: restore_npm
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #pin v4.0.2
+        with:
+          key: ${{ steps.cache_key.outputs.NPM_KEY }}
+          path: |
+            frontend/node_modules
+
+      - name: NPM Install
+        id: npm_install
+        if: ${{ steps.restore_npm.outputs.cache-hit != 'true' }}
+        run: |
+          cd frontend
+          npm i
+
+      - name: Webpack Build
+        id: webpack_build
+        run: |
+          cd frontend
+          node start_webpack.js
