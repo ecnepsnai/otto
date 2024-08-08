@@ -3,10 +3,11 @@ set -e
 
 CPU_ARCH=$(uname -m)
 ARCH="amd64"
-ALPINE_HASH="b89d9c93e9ed3597455c90a0b88a8bbb5cb7188438f70953fede212a0c4394e0" # https://hub.docker.com/_/alpine/tags
+source alpine_hash.txt
+ALPINE_HASH=${ALPINE_HASH_AMD64}
 if [[ ${CPU_ARCH} == 'aarch64' ]]; then
     ARCH="arm64"
-    ALPINE_HASH="b89d9c93e9ed3597455c90a0b88a8bbb5cb7188438f70953fede212a0c4394e0"
+    ALPINE_HASH=${ALPINE_HASH_ARM64}
 fi
 
 ROOT_PATH=$(realpath ../)
