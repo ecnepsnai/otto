@@ -282,7 +282,7 @@ export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameS
             document.body.classList.remove('modal-open');
             document.body.removeAttribute('style');
             document.querySelector('.modal-backdrop').remove();
-        } catch (e) {
+        } catch {
             //
         }
         this.instance.setState({ modal: undefined });

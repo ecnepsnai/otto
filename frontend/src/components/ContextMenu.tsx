@@ -115,7 +115,7 @@ export class GlobalContextMenuFrame extends React.Component<unknown, GlobalConte
     public static removeMenu(): void {
         try {
             document.querySelector('#menu-backdrop').remove();
-        } catch (e) {
+        } catch {
             //
         }
         this.instance.setState({ menu: undefined });

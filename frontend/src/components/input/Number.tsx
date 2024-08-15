@@ -1,5 +1,5 @@
 import * as React from 'react';
-import debounce = require('debounce-promise');
+import * as debounce from 'debounce-promise';
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
 import { InputProps } from './Input';
