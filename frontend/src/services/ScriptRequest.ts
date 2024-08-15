@@ -1,11 +1,5 @@
 import { ScriptRun } from '../types/Result';
-
-enum RequestResponseCode {
-    Output = 100,
-    Keepalive = 101,
-    Error = 400,
-    Finished = 200,
-}
+import { RequestResponseCode } from '../types/gengo_enum';
 
 interface RequestResponse {
     Code: RequestResponseCode;
@@ -59,7 +53,7 @@ export class ScriptRequest {
                     case RequestResponseCode.Output:
                         onOutput(response.Stdout, response.Stderr);
                         break;
-                    case RequestResponseCode.Finished:
+                    case RequestResponseCode.FinishedScript:
                         result = response.Result;
                         break;
                     default:

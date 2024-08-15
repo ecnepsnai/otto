@@ -12,7 +12,7 @@ import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Style } from '../../components/Style';
 import { GlobalModalFrame } from '../../components/Modal';
-import { RunModal } from '../run/RunModal';
+import { RunModal } from '../run/RunScriptModal';
 import { Rand } from '../../services/Rand';
 import { Group } from '../../types/Group';
 import { Pre } from '../../components/Pre';

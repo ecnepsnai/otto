@@ -10,11 +10,11 @@ enum RunStage {
     Finished,
 }
 
-interface RunModalProps {
+interface RunScriptModalProps {
     scriptID: string;
     hostIDs?: string[];
 }
-export const RunModal: React.FC<RunModalProps> = (props: RunModalProps) => {
+export const RunScriptModal: React.FC<RunScriptModalProps> = (props: RunScriptModalProps) => {
     const [stage, setStage] = React.useState(props.hostIDs ? RunStage.Running : RunStage.Setup);
     const [selectedHostIDs, setSelectedHostIDs] = React.useState(props.hostIDs);
     const [finishedHosts, setFinishedHosts] = React.useState<string[]>([]);

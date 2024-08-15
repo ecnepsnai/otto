@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { RunModal } from '../pages/run/RunModal';
+import { RunModal } from '../pages/run/RunScriptModal';
 import { Rand } from '../services/Rand';
 import { ScriptType } from '../types/Script';
 import { SmallPlayButton } from './Button';

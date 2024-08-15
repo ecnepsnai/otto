@@ -11,7 +11,7 @@ import { GlobalModalFrame } from '../../components/Modal';
 import { Formatter } from '../../services/Formatter';
 import { Rand } from '../../services/Rand';
 import { DefaultSort } from '../../services/Sort';
-import { RunModal } from '../run/RunModal';
+import { RunModal } from '../run/RunScriptModal';
 import { Permissions, UserAction } from '../../services/Permissions';
 
 export const ScriptList: React.FC = () => {
