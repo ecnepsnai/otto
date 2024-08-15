@@ -1,13 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
 
 	"github.com/ecnepsnai/otto/shared/otto"
 )
 
 func handleTriggerAction(conn *otto.Connection, messageType otto.MessageType, message interface{}) {
+	defer func() {
+		if r := recover(); r != nil {
+			conn.Close()
+			log.PError("Recovered from panic triggering action", map[string]interface{}{
+				"r": fmt.Sprintf("%s", r),
+				"s": string(debug.Stack()),
+			})
+			log.Error("This is a bug! Please report at https://github.com/ecnepsnai/otto and include the above log line")
+		}
+	}()
+
 	switch messageType {
 	case otto.MessageTypeTriggerActionRunScript:
 		handleTriggerActionRunScript(conn, message.(otto.MessageTriggerActionRunScript))

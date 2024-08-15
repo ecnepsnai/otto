@@ -5,7 +5,7 @@ import { InputProps } from './Input';
 import '../../../css/form.scss';
 
 export interface RadioChoice {
-    value: string | number;
+    value: string;
     label: string;
 }
 interface RadioProps extends InputProps {
@@ -20,11 +20,11 @@ interface RadioProps extends InputProps {
     /**
      * The default value to be selected
      */
-    defaultValue?: string | number;
+    defaultValue?: string;
     /**
      * Called when a new value is selected
      */
-    onChange: (value: string | number) => (void);
+    onChange: (value: string) => (void);
     /**
      * If toggle buttons should be used instead of classic radio controls
      */
@@ -43,7 +43,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
             throw new Error('default value not a valid choice');
         }
     }
-    const [value, setValue] = React.useState<string | number>(props.defaultValue);
+    const [value, setValue] = React.useState<string>(props.defaultValue);
 
     React.useEffect(() => {
         props.onChange(value);

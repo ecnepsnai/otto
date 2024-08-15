@@ -256,86 +256,81 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 		}, nil
 	}
 
-	if !result.ScriptResult.Success {
-		log.PError("Error running script on host", map[string]interface{}{
-			"host_id":   host.ID,
-			"script_id": script.ID,
-			"error":     result.ScriptResult.ExecError,
-		})
-		return &ScriptResult{
-			ScriptID:    script.ID,
-			Duration:    time.Since(start),
-			Environment: variables,
-			Result:      result.ScriptResult,
-		}, nil
-	}
-
-	// Post-execution files
-	for _, attachment := range attachments {
-		if !attachment.AfterScript {
-			continue
-		}
-
-		log.PInfo("Uploading script attachment", map[string]interface{}{
-			"script_id":     script.ID,
-			"attachment_id": attachment.ID,
-			"host_id":       host.ID,
-		})
-		if err := conn.UploadFile(attachment); err != nil {
-			log.PError("Error running script on host", map[string]interface{}{
-				"script_id": script.ID,
-				"host_id":   host.ID,
-				"error":     err.Error(),
-			})
-			return nil, err
-		}
-	}
-
 	heartbeatStore.UpdateHostReachability(host, true)
 
-	// After execution actions
-	switch script.AfterExecution {
-	case AgentActionReloadConfig:
-		err = conn.Conn.TriggerActionReloadConfig()
-	case AgentActionExitAgent:
-		err = conn.Conn.TriggerActionExitAgent()
-	case AgentActionReboot:
-		err = conn.Conn.TriggerActionReboot()
-	case AgentActionShutdown:
-		err = conn.Conn.TriggerActionShutdown()
-	case "":
-		// Noop
-		err = nil
-	default:
-		log.PError("Unknown post-execution action", map[string]interface{}{
-			"action":    script.AfterExecution,
-			"script_id": script.ID,
-		})
-		return &ScriptResult{
-			ScriptID:    script.ID,
-			Duration:    time.Since(start),
-			Environment: variables,
-			Result: otto.ScriptResult{
-				Success: false,
-			},
-			RunError: fmt.Sprintf("unknown post-execution action %s", script.AfterExecution),
-		}, nil
-	}
-	if err != nil {
-		log.PError("Error running script post-execution action on host", map[string]interface{}{
+	if !result.ScriptResult.Success {
+		log.PWarn("Unsuccessful script result", map[string]interface{}{
 			"host_id":   host.ID,
 			"script_id": script.ID,
-			"error":     result.ScriptResult.ExecError,
 		})
-		return &ScriptResult{
-			ScriptID:    script.ID,
-			Duration:    time.Since(start),
-			Environment: variables,
-			Result: otto.ScriptResult{
-				Success: false,
-			},
-			RunError: err.Error(),
-		}, nil
+	} else {
+		// Only perform post-execution actions if the script was successful
+
+		// Post-execution files
+		for _, attachment := range attachments {
+			if !attachment.AfterScript {
+				continue
+			}
+
+			log.PInfo("Uploading script attachment", map[string]interface{}{
+				"script_id":     script.ID,
+				"attachment_id": attachment.ID,
+				"host_id":       host.ID,
+			})
+			if err := conn.UploadFile(attachment); err != nil {
+				log.PError("Error running script on host", map[string]interface{}{
+					"script_id": script.ID,
+					"host_id":   host.ID,
+					"error":     err.Error(),
+				})
+				return nil, err
+			}
+		}
+
+		// After execution actions
+		switch script.AfterExecution {
+		case AgentActionReloadConfig:
+			err = conn.Conn.TriggerActionReloadConfig()
+		case AgentActionExitAgent:
+			err = conn.Conn.TriggerActionExitAgent()
+		case AgentActionReboot:
+			err = conn.Conn.TriggerActionReboot()
+		case AgentActionShutdown:
+			err = conn.Conn.TriggerActionShutdown()
+		case "":
+			// Noop
+			err = nil
+		default:
+			log.PError("Unknown post-execution action", map[string]interface{}{
+				"action":    script.AfterExecution,
+				"script_id": script.ID,
+			})
+			return &ScriptResult{
+				ScriptID:    script.ID,
+				Duration:    time.Since(start),
+				Environment: variables,
+				Result: otto.ScriptResult{
+					Success: false,
+				},
+				RunError: fmt.Sprintf("unknown post-execution action %s", script.AfterExecution),
+			}, nil
+		}
+		if err != nil {
+			log.PError("Error running script post-execution action on host", map[string]interface{}{
+				"host_id":   host.ID,
+				"script_id": script.ID,
+				"error":     result.ScriptResult.ExecError,
+			})
+			return &ScriptResult{
+				ScriptID:    script.ID,
+				Duration:    time.Since(start),
+				Environment: variables,
+				Result: otto.ScriptResult{
+					Success: false,
+				},
+				RunError: err.Error(),
+			}, nil
+		}
 	}
 
 	log.PInfo("Finished running script on host", map[string]interface{}{

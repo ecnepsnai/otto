@@ -169,12 +169,7 @@ Example response:
 
 
 
-**PUT /api/register**
-
-
-
 **GET /api/heartbeat**
-
 
 
 
@@ -457,8 +452,12 @@ Example response:
 **POST /api/options**
 
 
-## Registration Rules
+## Automatic Registration
 
+**PUT /api/register**
+
+
+    
 **GET /api/register/rules**
 
 
@@ -476,6 +475,14 @@ Example response:
 
 
 **DELETE /api/register/rules/rule/:id**
+
+
+
+**GET /api/register/options**
+
+
+
+**POST /api/register/options**
 
 
 
