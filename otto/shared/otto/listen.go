@@ -36,6 +36,12 @@ func SetupListener(options *ListenOptions, handle func(conn *Connection)) (*List
 		log.PDebug("[LISTEN] Validate trusted public key", map[string]interface{}{
 			"public_key": trustedKey,
 		})
+
+		if trustedKey == "*" {
+			log.Warn("[DANGER] Using a wildcard for a trusted public key disables an intentional security control and is dangerous")
+			break
+		}
+
 		data, err := base64.StdEncoding.DecodeString(trustedKey)
 		if err != nil {
 			return nil, fmt.Errorf("invalid base64 data for trusted key")
@@ -127,7 +133,7 @@ func (l *Listener) accept(c net.Conn) {
 			remoteIdentity = pubKey.Marshal()
 
 			for _, trustedKey := range l.options.GetTrustedPublicKeys() {
-				if trustedKey != incomingKey {
+				if trustedKey != incomingKey && trustedKey != "*" {
 					continue
 				}
 				log.Debug("[LISTEN] Recognized public key")

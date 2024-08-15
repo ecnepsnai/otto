@@ -85,13 +85,13 @@ func (s *hostStoreObject) hostWithName(tx ds.IReadTransaction, name string) *Hos
 	return &host
 }
 
-func (s *hostStoreObject) findDuplicate(tx ds.IReadTransaction, name, address string) string {
+func (s *hostStoreObject) findDuplicate(tx ds.IReadTransaction, name, address string, port uint32) string {
 	nameHost := s.hostWithName(tx, name)
 	if nameHost != nil {
 		return nameHost.ID
 	}
 	addressHost := s.hostWithAddress(tx, address)
-	if addressHost != nil {
+	if addressHost != nil && addressHost.Port == port {
 		return addressHost.ID
 	}
 
@@ -146,8 +146,8 @@ func (s *hostStoreObject) NewHost(params newHostParameters) (host *Host, err *Er
 }
 
 func (s *hostStoreObject) newHost(tx ds.IReadWriteTransaction, params newHostParameters) (*Host, *Error) {
-	if s.findDuplicate(tx, params.Name, params.Address) != "" {
-		log.Warn("Host with name '%s' or address '%s' already exists", params.Name, params.Address)
+	if s.findDuplicate(tx, params.Name, params.Address, params.Port) != "" {
+		log.Warn("Host with name '%s' or address '%s:%d' already exists", params.Name, params.Address, params.Port)
 		return nil, ErrorUser("Name or Address already in use")
 	}
 
@@ -230,9 +230,9 @@ func (s *hostStoreObject) EditHost(host *Host, params editHostParameters) (newHo
 }
 
 func (s *hostStoreObject) editHost(tx ds.IReadWriteTransaction, host *Host, params editHostParameters) (*Host, *Error) {
-	dupID := s.findDuplicate(tx, params.Name, params.Address)
+	dupID := s.findDuplicate(tx, params.Name, params.Address, params.Port)
 	if dupID != "" && dupID != host.ID {
-		log.Warn("Host with name '%s' or address '%s' already exists", params.Name, params.Address)
+		log.Warn("Host with name '%s' or address '%s:%d' already exists", params.Name, params.Address, params.Port)
 		return nil, ErrorUser("Name or Address already in use")
 	}
 
