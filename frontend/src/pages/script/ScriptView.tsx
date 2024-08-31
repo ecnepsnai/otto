@@ -12,7 +12,7 @@ import { Icon } from '../../components/Icon';
 import { EnvironmentVariableCard } from '../../components/EnvironmentVariableCard';
 import { Style } from '../../components/Style';
 import { GlobalModalFrame } from '../../components/Modal';
-import { RunModal } from '../run/RunScriptModal';
+import { RunScriptModal } from '../run/RunScriptModal';
 import { Rand } from '../../services/Rand';
 import { Group } from '../../types/Group';
 import { Pre } from '../../components/Pre';
@@ -99,21 +99,21 @@ export const ScriptView: React.FC = () => {
     };
 
     const executeClick = () => {
-        GlobalModalFrame.showModal(<RunModal scriptID={script.ID} key={Rand.ID()} />);
+        GlobalModalFrame.showModal(<RunScriptModal scriptID={script.ID} key={Rand.ID()} />);
     };
 
     const runScriptGroupClick = (groupID: string) => {
         return () => {
             Group.Hosts(groupID).then(hosts => {
                 const hostIDs = hosts.map(host => host.ID);
-                GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={hostIDs} key={Rand.ID()} />);
+                GlobalModalFrame.showModal(<RunScriptModal scriptID={script.ID} hostIDs={hostIDs} key={Rand.ID()} />);
             });
         };
     };
 
     const runScriptHostClick = (hostID: string) => {
         return () => {
-            GlobalModalFrame.showModal(<RunModal scriptID={script.ID} hostIDs={[hostID]} key={Rand.ID()} />);
+            GlobalModalFrame.showModal(<RunScriptModal scriptID={script.ID} hostIDs={[hostID]} key={Rand.ID()} />);
         };
     };
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { RunModal } from '../pages/run/RunScriptModal';
+import { RunScriptModal } from '../pages/run/RunScriptModal';
 import { Rand } from '../services/Rand';
 import { ScriptType } from '../types/Script';
 import { SmallPlayButton } from './Button';
@@ -19,7 +19,7 @@ interface ScriptListCardProps {
 export const ScriptListCard: React.FC<ScriptListCardProps> = (props: ScriptListCardProps) => {
     const runScriptClick = (scriptID: string, hostIDs: string[]) => {
         return () => {
-            GlobalModalFrame.showModal(<RunModal scriptID={scriptID} hostIDs={hostIDs} key={Rand.ID()} />);
+            GlobalModalFrame.showModal(<RunScriptModal scriptID={scriptID} hostIDs={hostIDs} key={Rand.ID()} />);
         };
     };
 

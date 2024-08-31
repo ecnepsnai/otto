@@ -18,10 +18,7 @@ export default [{
         "**/node_modules/",
         "**/build/",
         "**/webpack.*.js",
-        "**/add_module.js",
-        "**/.eslintrc.js",
         "**/start_webpack.js",
-        "**/webpack.*.js",
     ],
 }, ...compat.extends(
     "eslint:recommended",

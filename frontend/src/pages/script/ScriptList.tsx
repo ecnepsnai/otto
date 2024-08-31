@@ -11,7 +11,7 @@ import { GlobalModalFrame } from '../../components/Modal';
 import { Formatter } from '../../services/Formatter';
 import { Rand } from '../../services/Rand';
 import { DefaultSort } from '../../services/Sort';
-import { RunModal } from '../run/RunScriptModal';
+import { RunScriptModal } from '../run/RunScriptModal';
 import { Permissions, UserAction } from '../../services/Permissions';
 
 export const ScriptList: React.FC = () => {
@@ -80,7 +80,7 @@ const ScriptTableContextMenu = (script: ScriptType, onReload: () => void): (Cont
     };
 
     const executeScriptMenuClick = () => {
-        GlobalModalFrame.showModal(<RunModal scriptID={script.ID} key={Rand.ID()} />);
+        GlobalModalFrame.showModal(<RunScriptModal scriptID={script.ID} key={Rand.ID()} />);
     };
 
     return [
