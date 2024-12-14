@@ -215,7 +215,7 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 			continue
 		}
 
-		log.PInfo("Uploading script attachment", map[string]interface{}{
+		log.PDebug("Uploading script attachment", map[string]interface{}{
 			"script_id":     script.ID,
 			"attachment_id": attachment.ID,
 			"host_id":       host.ID,
@@ -228,6 +228,11 @@ func (host *Host) RunScript(script *Script, scriptOutput func(stdout, stderr []b
 			})
 			return nil, err
 		}
+		log.PInfo("Uploaded script attachment", map[string]interface{}{
+			"script_id":     script.ID,
+			"attachment_id": attachment.ID,
+			"host_id":       host.ID,
+		})
 	}
 
 	// Execute script

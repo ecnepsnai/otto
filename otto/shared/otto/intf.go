@@ -130,6 +130,7 @@ func (conn *Connection) TriggerActionRunScript(script ScriptInfo, scriptReader i
 			var output ScriptOutput
 			if outputLen > 0 {
 				outputData := make([]byte, outputLen)
+				log.Debug("Telling host we're ready for data...")
 				if err := conn.WriteMessage(MessageTypeReadyForData, nil); err != nil {
 					log.Error("Error sending message: %s", err.Error())
 					return nil, nil, err
@@ -181,17 +182,30 @@ func (conn *Connection) TriggerActionUploadFile(file FileInfo, fileReader io.Rea
 		})
 		return err
 	}
+
+	messageType, _, _ := conn.ReadMessage()
+	if messageType != MessageTypeReadyForData {
+		log.PError("Unexpected message from host", map[string]interface{}{
+			"message_type":  messageType,
+			"expected_type": MessageTypeReadyForData,
+		})
+		return fmt.Errorf("unexpected response")
+	}
+
 	if _, err := io.Copy(conn.w, fileReader); err != nil {
 		log.PError("Error writing file data", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return err
 	}
-	if err := conn.WriteFinished(); err != nil {
-		log.PError("Error writing file data", map[string]interface{}{
-			"error": err.Error(),
+
+	messageType, _, _ = conn.ReadMessage()
+	if messageType != MessageTypeActionResult {
+		log.PError("Unexpected message from host", map[string]interface{}{
+			"message_type":  messageType,
+			"expected_type": MessageTypeActionResult,
 		})
-		return err
+		return fmt.Errorf("unexpected response")
 	}
 	return nil
 }

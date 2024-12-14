@@ -301,9 +301,9 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 		result.Elapsed = time.Since(start)
 		result.Code = cmd.ProcessState.ExitCode()
 
-		if cmd.ProcessState.ExitCode() != 0 {
+		if result.Code != 0 {
 			result.Success = false
-			log.Error("Script exit code: %d", cmd.ProcessState.ExitCode())
+			log.Error("Script exit code: %d", result.Code)
 		} else {
 			result.Success = true
 		}
@@ -319,29 +319,30 @@ func handleTriggerActionRunScript(conn *otto.Connection, message otto.MessageTri
 		return
 	}
 
-	messageType, _, err := conn.ReadMessage()
-	if err != nil {
-		log.PError("Error waiting for reply from server", map[string]interface{}{
-			"error": err.Error(),
-		})
-		conn.Close()
-		return
+	if result.StdoutLen > 0 || result.StderrLen > 0 {
+		log.Debug("Waiting for server to be ready for output data")
+		messageType, _, err := conn.ReadMessage()
+		if err != nil {
+			log.PError("Error waiting for reply from server", map[string]interface{}{
+				"error": err.Error(),
+			})
+			conn.Close()
+			return
+		}
+		if messageType != otto.MessageTypeReadyForData {
+			log.Error("Unexpected message %d", messageType)
+			conn.Close()
+			return
+		}
+		if _, err := conn.Copy(combinedFile); err != nil {
+			log.PError("Error writing script output", map[string]interface{}{
+				"error": err.Error(),
+			})
+			conn.Close()
+			return
+		}
 	}
-	if messageType != otto.MessageTypeReadyForData {
-		log.Error("Unexpected message %d", messageType)
-		conn.Close()
-		return
-	}
-	if _, err := conn.Copy(combinedFile); err != nil {
-		log.PError("Error writing script output", map[string]interface{}{
-			"error": err.Error(),
-		})
-		conn.Close()
-		return
-	}
-	conn.WriteFinished()
-	log.Debug("Finished runscript action, closing connection...")
-	conn.Close()
+	log.Debug("Finished runscript action")
 }
 
 func handleCancelAction(message otto.MessageCancelAction) {

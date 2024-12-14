@@ -200,7 +200,13 @@ func (c *Connection) Copy(src io.Reader) (int64, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	return io.Copy(c.w, src)
+	len, err := io.Copy(c.w, src)
+	if err == nil {
+		log.PDebug("Copied data to connection", map[string]interface{}{
+			"len": len,
+		})
+	}
+	return len, err
 }
 
 // WriteFinished will signal that all data has been written. This does not close the connection, but

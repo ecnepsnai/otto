@@ -21,8 +21,8 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.APIRes
 	}
 
 	pathStr := request.HTTP.FormValue("Path")
-	inheritStr := request.HTTP.FormValue("Inherit")
-	inherit := inheritStr == "true"
+	inherit := request.HTTP.FormValue("Inherit") == "true"
+	afterScript := request.HTTP.FormValue("AfterScript") == "true"
 	uidStr := request.HTTP.FormValue("UID")
 	gidStr := request.HTTP.FormValue("GID")
 	modeStr := request.HTTP.FormValue("Mode")
@@ -56,8 +56,9 @@ func (h *handle) AttachmentUpload(request web.Request) (interface{}, *web.APIRes
 			UID:     uint32(uid),
 			GID:     uint32(gid),
 		},
-		Mode: uint32(mode),
-		Size: uint64(info.Size),
+		Mode:        uint32(mode),
+		Size:        uint64(info.Size),
+		AfterScript: afterScript,
 	}
 
 	attachment, erro := AttachmentStore.NewAttachment(req)
