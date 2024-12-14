@@ -11,7 +11,7 @@ interface PageTitleBreadcrumb {
 interface PageProps {
     title?: string | PageTitleBreadcrumb[];
     loading?: boolean;
-    toolbar?: JSX.Element;
+    toolbar?: React.ReactNode;
     children?: React.ReactNode;
 }
 export const Page: React.FC<PageProps> = (props: PageProps) => {
@@ -27,7 +27,7 @@ export const Page: React.FC<PageProps> = (props: PageProps) => {
         );
     }
 
-    let pageTitle: JSX.Element = undefined;
+    let pageTitle: React.ReactNode = undefined;
     if (props.title) {
         if (typeof props.title === 'object') {
             const breadcrumbs = props.title as PageTitleBreadcrumb[];
@@ -40,7 +40,7 @@ export const Page: React.FC<PageProps> = (props: PageProps) => {
                                 if (crumb.href) {
                                     content = (<span><Link to={crumb.href}>{crumb.title}</Link></span>);
                                 }
-                                let nextIcon: JSX.Element = undefined;
+                                let nextIcon: React.ReactNode = undefined;
                                 if (idx < breadcrumbs.length - 1) {
                                     nextIcon = (<Icon.ChevronRight />);
                                 }
@@ -66,7 +66,7 @@ export const Page: React.FC<PageProps> = (props: PageProps) => {
         }
     }
 
-    let toolbar: JSX.Element = undefined;
+    let toolbar: React.ReactNode = undefined;
     if (props.toolbar) {
         toolbar = (
             <div className="page-toolbar">

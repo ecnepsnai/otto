@@ -108,7 +108,7 @@ export class Form extends React.Component<FormProps, FormState> {
         );
     };
 
-    render(): JSX.Element {
+    render(): React.ReactNode {
         const className = this.props.fullWidth ? '' : 'container';
         return (
             <form onSubmit={this.onSubmit} ref={this.domRef} className={className}>

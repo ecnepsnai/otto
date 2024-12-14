@@ -46,7 +46,7 @@ export const Nav: React.FC = () => {
 
 interface NavItemProps {
     link: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
     label: string;
 }
 export const NavItem: React.FC<NavItemProps> = (props: NavItemProps) => {

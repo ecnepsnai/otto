@@ -1,5 +1,5 @@
 import * as React from 'react';
-import debounce = require('debounce-promise');
+import * as debounce from 'debounce-promise';
 import { FormGroup, ValidationResult } from '../Form';
 import { Rand } from '../../services/Rand';
 import { InputProps } from './Input';
@@ -173,11 +173,11 @@ export const Number: React.FC<NumberProps> = (props: NumberProps) => {
             );
         }
 
-        let prepend: JSX.Element = null;
+        let prepend: React.ReactNode = null;
         if (props.prepend) {
             prepend = (<span className="input-group-text">{props.prepend}</span>);
         }
-        let append: JSX.Element = null;
+        let append: React.ReactNode = null;
         if (props.append) {
             append = (<span className="input-group-text">{props.append}</span>);
         }

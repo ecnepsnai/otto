@@ -31,7 +31,7 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
         });
     };
 
-    const lastReply = (): JSX.Element => {
+    const lastReply = (): React.ReactNode => {
         if (!Heartbeat) {
             return null;
         }
@@ -39,7 +39,7 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
         return (<ListGroup.TextItem title="Last Heartbeat"><DateLabel date={Heartbeat.LastReply} /></ListGroup.TextItem>);
     };
 
-    const agentVersion = (): JSX.Element => {
+    const agentVersion = (): React.ReactNode => {
         if (!Heartbeat) {
             return null;
         }
@@ -47,7 +47,7 @@ export const HostHeartbeat: React.FC<HostHeartbeatProps> = (props: HostHeartbeat
         return (<ListGroup.TextItem title="Agent Version"><AgentVersion heartbeat={Heartbeat} /></ListGroup.TextItem>);
     };
 
-    const hostProperties = (): JSX.Element => {
+    const hostProperties = (): React.ReactNode => {
         if (!Heartbeat || !Heartbeat.Properties) {
             return null;
         }

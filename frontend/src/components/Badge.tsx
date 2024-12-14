@@ -75,7 +75,7 @@ export const HeartbeatBadge: React.FC<HeartbeatBadgeProps> = (props: HeartbeatBa
         return 'Not Reachable';
     };
 
-    const icon = (): JSX.Element => {
+    const icon = (): React.ReactNode => {
         if (!props.heartbeat) {
             return (<Icon.QuestionCircle />);
         }

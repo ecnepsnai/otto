@@ -66,7 +66,7 @@ export namespace Tabs {
     };
 
     interface TabProps {
-        icon?: JSX.Element;
+        icon?: React.ReactNode;
         title: string;
         children?: React.ReactNode;
         active?: boolean;

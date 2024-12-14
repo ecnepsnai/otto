@@ -150,11 +150,6 @@ export const Login: React.FC = () => {
         try {
             const response = await fetch('/api/login', { method: 'POST', body: JSON.stringify(credentials) });
             const results = await response.json();
-            if (results.code != 200) {
-                setLoading(false);
-                setError(LoginError.IncorrectPassword);
-                return;
-            }
 
             const status = results.data as LoginStatus;
             if (status === LoginStatus.Success) {
@@ -178,7 +173,7 @@ export const Login: React.FC = () => {
         try {
             const response = await fetch('/api/users/reset_password', { method: 'POST', body: JSON.stringify(request) });
             const results = await response.json();
-            if (results.code != 200) {
+            if (!results.data) {
                 setLoading(false);
                 setError(LoginError.LoginError);
                 return;

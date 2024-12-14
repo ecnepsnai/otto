@@ -58,11 +58,11 @@ export const RunOutput: React.FC<RunOutputProps> = (props: RunOutputProps) => {
             return (<Card.Body><em className="text-muted">Script produced no output</em></Card.Body>);
         }
 
-        let stdout: JSX.Element;
+        let stdout: React.ReactNode;
         if (props.stdout) {
             stdout = (<ListGroup.TextItem title="stdout"><Pre>{props.stdout}</Pre></ListGroup.TextItem>);
         }
-        let stderr: JSX.Element;
+        let stderr: React.ReactNode;
         if (props.stderr) {
             stderr = (<ListGroup.TextItem title="stderr"><Pre>{props.stderr}</Pre></ListGroup.TextItem>);
         }

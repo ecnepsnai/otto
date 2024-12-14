@@ -13,7 +13,7 @@ export interface Column {
     title: string;
     /** The value for the cell of this column for each row of data.
      * Can either be a function that returns JSX, or a string which defined the property for a simple object. */
-    value: (string | ((v: unknown) => JSX.Element));
+    value: (string | ((v: unknown) => React.ReactNode));
     /** The sort option for this column. Can either be a property of the object to do a basic comparison on,
      * or a function that will be called with each comparable object for a custom sort.
      * If no value is provided then sorting is disabled for this column. */
@@ -35,7 +35,7 @@ interface TableProps {
     /** The default sort settings for the table. */
     defaultSort?: SortProps;
     /** A menu to appear above the table */
-    menu?: JSX.Element;
+    menu?: React.ReactNode;
 }
 export const Table: React.FC<TableProps> = (props: TableProps) => {
     const [VirtualData, SetVirtualData] = React.useState<unknown[]>([]);
@@ -182,7 +182,7 @@ const TableData: React.FC<TableDataProps> = (props: TableDataProps) => {
             );
         }
 
-        let element: JSX.Element;
+        let element: React.ReactNode;
         try {
             element = column.value(props.data);
         } catch (ex) {

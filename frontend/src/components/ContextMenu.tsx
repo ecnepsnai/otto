@@ -5,7 +5,7 @@ import '../../css/context-menu.scss';
 
 export interface ContextMenuItem {
     title: string;
-    icon?: JSX.Element;
+    icon?: React.ReactNode;
     disabled?: boolean;
     href?: string;
     onClick?: () => void;
@@ -79,7 +79,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = (props: ContextMenuProps)
 };
 
 interface GlobalContextMenuFrameState {
-    menu?: JSX.Element;
+    menu?: React.ReactNode;
 }
 
 export class GlobalContextMenuFrame extends React.Component<unknown, GlobalContextMenuFrameState> {
@@ -91,7 +91,7 @@ export class GlobalContextMenuFrame extends React.Component<unknown, GlobalConte
 
     private static instance: GlobalContextMenuFrame;
 
-    public static showMenu(menu: JSX.Element): void {
+    public static showMenu(menu: React.ReactNode): void {
         const menuBackdrop = document.createElement('div');
         menuBackdrop.id = 'menu-backdrop';
         menuBackdrop.onclick = (e: MouseEvent) => {
@@ -115,13 +115,13 @@ export class GlobalContextMenuFrame extends React.Component<unknown, GlobalConte
     public static removeMenu(): void {
         try {
             document.querySelector('#menu-backdrop').remove();
-        } catch (e) {
+        } catch {
             //
         }
         this.instance.setState({ menu: undefined });
     }
 
-    render(): JSX.Element {
+    render(): React.ReactNode {
         return (
             <div id="global-menu-frame">
                 {

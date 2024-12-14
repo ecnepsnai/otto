@@ -4,7 +4,7 @@ import { Rand } from '../services/Rand';
 import { Icon } from './Icon';
 
 interface DropdownProps {
-    label: JSX.Element;
+    label: React.ReactNode;
     children?: React.ReactNode;
 }
 export const Dropdown: React.FC<DropdownProps> = (props: DropdownProps) => {
@@ -33,7 +33,7 @@ export namespace Menu {
     };
 
     interface ItemProps {
-        icon?: JSX.Element;
+        icon?: React.ReactNode;
         label: string;
         disabled?: boolean;
         onClick: () => (void);
@@ -54,7 +54,7 @@ export namespace Menu {
     };
 
     interface LinkProps {
-        icon?: JSX.Element;
+        icon?: React.ReactNode;
         label: string;
         to: string;
     }
@@ -69,7 +69,7 @@ export namespace Menu {
     };
 
     interface AnchorProps {
-        icon?: JSX.Element;
+        icon?: React.ReactNode;
         label: string;
         href: string;
     }

@@ -94,7 +94,7 @@ export const EventDetail: React.FC<EventDetailProps> = (props: EventDetailProps)
         }
     }, []);
 
-    const linkButton = (): JSX.Element => {
+    const linkButton = (): React.ReactNode => {
         let link: string;
 
         switch (props.prop) {

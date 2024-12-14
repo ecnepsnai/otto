@@ -96,7 +96,7 @@ export const Radio: React.FC<RadioProps> = (props: RadioProps) => {
         );
     };
 
-    let content: JSX.Element;
+    let content: React.ReactNode;
     if (props.buttons) {
         content = buttons();
     } else {

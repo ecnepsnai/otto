@@ -19,7 +19,7 @@ export class Notification extends React.Component<NotificationProps, unknown> {
             this.onClose();
         }, 1250);
     }
-    render(): JSX.Element {
+    render(): React.ReactNode {
         return (
             <div className="notification">
                 <Alert.Alert color={this.props.color} onClose={this.onClose}>
@@ -70,7 +70,7 @@ export class Notification extends React.Component<NotificationProps, unknown> {
 }
 
 interface GlobalNotificationFrameState {
-    notifications: JSX.Element[];
+    notifications: React.ReactElement[];
 }
 
 export class GlobalNotificationFrame extends React.Component<unknown, GlobalNotificationFrameState> {
@@ -82,7 +82,7 @@ export class GlobalNotificationFrame extends React.Component<unknown, GlobalNoti
 
     private static instance: GlobalNotificationFrame;
 
-    public static addNotification(notification: JSX.Element): void {
+    public static addNotification(notification: React.ReactElement): void {
         this.instance.setState(state => {
             const notifications = state.notifications;
             notifications.push(notification);
@@ -101,7 +101,7 @@ export class GlobalNotificationFrame extends React.Component<unknown, GlobalNoti
         });
     }
 
-    render(): JSX.Element {
+    render(): React.ReactElement {
         return (
             <div id="global-notification-frame">
                 {

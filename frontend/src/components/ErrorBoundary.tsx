@@ -23,7 +23,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         console.error('An error occurred: ' + error, errorInfo);
     }
 
-    render(): JSX.Element {
+    render(): React.ReactNode {
         if (this.state.errorDetails) {
             // Remove any modal backdrops in case the exception occurred in a modal
             document.querySelectorAll('div.modal-backdrop.fade.show').forEach(e => e.parentNode.removeChild(e));

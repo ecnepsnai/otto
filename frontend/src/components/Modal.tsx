@@ -9,7 +9,7 @@ export interface ModalButton {
     /**
      * The label for the button
      */
-    label: JSX.Element | string;
+    label: React.ReactNode | string;
     /**
      * The color of the button
      */
@@ -36,7 +36,7 @@ interface ModalProps {
     /**
      * The header of the modal
      */
-    header?: JSX.Element;
+    header?: React.ReactNode;
     /**
      * Array of buttons for the modal
      */
@@ -136,7 +136,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             </div>
         );
     };
-    render(): JSX.Element {
+    render(): React.ReactNode {
         let className = 'modal-dialog';
         if (this.props.size) {
             className += ' modal-' + this.props.size.toString();
@@ -207,7 +207,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
      * @param body The body of the dialog
      * @returns A promise that is resolved with wether or not the user clicked the 'Confirm' button
      */
-    public static confirm(title: string, body: string|JSX.Element): Promise<boolean> {
+    public static confirm(title: string, body: string|React.ReactNode): Promise<boolean> {
         return new Promise(resolve => {
             const buttonClick = (confirm: boolean): () => (void) => {
                 return () => {
@@ -256,7 +256,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = (props: ModalHeaderProps)
 };
 
 interface GlobalModalFrameState {
-    modal?: JSX.Element;
+    modal?: React.ReactNode;
 }
 
 export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameState> {
@@ -268,7 +268,7 @@ export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameS
 
     private static instance: GlobalModalFrame;
 
-    public static showModal(modal: JSX.Element): void {
+    public static showModal(modal: React.ReactNode): void {
         this.instance.setState(state => {
             if (state.modal != undefined) {
                 throw new Error('Refusing to stack modals');
@@ -282,13 +282,13 @@ export class GlobalModalFrame extends React.Component<unknown, GlobalModalFrameS
             document.body.classList.remove('modal-open');
             document.body.removeAttribute('style');
             document.querySelector('.modal-backdrop').remove();
-        } catch (e) {
+        } catch {
             //
         }
         this.instance.setState({ modal: undefined });
     }
 
-    render(): JSX.Element {
+    render(): React.ReactNode {
         return (
             <div id="global-modal-frame">
                 {

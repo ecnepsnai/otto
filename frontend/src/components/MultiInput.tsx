@@ -90,7 +90,7 @@ export const MultiInput: React.FC<MultiInputProps> = (props: MultiInputProps) =>
         });
     };
 
-    const helpText = (): JSX.Element => {
+    const helpText = (): React.ReactNode => {
         if (props.helpText) {
             return <div id={labelID + 'help'} className="form-text">{props.helpText}</div>;
         }
@@ -169,7 +169,7 @@ const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
         props.removeButtonClicked(props.index);
     };
 
-    const addButton = (): JSX.Element => {
+    const addButton = (): React.ReactNode => {
         if (props.showAddButton(props.index)) {
             return <AddButton onClick={addButtonClicked} />;
         }
@@ -177,7 +177,7 @@ const InputGroup: React.FC<InputGroupProps> = (props: InputGroupProps) => {
         return null;
     };
 
-    const removeButton = (): JSX.Element => {
+    const removeButton = (): React.ReactNode => {
         if (props.showRemoveButton(props.index)) {
             return <RemoveButton onClick={removeButtonClicked} />;
         }

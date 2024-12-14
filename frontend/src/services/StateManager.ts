@@ -27,7 +27,7 @@ export class StateManager {
         try {
             const data = await API.GET('/api/state');
             this.current = data as State;
-        } catch (err) {
+        } catch {
             location.href = '/login';
         }
 
