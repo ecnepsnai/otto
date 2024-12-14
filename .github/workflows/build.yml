@@ -15,10 +15,12 @@ jobs:
     name: "Build & Test (Go)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #pin v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #pin v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Set up Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 #pin v5.0.2
+        uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a #pin v5.2.0
         with:
           go-version: "stable"
           cache-dependency-path: otto/go.sum
@@ -34,7 +36,9 @@ jobs:
     name: "Build & Test (Node)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #pin v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #pin v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Prepare
         id: cache_key
@@ -44,7 +48,7 @@ jobs:
 
       - name: Restore NPM Packages
         id: restore_npm
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #pin v4.0.2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 #pin v4.2.0
         with:
           key: ${{ steps.cache_key.outputs.NPM_KEY }}
           path: |
@@ -55,7 +59,7 @@ jobs:
         if: ${{ steps.restore_npm.outputs.cache-hit != 'true' }}
         run: |
           cd frontend
-          npm i
+          npm --prefer-offline ci
 
       - name: Webpack Build
         id: webpack_build

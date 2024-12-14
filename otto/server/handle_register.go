@@ -78,7 +78,7 @@ func (v *view) Register(request web.Request) web.HTTPResponse {
 	}
 	usedRegisterNonces.Add(r.Nonce)
 
-	hostIP := request.ClientIPAddress().String()
+	hostIP := request.RealRemoteAddr().String()
 	log.PDebug("Incoming host registration request", map[string]interface{}{
 		"HostIP":              hostIP,
 		"AgentIdentity":       r.AgentIdentity,
