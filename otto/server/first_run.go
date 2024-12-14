@@ -1,5 +1,7 @@
 package server
 
+import "os"
+
 var defaultUser = newUserParameters{
 	Username:           "admin",
 	Password:           "admin",
@@ -39,7 +41,13 @@ func atLeastOneScript() bool {
 func checkFirstRun() {
 	if !atLeastOneUser() {
 		log.Warn("Creating default user")
-		user, err := UserStore.NewUser(defaultUser)
+
+		newUser := defaultUser
+		if os.Getenv("UNSAFE_ALLOW_DEFAULT_PASSWORD") != "" {
+			newUser.MustChangePassword = false
+		}
+
+		user, err := UserStore.NewUser(newUser)
 		if err != nil {
 			log.Fatal("Unable to make default user: %s", err.Message)
 		}

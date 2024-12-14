@@ -21,6 +21,8 @@ otto/cmd/agent/*
 !otto/cmd/agent/*.go
 otto/cmd/server/*
 !otto/cmd/server/*.go
+otto/cmd/test/*
+!otto/cmd/test/*.go
 
 # Frontend
 /frontend/node_modules

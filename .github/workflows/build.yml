@@ -30,8 +30,13 @@ jobs:
         working-directory: otto
 
       - name: Test
-        run: go test -v ./...
-        working-directory: otto
+        run: |
+          cd otto
+          go test -v ./...
+          cd cmd/test
+          go build
+          ./test
+
   build_node:
     name: "Build & Test (Node)"
     runs-on: ubuntu-latest
