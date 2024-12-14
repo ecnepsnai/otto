@@ -25,7 +25,7 @@ cd ${ROOT_PATH}/scripts
 cd ${FRONTEND_PATH}
 rm -rf build/
 echo -en "Building frontend... "
-npm install >> ${LOG} 2>&1
+npm --prefer-offline ci >> ${LOG} 2>&1
 node start_webpack.js --mode production >> ${LOG} 2>&1
 echo -e "${COLOR_GREEN}Finished${COLOR_NC}"
 cd ${ROOT_PATH}
