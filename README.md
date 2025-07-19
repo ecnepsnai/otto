@@ -1,3 +1,8 @@
+> [!CAUTION]
+> After several years of development and effort, I've made the decision to cease development of Otto and mark the project
+> as _"deprecated"_. This repo will remain in read-only format for reference, but no new releases, including bug fixes
+> and security enhancements will be made. Thank you for using Otto!
+
 <img src="https://raw.githubusercontent.com/ecnepsnai/otto/pre-release/frontend/img/full_light.png" height="50px" alt="otto">
 
 **Welcome to Otto, where things are *Ottomatic beyond belief!***
